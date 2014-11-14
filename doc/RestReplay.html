@@ -1,0 +1,1146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
+  <meta content="text/html; charset=us-ascii" http-equiv="Content-Type">
+
+  <title>RestReplay</title>
+  <style type="text/css">
+.A {
+      font-size: 10pt; line-height: 13pt; color: rgb(51, 51, 51); font-weight: normal; background-image: none;
+  }
+  .element-hdr, .pathrow {
+    font-size: 10pt; line-height: 13pt; color: rgb(51, 51, 51); font-weight: bold; background-image: none; background-color: rgb(173, 216, 230);
+  }
+  .code {
+    white-space: pre;
+    font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
+    border: 1px dashed rgb(187, 187, 187); margin: 0px 0px 10px; 
+    padding: 0px; 
+    overflow: auto; color: black; 
+    background-color: rgb(220, 240, 220);   
+  }
+  .panel {
+    border: 1px dashed rgb(187, 187, 187); margin: 0px 0px 10px; padding: 0px; overflow: auto; color: black; 
+    background-color: rgb(240, 240, 240);   
+  }
+  .comments {
+      font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 1em;
+      color: rgb(0, 130, 0);
+  }
+    
+  .public {
+      color: blue;
+  }
+  .note1 {
+      color: brown;
+      font-weight: bold;
+  }
+
+  </style>
+</head>
+
+<body>
+  <div id="content" class="page view">
+    <div class="wiki-content">
+      <h2><a name="RestReplay-RestReplayDocumentation" id="RestReplay-RestReplayDocumentation"></a>RestReplay Documentation</h2>
+
+      <p><span class="Apple-style-span">RestReplay is a utility to send REST requests to the services layer (including JSON, XML, and multipart XML requests), read responses, and compare<br>
+      the resulting payloads with templates.</span></p>
+
+      <h3><a name="RestReplay-1.a.Features" id="RestReplay-1.a.Features"></a>1.a. Features</h3>
+
+      <ul>
+        <li>Completely configurable via XML.</li>
+
+        <li>Abstracts each transaction with server as a "test".</li>
+
+        <li>Multiple tests can be grouped in a testGroup element, and each test may refer to previous tests within testGroup.</li>
+
+        <li>Automatic cleanup of resources allocated within a testGroup.</li>
+
+        <li>Send and receive JSON and XML payloads or MIME-multipart payloads.</li>
+
+        <li>File-based request and response payloads.</li>
+
+        <li>Variable expansion in: URLs, headers, request payloads, and response payloads.</li>
+
+        <li>Simple reporting of results on console and in surefire reports.</li>
+
+        <li>Programmatic interface for driving the tests and testGroups, and for finer control of reporting and cleanup.</li>
+      </ul>
+
+      <h3><a name="RestReplay-1.bOverview" id="RestReplay-1.bOverview"></a>1.b Overview</h3>
+
+      <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.b.1Runtime"></a>1.b.1 Runtime</h4>
+
+      <p>At runtime, RestReplay consults parameters passed in on the command line, or from maven surefire.</p>
+
+      <p>RestReplay then determines which <b>master</b> file to use. This file points to <b>control</b> files that contain tests.</p>
+
+      <p>The default behavior of RestReplay is to look for a directory, called the RestReplay directory.<br>
+      When running inside maven surefire, this is pre-defined to be a resource directory in the source code module,</p>
+
+      <p>Maven defines a variable called basedir, which points at the project directory for the current pom.xml.<br>
+      If we build services in /src/trunk/services, then basedir=/src/trunk/services/IntegrationTests/</p>
+
+      <div class="code panel">
+      RestReplayBasedir=${basedir}/src/test/resources/test-data/xmlreplay
+        or:
+      /src/trunk/services/IntegrationTests/src/test/resources/test-data/xmlreplay
+      </div>
+      
+      <p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.<br>
+      Most services should define their <b>control</b> file within their directory, e.g.</p>
+
+      <div class="code panel">
+      xmlreplay/xml-replay-master.xml         <span class="comments">//the <b>master</b> file used by the nightly build.</span>
+      xmlreplay/dev-master.xml                <span class="comments">//the <b>master</b> file for local development.</span>
+      xmlreplay/objectexit/                   <span class="comments">//the directory for all objectexit <b>control</b> files, and request/response templates.</span>
+      xmlreplay/objectexit/object-exit.xml    <span class="comments">//the <b>control</b> file for objectexit.</span>
+      xmlreplay/objectexit/res/               <span class="comments">//a sub-directory to contain response templates.</span>
+      </div>
+      
+      <p>For development, you may use a predefined <b>master</b> file, called dev-master.xml, or you may define your own. See "2.c. Running"<br>
+      For integration testing, use the predefined <b>master</b> file called xml-replay-master.xml.</p>
+
+      <p>Within a <b>control</b> file, RestReplay finds testGroup elements as specified on the command line or in the <b>master</b> file, <br>
+      and then runs these testGroup elements.</p>
+
+      <p>For each testGroup, a namespace is set up that will contain the results of all tests run in that testGroup, and any variables<br>
+      defined as the test runs. This namespace contains variables that dereference to java objects, so Strings, Date objects, etc.<br>
+      may be put into the namespace. For every test, RestReplay creates a named object of type<br>
+      org.dynamide.restreplay.ServiceResult, so that after that test has run, you<br>
+      may pull fields out of the ServiceResult object, such as responseCode, fullURL, location, and CSID as calculated from the <b>Location:</b> header.</p>
+
+      <p>You may also use methods on the ServiceResult object that give you XPath access to any field in any part either sent<br>
+      or recieved from the server in that test.</p>
+
+      <p>ServiceResult methods and fields:</p>
+
+      <div class="code">
+      public class ServiceResult ::
+      
+          <span class="comments">//dig into the schema part from the expanded request, identified by partName,</span>
+          <span class="comments">//  and get the text value of node identified by xpath</span>
+          public String sent(String partName, String xpath);
+          
+          <span class="comments">//dig into the schema part returned by the server, identified by partName,</span>
+          <span class="comments">// and get the text value of node identified by xpath </span>
+          public String got(String partName, String xpath);
+          
+          public String CSID <span class="comments">//just the CSID of the resource created or modified.</span>
+          
+          public String location <span class="comments">//the Location: header value of the resource, which is a full URL.</span>
+      </div>
+      <p>For each "test" node in a testGroup, RestReplay sets up a request, using the URI (which may contain expressions), the http method, and<br>
+      any parts specified for a POST or a PUT. The parts are read from text files in a directory relative to the RestReplay base directory,<br>
+      and may contain/define variables which get passed in. The value of these variables is evaluated in the <b>control</b> file just prior to<br>
+      the test node being run. So previous tests may be referenced. The parts are expanded for any expressions, and then put together<br>
+      in the appropriate http sequence and submitted to the server. The response from the server is then made available to the test to<br>
+      check using the "response" node. The "response" node allows you to specify a template file to compare, and any variables declared<br>
+      will be evaluated just prior to comparing the response from the server to the response template file.</p>
+
+      <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup".<br>
+      If true, then RestReplay does a DELETE on each resource allocated.<br>
+      If false, RestReplay does no automatic DELETEs.<br>
+      You may also programmatically call RestReplay, in which case you can programmatically control cleanup of individual tests.<br>
+      See "2.c.4 Cleanup"</p>
+
+      <p>Finally, results are aggregated and spit out to the command line console, and/or to maven surefire reports. You can customize<br>
+      how verbose these results are using the "dump" node in the <b>master</b> file.</p>
+
+      <p>If all testGroups and all tests succeed, then RestReplay tells maven surefire that the suite succeeded. Otherwise, maven surefire is told<br>
+      that the suite failed. In this case, you may examine the console, or look at the maven surefire report, which will contain a tabular summary<br>
+      of all testGroups and tests. You may have to click "show all results" in the maven surefire report.</p>
+
+      <p>RestReplay also creates a stand-alone report. Look at the command line output where RestReplay will report the location of this HTML report, e.g. something of this form:</p>
+      <pre>
+RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-reports/...
+</pre>This reports directory starts with an index file named after any <b>master</b> file you have run, which links to individual <b>control</b> file results.
+
+      <h2><a name="RestReplay-2.ReferenceDocumentation" id="RestReplay-2.ReferenceDocumentation"></a>2. Reference Documentation</h2>
+
+      <h3><a name="RestReplay-2.a.Installation" id="RestReplay-2.a.Installation"></a>2.a. Installation</h3>
+
+      <h3><a name="RestReplay-2.b.Configuration" id="RestReplay-2.b.Configuration"></a>2.b. Configuration</h3>
+
+      <h4><a name="RestReplay-2.b.1GeneralRules" id="RestReplay-2.b.1GeneralRules"></a>2.b.1 General Rules</h4>
+
+      <p>General Variable Syntax: starts with letter or underscore (_), contains letters, numbers, underscore. No<br>
+      other special characters, especially not the dollar-sign ($).</p>
+
+      <p>For an ID attribute to be valid, please use General Variable Syntax.</p>
+
+      <p>Element names should also follow the General Variable Syntax.</p>
+
+      <p>General Filename syntax: please stick to General Variable Syntax plus hyphen (-) and period (.).<br>
+      Filenames may contain the delimiter / to denote directories. These will be transformed into platform-specific directory separators.</p>
+
+      <h3><a name="RestReplay-2.cRunning" id="RestReplay-2.cRunning"></a>2.c Running</h3>
+
+      <p>You can run RestReplay on the command-line, or from the command-line of maven surefire.</p>
+
+      <p>To run using the maven surefire test, simply:</p>
+
+      <div class="code">
+    cd /src/trunk/services/IntegrationTests
+    mvn test
+      </div>
+
+      <p>or</p>
+
+      <div class="code">
+    mvn test -Dtest=RestReplayMasterTest
+      </div>
+
+      <p>To run using just one test, testGroup, or <b>control</b> file, use RestReplayDevTest, and then modify dev-master.xml, which already exists.</p>
+
+      <div class="code">
+    cd /src/trunk/services/IntegrationTests
+    vi ./src/test/resources/test-data/xmlreplay/dev-master.xml
+    mvn test -Dtest=RestReplayDevTest
+      </div>
+
+      <p>or define your own <b>master</b> file, which you create:</p>
+
+      <div class="code">
+    cd /src/trunk/services/IntegrationTests
+    vi ./src/test/resources/test-data/xmlreplay/my-master-file.xml
+    mvn test -DrestReplayMaster=my-master-file.xml -DforkMode=never -Dtest=RestReplayDevTest
+      </div>
+
+      <h4><a name="RestReplay-2.c.1Commandlineparameters" id="RestReplay-2.c.1Commandlineparameters"></a>2.c.1 Command-line parameters</h4>
+
+      <h4><a name="RestReplay-2.c.2XMLconfigurationparametersinmasterfile" id="RestReplay-2.c.2XMLconfigurationparametersinmasterfile"></a>2.c.2 XML configuration parameters in <b>master</b> file</h4>
+
+      <p>Click on an element to jump to documentation for that element and its attributes.</p>
+
+      <pre>&lt;<a href="#RestReplay-restReplayMaster">restReplayMaster</a>&gt;
+      &lt;<a href="#RestReplay-restReplayMaster.dump">dump</a>/&gt;
+      &lt;<a href="#RestReplay-restReplayMaster.run">run</a>&gt;&lt;/run&gt;
+      &lt;<a href="#RestReplay-restReplayMaster.auths">auths</a>&gt;
+          &lt;<a href="#RestReplay-restReplayMaster.auths.auth">auth</a>&gt;
+      &lt;/auths&gt;
+      &lt;<a href="#RestReplay-restReplayMaster.runOptions">runOptions</a>>
+        &lt;connectionTimeout />
+        &lt;socketTimeout />
+        &lt;errorsBecomeEmptyStrings />
+      &lt;/runOptions>
+      &lt;vars>
+        &lt;<a href="#RestReplay-restReplayMaster.vars.var">var</a> />
+      &lt;/vars>
+
+&lt;/restReplayMaster&gt;</pre>
+
+      <table border="1" cellpadding="3" cellspacing="0">
+        <tbody>
+          <tr class="A">
+            <td colspan="3" class="pathrow element-hdr"><a name="RestReplay-restReplayMaster" id="RestReplay-restReplayMaster"></a>/restReplayMaster</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">child elements</td>
+
+            <td class="A">run<br>
+                          runOptions<br />
+                          vars<br />
+                          auths<br />
+                          dump<br />
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.run"></a>/restReplayMaster/run</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@controlFile</td>
+
+            <td class="A">name of <b>control</b> file, relative to RestReplay directory</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@testGroup</td>
+
+            <td class="A">ID of single testGroup within <b>control</b> file to run. To run multiple tests, use multiple /restReplayMaster/run elements.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <span class="code">&lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /></span>
+            </td>
+          </tr>
+          
+          
+          
+          
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.runOptions"></a>/restReplayMaster/runOptions</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">connectionTimeout</td>
+
+            <td class="A">Timeout for connecting to remote servers</td>
+          </tr>
+          <tr class="A">
+            <td class="A">socketTimeout</td>
+
+            <td class="A">Timeout for data transfer</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">errorsBecomeEmptyStrings</td>
+
+            <td class="A">boolean: true|false.  Set to true if you want undefined vars and errors in var syntax to become empty strings, otherwise they are left intact in the template.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A"><div class="code">
+    &lt;runOptions>
+        &lt;connectionTimeout>3000&lt;/connectionTimeout>
+        &lt;socketTimeout>3000&lt;/socketTimeout>
+        &lt;errorsBecomeEmptyStrings>true&lt;/errorsBecomeEmptyStrings>
+    &lt;/runOptions>
+            </div></td>
+          </tr>
+
+                
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.vars.var"></a>/restReplayMaster/vars/var</td>
+          </tr>
+          <tr class="A">
+            <td class="A">@id</td>
+
+            <td class="A">The name of the variable.  var elements declared here are available to all tests.  These are useful for 
+            defining host endpoints, or other values that will apply across all tests under a master.</td>
+          </tr>
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A"><div class="code">
+    &lt;restReplayMaster>
+        &lt;protoHostPort><b>${SNOOPSERVER}</b>&lt;/protoHostPort>
+        &lt;vars>
+            &lt;var ID="<b>PISERVER</b>">http://int-piapi.stg-openclass.com&lt;/var>
+            &lt;var ID="<b>LASSERVER</b>">http://localhost:8080&lt;/var>
+            &lt;var ID="<b>SNOOPSERVER</b>">http://localhost:28082&lt;/var>
+        &lt;/vars>
+        ...
+    &lt;/restReplayMaster>
+    
+    <b>Then, in a test file, you can use full URLs which reference these servers
+    defined in the master control file:</b>
+    
+    &lt;restReplay>
+        &lt;protoHostPort><b>${LASSERVER}</b>&lt;/protoHostPort>
+    
+        &lt;testGroup ID="mainTestGroup" autoDeletePOSTS="false">
+    
+            &lt;test ID="pitoken">
+                &lt;expectedCodes>200&lt;/expectedCodes>
+                &lt;method>POST&lt;/method>
+                &lt;uri><b>${PISERVER}</b>/v1/piapi-int/tokens&lt;/uri>
+                &lt;filename>pitoken.json&lt;/filename>
+            &lt;/test>
+    
+            &lt;test ID="createAssignment">
+                &lt;expectedCodes>200&lt;/expectedCodes>
+                &lt;method>POST&lt;/method>
+                &lt;uri><b>${SNOOPSERVER}</b>/las-api/api/grid-apex/assignments&lt;/uri>
+                &lt;filename>create-assignment.json&lt;/filename>
+                ...
+            &lt;/test>
+            
+            &lt;test ID="getAssignments">
+                &lt;expectedCodes>200&lt;/expectedCodes>
+                &lt;method>GET&lt;/method>
+                &lt;uri>/las-api/api/grid-apex/assignments&lt;/uri>
+                &lt;filename>create-assignment.json&lt;/filename>
+                ...
+            &lt;/test>
+        &lt;/testGroup>
+    &lt;/restReplay>
+        
+      <b>"uri" values that have a full url will go to that host. If they don't have http://host:port, 
+        then they will use "protoHostPort" element from the test file, then the
+        master file.
+        In this case:</b>
+          createAssignment will go against SNOOPSERVER:  http://localhost:28082 
+          getAssignments will go against LASSERVER:      http://localhost:8080 
+          pitoken will go against PISERVER               http://int-piapi.stg-openclass.com
+            
+       <b>Then, in a test file, you can use full URLs which reference these servers
+    defined in the master control file:</b>
+    
+    <hr />
+    
+    <b>But if protoHostPort were not defined in this test file, then the
+    protoHostPort will be pulled in from the master file.</b>
+    
+        &lt;restReplay>
+          &lt;testGroup ID="secondTestGroup" autoDeletePOSTS="false">
+            &lt;test ID="getAssignments">
+                &lt;expectedCodes>200&lt;/expectedCodes>
+                &lt;method>GET&lt;/method>
+                &lt;uri>/las-api/api/grid-apex/assignments&lt;/uri>
+                &lt;filename>create-assignment.json&lt;/filename>
+                ...
+            &lt;/test>
+          &lt;/testGroup>
+       &lt;/restReplay>
+        
+      <b>In this case, getAssignments will use the default from protoHostPort in
+      the master file:</b>
+          pitoken will go against SNOOPSERVER               http://localhost:28082
+            
+          
+          </div></td>
+          </tr>
+
+   
+          
+          
+
+          <tr class="A">
+          
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.dump" id="RestReplay-restReplayMaster.dump"></a>/restReplayMaster/dump</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@dumpServiceResult</td>
+
+            <td class="A">minimal - a one-line display<br>
+            detailed - enough information to debug<br>
+            full - more verbose, includes payloads</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@payloads</td>
+
+            <td class="A">dumps payloads after summary result.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <div class="code">&lt;dump dumpServiceResult="detailed" payloads="false" /></div>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.auths" id="RestReplay-restReplayMaster.auths"></a>/restReplayMaster/auths</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A"><br></td>
+
+            <td class="A">A list of users and their related Base-64 encrypted<tt>username:password</tt>strings. You can generate these strings in number of
+            ways, among them by using the online utility at<a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel=
+            "nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@default</td>
+
+            <td class="A">the user ID to use if none is specified in the test</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.auths.auth" id="RestReplay-restReplayMaster.auths.auth"></a>/restReplayMaster/auths/auth</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@ID</td>
+
+            <td class="A">a cspace user ID</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">element text</td>
+
+            <td class="A">Base-64 encrypted username:password</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <p>Example:</p>
+
+              <div class="code">
+  &lt;auths default="admin@example.org">
+      &lt;auth ID="user1@museum1">dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth>
+      &lt;auth ID="bigbird2010">YmlnYmlyZDIwMTA6YmlnYmlyZDIwMTA=&lt;/auth>
+      &lt;auth ID="elmo2010">ZWxtbzIwMTA6ZWxtbzIwMTA=&lt;/auth>
+  &lt;/auths>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4><a name="RestReplay-2.c.3XMLconfigurationparametersincontrolfile" id="RestReplay-2.c.3XMLconfigurationparametersincontrolfile"></a>2.c.3 XML configuration parameters in <b>control</b> file</h4>
+
+      <p>Click on an element to jump to documentation for that element and its attributes.</p>
+
+      <pre>&lt;<a href="#RestReplay-restReplay">restReplay</a>&gt;
+          &lt;<a href="#RestReplay-restReplay.auths">auths</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.auths.auth">auth</a>&gt;&lt;/auth&gt;
+          &lt;/auths&gt;
+          &lt;<a href="#RestReplay-restReplay.testGroup">testGroup</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.protoHostPort">protoHostPort</a> /&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.vars.var">vars</a> /&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.headers.header">headers</a> /&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test">test</a>&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.method">method</a>&gt;&lt;/method&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a>&gt;&lt;/uri&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">vars</a>&gt;
+                      &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">var /</a>&gt;
+                  &lt;/vars&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.parts">headers</a>&gt;
+                      &lt;<a href="#RestReplay-restReplay.testGroup.test.part">header /</a>&gt;
+                  &lt;/headers&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.parts">parts</a>&gt;
+                      &lt;<a href="#RestReplay-restReplay.testGroup.test.part">part</a>&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.parts.part.label">label /</a>&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.parts.part.filename">filename /</a>&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.parts.part.var">var /</a>&gt;
+                      &lt;/part&gt;
+                  &lt;/parts&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.response">response</a>&gt;
+                      &lt;<a href="#RestReplay-restReplay.testGroup.test.response.expected">expected</a>/&gt;
+                      &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts">parts</a>&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part">part</a>&gt;
+                              &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.label">label</a>&gt;&lt;/label&gt;
+                              &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.f...">filename</a>&gt;&lt;/filename&gt;
+                              &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">var</a>&gt;&lt;/var&gt;
+                          &lt;/part&gt;
+                      &lt;/parts&gt;
+                  &lt;/response&gt;
+              &lt;/test&gt;
+          &lt;/testGroup&gt;
+      &lt;/restReplay&gt;</pre>
+
+      <table border="1" cellpadding="3" cellspacing="0">
+        <tbody>
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay" id="RestReplay-restReplay"></a>/restReplay</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">restReplay</td>
+
+            <td class="A">Root element of an RestReplay <b>control</b> file.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">child nodes</td>
+
+            <td class="A">protoHostPort<br>
+                          auths<br>
+                          testGroup</td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.vars.var" id="RestReplay-restReplay.testGroup.vars.var"></a>/restReplay/vars/var</td>
+          </tr>
+          <tr class="A">
+            <td class="A">var</td>
+            <td class="A">A variable that will be expanded just before the test is run.  Available to use in uri element.</td>
+          </tr>
+          <tr class="A">
+            <td class="A">Example:</td>
+            <td class="A">
+              <div class="code">
+    &lt;restReplay>
+      &lt;protoHostPort>...&lt;/protoHostPort>
+      &lt;testGroup ID="mainTestGroup">
+        &lt;vars>
+            &lt;var ID="<b>COURSE_ID</b>">540f4515e4b004e7d8f22fc8&lt;/var>
+            &lt;var ID="TEMPLATE_ID">87fff5f0-652d-11e4-8229-179090669834&lt;/var>
+        &lt;/vars>
+        ...
+        &lt;test ID="getAssignments">
+            &lt;expectedCodes>200&lt;/expectedCodes>
+            &lt;method>GET&lt;/method>
+            &lt;uri>/las-api/api/grid-apex/courses/<b>${COURSE_ID}</b>/assignments&lt;/uri>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.headers.header" id="RestReplay-restReplay.testGroup.headers.header"></a>/restReplay/headers/header</td>
+          </tr>
+          <tr class="A">
+            <td class="A">header</td>
+            <td class="A">A header that will be expanded just before the test is run.  If you need to force a particular test to skip including all the headers, 
+            set inheritHeaders="false" on that &lt;test> node.</td>
+          </tr>
+          <tr class="A">
+            <td class="A">Example:</td>
+            <td class="A">
+              <div class="code">
+    <restReplay>
+      &lt;testGroup ID="mainTestGroup">
+        &lt;headers>
+            &lt;header name="X-ApiKey">19d26d452432968c9b636c9daf0c6d9b&lt;/header>
+            &lt;header name="x-authorization">${pitoken.got("//data")}&lt;/header>
+        &lt;/headers>
+        &lt;vars>
+            &lt;var ID="COURSE_ID">540f4515e4b004e7d8f22fc8&lt;/var>
+            &lt;var ID="TEMPLATE_ID">87fff5f0-652d-11e4-8229-179090669834&lt;/var>
+        &lt;/vars>
+
+        &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>>
+            &lt;expectedCodes>200&lt;/expectedCodes>
+            &lt;method>POST&lt;/method>
+            &lt;uri>${PISERVER}/v1/piapi-int/tokens&lt;/uri>
+            &lt;filename>pitoken.json&lt;/filename>
+            <b>&lt-- Will NOT inherit headers --></b>
+        &lt;/test>
+
+        &lt;test ID="deleteTemplate">
+            &lt;expectedCodes>200&lt;/expectedCodes>
+            &lt;method>DELETE&lt;/method>
+            &lt;uri>/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri>
+            <b>&lt-- Will inherit headers: X-ApiKey and x-authorization --></b>
+        &lt;/test>
+              </div>
+            </td>
+          </tr>
+
+          
+          
+          
+          
+          
+          
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.auths" id="RestReplay-restReplay.auths"></a>/restReplay/auths</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">auths</td>
+
+            <td class="A">This element adds to any auths placed in the <b>master</b> file. Any ID defined in the <b>control</b> file<br>
+            overrides an auth of the same ID defined in the <b>master</b> file.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">child elements</td>
+
+            <td class="A">auth</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@default</td>
+
+            <td class="A">the user ID to use if none is specified in the test</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.auths.auth" id="RestReplay-restReplay.auths.auth"></a>/restReplay/auths/auth</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@ID</td>
+
+            <td class="A">a cspace user ID</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">element text</td>
+
+            <td class="A">Base-64 encrypted username:password</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <p>Example:</p>
+
+              <div class="code">
+&lt;auths default="admin@example.org">
+&lt;auth ID="admin@example.org">YWRtaW5AY29sbGVjdGlvbnNwYWNlLm9yZzpBZG1pbmlzdHJhdG9y&lt;/auth>
+&lt;/auths>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup" id="RestReplay-restReplay.testGroup"></a>/restReplay/testGroup</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">testGroup</td>
+            <td class="A">Runs a group of tests</td>
+          </tr>
+          
+          <tr class="A">
+            <td class="A">child elements</td>
+            <td class="A">headers<br>
+                          vars<br>
+                          test
+          </tr>
+
+          <tr class="A">
+            <td class="A">@ID</td>
+
+            <td class="A">A unique, valid ID for this testGroup.<br>
+            The <b>master</b> file uses this ID in its /restReplayMaster/run element to specify this testGroup to run.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@autoDeletePOSTS</td>
+
+            <td class="A">"true" - resource will be autoDeleted.<br>
+            "false" - resources will not be autoDeleted</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <p>Example:</p>
+
+              <div class="code">
+&lt;testGroup ID="CRUDL" autoDeletePOSTS="true">
+  &lt;test ID="foo">....&lt;/test>
+&lt;/testGroup>               
+              </div>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test" id="RestReplay-restReplay.testGroup.test"></a>/restReplay/testGroup/test</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">test</td>
+
+            <td class="A">A test exists in a testGroup, and defines one request/response/validation set.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@ID</td>
+
+            <td class="A">This ID must be unique within this file. Will become a variable name in the expression context bound to the ServiceResult object for this request/response.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@auth</td>
+
+            <td class="A">the ID of the /restReplay/auths/auth or /restReplayMaster/auths/auth element to use for this request.<br>
+            IMPORTANT: These are sticky - they stick around until reset by the next @auth specified in a test, in exec order of the tests in this file.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">child elements</td>
+
+            <td class="A">method<br>
+            uri<br>
+            part<br>
+            parts</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example</td>
+
+            <td class="A">
+              <div class="code panel">
+&lt;test ID="oePersonauthority">
+     &lt;method>POST&lt;/method>
+     &lt;uri>/cspace-services/personauthorities/&lt;/uri>
+     &lt;part>
+         &lt;label>personauthorities_common&lt;/label>
+         &lt;filename>objectexit/oePersonauthority.xml&lt;/filename>
+     &lt;/part>
+&lt;/test>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example</td>
+
+            <td class="A">
+              This example shows switching auths between tests, and how the auths are sticky.<br>
+              "permBigbird" and "accountBigbird" tests are run as user admin@example.org<br>
+              and "dimension1" and "dimension1" tests are run as user bigbird2010.
+
+              <div class="code">
+&lt;!-- Set up permissions and account, and test bigbird2010 -->
+&lt;test ID="permBigbird" auth="admin@example.org">
+    &lt;method>POST&lt;/method>
+    &lt;uri>/cspace-services/authorization/permissions&lt;/uri>
+    &lt;filename>security/1-bigbird-permission.xml&lt;/filename>
+&lt;/test>
+&lt;test ID="accountBigbird">
+    &lt;method>POST&lt;/method>
+    &lt;uri>/cspace-services/accounts&lt;/uri>
+    &lt;filename>security/5-account-bigbird.xml&lt;/filename>
+&lt;/test>
+&lt;test ID="dimension1"  auth="bigbird2010">
+    &lt;method>POST&lt;/method>
+    &lt;uri>/cspace-services/dimensions/&lt;/uri>
+    &lt;part>
+        &lt;label>dimensions_common&lt;/label>
+        &lt;filename>dimension/1.xml&lt;/filename>
+    &lt;/part>
+&lt;/test>
+&lt;test ID="dimension2">
+    &lt;method>PUT&lt;/method>
+    &lt;uri>/cspace-services/dimensions/${dimension1.CSID}&lt;/uri>
+    &lt;part>
+        &lt;label>dimensions_common&lt;/label>
+        &lt;filename>dimension/2-put.xml&lt;/filename>
+    &lt;/part>
+&lt;/test>              
+              </div>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.method" id="RestReplay-restReplay.testGroup.test.method"></a>/restReplay/testGroup/test/method</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">method</td>
+
+            <td class="A">GET<br>
+            POST<br>
+            PUT<br>
+            DELETE</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.uri" id="RestReplay-restReplay.testGroup.test.uri"></a>/restReplay/testGroup/test/uri</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">uri</td>
+
+            <td class="A">The portion of the URL after protocol, host, and port.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              Examples:<br>
+              If URL is<a href="http://localhost:8180/cspace-services/personauthorities/" class="external-link" rel="nofollow">http://localhost:8180/cspace-services/personauthorities/</a><br>
+              then uri is /cspace-services/personauthorities/<br>
+              The uri contains any required queryString parameters:
+
+              <div class="code">
+               &lt;uri>/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri>
+                </div>
+              </div>
+
+              <p>The uri element may contain expression variables:</p>
+
+              <div class="code">
+                &lt;uri>/cspace-services/personauthorities/${oePersonauthority.CSID}&lt;/uri>
+              </div>
+
+              <p>This example uses the CSID returned in the Location header the server sent back when executing &lt;test ID="oePersonauthority"&gt;</p>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts" id="RestReplay-restReplay.testGroup.test.parts"></a>/restReplay/testGroup/test/parts</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">parts</td>
+
+            <td class="A">Optional container for "part" elements. Needed if there are more than one part element, otherwise not needed.</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts.part" id="RestReplay-restReplay.testGroup.test.parts.part"></a><a name="RestReplay-restReplay.testGroup.test.part" id=
+            "RestReplay-restReplay.testGroup.test.part"></a>/restReplay/testGroup/test/part<br>
+            /restReplay/testGroup/test/parts/part</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">part</td>
+
+            <td class="A">If there is just one part, the parts container element may be omitted.<br>
+            A schema part sent to server in request, identified by a schema name in the "label" child element.<br>
+            Models a request schema part sent in either a multipart mime message,<br>
+            or in a CSpace 1.4 style application/xml message delimited by xml elements describing the schema part.</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts.part.label" id="RestReplay-restReplay.testGroup.test.parts.part.label"></a>/restReplay/testGroup/test/parts/part/label</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">label</td>
+
+            <td class="A">A schema name for this part, such as "objectexit_common", or "collectionspace_core".</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts.part.filename" id="RestReplay-restReplay.testGroup.test.parts.part.filename"></a>/restReplay/testGroup/test/parts/part/filename</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">filename</td>
+
+            <td class="A">The filename of the payload, relative to the RestReplay directory (not relative to the <b>control</b> file).</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">&amp;&lt;filename&gt;objectexit/object-exit.xml&lt;/filename&gt;</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts.part.var" id="RestReplay-restReplay.testGroup.test.parts.part.var"></a>/restReplay/testGroup/test/parts/part/var</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">var</td>
+
+            <td class="A">Declares a variable to be made available to the expansion of the part template.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@ID</td>
+
+            <td class="A">the name of the variable that can be dereferenced in an expression e.g. &lt;var ID="depositor"&gt;...&lt;/var&gt;</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              var may be dereferenced in an expression in the request payload.like this:
+
+              <div class="code">
+                &lt;depositor>${depositor}&lt;/depositor>
+              </div>
+
+              <p>The var itself may include any expression syntax in its element text, so that vars can be set based on any previous tests or java objects in the expression namespace.<br>
+              e.g.</p>
+
+              <div class="code">
+                &lt;var ID="depositor">${oePersonGET.got("persons_common","//refName")}&lt;/var>
+              </div><br>
+              In context, this looks like:
+
+              <div class="code">
+    &lt;test ID="oeObject">
+        &lt;method>POST&lt;/method>
+        &lt;uri>/cspace-services/objectexit/&lt;/uri>
+        &lt;part>
+            &lt;label>objectexit_common&lt;/label>
+            &lt;filename>objectexit/oeObject.xml&lt;/filename>
+            &lt;var ID="depositor">${oePersonGET.got("persons_common","//refName")}&lt;/var>
+            &lt;var ID="currentOwner">${oePersonGET.got("persons_common","//refName")}&lt;/var>
+            &lt;var ID="exitNumber">oeObject-exitnum-123&lt;/var>
+        &lt;/part>
+    &lt;/test>
+              </div>
+
+              <p>In this example, the ServiceResult object from the previous test identified by &lt;test ID="oePersonGET"&gt; exposes a method called got(String partLabel, String elementXPath), which can extract the node text for an element in a schema
+              part returned by a response.</p>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response" id="RestReplay-restReplay.testGroup.test.response"></a>/restReplay/testGroup/test/response</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">response</td>
+
+            <td class="A">Container for evaluating the response from the server</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">child elements</td>
+
+            <td class="A">expected<br>
+            parts<br>
+            part</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.expected" id="RestReplay-restReplay.testGroup.test.response.expected"></a>/restReplay/testGroup/test/response/expected</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@level</td>
+
+            <td class="A">
+              Single element for evaluating the response from the server. Specify the type of comparisons for validation with<br>
+              attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
+              (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
+              i.e. a child's text node is trimmed prior to comparison.)
+
+              <ul>
+                <li>ZERO: does no checking. If the server sends a valid reponse, the reponse succeeds.</li>
+
+                <li>ADDOK: Checks for TEXT differences. Nodes added by server, are allowed. Nodes expected by test but ommitted by server are in error.</li>
+
+                <li>TEXT: makes sure nodes from the server match nodes from the file named in "filename" child element of "response".<br>
+                Allows the server to add nodes, e.g. CSID, inAuthority, and other calculated fields may be skipped.</li>
+
+                <li>TREE: makes sure no nodes/children are added or removed.</li>
+
+                <li>TREE_TEXT: makes sure nodes match, and that no nodes/children are added or removed.</li>
+
+                <li>STRICT makes sure all nodes match exactly. This is the strictest level of match.</li>
+              </ul>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <div class="code">
+                &lt;expected level="TEXT" />
+              </div>
+            </td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.parts" id="RestReplay-restReplay.testGroup.test.response.parts"></a>/restReplay/testGroup/test/response/parts</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">parts</td>
+
+            <td class="A">Optional container for part elements. Required if more than one part element.</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.parts.part" id="RestReplay-restReplay.testGroup.test.response.parts.part"></a>/restReplay/testGroup/test/response/parts/part</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">part</td>
+
+            <td class="A">A template containing the schema part expected from the server, as opposed to the actual part sent from the server.</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.parts.part.label" id="RestReplay-restReplay.testGroup.test.response.parts.part.label"></a>/restReplay/testGroup/test/response/parts/part/label</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">label</td>
+
+            <td class="A">The name of the schema, such as "objectexit_common", or "collectionspace_core".</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.parts.part.f..." id="RestReplay-restReplay.testGroup.test.response.parts.part.f..."></a>/restReplay/testGroup/test/response/parts/part/filename</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">filename</td>
+
+            <td class="A">The filename of the template for comparing to what the server sent.</td>
+          </tr>
+
+          <tr class="A">
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.parts.part.var" id="RestReplay-restReplay.testGroup.test.response.parts.part.var"></a>/restReplay/testGroup/test/response/parts/part/var</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">var</td>
+
+            <td class="A">A variable declaration to be passed into the template.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">@ID</td>
+
+            <td class="A">ID defines the variable name that will appear in the expression context, and the text of the var node will be evaluated just prior to comparing the template to the response from the server.</td>
+          </tr>
+
+          <tr class="A">
+            <td class="A">Example:</td>
+
+            <td class="A">
+              <p>The file named in /restReplay/testGroup/test/response/part/filename is a template, which may contain variables.<br>
+              Those variables should be defined in var child elements at this level. This keeps complicated variables<br>
+              out of the template file and in the <b>control</b> file. Templates should just expose simple variables, such as ${depositor}<br>
+              and not complicated variables that dig into the objects in the namespace, e.g. this would be considered bad form<br>
+              if found inside a template file:</p>
+
+              <div class="code">
+    &lt;!-- DON'T DO THIS IN TEMPLATE FILE -->
+    &lt;shortIdentifier>${oePersonauthority.sent("personauthorities_common","//shortIdentifier")}&lt;/shortIdentifier>
+              </div>
+
+              <p>It would be better to defined that variable in the <b>control</b> file, and then pass that single variable into the template.<br>
+              e.g. define this in the template file "objectexit/res/oePersonauthorityGET.res.xml"</p>
+
+              <div class="code">
+        &lt;shortIdentifier>${shortIdentifier}&lt;/shortIdentifier>
+              </div>
+
+              <p>then instantiate that variable in the <b>control</b> file:</p>
+
+              <div class="code">
+    &lt;response>
+      &lt;expected level="TEXT" />
+      &lt;part>
+        &lt;label>personauthorities_common&lt;/label>
+        &lt;filename>objectexit/res/oePersonauthorityGET.res.xml&lt;/filename>
+        &lt;var ID="shortIdentifier">${oePersonauthority.sent("personauthorities_common","//shortIdentifier")}&lt;/var>
+        &lt;var ID="refName">urn:cspace:example.org:Personauthorities(${oePersonauthority.sent("personauthorities_common","//shortIdentifier")})'${oePersonauthority.sent("personauthorities_common","//displayName")}'&lt;/var>
+      &lt;/part>
+    &lt;/response>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4><a name="RestReplay-2.c.4Cleanup" id="RestReplay-2.c.4Cleanup"></a>2.c.4 Cleanup</h4>
+
+      <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup". If true,<br>
+      then any POSTs that returned a "Location: " header will result in RestReplay sending a DELETE on that Location: URL. If false, RestReplay<br>
+      will perform no automated cleanup for that testGroup. If you called RestReplay programmatically, then you may initiate cleanup manually by calling<br>
+      on these methods of org.dynamide.restreplay.RestReplay</p>
+
+      <div class="code">
+        public List&lt;ServiceResult>  autoDelete(String logName);
+      </div>
+
+      <p>or</p>
+
+      <div class="code">
+        public static List&lt;ServiceResult> autoDelete(Map&lt;String, ServiceResult> serviceResultsMap, String logName);
+      </div>
+    </div>
+  </div>
+</body>
+</html>

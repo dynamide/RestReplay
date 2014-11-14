@@ -1,0 +1,5 @@
+{
+     "data": "${dynamideToken.got("//data")}", 
+     "token": "${TOKEN}"
+}
+
