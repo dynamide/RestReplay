@@ -10,6 +10,8 @@ Building:
 
         mvn -o -DskipTests=true install;
 
+
+
 Running: 
   for a "qa" environment set up in the master file:
 
@@ -19,6 +21,14 @@ Running:
 
     mvn -o exec:java -DenvID=dev
 
+
+
+Running with tests in some other project-based directory: 
+
+    mvn -o exec:java -DenvID=local -DrestReplayBaseDir=/Users/vcrocla/src/RestReplay.pearson.basedir -DenvID=dev
+
+so the restReplayBaseDir is a directory that has your test master control files, 
+and where rest-replay-reports directory will appear.
 
 
 

@@ -205,6 +205,13 @@
                     <arguments>
                         <argument>-restReplayBaseDir</argument>
                         <argument>${basedir}/src/test/resources/test-data/restreplay</argument>
+                        <!--
+                        You can run with the argument here:
+                        <argument>/Users/vcrocla/src/RestReplay.pearson.basedir</argument>
+                        or you can run on the command line:
+                           mvn -o exec:java -DenvID=local -DrestReplayBaseDir=/Users/vcrocla/src/RestReplay.pearson.basedir -DenvID=dev
+                         to override this any value set here.
+                        -->
                         <argument>-restReplayMaster</argument>
                         <argument>las-master.xml</argument>
                         <!--argument>-envID</argument>
