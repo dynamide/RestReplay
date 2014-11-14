@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplay>
+    <protoHostPort>http://localhost:18080</protoHostPort>
+
+    <testGroup ID="dynamideTestGroup" autoDeletePOSTS="false">
+        <test ID="dynamide1">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>${DMSERVER}/tagonomy?mock=true</uri>
+        </test>
+        <test ID="dynamideToken">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <headers>
+                <header name="x-method">${dynamide1.method}</header>
+            </headers>
+        </test>
+        <test ID="dynamideUseToken">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=true&amp;name=dynamideUseToken</uri>
+            <headers>
+                <header name="x-authorization">${dynamideToken.got("//data")}</header>
+                <header name="x-method">${dynamideToken.method}</header>
+            </headers>
+        </test>
+        <test ID="dynamideUseTokenPOST">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>dynamide-token-post.json</filename>
+            <vars>
+                <var ID="TOKEN">${dynamideToken.got("//data")}</var>
+                <var ID="TOKEN2">${foo}</var>
+                <var ID="TOKEN3">${bar}</var>
+            </vars>
+        </test>
+        <test ID="dynamideUseTokenPUT">
+            <expectedCodes>200</expectedCodes>
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>dynamide-token-post.json4</filename>
+            <vars>
+                <var ID="TOKEN">${dynamideToken.got("//data")}</var>
+            </vars>
+            <headers>
+                <header name="x-method">${dynamide1.method}</header>
+            </headers>
+        </test>
+        <test ID="dynamideUseTokenDELETE">
+            <expectedCodes>200</expectedCodes>
+            <method>DELETE</method>
+            <uri>/tagonomy?mock=true</uri>
+        </test>
+    </testGroup>
+</restReplay>
