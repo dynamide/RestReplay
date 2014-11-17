@@ -163,7 +163,10 @@ public class ServiceResult {
     public String responseHeadersDump = "";//This is filled in by RestReplayTransport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from RestReplayTransport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
     public List<Alert> alerts = new ArrayList<Alert>();
-    public Map<String,String>  vars = new HashMap<String,String>();
+    private Map<String,String> vars = new HashMap<String,String>();
+    public Map<String,String> getVars(){
+        return vars;
+    }
     public void addVars(Map<String,String> newVars){
         vars.putAll(newVars);
     }

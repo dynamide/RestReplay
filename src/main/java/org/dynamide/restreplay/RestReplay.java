@@ -853,14 +853,14 @@ public class RestReplay {
         try {
             clonedMasterVarsWTest.putAll(clonedMasterVars);
             clonedMasterVarsWTest.putAll(readVars(testNode));
-            String testID = testNode.valueOf("@ID");
+            String testID = testNode.valueOf("@ID")+idFromMutator;
             lastTestID = testID;
             String testIDLabel = Tools.notEmpty(testID) ? (testGroupID+'.'+testID) : (testGroupID+'.'+testElementIndex)
                                  +"mut:"+idFromMutator+";";
             lastTestLabel = testIDLabel;
             String method = testNode.valueOf("method");
             String uri = testNode.valueOf("uri");
-            String mutator = testNode.valueOf("mutator");
+            String mutator = testNode.valueOf("mutator/@type");
 
             //get default timeouts from master config file.
             serviceResult.connectionTimeout = runOptions.connectionTimeout;
@@ -938,6 +938,11 @@ public class RestReplay {
                 //System.out.println("response parts: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+expectedResponseParts);
             }
 
+            if (clonedMasterVarsWTest!=null) {
+                serviceResult.addVars(clonedMasterVarsWTest);
+            }
+
+
             boolean isPOST = method.equalsIgnoreCase("POST");
             boolean isPUT =  method.equalsIgnoreCase("PUT");
             if ( isPOST || isPUT ) {
@@ -962,6 +967,10 @@ public class RestReplay {
                 } else {
                     contentRaw = contentRawFromMutator;
                 }
+                //TODO: confirm current behavior: why do I add vars AFTER the call?
+                if (vars!=null) {
+                    serviceResult.addVars(vars);
+                }
                 serviceResult = doPOST_PUTFromXML(
                         serviceResult,
                         contentRaw, //partsmutator,
@@ -975,26 +984,23 @@ public class RestReplay {
                         testIDLabel,
                         headerMap,
                         runOptions);
-                //TODO: confirm current behavior: why do I add vars AFTER the call?
-                if (vars!=null) {
-                    serviceResult.addVars(vars);
-                }
                 results.add(serviceResult);
                 //if (isPOST){
                 serviceResultsMap.put(testID, serviceResult);      //PUTs do not return a Location, so don't add PUTs to serviceResultsMap.
                 //}
                 serviceResultsMap.put("result", serviceResult);
+                serviceResult.time = (System.currentTimeMillis()-startTime);
 
                 if (Tools.notBlank(mutator)&&(contentRawFromMutator==null)){
-                    ContentMutator contentMutatorInner = new ContentMutator(parts.requestPayloadFilename);
+                    ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilename);
                     serviceResult.mutator = mutator;
 
                     ServiceResult childResult = null;
-                    String content = contentMutatorInner.mutate();
+                    String content = contentMutator.mutate();
                     while (content != null) {
                         childResult = executeTestNode(
                                 content,
-                                contentMutatorInner.getID(),
+                                contentMutator.getID(),
                                 testNode,//Node testNode,
                                 testgroup,//Node testgroup,
                                 protoHostPort,//String protoHostPort,
@@ -1013,7 +1019,7 @@ public class RestReplay {
                         if (null != childResult){
                             serviceResult.addChild(childResult);
                         }
-                        content = contentMutatorInner.mutate();
+                        content = contentMutator.mutate();
                     }
                 }
             } else if (method.equalsIgnoreCase("DELETE")){
@@ -1026,6 +1032,7 @@ public class RestReplay {
                             testIDLabel,
                             fromTestID,
                             headerMap);
+                    serviceResult.time = (System.currentTimeMillis()-startTime);
                     serviceResult.fromTestID = fromTestID;
                     if (expectedCodes.size()>0){
                         serviceResult.expectedCodes = expectedCodes;
@@ -1043,6 +1050,7 @@ public class RestReplay {
                     } else {
                         serviceResult = RestReplayTransport.doDELETE(serviceResult, fullURL, authForTest, testID, fromTestID, headerMap);
                     }
+                    serviceResult.time = (System.currentTimeMillis()-startTime);
                     serviceResult.fromTestID = fromTestID;
                     results.add(serviceResult);
                 }
@@ -1051,6 +1059,7 @@ public class RestReplay {
             } else if (method.equalsIgnoreCase("GET")){
                 fullURL = fromTestID(fullURL, testNode, serviceResultsMap);
                 serviceResult = RestReplayTransport.doGET(serviceResult, fullURL, authForTest, testIDLabel, headerMap);
+                serviceResult.time = (System.currentTimeMillis()-startTime);
                 results.add(serviceResult);
                 serviceResultsMap.put(testID, serviceResult);
                 serviceResultsMap.put("result", serviceResult);
@@ -1058,6 +1067,7 @@ public class RestReplay {
                 String listQueryParams = ""; //TODO: empty for now, later may pick up from XML control file.
                 serviceResult = RestReplayTransport.doLIST(serviceResult, fullURL, listQueryParams, authForTest, testIDLabel, headerMap);
                 results.add(serviceResult);
+                serviceResult.time = (System.currentTimeMillis()-startTime);
                 serviceResultsMap.put(testID, serviceResult);
                 serviceResultsMap.put("result", serviceResult);
             } else {
@@ -1120,7 +1130,7 @@ public class RestReplay {
             }
 
             boolean doingAuto = (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.auto);
-            serviceResult.time = (System.currentTimeMillis()-startTime);
+            //move this up: serviceResult.time = (System.currentTimeMillis()-startTime);
             String serviceResultRow = serviceResult.dump(dump.dumpServiceResult, hasError)+"; time:"+(System.currentTimeMillis()-startTime);
             String leader = (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.detailed) ? "RestReplay:"+testIDLabel+": ": "";
 

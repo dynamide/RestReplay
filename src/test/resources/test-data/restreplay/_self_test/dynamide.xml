@@ -9,10 +9,18 @@
         </test>
     </testGroup>
     <testGroup ID="main" autoDeletePOSTS="false">
+        <test ID="dynamideToken">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+        </test>
         <test ID="dynamide1">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
-            <uri>${DMSERVER}/tagonomy?mock=true</uri>
+            <uri>${DMSERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
+            <vars>
+                <var ID="TOKEN_ID">${dynamideToken.got("//status")}</var>
+            </vars>
         </test>
         <!--
         <test ID="dynamideToken">
@@ -65,7 +73,9 @@
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/content-mutator-test.json</filename>
-            <mutator>ExcludeFields</mutator>
+            <mutator type="ExcludeFields">
+                <expectedOK>"points","course_id"</expectedOK>
+            </mutator>
         </test>
     </testGroup>
 </restReplay>

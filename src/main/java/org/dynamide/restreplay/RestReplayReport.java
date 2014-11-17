@@ -170,7 +170,7 @@ public class RestReplayReport {
             String sep = String.format(TOC_LINESEP, cssClass);
             if (count>0){tocBuffer.append(sep);}
             count++;
-            tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID+toc.idFromMutator + "</a> ")
+            tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
                      .append((toc.children))
                      .append(TOC_CELLSEP)
                     .append(toc.time)
@@ -451,9 +451,12 @@ public class RestReplayReport {
 
     public String detail(ServiceResult s, boolean includePayloads, boolean includePartSummary, String start, String linesep, String end, int tocID) {
         String partSummary = s.partsSummary(includePartSummary);
+        String idNoMutatorID = (Tools.notEmpty(s.idFromMutator) && Tools.notEmpty(s.testID))
+                                 ? s.testID.substring(0, (s.testID.length() - s.idFromMutator.length()) )
+                                 : s.testID;
         String res = start
                 + (s.gotExpectedResult() ? lbl("SUCCESS") : "<font color='red'><b>FAILURE</b></font>")
-                + SP + (Tools.notEmpty(s.testID) ? s.testID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
+                + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + s.responseCode + SP
@@ -475,7 +478,7 @@ public class RestReplayReport {
                 + (Tools.notEmpty(s.location) ? lbl("location") + small(s.location) + linesep : "")
                 + (Tools.notEmpty(s.getError()) ?  alertError(s.getError()) + linesep : "")
                 + (Tools.notEmpty(s.getErrorDetail()) ?  alertError(s.getErrorDetail()) + linesep : "")
-                + ((s.vars.size()>0) ? lbl("vars")+varsToHtml(s) + linesep : "")
+                + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s) + linesep : "")
                 + ((includePartSummary && Tools.notBlank(partSummary)) ? lbl("part summary") + partSummary + linesep : "")
                 + (includePayloads && Tools.notBlank(s.requestPayload) ? LINE + lbl("requestPayload") + LINE + CRLF + s.requestPayload + LINE : "")
                 + (includePayloads && Tools.notBlank(s.getResult()) ? LINE + lbl("result") + LINE + CRLF + s.getResult() : "")
@@ -536,7 +539,7 @@ public class RestReplayReport {
 
     private String varsToHtml(ServiceResult result){
         StringBuffer b = new StringBuffer();
-        for (Map.Entry<String,String> entry: result.vars.entrySet()){
+        for (Map.Entry<String,String> entry: result.getVars().entrySet()){
             b.append("<span class='vars'>")
              .append(entry.getKey())
              .append(": ")
