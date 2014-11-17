@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
     <protoHostPort>${DMSERVER}</protoHostPort>
+    <testGroup ID="login" autoDeletePOSTS="false">
+        <test ID="dynamideToken">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+        </test>
+    </testGroup>
     <testGroup ID="main" autoDeletePOSTS="false">
         <test ID="dynamide1">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>${DMSERVER}/tagonomy?mock=true</uri>
         </test>
+        <!--
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -29,7 +37,7 @@
             <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>dynamide-token-post.json</filename>
+            <filename>_self_test/dynamide-token-post.json</filename>
             <vars>
                 <var ID="TOKEN">${dynamideToken.got("//data")}</var>
             </vars>
@@ -38,7 +46,7 @@
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>dynamide-token-post.json</filename>
+            <filename>_self_test/dynamide-token-post.json</filename>
             <vars>
                 <var ID="TOKEN">${dynamideToken.got("//data")}</var>
             </vars>
@@ -50,6 +58,14 @@
             <expectedCodes>200</expectedCodes>
             <method>DELETE</method>
             <uri>/tagonomy?mock=true</uri>
+        </test>
+-->
+        <test ID="dynamideUseMutator">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <mutator>ExcludeFields</mutator>
         </test>
     </testGroup>
 </restReplay>

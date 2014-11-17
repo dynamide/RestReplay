@@ -65,8 +65,19 @@ public class ServiceResult {
         Alert triggeringAlert;
         List<Alert> allAlerts;
     }
+    private List<ServiceResult>childResults = new ArrayList<ServiceResult>();
+    public void addChild(ServiceResult child){
+        childResults.add(child);
+    }
+    public List<ServiceResult> getChildResults(){
+        return childResults;
+    }
     public String testID = "";
     public String testGroupID = "";
+    public String testIDLabel = ""; //a place to stash the internal name used by the serviceresult, but shown for info here only.
+    public String idFromMutator = ""; //if a mutator turns a test into many tests, each gets a unique mutator id, as a subset of one of the test cases.
+    public boolean isMutation = false;
+    public String mutator = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.

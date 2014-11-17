@@ -47,3 +47,73 @@ function openAllHeaders( ){
         }
     }
 }
+
+function closeAllMutations( ){
+    var pluses = document.querySelectorAll("span.childstate");
+    for ( c = 0; c < pluses.length; ++c ) {
+        pluses[c].innerHTML = "+";
+    }
+    var divs = document.getElementsByTagName("td");
+    for ( t = 0; t < divs.length; ++t )    {
+        var td = divs[t];
+        if (td.className == "mutation"){
+            td.parentNode.style.display = "none";
+        }
+    }
+}
+
+function openAllMutations( ){
+    var pluses = document.querySelectorAll("span.childstate");
+    for ( c = 0; c < pluses.length; ++c ) {
+        pluses[c].innerHTML = "-";
+    }
+
+    var divs = document.getElementsByTagName("td");
+    for ( t = 0; t < divs.length; ++t )    {
+        var td = divs[t];
+        if (td.className == "mutation"){
+           td.parentNode.style.display = "table-row";
+        }
+    }
+}
+
+//a duplicate that searches by class.
+function closeAllMutationElements(){
+    var els = document.querySelectorAll(".child-results-summary");
+    for ( t = 0; t < els.length; ++t ) {
+      els[t].style.display = 'none';
+    }
+}
+
+function hideresults(rowid, obj){
+    var els = document.querySelectorAll("#"+rowid);
+    for ( t = 0; t < els.length; ++t ) {
+    debugger;
+        var e = els[t];
+        var expanding = true;
+        var stateEl = obj.querySelectorAll("span.childstate");
+        if (stateEl && stateEl[0]){
+            if (stateEl[0].innerHTML == "-"){
+                stateEl[0].innerHTML = "+";
+                expanding = false;
+            } else {
+                stateEl[0].innerHTML = "-";
+                expanding = true;
+            }
+        }
+        var rowdown = e.parentElement.parentElement.parentElement.nextElementSibling;
+        while (rowdown){
+            if (rowdown && rowdown.querySelectorAll("TD.mutation").length>0){
+                if (expanding){
+                    rowdown.style.display = 'table-row';
+                } else {
+                    rowdown.style.display = 'none';
+                }
+                rowdown = rowdown.nextElementSibling;
+            } else {
+                break;
+            }
+        }
+    }
+}
+

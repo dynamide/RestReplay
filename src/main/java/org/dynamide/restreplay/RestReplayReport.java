@@ -28,7 +28,9 @@ public class RestReplayReport {
     protected static final String TOPLINKS = "<a class='TOPLINKS' href='javascript:openAll();'>Show All Payloads</a>"
             + "<a class='TOPLINKS' href='javascript:closeAll();'>Hide All Payloads</a>"
             + "<a class='TOPLINKS' href='javascript:openAllHeaders();'>Show All Headers</a>"
-            + "<a class='TOPLINKS' href='javascript:closeAllHeaders();'>Hide All Headers</a>";
+            + "<a class='TOPLINKS' href='javascript:closeAllHeaders();'>Hide All Headers</a>"
+            + "<a class='TOPLINKS' href='javascript:openAllMutations();'>Show All Mutations</a>"
+            + "<a class='TOPLINKS' href='javascript:closeAllMutations();'>Hide All Mutations</a>";
 
     protected static final String HTML_TEST_START = "<div class='TESTCASE'>";
     protected static final String HTML_TEST_END = "</div>";
@@ -54,7 +56,7 @@ public class RestReplayReport {
     protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='6' class='TOC_HDR'>Summary</td></tr>"
                                               +"<tr><th>testID</th><th>time(ms)</th><th>status</th><th>code</th><th>warn</th><th>error</th></td></tr>\r\n"
                                               +"<tr><td>\r\n";
-    protected static final String TOC_LINESEP = "</td></tr>\r\n<tr><td>";
+    protected static final String TOC_LINESEP = "</td></tr>\r\n<tr><td class='%s'>";
     protected static final String TOC_CELLSEP = "</td><td>";
     protected static final String TOC_END = "</td></tr></table>";
 
@@ -80,7 +82,9 @@ public class RestReplayReport {
     }
 
 
-    private StringBuffer buffer = new StringBuffer();
+    //private StringBuffer buffer = new StringBuffer();
+    private List<ServiceResult> reportsList = new ArrayList<ServiceResult>();
+
     private String runInfo = "";
 
     public String getPage(String basedir) {
@@ -89,11 +93,63 @@ public class RestReplayReport {
                 + header.toString()
                 + this.runInfo
                 + BR
-                + getTOC("").toString()
+                + reportsListToTOC()
                 + BR
                 + DETAIL_HDR
-                + buffer.toString()
+                + reportsListToString()
                 + HTML_PAGE_END;
+    }
+
+    private String reportsListToTOC(){
+        int i = 0;
+        for (ServiceResult serviceResult: reportsList) {
+            TOC toc = new TOC();
+            toc.tocID = i++;//tocID;
+            toc.testID = serviceResult.testID;
+            toc.time = serviceResult.time;
+            toc.detail = (serviceResult.gotExpectedResult() ? ok("SUCCESS") : red("FAILURE"));
+            toc.warnings = alertsCount(serviceResult.alerts, LEVEL.WARN);
+            toc.errors = alertsCount(serviceResult.alerts, LEVEL.ERROR);
+            toc.responseCode = serviceResult.responseCode;
+            toc.isMutation = serviceResult.isMutation;
+            toc.idFromMutator = serviceResult.idFromMutator;
+            if (serviceResult.getChildResults().size()>0){
+                int numGotExpected = 0;
+                int numErrors = 0;
+                int numWarnings = 0;
+                int numResults = 0;
+                for (ServiceResult cr: serviceResult.getChildResults()) {
+                    numResults++;
+                    if (cr.gotExpectedResult()){
+                        numGotExpected ++;
+                    }
+                    numErrors   += alertsCount(serviceResult.alerts, LEVEL.WARN);
+                    numWarnings += alertsCount(serviceResult.alerts, LEVEL.ERROR);
+                }
+                assert numResults == serviceResult.getChildResults().size();
+                String rowid = "childresults_"+serviceResult.testID;
+                //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
+                toc.children = "<br /><div class='childResults' onclick='hideresults(\""+rowid+"\", this);'>[ <span class='childstate'>-</span> ] mutations "
+                               +"<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+serviceResult.mutator
+                                  +" ("+serviceResult.getChildResults().size()+") "
+                               +"<table id='"+rowid+"'"+serviceResult.testID+" class='child-results-summary'><tr><th>success</th><th>warn</th><th>error</th></tr>"
+                                +"<tr>"
+                                +"<td>"+numGotExpected+'/'+numResults+"</td>"
+                                +"<td>"+numWarnings+"</td>"
+                                +"<td>"+numErrors+"</td>"
+                               +"</tr></table></div>";
+            }
+            tocList.add(toc);
+        }
+        return getTOC("").toString();
+    }
+
+    private String reportsListToString(){
+        StringBuffer buffer = new StringBuffer();
+        for (ServiceResult sr: reportsList) {
+            appendServiceResult(sr, buffer);
+        }
+        return buffer.toString();
     }
 
     public String getTOC(String reportName) {
@@ -110,9 +166,12 @@ public class RestReplayReport {
         tocBuffer.append(TOC_START);
         int count = 0;
         for (TOC toc : tocList) {
-            if (count>0){tocBuffer.append(TOC_LINESEP);}
+            String cssClass = toc.isMutation ? "mutation" : "";
+            String sep = String.format(TOC_LINESEP, cssClass);
+            if (count>0){tocBuffer.append(sep);}
             count++;
-            tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID + "</a> ")
+            tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID+toc.idFromMutator + "</a> ")
+                     .append((toc.children))
                      .append(TOC_CELLSEP)
                     .append(toc.time)
                     .append(TOC_CELLSEP)
@@ -142,9 +201,9 @@ public class RestReplayReport {
     /**
      * Call this method to insert arbitrary HTML in your report file, at the point after the last call to addTestResult() or addTestGroup().
      */
-    public void addText(String text) {
-        buffer.append(text);
-    }
+   // public void addText(String text) {
+   //     buffer.append(text);
+   // }
 
     private class Header {
         public String groupID;
@@ -171,8 +230,15 @@ public class RestReplayReport {
     private int divID = 0;
 
     public void addTestResult(ServiceResult serviceResult) {
+        reportsList.add(serviceResult);
+
+    }
+
+    private void appendServiceResult(ServiceResult serviceResult, StringBuffer buffer){
+
+
         buffer.append(HTML_TEST_START);
-        int tocID = ++divID;
+        int tocID = divID++;
         buffer.append(formatSummary(serviceResult, tocID));
         buffer.append(formatPayloads(serviceResult, tocID));
         buffer.append(HTML_TEST_END);
@@ -186,6 +252,9 @@ public class RestReplayReport {
         public int errors = 0;
         public long time = 0;
         public int responseCode = 0;
+        public boolean isMutation = false;
+        public String idFromMutator = "";
+        public String children = "";
     }
 
     private List<TOC> tocList = new ArrayList<TOC>();
@@ -266,15 +335,7 @@ public class RestReplayReport {
     }
 
     protected String formatSummary(ServiceResult serviceResult, int tocID) {
-        TOC toc = new TOC();
-        toc.tocID = tocID;
-        toc.testID = serviceResult.testID;
-        toc.time = serviceResult.time;
-        toc.detail = (serviceResult.gotExpectedResult() ? ok("SUCCESS") : red("FAILURE"));
-        toc.warnings = alertsCount(serviceResult.alerts, LEVEL.WARN);
-        toc.errors = alertsCount(serviceResult.alerts, LEVEL.ERROR);
-        toc.responseCode = serviceResult.responseCode;
-        tocList.add(toc);
+
 
         StringBuffer fb = new StringBuffer();
         fb.append("<a name='TOC" + tocID + "'></a>");
@@ -392,7 +453,7 @@ public class RestReplayReport {
         String partSummary = s.partsSummary(includePartSummary);
         String res = start
                 + (s.gotExpectedResult() ? lbl("SUCCESS") : "<font color='red'><b>FAILURE</b></font>")
-                + SP + (Tools.notEmpty(s.testID) ? s.testID : "")
+                + SP + (Tools.notEmpty(s.testID) ? s.testID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + s.responseCode + SP

@@ -183,7 +183,6 @@ td, th {
 }
 
 .TOC_TABLE td {
-    padding: 5px;
 }
 
 .TOC_TABLE th {
@@ -202,4 +201,40 @@ td, th {
     font-weight: bold;
     background-color: white;
     padding: 10px;
+}
+.mutation {
+ padding-left: 50px;
+ font-size: 60%;
+}
+.mutationsubscript{
+color: #dc5c05;
+
+}
+.child-results-summary {
+  border: 1px solid gray;
+  float: right;
+  margin: 2px;
+}
+.child-results-summary th {
+  font-size: 60%;
+  color: 999;
+  border: 1px solid gray;
+}
+.child-results-summary td {
+  font-size: 60%;
+  color: 99f;
+  border: 1px solid gray;
+  text-align: right;
+
+}
+.childResults{
+    cursor: pointer;
+    font-size: 80%;
+    color: green;
+    width: 100%;
+}
+.childstate {
+    font-size: 140%;
+    color: orange;
+    font-weight: bold;
 }

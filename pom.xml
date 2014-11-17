@@ -218,7 +218,7 @@
                          to override this any value set here.
                         -->
                         <argument>-restReplayMaster</argument>
-                        <argument>las-master.xml</argument>
+                        <argument>rest-replay-master.xml</argument>
                         <!--argument>-envID</argument>
                         <argument>dev</argument-->
                     </arguments>

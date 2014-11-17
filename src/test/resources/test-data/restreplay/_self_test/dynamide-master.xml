@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplayMaster>
+
     <protoHostPort>${DMSERVER}</protoHostPort>
+
     <!-- legal values for dumpServiceResult=[minimal,detailed,full,auto] -->
     <dump payloads="false" dumpServiceResult="auto" />
-    <!--
-    <auths default="admin@core.collectionspace.org">
-       <auth ID="admin@core.collectionspace.org">YWRtaW5AY29yZS5jb2xsZWN0aW9uc3BhY2Uub3JnOkFkbWluaXN0cmF0b3I=</auth>
-    </auths>
-    -->
 
     <runOptions>
         <connectionTimeout>3000</connectionTimeout>
@@ -16,18 +13,10 @@
     </runOptions>
 
     <vars>
-        <var ID="PISERVER">http://int-piapi.stg-openclass.com</var>
-        <var ID="LASSERVER">http://localhost:8080</var>
         <var ID="DMSERVER">http://localhost:18080</var>
-        <var ID="QALASSERVER">http://las-qa.stg-openclass.com</var>
     </vars>
 
-    <!--run controlFile="./dynamide.xml" testGroup="dynamideTestGroup" /-->
-    <!--
-    <run controlFile="./pitoken.xml" testGroup="pitokenTestGroup" />
-    <run controlFile="./assignmentservice.xml" testGroup="debugTestGroup" />
-    -->
-    <run controlFile="./assignmentservice.xml" testGroup="mainTestGroup" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="main" />
 
 </restReplayMaster>
 
