@@ -57,12 +57,14 @@ public class ContentMutator {
     }
 
     public boolean valueInRangeForId(int value, String mutationId){
+        // ranges[no_fieldA,no_fieldB,no_fieldC]->[[200-205,300-301,4xx], [200-205], [300-390,4xx]]
         Range range = idRanges.get(mutationId);
         if (range!=null) {
             return range.valueInRange(value);
         }
-        if (idRanges.get("*")!=null){
-            return true; //for the wildcard, EVERYTHING is found.
+        range = idRanges.get("*");
+        if (range!=null){
+            return range.valueInRange(value);
         }
         return false;
     }
