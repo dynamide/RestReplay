@@ -1,6 +1,7 @@
 {
-        "numOfDrafts": 2,
+
         "hide":{
+            "numOfDrafts": 2,
             "asset_type": "writingassignment",
 
             "grid_asset_id": "35199ba0-6c7d-11e4-8d8d-179090669834",

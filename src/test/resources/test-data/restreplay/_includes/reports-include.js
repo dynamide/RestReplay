@@ -88,16 +88,15 @@ function closeAllMutationElements(){
 function hideresults(rowid, obj){
     var els = document.querySelectorAll("#"+rowid);
     for ( t = 0; t < els.length; ++t ) {
-    debugger;
         var e = els[t];
         var expanding = true;
         var stateEl = obj.querySelectorAll("span.childstate");
         if (stateEl && stateEl[0]){
-            if (stateEl[0].innerHTML == "-"){
-                stateEl[0].innerHTML = "+";
+            if (stateEl[0].innerHTML == "hide"){
+                stateEl[0].innerHTML = "show";
                 expanding = false;
             } else {
-                stateEl[0].innerHTML = "-";
+                stateEl[0].innerHTML = "hide";
                 expanding = true;
             }
         }
@@ -115,5 +114,14 @@ function hideresults(rowid, obj){
             }
         }
     }
+}
+
+function showMutator(sender, id){
+    var els = document.querySelectorAll("#"+id);
+     if (els && els.length>0){
+        var el = els[0];
+        el.style.display = 'block';
+     }
+
 }
 

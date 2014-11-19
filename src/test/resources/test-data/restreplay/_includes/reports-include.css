@@ -24,9 +24,7 @@ table {
 td, th {
     background-color: #e0ffff;
 }
-.SMALL {
-    font-size: 70%;
-}
+
 
 .REPORTTIME {
     background-color: white;
@@ -58,6 +56,15 @@ td, th {
     padding: 5px;
 }
 
+.SMALL {
+    font-size: 60%;
+    color: gray;
+}
+.SMALLBLACK {
+    font-size: 60%;
+    color: black;
+}
+
 .LABEL {
     font-size: 60%;
     color: gray;
@@ -70,6 +77,7 @@ td, th {
 }
 
 .ERROR {
+    padding: 2px;
     font-size: 60%;
     color: red;
     font-weight: bold;
@@ -169,6 +177,7 @@ td, th {
 }
 
 .toc-error {
+    padding: 2px;
     font-size: 60%;
     color: black;
     background-color: yellow;
@@ -176,6 +185,7 @@ td, th {
 }
 
 .toc-warn {
+    padding: 2px;
     font-size: 60%;
     color: black;
     background-color: orange;
@@ -183,13 +193,16 @@ td, th {
 }
 
 .TOC_TABLE td {
+   padding: 6px;
+   border-color: lightblue;
 }
 
 .TOC_TABLE th {
-    padding: 5px;
+    padding: 10px;
     color: gray;
     font-size: 50%;
     font-weight: normal;
+    border-color: lightblue;
 }
 
 .TOC_HDR {
@@ -202,12 +215,20 @@ td, th {
     background-color: white;
     padding: 10px;
 }
-.mutation {
+td.mutation {
  padding-left: 50px;
- font-size: 60%;
+ font-size: 80%;
 }
+tr.mutation {
+  font-size: 60%;
+}
+
+.mutation td {
+  padding-left: 10px;
+}
+
 .mutationsubscript{
-color: #dc5c05;
+  color: #dc5c05;
 
 }
 .child-results-summary {
@@ -231,10 +252,10 @@ color: #dc5c05;
     cursor: pointer;
     font-size: 80%;
     color: green;
-    width: 100%;
+    margin-left: 30px;
 }
 .childstate {
-    font-size: 140%;
+    font-size: 100%;
     color: orange;
     font-weight: bold;
 }

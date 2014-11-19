@@ -779,23 +779,27 @@ public class RestReplay {
             for (Node testNode : tests) {
                 serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
                 testElementIndex++;
-                executeTestNode(null,
-                                "",
-                                testNode,
-                                testgroup,
-                                protoHostPort,
-                                clonedMasterVars,
-                                testElementIndex,
-                                testGroupID,
-                                evalStruct,
-                                authsMap,
-                                defaultAuths,
-                                restReplayBaseDir,
-                                runOptions,
-                                dump,
-                                serviceResultsMap,
-                                report,
-                                results);
+                ServiceResult serviceResult = new ServiceResult();
+                serviceResultsMap.put("this", serviceResult);
+                executeTestNode(serviceResult,
+                        null,
+                        null,
+                        testNode,
+                        testgroup,
+                        protoHostPort,
+                        clonedMasterVars,
+                        testElementIndex,
+                        testGroupID,
+                        evalStruct,
+                        authsMap,
+                        defaultAuths,
+                        restReplayBaseDir,
+                        runOptions,
+                        dump,
+                        serviceResultsMap,
+                        report,
+                        results);
+                serviceResultsMap.remove("this");
             }
             serviceResultsMap.remove("result");
             if (Tools.isTrue(autoDeletePOSTS)&&param_autoDeletePOSTS){
@@ -818,8 +822,10 @@ public class RestReplay {
         return results;
     }
 
-    private static ServiceResult executeTestNode(String contentRawFromMutator,
-                                        final String idFromMutator,
+    private static ServiceResult executeTestNode(
+                                        ServiceResult serviceResult,
+                                        String contentRawFromMutator,
+                                        ContentMutator mutator,
                                         Node testNode,
                                         Node testgroup,
                                         String protoHostPort,
@@ -836,31 +842,35 @@ public class RestReplay {
                                         RestReplayReport report,
                                         List<ServiceResult> results){
 
+        final String idFromMutator = (null!=mutator) ? mutator.getMutationID() : "";
+
         long startTime = System.currentTimeMillis();
         String lastTestID = "";
         String lastTestLabel = "";
 
 
-        ServiceResult serviceResult = new ServiceResult();
+        //ServiceResult serviceResult = new ServiceResult();
         report.addTestResult(serviceResult);
 
 
         if (contentRawFromMutator!=null){
             serviceResult.isMutation = true;
         }
+        serviceResult.mutator = mutator;
+
         Map<String,String> clonedMasterVarsWTest = new HashMap<String, String>();
 
         try {
             clonedMasterVarsWTest.putAll(clonedMasterVars);
             clonedMasterVarsWTest.putAll(readVars(testNode));
-            String testID = testNode.valueOf("@ID")+idFromMutator;
+            String testID = testNode.valueOf("@ID")+(Tools.notBlank(idFromMutator)? "_"+idFromMutator : "");
             lastTestID = testID;
             String testIDLabel = Tools.notEmpty(testID) ? (testGroupID+'.'+testID) : (testGroupID+'.'+testElementIndex)
                                  +"mut:"+idFromMutator+";";
             lastTestLabel = testIDLabel;
             String method = testNode.valueOf("method");
             String uri = testNode.valueOf("uri");
-            String mutator = testNode.valueOf("mutator/@type");
+            String mutatorType = testNode.valueOf("mutator/@type");
 
             //get default timeouts from master config file.
             serviceResult.connectionTimeout = runOptions.connectionTimeout;
@@ -881,6 +891,14 @@ public class RestReplay {
             if (Tools.isEmpty(authForTest)){
                 authForTest = defaultAuths.getDefaultAuth();
             }
+
+            //AFTER this, evals will happen, so fields on "this" must be updated:
+            serviceResult.testID = testID;
+            serviceResult.testIDLabel = testIDLabel;
+            serviceResult.idFromMutator = idFromMutator;
+            serviceResult.auth = authForTest;
+            serviceResult.method = method;
+
 
             //====Headers==========================
             Map<String, String> headerMap = readHeaders(testNode,
@@ -920,15 +938,22 @@ public class RestReplay {
                 serviceResult.alerts.addAll(evalResult.alerts);
             }
             String fullURL = fixupFullURL(oneProtoHostPort, uri);
+            serviceResult.fullURL = fullURL;
             serviceResult.protoHostPort = oneProtoHostPort;
 
-            List<Integer> expectedCodes = new ArrayList<Integer>();
-            String expectedCodesStr = testNode.valueOf("expectedCodes");
-            if (Tools.notEmpty(expectedCodesStr)){
-                String[] codesArray = expectedCodesStr.split(",");
-                for (String code : codesArray){
-                    expectedCodes.add(new Integer(code.trim()));
+            if (mutator == null) {
+                List<Integer> expectedCodes = new ArrayList<Integer>();
+                String expectedCodesStr = testNode.valueOf("expectedCodes");
+                if (Tools.notEmpty(expectedCodesStr)) {
+                    String[] codesArray = expectedCodesStr.split(",");
+                    for (String code : codesArray) {
+                        expectedCodes.add(new Integer(code.trim()));
+                    }
                 }
+                serviceResult.expectedCodes = expectedCodes;
+            } else {
+                System.out.println("mutator not null");
+
             }
 
             Node responseNode = testNode.selectSingleNode("response");
@@ -942,7 +967,6 @@ public class RestReplay {
                 serviceResult.addVars(clonedMasterVarsWTest);
             }
 
-
             boolean isPOST = method.equalsIgnoreCase("POST");
             boolean isPUT =  method.equalsIgnoreCase("PUT");
             if ( isPOST || isPUT ) {
@@ -952,6 +976,7 @@ public class RestReplay {
                 }
                 if (isPUT) {
                     fullURL = fromTestID(fullURL, testNode, serviceResultsMap);
+                    serviceResult.fullURL = fullURL;
                 }
                 //vars only make sense in two contexts: POST/PUT, because you are submitting another file with internal expressions,
                 // and in <response> nodes. For GET, DELETE, there is no payload, so all the URLs with potential expressions are right there in the testNode.
@@ -991,35 +1016,45 @@ public class RestReplay {
                 serviceResultsMap.put("result", serviceResult);
                 serviceResult.time = (System.currentTimeMillis()-startTime);
 
-                if (Tools.notBlank(mutator)&&(contentRawFromMutator==null)){
+                if (Tools.notBlank(mutatorType)&&(contentRawFromMutator==null)){
                     ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilename);
-                    serviceResult.mutator = mutator;
+                    contentMutator.setOptions(testNode);
+                    serviceResult.mutatorType = mutatorType;
+                    serviceResult.mutator = contentMutator;
 
-                    ServiceResult childResult = null;
-                    String content = contentMutator.mutate();
-                    while (content != null) {
-                        childResult = executeTestNode(
-                                content,
-                                contentMutator.getID(),
-                                testNode,//Node testNode,
-                                testgroup,//Node testgroup,
-                                protoHostPort,//String protoHostPort,
-                                clonedMasterVars,//Map<String,String> clonedMasterVars,
-                                testElementIndex,//int testElementIndex,
-                                testGroupID,//String testGroupID,
-                                evalStruct,//RestReplayEval evalStruct,
-                                authsMap,//AuthsMap authsMap,
-                                defaultAuths,//AuthsMap defaultAuths,
-                                restReplayBaseDir,//String restReplayBaseDir,
-                                runOptions,//RunOptions runOptions,
-                                dump,// Dump dump,
-                                serviceResultsMap,//Map<String,ServiceResult> serviceResultsMap,
-                                report,//RestReplayReport report,
-                                results);//List<ServiceResult> results)
-                        if (null != childResult){
+
+                    ServiceResult holdThis = serviceResultsMap.get("this");
+                    try {
+                        String content = contentMutator.mutate();
+                        while (content != null) {
+                            ServiceResult childResult = new ServiceResult();
                             serviceResult.addChild(childResult);
+                            serviceResultsMap.put("this", childResult);
+
+                            executeTestNode(
+                                    childResult,
+                                    content,
+                                    contentMutator,
+                                    testNode,//Node
+                                    testgroup,//Node
+                                    protoHostPort,//String
+                                    clonedMasterVars,//Map<String,String>
+                                    testElementIndex,//int
+                                    testGroupID,//String
+                                    evalStruct,//RestReplayEval
+                                    authsMap,//AuthsMap
+                                    defaultAuths,//AuthsMap
+                                    restReplayBaseDir,//String
+                                    runOptions,//RunOptions
+                                    dump,// Dump
+                                    serviceResultsMap,//Map<String,ServiceResult>
+                                    report,//RestReplayReport
+                                    results);//List<ServiceResult> results)
+
+                            content = contentMutator.mutate();
                         }
-                        content = contentMutator.mutate();
+                    } finally {
+                        if (holdThis!=null) serviceResultsMap.put("this", holdThis);
                     }
                 }
             } else if (method.equalsIgnoreCase("DELETE")){
@@ -1034,9 +1069,9 @@ public class RestReplay {
                             headerMap);
                     serviceResult.time = (System.currentTimeMillis()-startTime);
                     serviceResult.fromTestID = fromTestID;
-                    if (expectedCodes.size()>0){
-                        serviceResult.expectedCodes = expectedCodes;
-                    }
+       //             if (expectedCodes.size()>0){
+       //                 serviceResult.expectedCodes = expectedCodes;
+       //             }
                     results.add(serviceResult);
                     if (serviceResult.codeInSuccessRange(serviceResult.responseCode)){  //gotExpectedResult depends on serviceResult.expectedCodes.
                         serviceResultsMap.remove(fromTestID);
@@ -1058,6 +1093,7 @@ public class RestReplay {
                 // but "result" is supposed to be available until end of test.
             } else if (method.equalsIgnoreCase("GET")){
                 fullURL = fromTestID(fullURL, testNode, serviceResultsMap);
+                serviceResult.fullURL = fullURL;
                 serviceResult = RestReplayTransport.doGET(serviceResult, fullURL, authForTest, testIDLabel, headerMap);
                 serviceResult.time = (System.currentTimeMillis()-startTime);
                 results.add(serviceResult);
@@ -1074,15 +1110,10 @@ public class RestReplay {
                 throw new Exception("HTTP method not supported by RestReplay: "+method);
             }
 
-            serviceResult.testID = testID;
-            serviceResult.testIDLabel = testIDLabel;
-            serviceResult.idFromMutator = idFromMutator;
-            serviceResult.fullURL = fullURL;
-            serviceResult.auth = authForTest;
-            serviceResult.method = method;
-            if (expectedCodes.size()>0){
-                serviceResult.expectedCodes = expectedCodes;
-            }
+
+     //       if (expectedCodes.size()>0){
+     //           serviceResult.expectedCodes = expectedCodes;
+     //       }
             if (Tools.isEmpty(serviceResult.testID)) serviceResult.testID = testIDLabel;
             if (Tools.isEmpty(serviceResult.testGroupID)) serviceResult.testGroupID = testGroupID;
 

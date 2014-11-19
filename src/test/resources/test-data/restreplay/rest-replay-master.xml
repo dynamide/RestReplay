@@ -15,9 +15,17 @@
         <var ID="DMSERVER">http://localhost:18080</var>
     </vars>
 
-    <run controlFile="_self_test/dynamide.xml" testGroup="login" />
 
+    <!--
+     <run controlFile="_self_test/dynamide.xml" testGroup="login" />
     <run controlFile="_self_test/dynamide.xml" testGroup="main" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="bugs" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="debug" />
+    -->
+
+    <run controlFile="_self_test/dynamide.xml" testGroup="login" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="main" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="debug" />
 
 
 </restReplayMaster>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
     <protoHostPort>${DMSERVER}</protoHostPort>
+
     <testGroup ID="login" autoDeletePOSTS="false">
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
@@ -8,6 +9,7 @@
             <uri>/tagonomy?mock=token</uri>
         </test>
     </testGroup>
+
     <testGroup ID="main" autoDeletePOSTS="false">
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
@@ -22,7 +24,19 @@
                 <var ID="TOKEN_ID">${dynamideToken.got("//status")}</var>
             </vars>
         </test>
-        <!--
+        <test ID="dynamideUseMutator">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <mutator type="ExcludeFields">
+                <expected>
+                    <code range="200">*</code>
+                    <code range="200-299">numOfDrafts</code>
+                    <code range="400-499,500-599">book_id, course_id</code>
+                </expected>
+            </mutator>
+        </test>
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -54,6 +68,59 @@
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <vars>
+                <var ID="TOKEN">${dynamideToken.got("//data/")</var>
+            </vars>
+            <headers>
+                <header name="x-method">${dynamide1.method}</header>
+            </headers>
+            <mutator type="ExcludeFields">
+                <expected>
+                    <code range="4xx">*</code>
+                </expected>
+            </mutator>
+        </test>
+        <test ID="dynamideUseTokenDELETE">
+            <expectedCodes>200</expectedCodes>
+            <method>DELETE</method>
+            <uri>/tagonomy?mock=true</uri>
+        </test>
+
+    </testGroup>
+
+
+
+    <testGroup ID="debug">
+        <test ID="dynamideUseTokenPUT">
+            <expectedCodes>200</expectedCodes>
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
+            <filename>_self_test/dynamide-mutator.json</filename>
+            <vars>
+                <var ID="TOKEN">FOOTOKEN</var>
+                <var ID="mutation">${this.mutation}</var>
+            </vars>
+            <mutator type="ExcludeFields">
+                <expected>
+                    <code range="5xx">mutation</code>
+                    <code range="2x">*</code>
+                </expected>
+            </mutator>
+        </test>
+    </testGroup>
+
+
+
+    <testGroup ID="bugs">
+        <test ID="dynamideUseTokenPUT">
+            <!-- This case causes errors to happen in the mutated child tests, but reading the json response borks the
+                 parent so it doesn't display correctly, and the children seem like top-level tests.
+                 Trace this to the code that breaks on the error and trap the error correctly.
+            -->
+            <expectedCodes>200</expectedCodes>
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/dynamide-token-post.json</filename>
             <vars>
                 <var ID="TOKEN">${dynamideToken.got("//data")}</var>
@@ -61,20 +128,10 @@
             <headers>
                 <header name="x-method">${dynamide1.method}</header>
             </headers>
-        </test>
-        <test ID="dynamideUseTokenDELETE">
-            <expectedCodes>200</expectedCodes>
-            <method>DELETE</method>
-            <uri>/tagonomy?mock=true</uri>
-        </test>
--->
-        <test ID="dynamideUseMutator">
-            <expectedCodes>200</expectedCodes>
-            <method>POST</method>
-            <uri>/tagonomy?mock=true</uri>
-            <filename>_self_test/content-mutator-test.json</filename>
             <mutator type="ExcludeFields">
-                <expectedOK>"points","course_id"</expectedOK>
+                <expected>
+                    <code range="4xx">*</code>
+                </expected>
             </mutator>
         </test>
     </testGroup>

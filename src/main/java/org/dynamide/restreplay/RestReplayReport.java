@@ -56,7 +56,7 @@ public class RestReplayReport {
     protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='6' class='TOC_HDR'>Summary</td></tr>"
                                               +"<tr><th>testID</th><th>time(ms)</th><th>status</th><th>code</th><th>warn</th><th>error</th></td></tr>\r\n"
                                               +"<tr><td>\r\n";
-    protected static final String TOC_LINESEP = "</td></tr>\r\n<tr><td class='%s'>";
+    protected static final String TOC_LINESEP = "</td></tr>\r\n<tr class='%s'><td class='%s'>";
     protected static final String TOC_CELLSEP = "</td><td>";
     protected static final String TOC_END = "</td></tr></table>";
 
@@ -107,41 +107,105 @@ public class RestReplayReport {
             toc.tocID = i++;//tocID;
             toc.testID = serviceResult.testID;
             toc.time = serviceResult.time;
-            toc.detail = (serviceResult.gotExpectedResult() ? ok("SUCCESS") : red("FAILURE"));
+            toc.detail = (serviceResult.gotExpectedResult() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
             toc.warnings = alertsCount(serviceResult.alerts, LEVEL.WARN);
             toc.errors = alertsCount(serviceResult.alerts, LEVEL.ERROR);
             toc.responseCode = serviceResult.responseCode;
             toc.isMutation = serviceResult.isMutation;
             toc.idFromMutator = serviceResult.idFromMutator;
-            if (serviceResult.getChildResults().size()>0){
-                int numGotExpected = 0;
-                int numErrors = 0;
-                int numWarnings = 0;
-                int numResults = 0;
-                for (ServiceResult cr: serviceResult.getChildResults()) {
-                    numResults++;
-                    if (cr.gotExpectedResult()){
-                        numGotExpected ++;
-                    }
-                    numErrors   += alertsCount(serviceResult.alerts, LEVEL.WARN);
-                    numWarnings += alertsCount(serviceResult.alerts, LEVEL.ERROR);
-                }
-                assert numResults == serviceResult.getChildResults().size();
-                String rowid = "childresults_"+serviceResult.testID;
-                //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
-                toc.children = "<br /><div class='childResults' onclick='hideresults(\""+rowid+"\", this);'>[ <span class='childstate'>-</span> ] mutations "
-                               +"<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+serviceResult.mutator
-                                  +" ("+serviceResult.getChildResults().size()+") "
-                               +"<table id='"+rowid+"'"+serviceResult.testID+" class='child-results-summary'><tr><th>success</th><th>warn</th><th>error</th></tr>"
-                                +"<tr>"
-                                +"<td>"+numGotExpected+'/'+numResults+"</td>"
-                                +"<td>"+numWarnings+"</td>"
-                                +"<td>"+numErrors+"</td>"
-                               +"</tr></table></div>";
-            }
+            toc.children = formatMutatorChildrenBlock(serviceResult);
             tocList.add(toc);
         }
         return getTOC("").toString();
+    }
+
+    private String formatMutatorSUCCESS(ServiceResult serviceResult) {
+        if (serviceResult.getChildResults().size() > 0) {
+            int numGotExpected = 0;
+            int numErrors = 0;
+            int numWarnings = 0;
+            int numResults = 0;
+            for (ServiceResult cr : serviceResult.getChildResults()) {
+                numResults++;
+                if (cr.gotExpectedResult()) {
+                    numGotExpected++;
+                }
+                numErrors += alertsCount(cr.alerts, LEVEL.WARN);
+                numWarnings += alertsCount(cr.alerts, LEVEL.ERROR);
+            }
+            return "SUCCESS +" + numGotExpected + '/' + numResults;
+        } else {
+            return "SUCCESS";
+        }
+    }
+
+    private String formatMutatorChildrenBlock(ServiceResult serviceResult) {
+        if (serviceResult.getChildResults().size() > 0) {
+            int numGotExpected = 0;
+            int numErrors = 0;
+            int numWarnings = 0;
+            int numResults = 0;
+            for (ServiceResult childResult : serviceResult.getChildResults()) {
+                numResults++;
+                if (childResult.gotExpectedResult()) {
+                    numGotExpected++;
+                }
+                numErrors += alertsCount(childResult.alerts, LEVEL.WARN);
+                numWarnings += alertsCount(childResult.alerts, LEVEL.ERROR);
+            }
+            assert numResults == serviceResult.getChildResults().size();
+            String rowid = "childresults_" + serviceResult.testID;
+            //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
+            return "<span class='childResults' onclick='hideresults(\"" + rowid + "\", this);'>"
+                    + "<table id='" + rowid + "'" + serviceResult.testID + " class='child-results-summary'>"
+                    + "<tr>"
+                    + "<td><span class='childstate'>hide</span></td>"
+                    + "<td>" + numGotExpected + '/' + numResults + "</td>"
+                    + "<td>" + numWarnings + "</td>"
+                    + "<td>" + numErrors + "</td>"
+                    + "</tr></table></span>";
+
+        }
+        return "";
+    }
+
+    private String formatMutatorChildrenBlockHIDE(ServiceResult serviceResult){
+        String rowid = "childresults_"+serviceResult.testID;
+        if (serviceResult.getChildResults().size()>0){
+            int numGotExpected = 0;
+            int numErrors = 0;
+            int numWarnings = 0;
+            int numResults = 0;
+            for (ServiceResult cr: serviceResult.getChildResults()) {
+                numResults++;
+                if (cr.gotExpectedResult()){
+                    numGotExpected ++;
+                }
+                numErrors   += alertsCount(cr.alerts, LEVEL.WARN);
+                numWarnings += alertsCount(cr.alerts, LEVEL.ERROR);
+            }
+            assert numResults == serviceResult.getChildResults().size();
+            //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
+            return
+            "<table id='"+rowid+"'"+serviceResult.testID+" class='child-results-summary'>"
+                +"<tr>"
+                +"<td>"+numGotExpected+'/'+numResults+"</td>"
+                +"<td>"+numWarnings+"</td>"
+                +"<td>"+numErrors+"</td>"
+                +"</tr></table>"
+             + "<div onclick='showMutator(this,\"mutator1\")'>><div id='mutator1' style='display:none;' >"
+                    +"<br /><div class='childResults' onclick='hideresults(\""+rowid+"\", this);'>[ <span class='childstate'>-</span> ] mutations "
+                    +"<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+serviceResult.mutator.shortName()
+                    +" ("+serviceResult.getChildResults().size()+") "
+                    +"<table id='"+rowid+"'"+serviceResult.testID+" class='child-results-summary'><tr><th>success</th><th>warn</th><th>error</th></tr>"
+                    +"<tr>"
+                    +"<td>"+numGotExpected+'/'+numResults+"</td>"
+                    +"<td>"+numWarnings+"</td>"
+                    +"<td>"+numErrors+"</td>"
+                    +"</tr></table></div>"
+                    +"</div></div>";
+        }
+        return "";
     }
 
     private String reportsListToString(){
@@ -167,7 +231,7 @@ public class RestReplayReport {
         int count = 0;
         for (TOC toc : tocList) {
             String cssClass = toc.isMutation ? "mutation" : "";
-            String sep = String.format(TOC_LINESEP, cssClass);
+            String sep = String.format(TOC_LINESEP, cssClass, cssClass);
             if (count>0){tocBuffer.append(sep);}
             count++;
             tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
@@ -335,8 +399,6 @@ public class RestReplayReport {
     }
 
     protected String formatSummary(ServiceResult serviceResult, int tocID) {
-
-
         StringBuffer fb = new StringBuffer();
         fb.append("<a name='TOC" + tocID + "'></a>");
         fb.append(detail(serviceResult, false, false, DETAIL_START, DETAIL_LINESEP, DETAIL_END, tocID));
@@ -441,6 +503,10 @@ public class RestReplayReport {
         return "<span class='SMALL'>" + label + "</span> ";
     }
 
+    protected static String smallblack(String label) {
+        return "<span class='SMALLBLACK'>" + label + "</span> ";
+    }
+
     protected String units(String label) {
         return "<span class='LABEL'>" + label + "</span> ";
     }
@@ -454,17 +520,16 @@ public class RestReplayReport {
         String idNoMutatorID = (Tools.notEmpty(s.idFromMutator) && Tools.notEmpty(s.testID))
                                  ? s.testID.substring(0, (s.testID.length() - s.idFromMutator.length()) )
                                  : s.testID;
+        String SUCCESS = formatMutatorSUCCESS(s);
         String res = start
-                + (s.gotExpectedResult() ? lbl("SUCCESS") : "<font color='red'><b>FAILURE</b></font>")
+                + (s.gotExpectedResult() ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
-                + s.responseCode + SP
-                    + ((s.expectedCodes.size() > 0) ? lbl("  expected") + s.expectedCodes  : "")
-                    +  lbl("  gotExpected") + s.gotExpectedResult()
-                   //+ lbl(" len:")+s.contentLength + linesep
-                    + SP + lbl(" time")+s.time + units("ms") + linesep
+                + formatResponseCodeBlock(s) + linesep
                 + (Tools.notBlank(s.failureReason) ? s.failureReason + linesep : "")
+
+                //+ ((s.mutator != null) ? s.mutator.toString() : "") + linesep
 
                 //+ ( Tools.notEmpty(s.testGroupID) ? "testGroupID:"+s.testGroupID+linesep : "" )
                 //THIS WORKS, BUT IS VERBOSE: + ( Tools.notEmpty(s.fromTestID) ? "fromTestID:"+s.fromTestID+linesep : "" )
@@ -484,6 +549,23 @@ public class RestReplayReport {
                 + (includePayloads && Tools.notBlank(s.getResult()) ? LINE + lbl("result") + LINE + CRLF + s.getResult() : "")
                 + end;
         return res;
+    }
+
+    private String formatResponseCodeBlock(ServiceResult s){
+        String sExpected = "";
+        if (s.expectedCodes.size() > 0) {
+            sExpected = lbl("  expected") + s.expectedCodes;
+            //+ small("  from "+s.gotExpectedResultBecause);
+        }
+        if (s.mutator!=null && Tools.notBlank(s.idFromMutator)) {
+            sExpected = lbl("  expected") + s.mutator.expectedRangeForID(s.idFromMutator)
+            + small("  from "+s.gotExpectedResultBecause);
+        }
+
+        return  s.responseCode
+                + SP + lbl(" gotExpected")+s.gotExpectedResult()
+                + SP + sExpected
+                + SP + lbl(" time")+s.time + units("ms") ;
     }
 
     private String requestHeadersToHtml(List<String> hdrs) {

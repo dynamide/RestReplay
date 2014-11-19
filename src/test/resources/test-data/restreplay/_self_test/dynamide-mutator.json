@@ -1,0 +1,6 @@
+{
+     "data": "ABC DATA",
+     "token": "${TOKEN}",
+     "mutation":"${mutation}"
+}
+

@@ -65,19 +65,30 @@ public class ServiceResult {
         Alert triggeringAlert;
         List<Alert> allAlerts;
     }
+
     private List<ServiceResult>childResults = new ArrayList<ServiceResult>();
     public void addChild(ServiceResult child){
+        child.setParent(this);
         childResults.add(child);
     }
     public List<ServiceResult> getChildResults(){
         return childResults;
     }
-    public String testID = "";
+
+    private ServiceResult parent;
+    public ServiceResult getParent(){
+        return parent;
+    }
+    protected void setParent(ServiceResult sr){
+        parent = sr;
+    }
+    public String testID = "test-id-not-set";
     public String testGroupID = "";
     public String testIDLabel = ""; //a place to stash the internal name used by the serviceresult, but shown for info here only.
     public String idFromMutator = ""; //if a mutator turns a test into many tests, each gets a unique mutator id, as a subset of one of the test cases.
     public boolean isMutation = false;
-    public String mutator = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
+    public String mutatorType = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
+    public ContentMutator mutator = null;
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.
@@ -132,6 +143,7 @@ public class ServiceResult {
         error = (Tools.notEmpty(error))
                 ? error+ "<br />\r\n"+msg
                 : msg;
+        addAlert(error, testIDLabel, Alert.LEVEL.ERROR);
     }
     public int socketTimeout = 30000;  //millis
     public int connectionTimeout = 30000;   //millis
@@ -146,6 +158,9 @@ public class ServiceResult {
     }
     public void setMimeType(String mimeHeader){
         //this gets called twice: once in getContentHeader from post, and once in readStream, and readErrorStream.  But so what.
+        if (mimeHeader==null) {
+            return;
+        }
         int start = mimeHeader.indexOf(';');
         if (start>0){
             mimeType = mimeHeader.substring(0, start).trim();
@@ -196,12 +211,10 @@ public class ServiceResult {
         return buf.toString();
     }
     public boolean codeInSuccessRange(int code){
-        if (0<=code && code<200){
-            return false;
-        } else if (400<=code) {
-            return false;
+        if (200<=code && code<400){
+            return true;
         }
-        return true;
+        return false;
     }
 
     public boolean isDomWalkOK(){
@@ -272,6 +285,8 @@ public class ServiceResult {
         overrideExpectedResult = true;
     }
 
+    public String gotExpectedResultBecause = "";
+
     public boolean gotExpectedResult(){
         if (overrideExpectedResult){
             return true;
@@ -279,14 +294,36 @@ public class ServiceResult {
         //if (Tools.notEmpty(failureReason)){
         //    return false;
         //}
-        for (Integer oneExpected : expectedCodes){
+
+        List<Integer>  expectedCodesFrom = expectedCodes;
+
+        gotExpectedResultBecause = " test["+testID+']';
+        if (null!=mutator && Tools.notEmpty(idFromMutator)){
+            System.out.println("\r\n\r\n>>>>>>>>>> id: "+testID+" mutationID:"+idFromMutator);
+            boolean hasRange = mutator.hasRangeForId(idFromMutator);
+            if(hasRange) {
+                gotExpectedResultBecause = " mutator["+idFromMutator+']';
+                boolean found = (mutator.valueInRangeForId(responseCode, idFromMutator));
+                System.out.println(" found("+idFromMutator+"): "+found);
+                return found;
+            } else {
+                System.out.println(" NOT found("+idFromMutator+") ");
+            }
+            if (this.getParent() != null){
+                ServiceResult p = this.getParent();
+                expectedCodesFrom = p.expectedCodes;
+                gotExpectedResultBecause = " parent["+p.testID+']';
+            }
+        }
+
+        for (Integer oneExpected : expectedCodesFrom){
             if (responseCode == oneExpected){
                 failureReason = "";
                 return isDomWalkOK();
             }
         }
-        if ( expectedCodes.size()>0 && codeInSuccessRange(responseCode)){ //none found, but result expected.
-            for (Integer oneExpected : expectedCodes){
+        if ( expectedCodesFrom.size()>0 && codeInSuccessRange(responseCode)){ //none found, but result expected.
+            for (Integer oneExpected : expectedCodesFrom){
                 if ( ! codeInSuccessRange(oneExpected)){
                     failureReason = "";
                     return isDomWalkOK();
@@ -423,27 +460,29 @@ public class ServiceResult {
     public Object get(String what){
         if ("CSID".equals(what)){
             return CSID;
-        } else if ("location".equals(what)){
+        } else if ("location".equalsIgnoreCase(what)){
             return location;
-        } else if ("testID".equals(what)){
+        } else if ("testID".equalsIgnoreCase(what)){
             return testID;
-        } else if ("testGroupID".equals(what)){
+        } else if ("mutation".equalsIgnoreCase(what)){
+            return idFromMutator;
+        } else if ("testGroupID".equalsIgnoreCase(what)){
             return testGroupID;
-        } else if ("fullURL".equals(what)){
+        } else if ("fullURL".equalsIgnoreCase(what)){
             return fullURL;
-        } else if ("url".equals(what)){
+        } else if ("url".equalsIgnoreCase(what)){
             try {
                 return new URL(fullURL);
             } catch (MalformedURLException e) {
                 return fullURL;
             }
-        } else if ("deleteURL".equals(what)){
+        } else if ("deleteURL".equalsIgnoreCase(what)){
             return deleteURL;
         } else if ("protoHostPort".equalsIgnoreCase(what)){
             return protoHostPort;
-        } else if ("responseCode".equals(what)){
+        } else if ("responseCode".equalsIgnoreCase(what)){
             return ""+responseCode;
-        } else if ("method".equals(what)){
+        } else if ("method".equalsIgnoreCase(what)){
             return method;
         }
         if (vars.containsKey(what)){
