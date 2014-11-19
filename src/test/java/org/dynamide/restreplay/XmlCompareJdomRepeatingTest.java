@@ -36,7 +36,7 @@ import java.io.File;
 public class XmlCompareJdomRepeatingTest {
 
     private static String getDirectory(){
-        String dataDir = "src/test/resources/test-data/restreplay/XmlCompareJdom";   // this dir lives under service/IntegrationTests
+        String dataDir = "src/test/resources/test-data/restreplay/_self_test/XmlCompareJdom";   // this dir lives under service/IntegrationTests
         String pwd = ".";
         try {
             pwd = (new File(".")).getCanonicalPath();
