@@ -951,9 +951,6 @@ public class RestReplay {
                     }
                 }
                 serviceResult.expectedCodes = expectedCodes;
-            } else {
-                System.out.println("mutator not null");
-
             }
 
             Node responseNode = testNode.selectSingleNode("response");
@@ -1122,6 +1119,29 @@ public class RestReplay {
                 String level = expectedLevel.valueOf("@level");
                 serviceResult.payloadStrictness = level;
             }
+
+            Node exportsNode = testNode.selectSingleNode("exports");
+            if (exportsNode!=null) {
+                Map<String, String> exports = readVars(exportsNode);
+                Map<String, String> exportsEvald = new HashMap<String, String>();
+                for (Map.Entry<String, String> entry : exports.entrySet()) {
+                    String exportID = entry.getKey();
+                    String expr = entry.getValue();
+                    boolean ebes = runOptions.errorsBecomeEmptyStrings;
+                    try {
+                        runOptions.errorsBecomeEmptyStrings = false;
+                        //System.out.println("---->eval export: "+expr);
+                        EvalResult evalResult = evalStruct.eval("export vars", expr, serviceResultsMap, clonedMasterVarsWTest, evalStruct.jexl, evalStruct.jc, runOptions);
+                        //System.out.println("      ---->"+evalResult.result+"<--"+evalResult.alerts+serviceResult.xmlResult);
+                        exportsEvald.put(exportID, evalResult.result);
+                        serviceResult.alerts.addAll(evalResult.alerts);
+                    } finally {
+                        runOptions.errorsBecomeEmptyStrings = ebes;
+                    }
+                }
+                serviceResult.addExports(exportsEvald);
+            }
+
             //=====================================================
             //  ALL VALIDATION FOR ALL REQUESTS IS DONE HERE:
             //=====================================================

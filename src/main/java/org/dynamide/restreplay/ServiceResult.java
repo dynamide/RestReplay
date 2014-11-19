@@ -178,6 +178,7 @@ public class ServiceResult {
     public String responseHeadersDump = "";//This is filled in by RestReplayTransport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from RestReplayTransport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
     public List<Alert> alerts = new ArrayList<Alert>();
+
     private Map<String,String> vars = new HashMap<String,String>();
     public Map<String,String> getVars(){
         return vars;
@@ -185,6 +186,16 @@ public class ServiceResult {
     public void addVars(Map<String,String> newVars){
         vars.putAll(newVars);
     }
+
+    private Map<String,String> exports = new HashMap<String,String>();
+    public Map<String, String> getExports() {
+        return exports;
+    }
+    public void addExports(Map<String,String> newexports){
+        exports.putAll(newexports);
+    }
+
+
 
     private Map<String, TreeWalkResults> partSummaries = new HashMap<String, TreeWalkResults>();
     public void addPartSummary(String label, TreeWalkResults list){
@@ -299,15 +310,15 @@ public class ServiceResult {
 
         gotExpectedResultBecause = " test["+testID+']';
         if (null!=mutator && Tools.notEmpty(idFromMutator)){
-            System.out.println("\r\n\r\n>>>>>>>>>> id: "+testID+" mutationID:"+idFromMutator);
+            //System.out.println("\r\n\r\n>>>>>>>>>> id: "+testID+" mutationID:"+idFromMutator);
             boolean hasRange = mutator.hasRangeForId(idFromMutator);
             if(hasRange) {
                 gotExpectedResultBecause = " mutator["+idFromMutator+']';
                 boolean found = (mutator.valueInRangeForId(responseCode, idFromMutator));
-                System.out.println(" found("+idFromMutator+"): "+found);
+                //System.out.println(" found("+idFromMutator+"): "+found);
                 return found;
             } else {
-                System.out.println(" NOT found("+idFromMutator+") ");
+                //System.out.println(" NOT found("+idFromMutator+") ");
             }
             if (this.getParent() != null){
                 ServiceResult p = this.getParent();

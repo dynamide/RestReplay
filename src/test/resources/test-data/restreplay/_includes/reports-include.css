@@ -23,6 +23,7 @@ table {
 
 td, th {
     background-color: #e0ffff;
+    font-size: 100%;
 }
 
 
@@ -150,6 +151,15 @@ td, th {
     margin: 2px;
     padding: 2px;
 }
+.exports {
+    background-color: #99ddff;
+    font-size: 60%;
+    display: inline-block;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 2px;
+    padding: 2px;
+}
 
 .varslist {
     background-color: #bbddff;
@@ -195,6 +205,7 @@ td, th {
 .TOC_TABLE td {
    padding: 6px;
    border-color: lightblue;
+    font-size: 100%;
 }
 
 .TOC_TABLE th {
@@ -215,22 +226,26 @@ td, th {
     background-color: white;
     padding: 10px;
 }
+
 td.mutation {
  padding-left: 50px;
- font-size: 80%;
+ font-size: 100%;
+}
+td.mutation:first-child {
+ padding-left: 70px;
+ font-size: 100%;
 }
 tr.mutation {
-  font-size: 60%;
+  font-size: 80%;
 }
-
 .mutation td {
-  padding-left: 10px;
+  padding-left: 20px;
+  background-color: white;
 }
-
 .mutationsubscript{
   color: #dc5c05;
-
 }
+
 .child-results-summary {
   border: 1px solid gray;
   float: right;
@@ -246,7 +261,7 @@ tr.mutation {
   color: 99f;
   border: 1px solid gray;
   text-align: right;
-
+  background-color: white;
 }
 .childResults{
     cursor: pointer;

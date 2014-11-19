@@ -543,7 +543,7 @@ public class RestReplayReport {
                 + (Tools.notEmpty(s.location) ? lbl("location") + small(s.location) + linesep : "")
                 + (Tools.notEmpty(s.getError()) ?  alertError(s.getError()) + linesep : "")
                 + (Tools.notEmpty(s.getErrorDetail()) ?  alertError(s.getErrorDetail()) + linesep : "")
-                + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s) + linesep : "")
+                + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s)+exportsToHtml(s) + linesep : "")
                 + ((includePartSummary && Tools.notBlank(partSummary)) ? lbl("part summary") + partSummary + linesep : "")
                 + (includePayloads && Tools.notBlank(s.requestPayload) ? LINE + lbl("requestPayload") + LINE + CRLF + s.requestPayload + LINE : "")
                 + (includePayloads && Tools.notBlank(s.getResult()) ? LINE + lbl("result") + LINE + CRLF + s.getResult() : "")
@@ -628,6 +628,19 @@ public class RestReplayReport {
              .append(entry.getValue())
              .append("<br />")
              .append("</span>");
+        }
+        return b.toString();
+    }
+
+    private String exportsToHtml(ServiceResult result){
+        StringBuffer b = new StringBuffer();
+        for (Map.Entry<String,String> entry: result.getExports().entrySet()){
+            b.append("<span class='exports'>")
+                    .append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append("<br />")
+                    .append("</span>");
         }
         return b.toString();
     }

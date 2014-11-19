@@ -24,7 +24,8 @@
 package org.dynamide.util;
 
 import java.io.File;
-import  java.util.regex.Pattern;
+import java.net.URLEncoder;
+import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /** General utility methods.
@@ -252,6 +253,17 @@ public class Tools {
 
         s = s + "\r\n  -- Stack Trace: \r\n  --      " + getStackTrace(e, includeLines);
         return s;
+    }
+
+    public static String encodeURLString(String s){
+        return URLEncoder.encode(s);
+    }
+
+    public static String decodeURLString(String URLString){
+        if ( URLString == null ) {
+            return "";
+        }
+        return URLDecoder.decodeURLString(URLString);
     }
 
 

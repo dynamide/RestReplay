@@ -1,6 +1,6 @@
 {
      "data": "ABC DATA",
-     "token": "${TOKEN}",
-     "mutation":"${mutation}"
+     "token": "TOKEN",
+     "mutation":"${this.mutation}"
 }
 

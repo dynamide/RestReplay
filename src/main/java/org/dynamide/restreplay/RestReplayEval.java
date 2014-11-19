@@ -31,6 +31,7 @@ import java.util.*;
 
 import org.dynamide.restreplay.ServiceResult.Alert.LEVEL;
 import org.dynamide.restreplay.RestReplay.RunOptions;
+import org.dynamide.util.Tools;
 
 /**
  * User: laramie
@@ -41,6 +42,7 @@ public class RestReplayEval {
     public Map<String, ServiceResult> serviceResultsMap;
     public JexlEngine jexl;
     public JexlContext jc;
+    public static Tools TOOLS = new Tools();
 
     public static class EvalResult {
         public String result = "";
@@ -102,6 +104,7 @@ public class RestReplayEval {
                     jc.set(key, value);
                 }
             }
+            jc.set("tools", TOOLS);
             EvalResult innerResult2 = parse(context, inputJexlExpression, jexl, jc, runOptions);
             if (innerResult2.alerts.size()>0){
                 result.alerts.addAll(innerResult2.alerts);

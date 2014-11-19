@@ -29,7 +29,7 @@ public class ContentMutator {
     private String fileName = "";
     private Map<String,Range> idRanges = new HashMap<String, Range>();
     public String getMutationID(){
-        return current;
+        return "no_"+current;
     }
 
     public String shortName(){

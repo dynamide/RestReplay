@@ -467,7 +467,11 @@ public class RestReplayTransport {
     }
 
     private static void readErrorStream(HttpURLConnection  conn, ServiceResult result, String mimeType) throws Throwable {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        InputStream stream = conn.getErrorStream();
+        if (stream == null){
+            stream = conn.getInputStream();
+        }
+        BufferedReader rd = new BufferedReader(new InputStreamReader(stream));
         try {
             String line;
             StringBuffer sb = new StringBuffer();

@@ -113,7 +113,7 @@
 
 
     <testGroup ID="bugs">
-        <test ID="dynamideUseTokenPUT">
+        <test ID="dynamideUseTokenPUTbugs">
             <!-- This case causes errors to happen in the mutated child tests, but reading the json response borks the
                  parent so it doesn't display correctly, and the children seem like top-level tests.
                  Trace this to the code that breaks on the error and trap the error correctly.
@@ -121,18 +121,25 @@
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>_self_test/dynamide-token-post.json</filename>
-            <vars>
-                <var ID="TOKEN">${dynamideToken.got("//data")}</var>
-            </vars>
-            <headers>
-                <header name="x-method">${dynamide1.method}</header>
-            </headers>
+            <filename>_self_test/dynamide-mutator.json</filename>
             <mutator type="ExcludeFields">
                 <expected>
                     <code range="4xx">*</code>
                 </expected>
             </mutator>
+            <exports>
+                <vars>
+                    <var ID="plainString">${tools.encodeURLString("and these are my data 1 2 3 + % * left-brace:\u007B right-brace:\u007D ")}</var>
+                    <var ID="encodedData2">${tools.encodeURLString(this.got("//data"))}</var>
+                    <var ID="data">${this.got("//data")}</var>
+                    <var ID="result">This case (result/this) is borked: ${result.got("//data")}</var>
+                </vars>
+            </exports>
+        </test>
+        <test ID="dynamideUseData">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(dynamideUseTokenPUTbugs.result)}</uri>
         </test>
     </testGroup>
 </restReplay>
