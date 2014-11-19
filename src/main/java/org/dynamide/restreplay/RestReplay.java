@@ -451,7 +451,7 @@ public class RestReplay {
         //public static final ServiceResult.DUMP_OPTIONS dumpServiceResultOptions = ServiceResult.DUMP_OPTIONS;
         public ServiceResult.DUMP_OPTIONS dumpServiceResult = ServiceResult.DUMP_OPTIONS.minimal;
         public String toString(){
-            return "payloads: "+payloads+" dumpServiceResult: "+dumpServiceResult;
+            return "payloads: "+payloads+", dumpServiceResult: "+dumpServiceResult;
         }
     }
 
@@ -1192,14 +1192,14 @@ public class RestReplay {
                 System.out.println("\r\n#---------------------#");
             }
             System.out.println(timeString()+" "+leader+serviceResultRow+"\r\n");
-            if (dump.payloads || (doingAuto&&hasError) ) {
+            if (dump.payloads && (doingAuto&&hasError) ) {
                 if (Tools.notBlank(serviceResult.requestPayload)){
                     System.out.println("\r\n========== request payload ===============");
                     System.out.println(serviceResult.requestPayload);
                     System.out.println("==========================================\r\n");
                 }
             }
-            if (dump.payloads || (doingAuto&&hasError)) {
+            if (dump.payloads && (doingAuto&&hasError)) {
                 if (Tools.notBlank(serviceResult.getResult())){
                     System.out.println("\r\n========== response payload ==============");
                     System.out.println(serviceResult.getResult());
