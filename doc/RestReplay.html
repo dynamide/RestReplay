@@ -384,6 +384,18 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
     
     <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
+
+
+        &lt;restReplayMaster>
+            &lt;protoHostPort><b>${SNOOPSERVER}</b>&lt;/protoHostPort>
+            &lt;vars>
+                &lt;var ID="<b>PISERVER</b>">http://int-piapi.stg-openclass.com&lt;/var>
+                &lt;var ID="<b>LASSERVER</b>">http://localhost:8080&lt;/var>
+                &lt;var ID="<b>SNOOPSERVER</b>">http://localhost:28082&lt;/var>
+            &lt;/vars>
+            ...
+            <run controlFile="_self_test/dynamide.xml" testGroup="secondTestGroup" />
+        &lt;/restReplayMaster>
     
         &lt;restReplay>
           &lt;testGroup ID="secondTestGroup" autoDeletePOSTS="false">
@@ -399,7 +411,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
         
       <b>In this case, getAssignments will use the default from protoHostPort in
       the master file:</b>
-          pitoken will go against SNOOPSERVER               http://localhost:28082
+      secondTestGroup.getAssignments will go against SNOOPSERVER               http://localhost:28082
             
           
           </div></td>

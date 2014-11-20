@@ -15,19 +15,22 @@ import org.dom4j.Node;
 public class ContentMutator {
 
     public ContentMutator(String theFileName) throws IOException {
-        this.fileName = theFileName;
+        fileName = theFileName;
         contentRaw = new String(FileUtils.readFileToByteArray(new File(fileName)));
-        JSONObject jo = new JSONObject(contentRaw);
+        jo = new JSONObject(contentRaw);
         names = JSONObject.getNames(jo);
         max = names.length;
+        dest = new String[max-1];
     }
+    String[] dest;
+    private JSONObject jo;
     private String[] names;
     private String contentRaw = "";
     private int p = -1;
-    private int max = 0;
+    private final int max;
     private String current;
-    private String fileName = "";
-    private Map<String,Range> idRanges = new HashMap<String, Range>();
+    private final String fileName;
+    private final Map<String,Range> idRanges = new HashMap<String, Range>();
     public String getMutationID(){
         return "no_"+current;
     }
@@ -94,12 +97,10 @@ public class ContentMutator {
         if (p>=max){
             return null;
         }
-        String[] dest = new String[max-1];
         System.arraycopy(names, 0, dest, 0, p - 0);
         System.arraycopy(names, p + 1, dest, p, max - p - 1);
         current = names[p];
         //System.out.println(String.format("names%s, dest%s, p%d, max%d, names.length%d", Arrays.toString(names), Arrays.toString(dest), p, max, names.length));
-        JSONObject jo = new JSONObject(contentRaw);
         JSONObject subset = new JSONObject(jo, dest);
         return subset.toString();
     }
@@ -123,6 +124,10 @@ public class ContentMutator {
     public static void main(String[]args) throws Exception {
         String fn = "/Users/vcrocla/src/RestReplay/src/test/resources/test-data/restreplay/_self_test/content-mutator-test.json";
         ContentMutator mutator = new ContentMutator(fn);
-        System.out.println(mutator.mutate());
+        String m = mutator.mutate();
+        while(m!=null){
+            System.out.println(m);
+            m = mutator.mutate();
+        }
     }
 }
