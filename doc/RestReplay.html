@@ -331,7 +331,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
     &lt;restReplayMaster>
         &lt;protoHostPort><b>${SNOOPSERVER}</b>&lt;/protoHostPort>
         &lt;vars>
-            &lt;var ID="<b>PISERVER</b>">http://int-piapi.stg-openclass.com&lt;/var>
+            &lt;var ID="<b>PISERVER</b>">http://piserver.example.com&lt;/var>
             &lt;var ID="<b>LASSERVER</b>">http://localhost:8080&lt;/var>
             &lt;var ID="<b>SNOOPSERVER</b>">http://localhost:28082&lt;/var>
         &lt;/vars>
@@ -377,7 +377,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
         In this case:</b>
           createAssignment will go against SNOOPSERVER:  http://localhost:28082 
           getAssignments will go against LASSERVER:      http://localhost:8080 
-          pitoken will go against PISERVER               http://int-piapi.stg-openclass.com
+          pitoken will go against PISERVER               http://piserver.example.com
             
 
     <hr />
@@ -389,7 +389,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
         &lt;restReplayMaster>
             &lt;protoHostPort><b>${SNOOPSERVER}</b>&lt;/protoHostPort>
             &lt;vars>
-                &lt;var ID="<b>PISERVER</b>">http://int-piapi.stg-openclass.com&lt;/var>
+                &lt;var ID="<b>PISERVER</b>">http://piserver.example.com&lt;/var>
                 &lt;var ID="<b>LASSERVER</b>">http://localhost:8080&lt;/var>
                 &lt;var ID="<b>SNOOPSERVER</b>">http://localhost:28082&lt;/var>
             &lt;/vars>
