@@ -89,6 +89,7 @@ public class ServiceResult {
     public boolean isMutation = false;
     public String mutatorType = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
     public ContentMutator mutator = null;
+    public String mutationDetailBlockID = "";
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.

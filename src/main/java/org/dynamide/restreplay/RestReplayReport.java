@@ -8,6 +8,7 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -112,7 +113,10 @@ public class RestReplayReport {
             toc.responseCode = serviceResult.responseCode;
             toc.isMutation = serviceResult.isMutation;
             toc.idFromMutator = serviceResult.idFromMutator;
-            toc.children = formatMutatorChildrenBlock(serviceResult);
+
+            MutatorChildBlock block = formatMutatorChildrenBlock(serviceResult);
+            serviceResult.mutationDetailBlockID = block.detailID;
+            toc.children = block.tocHTML;
             tocList.add(toc);
         }
         return getTOC("").toString();
@@ -138,7 +142,14 @@ public class RestReplayReport {
         }
     }
 
-    private String formatMutatorChildrenBlock(ServiceResult serviceResult) {
+    private static class MutatorChildBlock {
+        public String tocHTML = "";
+        public String detailID = "";
+        public String rowID = "";
+    }
+
+    private MutatorChildBlock formatMutatorChildrenBlock(ServiceResult serviceResult) {
+        MutatorChildBlock block = new MutatorChildBlock();
         if (serviceResult.getChildResults().size() > 0) {
             int numGotExpected = 0;
             int numErrors = 0;
@@ -155,62 +166,62 @@ public class RestReplayReport {
             assert numResults == serviceResult.getChildResults().size();
             String rowid = "childresults_" + serviceResult.testID;
             //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
-            return "<span class='childResults' onclick='hideresults(\"" + rowid + "\", this);'>"
-                    + "<table id='" + rowid + "'" + serviceResult.testID + " class='child-results-summary'>"
+            block.tocHTML = "<span class='childResults' onclick='hideresults(\"" + rowid + "\", this);'>"
+                    + "<table id='" + rowid + "' class='child-results-summary'>"
                     + "<tr>"
                     + "<td><span class='childstate'>hide</span></td>"
                     + "<td>" + numGotExpected + '/' + numResults + "</td>"
                     + "<td>" + numWarnings + "</td>"
                     + "<td>" + numErrors + "</td>"
                     + "</tr></table></span>";
-
+            block.detailID = rowid;
+            block.rowID = rowid;
         }
-        return "";
-    }
-
-    private String formatMutatorChildrenBlockHIDE(ServiceResult serviceResult){
-        String rowid = "childresults_"+serviceResult.testID;
-        if (serviceResult.getChildResults().size()>0){
-            int numGotExpected = 0;
-            int numErrors = 0;
-            int numWarnings = 0;
-            int numResults = 0;
-            for (ServiceResult cr: serviceResult.getChildResults()) {
-                numResults++;
-                if (cr.gotExpectedResult()){
-                    numGotExpected ++;
-                }
-                numErrors   += alertsCount(cr.alerts, LEVEL.WARN);
-                numWarnings += alertsCount(cr.alerts, LEVEL.ERROR);
-            }
-            assert numResults == serviceResult.getChildResults().size();
-            //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
-            return
-            "<table id='"+rowid+"'"+serviceResult.testID+" class='child-results-summary'>"
-                +"<tr>"
-                +"<td>"+numGotExpected+'/'+numResults+"</td>"
-                +"<td>"+numWarnings+"</td>"
-                +"<td>"+numErrors+"</td>"
-                +"</tr></table>"
-             + "<div onclick='showMutator(this,\"mutator1\")'>><div id='mutator1' style='display:none;' >"
-                    +"<br /><div class='childResults' onclick='hideresults(\""+rowid+"\", this);'>[ <span class='childstate'>-</span> ] mutations "
-                    +"<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+serviceResult.mutator.shortName()
-                    +" ("+serviceResult.getChildResults().size()+") "
-                    +"<table id='"+rowid+"'"+serviceResult.testID+" class='child-results-summary'><tr><th>success</th><th>warn</th><th>error</th></tr>"
-                    +"<tr>"
-                    +"<td>"+numGotExpected+'/'+numResults+"</td>"
-                    +"<td>"+numWarnings+"</td>"
-                    +"<td>"+numErrors+"</td>"
-                    +"</tr></table></div>"
-                    +"</div></div>";
-        }
-        return "";
+        return block;
     }
 
     private String reportsListToString(){
         StringBuffer buffer = new StringBuffer();
-        for (ServiceResult sr: reportsList) {
-            appendServiceResult(sr, buffer);
+        ServiceResult leftoverServiceResult = null;
+        Iterator<ServiceResult> it = reportsList.iterator();
+        while ((leftoverServiceResult!=null) || it.hasNext()) {
+            ServiceResult sr;
+            if (leftoverServiceResult!=null){
+                sr = leftoverServiceResult;
+                leftoverServiceResult = null;
+            } else {
+                sr = it.next();
+            }
+            if (sr.getChildResults().size()>0) {
+                ServiceResult mutatorParent = sr;
+                buffer.append("<div id='mutation_parent_" + sr.testIDLabel + "'>");  //todo: there is a dot in the testIDLabel. Not sure what that will break (js, etc.)
+                appendServiceResult(sr, buffer);
+                buffer.append("<div id='" + sr.mutationDetailBlockID + "'>");
+                if (it.hasNext()) {
+                    sr = it.next();
+                    boolean keepGoing = true;
+                    leftoverServiceResult = null;
+                    while (keepGoing) {
+                        keepGoing = (sr.getParent() == mutatorParent);
+                        if (!keepGoing) break;
+                        appendServiceResult(sr, buffer);
+                        if (it.hasNext()) {
+                            sr = it.next();
+                            keepGoing = true;
+                            if (sr.getParent() != mutatorParent) {
+                                keepGoing = false;
+                                leftoverServiceResult = sr;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                buffer.append("</div>");
+                buffer.append("</div>");
+            } else {
+                appendServiceResult(sr, buffer);
+            }
         }
         return buffer.toString();
     }
@@ -299,12 +310,16 @@ public class RestReplayReport {
     }
 
     private void appendServiceResult(ServiceResult serviceResult, StringBuffer buffer){
-
-
         buffer.append(HTML_TEST_START);
         int tocID = divID++;
+        String cssClass = serviceResult.isMutation
+                ?"payloads mutation"
+                :"payloads";
+        buffer.append("<div class='"+cssClass+"'>");
+
         buffer.append(formatSummary(serviceResult, tocID));
         buffer.append(formatPayloads(serviceResult, tocID));
+        buffer.append("</div>");
         buffer.append(HTML_TEST_END);
     }
 
@@ -410,21 +425,24 @@ public class RestReplayReport {
 
     protected String formatPayloads(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
-        if (serviceResult.isMutation) {
-            fb.append("<div class='mutation'>");
-        }
-        fb.append(BR);
         ServiceResult.PRETTY_FORMAT respType = serviceResult.contentTypeFromResponse();
         appendPayload(fb, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw)", "REQUESTRAW" + tocID);
-        appendPayload(fb, serviceResult.requestPayload, respType, "REQUEST", "REQUEST" + tocID);
+        appendPayload(fb, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID);
         appendPayload(fb, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID);
         appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID);
         appendPayload(fb, serviceResult.expectedContentExpanded, respType, "EXPECTED", "EXPECTED" + tocID);
-        fb.append(BR);
-        if (serviceResult.isMutation) {
-            fb.append("</div>");
-        }
         return fb.toString();
+    }
+    private String safeJSONToString(String in){
+        try {
+            String out = ServiceResult.prettyPrintJSON(in);
+            if (out == null) {
+                return in;
+            }
+            return out;
+        } catch (Throwable t){
+            return in;
+        }
     }
 
     protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID) {
@@ -535,7 +553,7 @@ public class RestReplayReport {
         String SUCCESS = formatMutatorSUCCESS(s);
         String res = start
                 + (s.gotExpectedResult() ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
-                + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "+s.idFromMutator+":"+s.isMutation
+                + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + formatResponseCodeBlock(s) + linesep
