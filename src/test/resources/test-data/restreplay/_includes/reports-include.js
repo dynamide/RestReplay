@@ -51,37 +51,40 @@ function openAllHeaders( ){
 function closeAllMutations( ){
     var pluses = document.querySelectorAll("span.childstate");
     for ( c = 0; c < pluses.length; ++c ) {
-        pluses[c].innerHTML = "+";
+        pluses[c].innerHTML = "show";
     }
-    var divs = document.getElementsByTagName("td");
-    for ( t = 0; t < divs.length; ++t )    {
-        var td = divs[t];
-        if (td.className == "mutation"){
-            td.parentNode.style.display = "none";
-        }
+    var tables = document.querySelectorAll(".mutation");
+    for ( t = 0; t < tables.length; ++t ) {
+          tables[t].style.display = 'none';
+    }
+
+    var tds = document.querySelectorAll(".mutationTR");
+    for ( t = 0; t < tds.length; ++t ) {
+          tds[t].style.display = 'none';
     }
 }
 
 function openAllMutations( ){
     var pluses = document.querySelectorAll("span.childstate");
     for ( c = 0; c < pluses.length; ++c ) {
-        pluses[c].innerHTML = "-";
+        pluses[c].innerHTML = "hide";
     }
 
-    var divs = document.getElementsByTagName("td");
-    for ( t = 0; t < divs.length; ++t )    {
-        var td = divs[t];
-        if (td.className == "mutation"){
-           td.parentNode.style.display = "table-row";
-        }
+    var tables = document.querySelectorAll(".mutation");
+    for ( t = 0; t < tables.length; ++t ) {
+          var table = tables[t];
+          debugger;
+          if (table.tagName && table.tagName == "TABLE"){
+              table.style.display = 'table';
+          } else {
+              table.style.display = 'block';
+              //not checking for all of them, I just use tables and divs.
+          }
     }
-}
 
-//a duplicate that searches by class.
-function closeAllMutationElements(){
-    var els = document.querySelectorAll(".child-results-summary");
-    for ( t = 0; t < els.length; ++t ) {
-      els[t].style.display = 'none';
+    var tds = document.querySelectorAll(".mutationTR");
+    for ( t = 0; t < tds.length; ++t ) {
+          tds[t].style.display = 'table-row';
     }
 }
 
@@ -102,7 +105,7 @@ function hideresults(rowid, obj){
         }
         var rowdown = e.parentElement.parentElement.parentElement.nextElementSibling;
         while (rowdown){
-            if (rowdown && rowdown.querySelectorAll("TD.mutation").length>0){
+            if (rowdown && rowdown.querySelectorAll("TD.mutationTD").length>0){
                 if (expanding){
                     rowdown.style.display = 'table-row';
                 } else {

@@ -33,6 +33,10 @@ import java.util.regex.Matcher;
  * v.1.4
  */
 public class Tools {
+    /** useful for gluing URLs together, since this uses '/' as the glue character to call glue(String,String,String)*/
+    public static String glue(String first, String second){
+        return glue(first, "/", second);
+    }
     /** @return first glued to second with the separator string, at most one time - useful for appending paths.
      */
     public static String glue(String first, String separator, String second){
@@ -160,7 +164,7 @@ public class Tools {
     public static String getFilenameExtension(String filename) {
         int dot = filename.lastIndexOf(FILE_EXTENSION_SEPARATOR);
         return (dot>=0)?filename.substring(dot + 1):null;
-        }
+    }
 
     public static String getFilenameBase(String filename) {
         int dot = filename.lastIndexOf(FILE_EXTENSION_SEPARATOR);
@@ -168,12 +172,23 @@ public class Tools {
         	dot = filename.length();
         int sep = filename.lastIndexOf(File.separator); // Note: if -1, then sep+1=0, which is right
         return filename.substring(sep + 1, dot);
-        }
+    }
+
+    /** @return path without last slash and without filename, returns "" if slash not found (slash is File.separator).*/
+    public static String getFilenamePath(String filename) {
+        int slash = filename.lastIndexOf(File.separator);
+        return (slash>=0)?filename.substring(0, slash):"";
+    }
+
 
     public static String getStackTrace(Throwable e){
         return getStackTrace(e, -1);
     }
-    
+
+    public static String getStackTrace(){
+        return getStackTrace(new Exception("Getting StackTrace"), 0);
+    }
+
     public static String implode(String strings[], String sep) {
 		String implodedString;
 		if (strings.length == 0) {

@@ -49,7 +49,6 @@ public class RestReplayReport {
     protected static final String BR = "<br />\r\n";
 
     protected static final String DETAIL_HDR = "<h2 class='DETAIL_HDR'>Test Details</h2>";
-    protected static final String DETAIL_START = "<table border='1' class='DETAIL_TABLE'><tr><td>\r\n";
     protected static final String DETAIL_LINESEP = "</td></tr>\r\n<tr><td>";
     protected static final String DETAIL_END = "</td></tr></table>";
 
@@ -230,8 +229,9 @@ public class RestReplayReport {
         tocBuffer.append(TOC_START);
         int count = 0;
         for (TOC toc : tocList) {
-            String cssClass = toc.isMutation ? "mutation" : "";
-            String sep = String.format(TOC_LINESEP, cssClass, cssClass);
+            String cssClassTR = toc.isMutation ? "mutationTR" : "";
+            String cssClassTD = toc.isMutation ? "mutationTD" : "";
+            String sep = String.format(TOC_LINESEP, cssClassTR, cssClassTD);
             if (count>0){tocBuffer.append(sep);}
             count++;
             tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
@@ -364,9 +364,12 @@ public class RestReplayReport {
                                           List<String> reportsList,
                                           String envID,
                                           Map<String,String> masterVars) {
-        String masterFilename = "index."
-                +(Tools.notBlank(envID)?envID+'.':"")
-                + localMasterFilename + ".html";
+        File f = new File(localMasterFilename);
+        String relPath = Tools.getFilenamePath(f.getPath());
+        String masterFilenameNameOnly = "index."
+                    +(Tools.notBlank(envID)?envID+'.':"")
+                    + f.getName() + ".html";
+
         try {
             StringBuffer sb = new StringBuffer(formatPageStart(restReplayBaseDir));
             String dateStr = Tools.nowLocale();
@@ -379,10 +382,10 @@ public class RestReplayReport {
                 sb.append("<hr />");
             }
             sb.append(HTML_PAGE_END);
-            System.out.println("====\r\n==== Master Report Index: "+reportsDir+'/'+masterFilename+"\r\n====");
-            return FileTools.saveFile(reportsDir, masterFilename, sb.toString(), false);
+            System.out.println("====\r\n==== Master Report Index: "+reportsDir+'/'+Tools.glue(relPath, masterFilenameNameOnly)+"\r\n====");
+            return FileTools.saveFile(Tools.join(reportsDir, relPath), masterFilenameNameOnly, sb.toString(), true);
         } catch (Exception e) {
-            System.out.println("ERROR saving RestReplay report index: in  restReplayBaseDir: " + reportsDir + "localMasterFilename: " + localMasterFilename + " masterFilename: " + masterFilename + " list: " + reportsList + " error: " + e);
+            System.out.println("ERROR saving RestReplay report index: in  restReplayBaseDir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" relPath:"+relPath+ " masterFilename: " + masterFilenameNameOnly + " list: " + reportsList + " error: " + e);
             return null;
         }
     }
@@ -401,12 +404,15 @@ public class RestReplayReport {
     protected String formatSummary(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
         fb.append("<a name='TOC" + tocID + "'></a>");
-        fb.append(detail(serviceResult, false, false, DETAIL_START, DETAIL_LINESEP, DETAIL_END, tocID));
+        fb.append(detail(serviceResult, false, false, DETAIL_LINESEP, DETAIL_END, tocID));
         return fb.toString();
     }
 
     protected String formatPayloads(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
+        if (serviceResult.isMutation) {
+            fb.append("<div class='mutation'>");
+        }
         fb.append(BR);
         ServiceResult.PRETTY_FORMAT respType = serviceResult.contentTypeFromResponse();
         appendPayload(fb, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw)", "REQUESTRAW" + tocID);
@@ -415,6 +421,9 @@ public class RestReplayReport {
         appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID);
         appendPayload(fb, serviceResult.expectedContentExpanded, respType, "EXPECTED", "EXPECTED" + tocID);
         fb.append(BR);
+        if (serviceResult.isMutation) {
+            fb.append("</div>");
+        }
         return fb.toString();
     }
 
@@ -515,7 +524,10 @@ public class RestReplayReport {
         return "<span class='AlertError'>" + msg + "</span> ";
     }
 
-    public String detail(ServiceResult s, boolean includePayloads, boolean includePartSummary, String start, String linesep, String end, int tocID) {
+    public String detail(ServiceResult s, boolean includePayloads, boolean includePartSummary,String linesep, String end, int tocID) {
+        String mutation = s.isMutation ? " mutation" : "";
+        String start = "<table border='1' class='DETAIL_TABLE "+mutation+"'><tr><td>\r\n";
+
         String partSummary = s.partsSummary(includePartSummary);
         String idNoMutatorID = (Tools.notEmpty(s.idFromMutator) && Tools.notEmpty(s.testID))
                                  ? s.testID.substring(0, (s.testID.length() - s.idFromMutator.length()) )
@@ -523,7 +535,7 @@ public class RestReplayReport {
         String SUCCESS = formatMutatorSUCCESS(s);
         String res = start
                 + (s.gotExpectedResult() ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
-                + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
+                + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "+s.idFromMutator+":"+s.isMutation
                 + SP + linesep
                 + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + formatResponseCodeBlock(s) + linesep

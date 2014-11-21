@@ -2,7 +2,7 @@
 <restReplayMaster>
     <protoHostPort>${DMSERVER}</protoHostPort>
 
-    <dump payloads="true" dumpServiceResult="detailed" />
+    <dump payloads="false" dumpServiceResult="minimal" />
 
     <runOptions>
         <connectionTimeout>3000</connectionTimeout>
@@ -14,7 +14,7 @@
         <var ID="DMSERVER">http://localhost:18080</var>
     </vars>
 
-    <run controlFile="_self_test/dynamide.xml" testGroup="main" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="selftestGroup" />
 
 </restReplayMaster>
 

@@ -93,7 +93,7 @@ public class RestReplayDevTest extends RestReplayTest {
             try {
                 long start = System.currentTimeMillis();
                 System.out.println("RUNNING Master in Worker: "+this.getName());
-                RestReplay replay = createRestReplayUsingIntegrationTestsModule("..");
+                RestReplay replay = createRestReplayForMaven();//createRestReplayUsingIntegrationTestsModule("..");
                 List<List<ServiceResult>> list = replay.runMaster(masterFile);
                 logTestForGroup(list, "RestReplayMasterTest");
                 long stop = System.currentTimeMillis();

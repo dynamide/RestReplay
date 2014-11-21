@@ -64,16 +64,16 @@ public class RestReplaySelfTest extends RestReplayTest {
     @Test
     public void runMaster() throws Exception {
         RestReplay replay = createRestReplay();
-        List<List<ServiceResult>> list = replay.runMaster("rest-replay-master-self-test.xml");
+        List<List<ServiceResult>> list = replay.runMaster("_self_test/master-self-test.xml");
         logTestForGroup(list, "runMaster");
     }
 
     @Test
     public void runTestGroup() throws Exception {
         RestReplay replay = createRestReplay();
-        replay.readOptionsFromMasterConfigFile("rest-replay-master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
-        replay.setControlFileName("rest-replay-self-test.xml");
-        List<ServiceResult> list = replay.runTestGroup("selftestGroup");
+        replay.readOptionsFromMasterConfigFile("_self_test/master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
+        replay.setControlFileName("_self_test/dynamide.xml");
+        List<ServiceResult> list = replay.runTestGroup("main");
         logTest(list, "runTestGroup");
     }
 
@@ -127,7 +127,7 @@ public class RestReplaySelfTest extends RestReplayTest {
         //   RestReplay replay = RestReplayTest.createRestReplayUsingIntegrationTestsModule("../.."); if you are in a module such as dimension/client
 
         //You may read Dump, Auths, and protoHostPort from the master file:
-        replay.readOptionsFromMasterConfigFile("rest-replay-master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
+        replay.readOptionsFromMasterConfigFile("_self_test/master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
         //or you may set those options individually as shown next.
         // Note that controlFileName is NOT set from calling readOptionsFromMasterConfigFile.
         // If you run a master, it sets controlFileName, possibly in a loop.
@@ -137,7 +137,7 @@ public class RestReplaySelfTest extends RestReplayTest {
         //RestReplay wants to know about two files: a master and a control file
         //  The master references one to many control files.
         //  If you don't call runMaster(), you must specify the control file:
-        replay.setControlFileName("rest-replay-self-test.xml");
+        replay.setControlFileName("_self_test/dynamide.xml");
 
         //These option default sensibly, some of them from the master, but here's how to set them all:
 
@@ -148,7 +148,7 @@ public class RestReplaySelfTest extends RestReplayTest {
         replay.setDump(dump);
 
         //use this if you must look it up from some other place.
-        // Default is to have it in rest-replay-master.xml
+        // Default is to have it in master.xml
         replay.setProtoHostPort("http://localhost:8180");
 
         //Default is true, but you can override if you want to leave objects on server, or control the order of deletion.
@@ -163,6 +163,9 @@ public class RestReplaySelfTest extends RestReplayTest {
         // This runs a group called "organization" inside a control file named above, which happens to be called "organization.xml".
         // You could also run just one test using these options by calling replay.runTest as shown above in RestReplayTest.runOneTest()
 
+        //TODO: this has a problem: it will override a master file's autodelete, and if there is a bad location header in a response, then this will
+        // hang, and longer than the timeout is for, for some reason.
+        //  autodelete logs better, and the timeout is working:
         //Now, since we set setAutoDeletePOSTS(false) above, you can clean up manually:
         replay.autoDelete("runTestGroup_AllOptions"); //deletes everything in serviceResultsMap, which it hangs onto.
 

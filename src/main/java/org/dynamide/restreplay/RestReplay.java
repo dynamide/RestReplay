@@ -107,6 +107,14 @@ public class RestReplay {
         this.controlFileName = controlFileName;
     }
 
+    private String masterFilename;
+    public String getMasterFilename() {
+        return masterFilename;
+    }
+    public void setMasterFilename(String val){
+        this.masterFilename = val;
+    }
+
     private String protoHostPort = "";
     public String getProtoHostPort() {
         return protoHostPort;
@@ -178,6 +186,9 @@ public class RestReplay {
     public boolean masterConfigFileExists(String masterFilename){
         try {
             org.dom4j.Document doc = openMasterConfigFile(masterFilename);
+            if (doc==null){
+                return false;
+            }
             return true;
         } catch (Throwable t){
             return false;
@@ -280,6 +291,7 @@ public class RestReplay {
     /** Creates new instances of RestReplay, one for each controlFile specified in the master,
      *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
     public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
+        System.out.println(">>> masterFilename: "+masterFilename);
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         org.dom4j.Document document;
         if (readOptionsFromMaster){
@@ -314,6 +326,7 @@ public class RestReplay {
             replay.setDump(dump);
             replay.setDefaultAuthsMap(getDefaultAuthsMap());
             replay.setRunOptions(this.runOptions);
+            replay.setMasterFilename(masterFilename);
 
             Map<String,String> runVars = readVars(runNode);
             Map<String,String> masterVarsDup = new HashMap<String,String>();
@@ -345,7 +358,8 @@ public class RestReplay {
                                 this.defaultAuthsMap,
                                 this.reportsList,
                                 this.reportsDir,
-                                this.relativePathFromReportsDir);
+                                this.relativePathFromReportsDir,
+                                this.getMasterFilename());
         return result;
     }
 
@@ -364,7 +378,8 @@ public class RestReplay {
                                 this.defaultAuthsMap,
                                 this.reportsList,
                                 this.reportsDir,
-                                this.relativePathFromReportsDir);
+                                this.relativePathFromReportsDir,
+                                this.getMasterFilename());
         if (result.size()>1){
             throw new IndexOutOfBoundsException("Multiple ("+result.size()+") tests with ID='"+testID+"' were found within test group '"+testGroupID+"', but there should only be one test per ID attribute.");
         }
@@ -393,7 +408,11 @@ public class RestReplay {
             try {
                 if (Tools.notEmpty(pr.deleteURL)){
                     ServiceResult deleteResult = new ServiceResult();
+                    deleteResult.connectionTimeout = pr.connectionTimeout;
+                    deleteResult.socketTimeout = pr.socketTimeout;
+                    System.out.println("ATTEMPTING AUTODELETE: ==>"+pr.deleteURL+"<==");
                     deleteResult = RestReplayTransport.doDELETE(deleteResult, pr.deleteURL, pr.auth, pr.testID, "[autodelete:"+logName+"]", pr.headerMap);
+                    System.out.println("DONE AUTODELETE: ==>"+pr.deleteURL+"<== : "+deleteResult);
                     results.add(deleteResult);
                 } else {
                     ServiceResult errorResult = new ServiceResult();
@@ -402,6 +421,7 @@ public class RestReplay {
                     errorResult.fromTestID = pr.fromTestID;
                     errorResult.overrideGotExpectedResult();
                     results.add(errorResult);
+                    System.out.println("DONE AUTODELETE (errorResult): ==>"+pr.deleteURL+"<== : "+errorResult);
                 }
             } catch (Throwable t){
                 String s = (pr!=null) ? "ERROR while cleaning up ServiceResult map: "+pr+" for "+pr.deleteURL+" :: "+t
@@ -413,6 +433,7 @@ public class RestReplay {
                 errorResult.fromTestID = pr.fromTestID;
                 errorResult.addError(s,t);
                 results.add(errorResult);
+                System.out.println("DONE AUTODELETE (Throwable): ==>"+pr.deleteURL+"<== : "+errorResult+" t:"+t);
             }
         }
         return results;
@@ -687,7 +708,8 @@ public class RestReplay {
                                           AuthsMap defaultAuths,
                                           List<String> reportsList,
                                           String reportsDir,
-                                          String relativePathFromReportsDir)
+                                          String relativePathFromReportsDir,
+                                          String masterFilenameInfo)
                                           throws Exception {
         //20141010 removed, passed in now.  RunOptions runOptions = new RunOptions();
 
@@ -711,7 +733,7 @@ public class RestReplay {
         if (null != n){
             protoHostPort = n.getText().trim();
             System.out.println("Using protoHostPort ('"+protoHostPort+"') from restReplay file ('"+controlFile+"'), not master.");
-            protoHostPortFrom = "from control file: "+controlFile;
+            protoHostPortFrom = "from control file.";
         }
 
         String authsMapINFO;
@@ -727,6 +749,7 @@ public class RestReplay {
         String restReplayHeader = "========================================================================"
                           +"\r\nRestReplay running:"
                           +"\r\n   controlFile: "+ (new File(controlFile).getCanonicalPath())
+                          +"\r\n   Master: "+ masterFilenameInfo
                           +"\r\n   env: "+relativePathFromReportsDir
                           +"\r\n   protoHostPort: "+protoHostPort+"    "+protoHostPortFrom
                           +"\r\n   testGroup: "+testGroupID
@@ -1289,8 +1312,8 @@ public class RestReplay {
         options.addOption("envID", true, "dev");
         options.addOption("autoDeletePOSTS", true, "true");
         options.addOption("dumpResults", true, "true");
-        options.addOption("controlFilename", true, "rest-replay-master.xml");
-        options.addOption("restReplayMaster", true, "rest-replay-master.xml");
+        options.addOption("controlFilename", true, "master.xml");
+        options.addOption("restReplayMaster", true, "master.xml");
 
         return options;
     }
@@ -1421,7 +1444,7 @@ public class RestReplay {
                 RunOptions runOptions = new RunOptions(); //just use defaults. won't read master file.
                 runRestReplayFile(restReplayBaseDirResolved, controlFilename, testGroupID, testID,
                                   createResultsMap(), null, runOptions,
-                                  bAutoDeletePOSTS, dump, "", null, reportsList, reportsDir,""/*no master, so no env*/);
+                                  bAutoDeletePOSTS, dump, "", null, reportsList, reportsDir,""/*no master, so no env*/, "");
                 System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }
         } catch (ParseException exp) {

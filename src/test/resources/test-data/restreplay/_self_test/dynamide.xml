@@ -2,6 +2,8 @@
 <restReplay>
     <protoHostPort>${DMSERVER}</protoHostPort>
 
+
+
     <testGroup ID="login" autoDeletePOSTS="false">
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
@@ -10,7 +12,9 @@
         </test>
     </testGroup>
 
-    <testGroup ID="main" autoDeletePOSTS="false">
+
+
+    <testGroup ID="selftestGroup" autoDeletePOSTS="false">
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -37,14 +41,6 @@
                 </expected>
             </mutator>
         </test>
-        <test ID="dynamideToken">
-            <expectedCodes>200</expectedCodes>
-            <method>GET</method>
-            <uri>/tagonomy?mock=token</uri>
-            <headers>
-                <header name="x-method">${dynamide1.method}</header>
-            </headers>
-        </test>
         <test ID="dynamideUseToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -53,7 +49,11 @@
                 <header name="x-authorization">${dynamideToken.got("//data")}</header>
                 <header name="x-method">${dynamideToken.method}</header>
             </headers>
+            <!--This causes a warning.  And it breaks auto delete with the erroneous url.
+            Keeping this here for development of two error tests.
+            TODO: Develop tests that fire these, and also demonstrate the ways to construct a url, and a deleteURL.
             <deleteURL>${result.url.protocol}://${result.url.authority}${result.url.path} -:: ${result.protoHostPort} ::-</deleteURL>
+            -->
         </test>
         <test ID="dynamideUseTokenPOST">
             <expectedCodes>200</expectedCodes>
@@ -67,14 +67,8 @@
         <test ID="dynamideUseTokenPUT">
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
-            <uri>/tagonomy?mock=true</uri>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
             <filename>_self_test/content-mutator-test.json</filename>
-            <vars>
-                <var ID="TOKEN">${dynamideToken.got("//data/")</var>
-            </vars>
-            <headers>
-                <header name="x-method">${dynamide1.method}</header>
-            </headers>
             <mutator type="ExcludeFields">
                 <expected>
                     <code range="4xx">*</code>
@@ -86,12 +80,17 @@
             <method>DELETE</method>
             <uri>/tagonomy?mock=true</uri>
         </test>
-
+        <test ID="dynamide501">
+            <expectedCodes>501</expectedCodes>
+            <method>PUT</method>
+            <uri>/tagonomy?mock=501</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+        </test>
     </testGroup>
 
 
 
-    <testGroup ID="debug">
+    <testGroup ID="debug"  autoDeletePOSTS="false">
         <test ID="dynamideUseTokenPUT">
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
@@ -112,7 +111,7 @@
 
 
 
-    <testGroup ID="bugs">
+    <testGroup ID="bugs"  autoDeletePOSTS="false">
         <test ID="dynamideUseTokenPUTbugs">
             <!-- This case causes errors to happen in the mutated child tests, but reading the json response borks the
                  parent so it doesn't display correctly, and the children seem like top-level tests.
@@ -136,10 +135,11 @@
                 </vars>
             </exports>
         </test>
-        <test ID="dynamideUseData">
+        <test ID="dynamideUseData"  autoDeletePOSTS="false">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(dynamideUseTokenPUTbugs.result)}</uri>
         </test>
     </testGroup>
+
 </restReplay>

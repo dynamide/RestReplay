@@ -3,7 +3,7 @@
     <protoHostPort>http://localhost:8180</protoHostPort>
     
     <!-- legal values for dumpServiceResult=[minimal,detailed,full,auto] -->
-    <dump payloads="true" dumpServiceResult="detailed" />
+    <dump payloads="false" dumpServiceResult="minimal" />
 
     <runOptions>
         <connectionTimeout>3000</connectionTimeout>
@@ -13,7 +13,6 @@
 
     <vars>
         <var ID="DMSERVER">http://localhost:18080</var>
-        <var ID="mastervar">My Mastervar</var>
     </vars>
 
 
@@ -24,7 +23,7 @@
     <run controlFile="_self_test/dynamide.xml" testGroup="debug" />
     -->
 
-    <run controlFile="_self_test/dynamide.xml" testGroup="main" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="selftestGroup" />
 
 
 </restReplayMaster>

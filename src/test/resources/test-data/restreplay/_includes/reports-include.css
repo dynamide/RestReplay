@@ -227,15 +227,15 @@ td, th {
     padding: 10px;
 }
 
-td.mutation {
+td.mutationTD {
  padding-left: 50px;
  font-size: 100%;
 }
-td.mutation:first-child {
+td.mutationTD:first-child {
  padding-left: 70px;
  font-size: 100%;
 }
-tr.mutation {
+tr.mutationTR {
   font-size: 80%;
 }
 .mutation td {
