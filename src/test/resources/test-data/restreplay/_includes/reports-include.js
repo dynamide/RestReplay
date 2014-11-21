@@ -73,7 +73,6 @@ function openAllMutations( ){
     var tables = document.querySelectorAll(".mutation");
     for ( t = 0; t < tables.length; ++t ) {
           var table = tables[t];
-          debugger;
           if (table.tagName && table.tagName == "TABLE"){
               table.style.display = 'table';
           } else {
