@@ -86,7 +86,7 @@ td, th {
 
 .PAYLOAD {
     background-color: white;
-    font-size: 90%;
+    font-size: 85%;
 }
 
 .TOPLINKS {
@@ -109,7 +109,7 @@ td, th {
 }
 
 .header {
-    font-size: 80%;
+    font-size: 70%;
     display: inline-block;
     border: 1px solid blue;
     border-radius: 5px;
@@ -227,23 +227,41 @@ td, th {
     padding: 10px;
 }
 
+TABLE.mutation {
+}
 td.mutationTD {
- padding-left: 50px;
+ padding-left: 20px;
  font-size: 100%;
 }
 td.mutationTD:first-child {
- padding-left: 70px;
+ padding-left: 30px;
  font-size: 100%;
 }
 tr.mutationTR {
   font-size: 80%;
 }
 .mutation td {
-  padding-left: 20px;
   background-color: white;
 }
 .mutationsubscript{
   color: #dc5c05;
+}
+DIV.payloads {
+    margin-left: 5px;
+    margin-bottom:10px;
+}
+DIV.mutation {
+    padding-left: 30px;
+    margin-top: 0px;
+    margin-bottom:8px;
+}
+.payloads A {
+   /* the payload show/hide links under each test. */
+   font-size: 65%;
+}
+.mutation A {
+/* the payload show/hide links under each test that is a mutation. */
+  font-size: 50%;
 }
 
 .child-results-summary {
