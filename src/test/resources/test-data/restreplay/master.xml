@@ -3,7 +3,7 @@
     <protoHostPort>http://localhost:8180</protoHostPort>
     
     <!-- legal values for dumpServiceResult=[minimal,detailed,full,auto] -->
-    <dump payloads="false" dumpServiceResult="minimal" />
+    <dump payloads="true" dumpServiceResult="detailed" />
 
     <runOptions>
         <connectionTimeout>3000</connectionTimeout>
@@ -24,7 +24,7 @@
     <run controlFile="_self_test/dynamide.xml" testGroup="debug" />
     -->
 
-    <run controlFile="_self_test/dynamide.xml" testGroup="bugs" />
+    <run controlFile="_self_test/dynamide.xml" testGroup="main" />
 
 
 </restReplayMaster>

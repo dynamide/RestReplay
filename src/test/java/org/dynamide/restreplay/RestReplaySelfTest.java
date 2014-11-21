@@ -52,7 +52,9 @@ import java.util.Map;
 public class RestReplaySelfTest extends RestReplayTest {
 
     public static RestReplay createRestReplay() throws Exception {
-        return RestReplayTest.createRestReplayUsingIntegrationTestsModule("..");
+        //return RestReplayTest.createRestReplayUsingIntegrationTestsModule("..");
+        return createRestReplayForMaven();
+
         //NOTE: this self-test lives in services/IntegrationTests, so relToServicesRoot is ".."
         //      but if you were running from, say, services/dimension/client, then relToServicesRoot would be "../.."
         //      so you would have to call RestReplayTest.createRestReplayUsingIntegrationTestsModule("../..")

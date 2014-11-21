@@ -39,7 +39,7 @@ public class RestReplayTest {
 
     public static final String RESTREPLAY_REL_DIR_TO_MODULE = "/src/test/resources/test-data/restreplay";
     public static final String REPORTS_DIRNAME = "rest-replay-reports";
-    public static final String RESTREPLAY_REL_DIR_REPORTS_TO_MODULE= "/target/"+REPORTS_DIRNAME;
+    public static final String RESTREPLAY_REL_DIR_REPORTS_TO_MODULE= RESTREPLAY_REL_DIR_TO_MODULE+'/'+REPORTS_DIRNAME;
 
     /** To use this method, you should have a test repository of xml files in the path
      *  defined by RESTREPLAY_REL_DIR_TO_MODULE, relative to your pom.xml file, but normally
@@ -50,7 +50,7 @@ public class RestReplayTest {
         String pwd = (new File(".")).getCanonicalPath();
         System.out.println("createRestReplayForModule.pwd: "+pwd);
         RestReplay replay = new RestReplay(pwd+RESTREPLAY_REL_DIR_TO_MODULE,
-                                                              pwd+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
+                                           pwd+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
         System.out.println("RestReplay: "+replay);
         return replay;
     }
@@ -72,11 +72,29 @@ public class RestReplayTest {
     public static RestReplay createRestReplayUsingIntegrationTestsModule(String relToServicesRoot) throws Exception {
         String thisDir = Tools.glue(relToServicesRoot, "/", "IntegrationTests");
         String pwd = (new File(thisDir)).getCanonicalPath();
-        //System.out.println("createRestReplayUsingIntegrationTestsModule.pwd: "+pwd);
+        System.out.println("createRestReplayUsingIntegrationTestsModule.pwd: "+pwd);
         RestReplay replay = new RestReplay(pwd+RESTREPLAY_REL_DIR_TO_MODULE,
                                                              pwd+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
         //System.out.println("RestReplay: "+replay);
         return replay;
+    }
+
+    public static RestReplay createRestReplayForMaven() throws Exception {
+        String baseDir = getBaseDirectory();
+        RestReplay replay = new RestReplay(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
+                                           baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
+        return replay;
+    }
+
+    private static String getBaseDirectory(){
+        String pwd = ".";
+        try {
+            pwd = (new File(".")).getCanonicalPath();
+            System.out.println("pwd in createRestReplayForMaven:"+pwd);
+        } catch (Exception e){
+            System.err.println("Error trying to find current working directory: "+e);
+        }
+        return pwd;
     }
 
     public static void logTest(ServiceResult sresult, String testname){

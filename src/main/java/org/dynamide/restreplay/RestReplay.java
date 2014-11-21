@@ -1182,29 +1182,22 @@ public class RestReplay {
 
             boolean doingAuto = (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.auto);
             //move this up: serviceResult.time = (System.currentTimeMillis()-startTime);
-            String serviceResultRow = serviceResult.dump(dump.dumpServiceResult, hasError)+"; time:"+(System.currentTimeMillis()-startTime);
+            String serviceResultRow = serviceResult.dump(dump.dumpServiceResult, hasError);
             String leader = (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.detailed) ? "RestReplay:"+testIDLabel+": ": "";
 
             //move this to beginning:   report.addTestResult(serviceResult);
 
             if (   (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.detailed)
                     || (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.full)         ){
-                System.out.println("\r\n#---------------------#");
+                System.out.println("\r\n#\r\n#========= "+testIDLabel+" ============#\r\n#");
             }
+
             System.out.println(timeString()+" "+leader+serviceResultRow+"\r\n");
+
             if (dump.payloads && (doingAuto&&hasError) ) {
-                if (Tools.notBlank(serviceResult.requestPayload)){
-                    System.out.println("\r\n========== request payload ===============");
-                    System.out.println(serviceResult.requestPayload);
-                    System.out.println("==========================================\r\n");
-                }
-            }
-            if (dump.payloads && (doingAuto&&hasError)) {
-                if (Tools.notBlank(serviceResult.getResult())){
-                    System.out.println("\r\n========== response payload ==============");
-                    System.out.println(serviceResult.getResult());
-                    System.out.println("==========================================\r\n");
-                }
+                //the call to serviceResultRow = serviceResult.dump(...) does something similar under non-error conditions.
+                // here we are handling error conditions with "auto" and forcing out payloads.
+                System.out.println(serviceResult.dumpPayloads());
             }
         } catch (Throwable t) {
             serviceResultsMap.remove("result");

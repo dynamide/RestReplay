@@ -163,6 +163,13 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="vcrocla">
+      <words>
+        <w>programmatically</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/org.dynamide.RestReplay.iml" filepath="$PROJECT_DIR$/org.dynamide.RestReplay.iml" />

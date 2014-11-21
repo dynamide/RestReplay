@@ -364,9 +364,23 @@ public class ServiceResult {
 
     }
 
-    private static final String LINE = "\r\n==================================";
-    private static final String CRLF = "\r\n";
+    private static final String lineHDR(String title){return "\r\n-------------- "+title+" --------------------\r\n";}
+    private static final String LINE = "\r\n----------------------------------------------------\r\n";
 
+    public String dumpPayloads(){
+        StringBuffer s = new StringBuffer();
+        if (Tools.notBlank(this.requestPayload)){
+            s.append(lineHDR("request payload"));
+            s.append(this.requestPayload);
+            s.append(LINE);
+        }
+        if (Tools.notBlank(this.getResult())){
+            s.append(lineHDR("response payload"));
+            s.append(this.getResult());
+            s.append(LINE);
+        }
+        return s.toString();
+    }
     public String detail(boolean includePayloads){
         String res =  "{"
                 + ( gotExpectedResult() ? "SUCCESS" : "FAILURE"  )
@@ -379,16 +393,17 @@ public class ServiceResult {
                 + ( Tools.notEmpty(fromTestID) ? "; fromTestID:"+fromTestID : "" )
                 + ( Tools.notEmpty(responseMessage) ? "; msg:"+responseMessage : "" )
                 +"; URL:"+fullURL
+                +"; time:"+time+"ms"
                 +"; auth: "+auth
                 + ( Tools.notEmpty(deleteURL) ? "; deleteURL:"+deleteURL : "" )
-                + ( Tools.notEmpty(location) ? "; location.CSID:"+location : "" )
+                + ( Tools.notEmpty(location) ? "; location:"+location : "" )
                 + ( Tools.notEmpty(error) ? "; ERROR_IN_DETAIL:"+error : "" )
                 + "; gotExpected:"+gotExpectedResult()
                 //+";result:"+result+";"
                 + ( partsSummary(true))
                 +"}"
-                + ( includePayloads && Tools.notBlank(requestPayload) ? LINE+"requestPayload:"+LINE+CRLF+requestPayload+LINE : "" )
-                + ( includePayloads && Tools.notBlank(result) ? LINE+"result:"+LINE+CRLF+result : "" );
+                + ( includePayloads  ? dumpPayloads() : "" )
+                ;
         return res;
     }
 
@@ -406,6 +421,7 @@ public class ServiceResult {
                 + (expectedCodes.size()>0 ? "; expected:"+expectedCodes : "")
                 + ( Tools.notEmpty(responseMessage) ? "; msg:"+responseMessage : "" )
                 +"; URL:"+fullURL
+                +"; time:"+time+"ms"
                 //for auth, see detail()   +"; auth: "+auth
                 + ( Tools.notEmpty(error) ? "; ERROR_IN_PART:"+error : "" )
                 + (verbosePartsSummary ? partsSummary(true) : partsSummary(false) )

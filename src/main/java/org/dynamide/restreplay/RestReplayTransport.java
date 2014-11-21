@@ -425,13 +425,13 @@ public class RestReplayTransport {
     private static void extractLocation(HttpMethodBase method, String urlString, ServiceResult result){
         Header[] headers = method.getResponseHeaders("Location");
         if (headers.length>0) {
-             System.out.println("Location headers[0]:  "+headers[0]);
+            // System.out.println("Location headers[0]:  "+headers[0]+ " in "+urlString);
             String locationZero = headers[0].getValue();
             if (locationZero != null){
                 //String[] segments = locationZero.split("/");
                 //location = segments[segments.length - 1];
                 result.location = locationZero;
-                System.out.println("location:"+result.location);
+                //System.out.println("location:"+result.location);
                 //result.deleteURL = Tools.glue(urlString, "/", locationZero);
                 result.deleteURL = locationZero;
             }

@@ -40,6 +40,7 @@ public class XmlCompareJdomRepeatingTest {
         String pwd = ".";
         try {
             pwd = (new File(".")).getCanonicalPath();
+            System.out.println("pwd in XmlCompareJdomRepeatingTest:"+pwd);
         } catch (Exception e){
             System.err.println("Error trying to find current working directory: "+e);
         }
