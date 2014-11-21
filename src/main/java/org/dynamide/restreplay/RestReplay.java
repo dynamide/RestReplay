@@ -67,7 +67,7 @@ public class RestReplay {
     }
 
     public static final String DEFAULT_CONTROL = "rest-replay-control.xml";
-    public static final String DEFAULT_MASTER_CONTROL = "rest-replay-master.xml";
+    public static final String DEFAULT_MASTER_CONTROL = "master.xml";
     public static final String DEFAULT_DEV_MASTER_CONTROL = "dev-master.xml";
 
     private String envID = "";

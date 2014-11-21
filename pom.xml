@@ -214,7 +214,7 @@
                          to override this any value set here.
                         -->
                         <argument>-restReplayMaster</argument>
-                        <argument>rest-replay-master.xml</argument>
+                        <argument>master.xml</argument>
                         <!--argument>-envID</argument>
                         <argument>dev</argument-->
                     </arguments>
