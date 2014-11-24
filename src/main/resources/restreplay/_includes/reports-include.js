@@ -59,9 +59,14 @@ function closeAllMutations( ){
     }
 
     var tds = document.querySelectorAll(".mutationTR");
-    for ( t = 0; t < tds.length; ++t ) {
-          tds[t].style.display = 'none';
+        for ( t = 0; t < tds.length; ++t ) {
+              tds[t].style.display = 'none';
+        }
+    var divs = document.querySelectorAll("DIV.mutation-detail-block");
+    for ( t = 0; t < divs.length; ++t ) {
+          divs[t].style.display = 'none';
     }
+
 }
 
 function openAllMutations( ){
@@ -85,8 +90,14 @@ function openAllMutations( ){
     for ( t = 0; t < tds.length; ++t ) {
           tds[t].style.display = 'table-row';
     }
+
+    var divs = document.querySelectorAll("DIV.mutation-detail-block");
+    for ( t = 0; t < divs.length; ++t ) {
+          divs[t].style.display = 'block';
+    }
 }
 
+//this function actually hides/shows all mutations.
 function hideresults(rowid, obj){
     var els = document.querySelectorAll("#"+rowid);
     for ( t = 0; t < els.length; ++t ) {
@@ -113,6 +124,15 @@ function hideresults(rowid, obj){
                 rowdown = rowdown.nextElementSibling;
             } else {
                 break;
+            }
+        }
+        var b = document.querySelectorAll("DIV#"+rowid);
+        for ( t = 0; t < b.length; ++t ) {
+           var div = b[t];
+            if (expanding){
+                div.style.display = 'block';
+            } else {
+                div.style.display = 'none';
             }
         }
     }

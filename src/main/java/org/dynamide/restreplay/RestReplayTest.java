@@ -37,52 +37,16 @@ import java.util.List;
  */
 public class RestReplayTest {
 
-    public static final String RESTREPLAY_REL_DIR_TO_MODULE = "/src/test/resources/test-data/restreplay";
+    public static final String RESTREPLAY_REL_DIR_TO_MODULE = "/src/main/resources/restreplay";
     public static final String REPORTS_DIRNAME = "rest-replay-reports";
-    public static final String RESTREPLAY_REL_DIR_REPORTS_TO_MODULE= RESTREPLAY_REL_DIR_TO_MODULE+'/'+REPORTS_DIRNAME;
-
-    /** To use this method, you should have a test repository of xml files in the path
-     *  defined by RESTREPLAY_REL_DIR_TO_MODULE, relative to your pom.xml file, but normally
-     *  you would use the central repository of tests, which live in services/IntegrationTests,
-     *  and which you can use by calling createRestReplay() which calls createRestReplayUsingIntegrationTestsModule() for you.
-     */
-    public static RestReplay createRestReplayForModule() throws Exception {
-        String pwd = (new File(".")).getCanonicalPath();
-        System.out.println("createRestReplayForModule.pwd: "+pwd);
-        RestReplay replay = new RestReplay(pwd+RESTREPLAY_REL_DIR_TO_MODULE,
-                                           pwd+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
-        System.out.println("RestReplay: "+replay);
-        return replay;
-    }
-
-    /** Use this method if your test xml files are stored in the central repository,
-     *   which is "services/IntegrationTests" + RESTREPLAY_REL_DIR_TO_MODULE
-     */
-    public static RestReplay createRestReplay() throws Exception {
-        return createRestReplayUsingIntegrationTestsModule("../..");
-    }
-
-    /**
-     * @param relToServicesRoot is a Unix-like path from the calling module to the services root,
-     *        so if  if you are in services/dimension/client/
-     *        then relToServicesRoot is "../.." which is how most of the client tests are set up, or if you
-     *        are setting up your test repository relative to the main service, e.g. you are in
-     *        services/dimension/, then relToServicesRoot is ".."
-     */
-    public static RestReplay createRestReplayUsingIntegrationTestsModule(String relToServicesRoot) throws Exception {
-        String thisDir = Tools.glue(relToServicesRoot, "/", "IntegrationTests");
-        String pwd = (new File(thisDir)).getCanonicalPath();
-        System.out.println("createRestReplayUsingIntegrationTestsModule.pwd: "+pwd);
-        RestReplay replay = new RestReplay(pwd+RESTREPLAY_REL_DIR_TO_MODULE,
-                                                             pwd+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
-        //System.out.println("RestReplay: "+replay);
-        return replay;
-    }
+    public static final String RESTREPLAY_REL_DIR_REPORTS_TO_MODULE= "/"+REPORTS_DIRNAME;
 
     public static RestReplay createRestReplayForMaven() throws Exception {
         String baseDir = getBaseDirectory();
+        ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
         RestReplay replay = new RestReplay(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
-                                           baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE);
+                                           baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
+                                           rootResourceManager);
         return replay;
     }
 

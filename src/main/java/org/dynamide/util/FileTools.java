@@ -81,6 +81,14 @@ public class FileTools {
         return getObjectFromStream(jaxbClass, is);
     }
 
+
+    //TODO: add parameter for: String encoding
+    public static String convertStreamToString2(java.io.InputStream is) {
+        if (is == null) return "";
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+
 	public static String convertStreamToString(InputStream is) {
 		/*
 		 * To convert the InputStream to String we use the
@@ -176,7 +184,7 @@ public class FileTools {
             return null;
         }
     }
-    
+
     public static List<String> readFileAsLines(String filePath) {
         List<String> lines = new ArrayList<String>();
         try {

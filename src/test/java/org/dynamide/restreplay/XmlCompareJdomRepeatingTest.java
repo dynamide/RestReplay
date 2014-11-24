@@ -27,6 +27,7 @@ import org.dynamide.util.Tools;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * User: laramie
@@ -45,7 +46,9 @@ public class XmlCompareJdomRepeatingTest {
             System.err.println("Error trying to find current working directory: "+e);
         }
         String thisDir = Tools.glue(pwd, "/", dataDir);
-        return thisDir;
+        //return thisDir;
+
+        return pwd;
     }
 
     private void testBanner(String msg){
@@ -60,11 +63,15 @@ public class XmlCompareJdomRepeatingTest {
     }
 
     @Test
-    public void testLeftAndRightSame(){
+    public void testLeftAndRightSame() throws IOException {
         testBanner("testLeftAndRightSame");
+
         String dir = getDirectory();
-        String expectedPartContent = FileTools.readFile(dir, "1-left.xml");
-        String fromServerContent = FileTools.readFile(dir, "1-right.xml");
+        String relLeft  = "_self_test/XmlCompareJdom/1-left.xml";
+        String relRight = "_self_test/XmlCompareJdom/1-right.xml";
+        String expectedPartContent = RestReplay.readResource(relLeft, dir+'/'+relLeft);
+        String fromServerContent =  RestReplay.readResource(relRight, dir+'/'+relRight);
+
         String startPath = "/document/*[local-name()='relations-common-list']";
         TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
         TreeWalkResults results =
@@ -79,11 +86,15 @@ public class XmlCompareJdomRepeatingTest {
     }
 
     @Test
-    public void testLeftAndRightSameNoStartElement(){
+    public void testLeftAndRightSameNoStartElement() throws IOException {
         testBanner("testLeftAndRightSameNoStartElement");
+
         String dir = getDirectory();
-         String expectedPartContent = FileTools.readFile(dir, "2-left.xml");
-        String fromServerContent = FileTools.readFile(dir, "2-right.xml");
+        String relLeft  = "_self_test/XmlCompareJdom/2-left.xml";
+        String relRight = "_self_test/XmlCompareJdom/2-right.xml";
+        String expectedPartContent = RestReplay.readResource(relLeft, dir+'/'+relLeft);
+        String fromServerContent =  RestReplay.readResource(relRight, dir+'/'+relRight);
+
         String startPath = "/document";
         TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
         TreeWalkResults results =

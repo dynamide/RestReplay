@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class RestReplayDevTest extends RestReplayTest {
 
-    @Test
+    //@Test
     public void runMaster() throws Exception {
         String masterFile = System.getProperty("restReplayMaster");
         System.err.println("\r\n\r\n\r\nrestReplayMaster~~~ "+masterFile);

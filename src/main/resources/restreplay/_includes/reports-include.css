@@ -292,3 +292,17 @@ DIV.mutation {
     color: orange;
     font-weight: bold;
 }
+
+.resource-history {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    font-size: 90%;
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #98bf21;
+    padding: 7px;
+}
+.resource-history td, .resource-history tr {
+   padding: 6px;
+   border: 1px solid lightblue;
+   font-size: 100%;
+}

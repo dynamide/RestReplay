@@ -7,6 +7,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -87,7 +88,7 @@ public class RestReplayReport {
 
     private String runInfo = "";
 
-    public String getPage(String basedir) {
+    public String getPage(String basedir) throws IOException {
         return formatPageStart(basedir)
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "</div>"
                 + header.toString()
@@ -196,7 +197,7 @@ public class RestReplayReport {
                 ServiceResult mutatorParent = sr;
                 buffer.append("<div id='mutation_parent_" + sr.testIDLabel + "'>");  //todo: there is a dot in the testIDLabel. Not sure what that will break (js, etc.)
                 appendServiceResult(sr, buffer);
-                buffer.append("<div id='" + sr.mutationDetailBlockID + "'>");
+                buffer.append("<div id='" + sr.mutationDetailBlockID + "' class='mutation-detail-block'>");
                 if (it.hasNext()) {
                     sr = it.next();
                     boolean keepGoing = true;
@@ -338,9 +339,12 @@ public class RestReplayReport {
 
     private List<TOC> tocList = new ArrayList<TOC>();
 
-    public static String formatPageStart(String restReplayBaseDir) {
-        String script = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.js");
-        String style = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.css");
+    public static String formatPageStart(String restReplayBaseDir) throws IOException {
+
+        String script = RestReplay.readResource(INCLUDES_DIR + "/reports-include.js", restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.js");
+        String style = RestReplay.readResource(INCLUDES_DIR + "/reports-include.css", restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.css");
+        //String script = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.js");
+        //String style = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.css");
         return "<html><head><script type='text/javascript'>\r\n"
                 + script
                 + "\r\n</script>\r\n<style>\r\n"
@@ -378,7 +382,8 @@ public class RestReplayReport {
                                           String localMasterFilename,
                                           List<String> reportsList,
                                           String envID,
-                                          Map<String,String> masterVars) {
+                                          Map<String,String> masterVars,
+                                          RestReplay restReplay) {
         File f = new File(localMasterFilename);
         String relPath = Tools.getFilenamePath(f.getPath());
         String masterFilenameNameOnly = "index."
@@ -396,6 +401,8 @@ public class RestReplayReport {
                 sb.append(oneToc);
                 sb.append("<hr />");
             }
+            sb.append("<h2>ResourceManager Summary</h2>");
+            sb.append(restReplay.getResourceManager().formatSummary());
             sb.append(HTML_PAGE_END);
             System.out.println("====\r\n==== Master Report Index: "+reportsDir+'/'+Tools.glue(relPath, masterFilenameNameOnly)+"\r\n====");
             return FileTools.saveFile(Tools.join(reportsDir, relPath), masterFilenameNameOnly, sb.toString(), true);

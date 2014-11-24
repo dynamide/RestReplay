@@ -14,9 +14,9 @@ import org.dom4j.Node;
 
 public class ContentMutator {
 
-    public ContentMutator(String theFileName) throws IOException {
+    public ContentMutator(String relResourceName, String theFileName) throws IOException {
         fileName = theFileName;
-        contentRaw = new String(FileUtils.readFileToByteArray(new File(fileName)));
+        contentRaw = RestReplay.readResource(relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(fileName)));
         jo = new JSONObject(contentRaw);
         names = JSONObject.getNames(jo);
         max = names.length;
@@ -122,8 +122,9 @@ public class ContentMutator {
     }
 
     public static void main(String[]args) throws Exception {
-        String fn = "/Users/vcrocla/src/RestReplay/src/test/resources/test-data/restreplay/_self_test/content-mutator-test.json";
-        ContentMutator mutator = new ContentMutator(fn);
+        String relResourceName = "_self_test/content-mutator-test.json";
+        String fn = "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json";
+        ContentMutator mutator = new ContentMutator(relResourceName, fn);
         String m = mutator.mutate();
         while(m!=null){
             System.out.println(m);

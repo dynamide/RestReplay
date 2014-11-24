@@ -68,7 +68,7 @@ public class RestReplaySelfTest extends RestReplayTest {
         logTestForGroup(list, "runMaster");
     }
 
-    @Test
+    //@Test
     public void runTestGroup() throws Exception {
         RestReplay replay = createRestReplay();
         replay.readOptionsFromMasterConfigFile("_self_test/master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
@@ -117,7 +117,7 @@ public class RestReplaySelfTest extends RestReplayTest {
 */
 
 
-    @Test
+    //@Test
     public void runTestGroup_AllOptions() throws Exception {
         RestReplay replay = createRestReplay();  //Use the central repository.
         //You can also use your own xml replay repository in your module, like so:

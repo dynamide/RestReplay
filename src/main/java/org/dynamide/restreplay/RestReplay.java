@@ -5,6 +5,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
+import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -27,11 +28,12 @@ import javax.xml.ws.Service;
  */
 public class RestReplay {
 
-    public RestReplay(String basedir, String reportsDir){
+    public RestReplay(String basedir, String reportsDir, ResourceManager manager){
         this.basedir = basedir;
         this.serviceResultsMap = createResultsMap();
         this.reportsList = new ArrayList<String>();
         this.reportsDir = reportsDir;
+        this.resourceManager = manager;
     }
 
     public static class RunOptions{
@@ -64,6 +66,11 @@ public class RestReplay {
     }
     private void setRunOptions(RunOptions options){
         this.runOptions = options;
+    }
+
+    private ResourceManager resourceManager;
+    public ResourceManager getResourceManager(){
+        return resourceManager;
     }
 
     public static final String DEFAULT_CONTROL = "rest-replay-control.xml";
@@ -185,7 +192,7 @@ public class RestReplay {
      */
     public boolean masterConfigFileExists(String masterFilename){
         try {
-            org.dom4j.Document doc = openMasterConfigFile(masterFilename);
+            org.dom4j.Document doc = openMasterConfigFile("masterConfigFileExists", masterFilename);
             if (doc==null){
                 return false;
             }
@@ -195,28 +202,23 @@ public class RestReplay {
         }
     }
 
-    public org.dom4j.Document openMasterConfigFile(String masterFilename) throws FileNotFoundException {
-        String fullPath = Tools.glue(basedir, "/", masterFilename);
-        File f = new File(fullPath);
-        if (!f.exists()){
-            return null;
-        }
-        org.dom4j.Document document;
+    public org.dom4j.Document openMasterConfigFile(String reason, String masterFilename) throws FileNotFoundException {
         try {
-            document = getDocument(fullPath); //will check full path first, then checks relative to PWD.
-        } catch (DocumentException de){
-            throw new FileNotFoundException("RestReplay master control file ("+masterFilename+") contains error or not found in basedir: "+basedir+". Exiting test. "+de);
-
+            return getResourceManager().getDocument("openMasterConfigFile:"+reason, basedir, masterFilename);
+        } catch (DocumentException de) {
+            System.out.println("$$$$$$ ERROR: " + de);
+            throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + basedir + ". Exiting test. " + de);
         }
-        return document;
     }
+
+
 
     /** specify the master config file, relative to getBaseDir(), but ignore any tests or testGroups in the master.
      *  Depends on this.getEnvID() being set before this method is called, otherwise uses default envID found in master.
      *  @return a Document object, which you don't need to use: all options will be stored in this RestReplay instance.
      */
     public org.dom4j.Document readOptionsFromMasterConfigFile(String masterFilename) throws FileNotFoundException {
-        org.dom4j.Document document = openMasterConfigFile(masterFilename);
+        org.dom4j.Document document = openMasterConfigFile("readOptionsFromMasterConfigFile", masterFilename);
         if (document == null){
             throw new FileNotFoundException(masterFilename);
         }
@@ -297,7 +299,7 @@ public class RestReplay {
         if (readOptionsFromMaster){
             document = readOptionsFromMasterConfigFile(masterFilename);  //side-effects: sets fields of "this".
         } else {
-            document = openMasterConfigFile(masterFilename);
+            document = openMasterConfigFile("runMaster", masterFilename);
         }
         if (document==null){
             throw new FileNotFoundException(masterFilename);
@@ -318,7 +320,7 @@ public class RestReplay {
             if (Tools.notBlank(this.getEnvID())){
                 envReportsDir = Tools.glue(saveReportsDir,"/",this.relativePathFromReportsDir);
             }
-            RestReplay replay = new RestReplay(basedir, envReportsDir);//this.reportsDir);
+            RestReplay replay = new RestReplay(basedir, envReportsDir, this.getResourceManager());//this.reportsDir);
             replay.setEnvID(this.envID);  //internally sets replay.relativePathFromReportsDir
             replay.setControlFileName(controlFile);
             replay.setProtoHostPort(protoHostPort);
@@ -337,9 +339,10 @@ public class RestReplay {
             //======================== Now run *that* instance. ======================
             List<ServiceResult> results = replay.runTests(testGroup, test);
             list.add(results);
+            //this.resourceHistory.addAll(replay.resourceHistory);//TODO. this is a hack because we don't have an acutal ResourceManager, so just now scooping up child loaded resources, and pretending we loaded them in parent.
             this.reportsList.addAll(replay.getReportsList());   //Add all the reports from the inner replay, to our master replay's reportsList, to generate the index.html file.
         }
-        RestReplayReport.saveIndexForMaster(basedir, reportsDir, masterFilename, this.reportsList, this.getEnvID(), masterVars);
+        RestReplayReport.saveIndexForMaster(basedir, reportsDir, masterFilename, this.reportsList, this.getEnvID(), masterVars, this);
         return list;
     }
 
@@ -421,7 +424,7 @@ public class RestReplay {
                     errorResult.fromTestID = pr.fromTestID;
                     errorResult.overrideGotExpectedResult();
                     results.add(errorResult);
-                    System.out.println("DONE AUTODELETE (errorResult): ==>"+pr.deleteURL+"<== : "+errorResult);
+                    System.out.println("DONE AUTODELETE (errorResult): ==>" + pr.deleteURL + "<== : " + errorResult);
                 }
             } catch (Throwable t){
                 String s = (pr!=null) ? "ERROR while cleaning up ServiceResult map: "+pr+" for "+pr.deleteURL+" :: "+t
@@ -496,7 +499,9 @@ public class RestReplay {
     private static class PartsStruct {
         public List<Map<String,String>> varsList = new ArrayList<Map<String,String>>();
         String requestPayloadFilename = "";
+        String requestPayloadFilenameRel = "";
         String expectedResponseFilename = "";
+        String expectedResponseFilenameRel = "";
         String overrideTestID = "";
         String startElement = "";
         String label = "";
@@ -512,8 +517,10 @@ public class RestReplay {
             if (Tools.notEmpty(filename)){
                 if (isResponse) {
                     resultPartsStruct.expectedResponseFilename = restReplayBaseDir + '/' + filename;
+                    resultPartsStruct.expectedResponseFilenameRel = filename;
                 } else {
                     resultPartsStruct.requestPayloadFilename = restReplayBaseDir + '/' + filename;
+                    resultPartsStruct.requestPayloadFilenameRel = filename;
                 }
                 resultPartsStruct.varsList.add(readVars(testNode));
             }
@@ -583,17 +590,21 @@ public class RestReplay {
         return result;
     }
 
-    public static org.dom4j.Document getDocument(String xmlFileName) throws DocumentException {
-        org.dom4j.Document document = null;
-        SAXReader reader = new SAXReader();
-        //try {
-            document = reader.read(xmlFileName);
-        //} catch (DocumentException e) {
-        //    System.out.println("ERROR reading document: "+e);
-            //e.printStackTrace();
-        //}
-        return document;
+    public static String readResource(String relResourcePath, String fullPath) throws IOException {
+        if (Tools.notBlank(relResourcePath)) {
+            InputStream stream = RestReplay.class.getClassLoader().getResourceAsStream("restreplay/" + relResourcePath);  // restreplay/ is on the classpath (in the jar).
+            if (stream != null) {
+                System.out.println("======> found stream for relResourcePath: -->" + relResourcePath + "<--, not fullPath:-->" + fullPath + "<--");
+                String res = FileTools.convertStreamToString(stream);
+                //System.out.println("======> stream starts with:" + res.substring(0, Math.min(res.length(), 100)));
+                return res;
+            }
+        }
+        System.out.println("======> using File for fullPath: "+fullPath);
+        byte[] b = FileUtils.readFileToByteArray(new File(fullPath));
+        return new String(b);
     }
+
 
     /* See, for example of <expected> : test/resources/test-data/restreplay/objectexit/object-exit.xml */
     protected static String validateResponseSinglePayload(ServiceResult serviceResult,
@@ -603,10 +614,10 @@ public class RestReplay {
                                                  RunOptions runOptions)
     throws Exception {
         String OK = "";
-        byte[] b = FileUtils.readFileToByteArray(new File(expectedResponseParts.expectedResponseFilename));
-        String expectedPartContent = new String(b);
+        String expectedPartContent = readResource(expectedResponseParts.expectedResponseFilenameRel,
+                                                  expectedResponseParts.expectedResponseFilename);
         Map<String,String> vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.  Must be there, even if empty.
-        EvalResult evalResult = evalStruct.eval(expectedResponseParts.expectedResponseFilename,
+        EvalResult evalResult = evalStruct.eval(expectedResponseParts.expectedResponseFilenameRel,
                                                 expectedPartContent,
                                                 serviceResultsMap,
                                                 vars,
@@ -694,7 +705,7 @@ public class RestReplay {
 
     //================= runRestReplayFile ======================================================
 
-    public static List<ServiceResult> runRestReplayFile(
+    public List<ServiceResult> runRestReplayFile(
                                           String restReplayBaseDir,
                                           String controlFileName,
                                           String testGroupID,
@@ -722,9 +733,9 @@ public class RestReplay {
 
         String controlFile = Tools.glue(restReplayBaseDir, "/", controlFileName);
         org.dom4j.Document document;
-        document = getDocument(controlFile); //will check full path first, then checks relative to PWD.
+        document = getResourceManager().getDocument("runRestReplayFile:controlFileName", restReplayBaseDir, controlFileName); //will check full path first, then checks relative to PWD.
         if (document==null){
-            throw new FileNotFoundException("RestReplay control file ("+controlFileName+") not found in basedir: "+restReplayBaseDir+" Exiting test.");
+            throw new FileNotFoundException("RestReplay control file ("+controlFileName+") not found in classpath, or basedir: "+restReplayBaseDir+" Exiting test.");
         }
 
         String protoHostPortFrom = "from restReplay Master.";
@@ -732,7 +743,7 @@ public class RestReplay {
         Node n = document.selectSingleNode("/restReplay/protoHostPort");  //see if control file has override.
         if (null != n){
             protoHostPort = n.getText().trim();
-            System.out.println("Using protoHostPort ('"+protoHostPort+"') from restReplay file ('"+controlFile+"'), not master.");
+            System.out.println("Using protoHostPort ('"+protoHostPort+"') from restReplay file ('"+controlFileName+"'), not master.");
             protoHostPortFrom = "from control file.";
         }
 
@@ -748,7 +759,7 @@ public class RestReplay {
         report.addTestGroup(testGroupID, controlFileName);   //controlFileName is just the short name, without the full path.
         String restReplayHeader = "========================================================================"
                           +"\r\nRestReplay running:"
-                          +"\r\n   controlFile: "+ (new File(controlFile).getCanonicalPath())
+                          +"\r\n   controlFile: "+controlFileName
                           +"\r\n   Master: "+ masterFilenameInfo
                           +"\r\n   env: "+relativePathFromReportsDir
                           +"\r\n   protoHostPort: "+protoHostPort+"    "+protoHostPortFrom
@@ -1008,7 +1019,7 @@ public class RestReplay {
                 String contentRaw = "";
                 String fileName = parts.requestPayloadFilename;
                 if (contentRawFromMutator == null) {
-                    contentRaw = new String(FileUtils.readFileToByteArray(new File(fileName)));
+                    contentRaw = readResource(parts.requestPayloadFilenameRel, parts.requestPayloadFilename);//new String(FileUtils.readFileToByteArray(new File(fileName)));
                 } else {
                     contentRaw = contentRawFromMutator;
                 }
@@ -1037,7 +1048,7 @@ public class RestReplay {
                 serviceResult.time = (System.currentTimeMillis()-startTime);
 
                 if (Tools.notBlank(mutatorType)&&(contentRawFromMutator==null)){
-                    ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilename);
+                    ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename);
                     contentMutator.setOptions(testNode);
                     serviceResult.mutatorType = mutatorType;
                     serviceResult.mutator = contentMutator;
@@ -1224,7 +1235,9 @@ public class RestReplay {
             }
         } catch (Throwable t) {
             serviceResultsMap.remove("result");
-            String msg = "ERROR: RestReplay experienced an error in a test node ("+testToString(testNode)+"). Throwable: "+t;
+            String msg = "ERROR: RestReplay experienced an error in a test node ("+testToString(testNode)+"). Throwable: "+Tools.getStackTrace(t);
+            String mostack = Arrays.toString(Thread.currentThread().getStackTrace());
+            FileTools.saveFile("/Users/vcrocla", "dump.txt", msg+"\r\nmostack:"+mostack, false);
             System.out.println(msg);
             System.out.println(Tools.getStackTrace(t));
             //ServiceResult serviceResult = new ServiceResult();
@@ -1232,13 +1245,18 @@ public class RestReplay {
             serviceResult.failureReason = " : SYSTEM ERROR; ";
             if (Tools.isEmpty(serviceResult.testID)) serviceResult.testID = lastTestID;
             if (Tools.isEmpty(serviceResult.testID)) serviceResult.testID = lastTestLabel;
-            if (t instanceof ServiceResult.AlertError){
-                serviceResult.alerts.addAll(((AlertError)t).allAlerts);
-            }
+            addAlertErrorToAlerts(serviceResult.alerts, t);
             report.addTestResult(serviceResult);
             results.add(serviceResult);
         }
         return serviceResult;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private static final void addAlertErrorToAlerts(List<Alert> alerts, Object t){
+        if (t instanceof ServiceResult.AlertError){
+            alerts.addAll(((AlertError) t).allAlerts);
+        }
     }
 
 
@@ -1420,12 +1438,14 @@ public class RestReplay {
                                        ? ("\r\n    will use master file: "+fMaster.getCanonicalPath())
                                        : ("\r\n    will use control file: "+f.getCanonicalPath()) )
                              );
-            
+
+            ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
+
             if (Tools.notEmpty(restReplayMaster)){
                 if (Tools.notEmpty(controlFilename)){
                     System.out.println("WARN: controlFilename: "+controlFilename+" will not be used because master was specified.  Running master: "+restReplayMaster);
                 }
-                RestReplay replay = new RestReplay(restReplayBaseDirResolved, reportsDir);
+                RestReplay replay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager);
                 replay.setEnvID(envID);
                 replay.readOptionsFromMasterConfigFile(restReplayMaster);
                 replay.setAutoDeletePOSTS(bAutoDeletePOSTS);
@@ -1442,7 +1462,8 @@ public class RestReplay {
                 }
                 List<String> reportsList = new ArrayList<String>();
                 RunOptions runOptions = new RunOptions(); //just use defaults. won't read master file.
-                runRestReplayFile(restReplayBaseDirResolved, controlFilename, testGroupID, testID,
+                RestReplay restReplay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager);
+                restReplay.runRestReplayFile(restReplayBaseDirResolved, controlFilename, testGroupID, testID,
                                   createResultsMap(), null, runOptions,
                                   bAutoDeletePOSTS, dump, "", null, reportsList, reportsDir,""/*no master, so no env*/, "");
                 System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());

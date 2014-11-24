@@ -52,6 +52,10 @@ public class Tools {
         return first+separator+second;
     }
 
+    public static String chop(String source, int length){
+        return source.substring(0, Math.min(source.length(), length));
+    }
+
     /** Remove all whitespace from a String.  */
     public static String squeeze(String s) {
         return s.replaceAll("\\s+", "");

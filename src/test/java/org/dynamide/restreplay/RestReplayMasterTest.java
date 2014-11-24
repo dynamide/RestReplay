@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class RestReplayMasterTest  extends RestReplayTest {
 
-    @Test
+    //@Test
     public void runMaster() throws Exception {
         //RestReplay replay = createRestReplayUsingIntegrationTestsModule("..");
         RestReplay replay = createRestReplayForMaven();
