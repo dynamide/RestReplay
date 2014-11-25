@@ -185,20 +185,20 @@
       If we build services in /src/trunk/services, then basedir=/src/trunk/services/IntegrationTests/</p>
 
       <div class="code panel">
-      RestReplayBasedir=${basedir}/src/test/resources/test-data/xmlreplay
+      RestReplayBasedir=${basedir}/src/test/resources/test-data/restreplay
         or:
-      /src/trunk/services/IntegrationTests/src/test/resources/test-data/xmlreplay
+      /src/trunk/services/IntegrationTests/src/test/resources/test-data/restreplay
       </div>
 
       <p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.<br>
       Most services should define their <b>control</b> file within their directory, e.g.</p>
 
       <div class="code panel">
-      xmlreplay/xml-replay-master.xml         <span class="comments">//the <b>master</b> file used by the nightly build.</span>
-      xmlreplay/dev-master.xml                <span class="comments">//the <b>master</b> file for local development.</span>
-      xmlreplay/objectexit/                   <span class="comments">//the directory for all objectexit <b>control</b> files, and request/response templates.</span>
-      xmlreplay/objectexit/object-exit.xml    <span class="comments">//the <b>control</b> file for objectexit.</span>
-      xmlreplay/objectexit/res/               <span class="comments">//a sub-directory to contain response templates.</span>
+      restreplay/xml-replay-master.xml         <span class="comments">//the <b>master</b> file used by the nightly build.</span>
+      restreplay/dev-master.xml                <span class="comments">//the <b>master</b> file for local development.</span>
+      restreplay/objectexit/                   <span class="comments">//the directory for all objectexit <b>control</b> files, and request/response templates.</span>
+      restreplay/objectexit/object-exit.xml    <span class="comments">//the <b>control</b> file for objectexit.</span>
+      restreplay/objectexit/res/               <span class="comments">//a sub-directory to contain response templates.</span>
       </div>
 
       <p>For development, you may use a predefined <b>master</b> file, called dev-master.xml, or you may define your own. See "2.c. Running"<br>
@@ -284,7 +284,7 @@
       <p>To run using the maven surefire test, simply:</p>
 
       <div class="code">
-    mvn -o install test -D-restReplayBaseDir=./src/test/resources/test-data/restreplay -D-restReplayMaster=rest-replay-master.xml
+    mvn -o install test \<br>        -D-restReplayBaseDir=./src/test/resources/test-data/restreplay \<br>        -D-restReplayMaster=rest-replay-master.xml
       </div>
 
       <p>or</p>
@@ -297,7 +297,7 @@
 
       <div class="code">
     cd /src/trunk/services/IntegrationTests
-    vi ./src/test/resources/test-data/xmlreplay/dev-master.xml
+    vi ./src/test/resources/test-data/restreplay/dev-master.xml
     mvn test -Dtest=RestReplayDevTest
       </div>
 
@@ -305,8 +305,8 @@
 
       <div class="code">
     cd /src/trunk/services/IntegrationTests
-    vi ./src/test/resources/test-data/xmlreplay/my-master-file.xml
-    mvn test -DrestReplayMaster=my-master-file.xml -DforkMode=never -Dtest=RestReplayDevTest
+    vi ./src/test/resources/test-data/restreplay/my-master-file.xml
+    mvn test -DrestReplayMaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=RestReplayDevTest
       </div>
 
       <h4><a name="RestReplay-2.c.1Commandlineparameters" id="RestReplay-2.c.1Commandlineparameters"></a>2.c.1 Command-line parameters</h4>
@@ -468,13 +468,11 @@
               <td>
                   <p>Example:</p>
 
-                  <div class="code">
-                      &lt;auths default="admin@example.org"&gt;
-                      &lt;auth ID="user1@museum1"&gt;dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth&gt;
-                      &lt;auth ID="bigbird2010"&gt;YmlnYmlyZDIwMTA6YmlnYmlyZDIwMTA=&lt;/auth&gt;
-                      &lt;auth ID="elmo2010"&gt;ZWxtbzIwMTA6ZWxtbzIwMTA=&lt;/auth&gt;
-                      &lt;/auths&gt;
-                  </div>
+                  <div class="code">&lt;auths default="admin@example.org"&gt;
+    &lt;auth ID="user1@museum1"&gt;dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth&gt;
+    &lt;auth ID="bigbird2010"&gt;YmlnYmlyZDIwMTA6YmlnYmlyZDIwMTA=&lt;/auth&gt;
+    &lt;auth ID="elmo2010"&gt;ZWxtbzIwMTA6ZWxtbzIwMTA=&lt;/auth&gt;
+&lt;/auths&gt;                  </div>
               </td>
           </tr>
 
@@ -503,17 +501,19 @@
             <td>Example:</td>
 
             <td>
-<div class="code">
-    &lt;runOptions&gt;
+<div class="code">    &lt;runOptions&gt;
         &lt;connectionTimeout&gt;3000&lt;/connectionTimeout&gt;
         &lt;socketTimeout&gt;3000&lt;/socketTimeout&gt;
         &lt;errorsBecomeEmptyStrings&gt;true&lt;/errorsBecomeEmptyStrings&gt;
-    &lt;/runOptions&gt;
-            </div></td>
+    &lt;/runOptions&gt;           </div></td>
           </tr>
 
 
           <tr>
+<td>Discussion:</td>
+<td>This file is the best place to do site-wide settings for RestReplay<br><br>&nbsp;&nbsp;&nbsp; All of these options can be controlled in a master file, too,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; but you should do that only in two cases:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1) you are developing locally, and are setting per-test cases while you run tests,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and you may or may not check in your changes.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, change any settings you like as close to the testCase as you can in the chain:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions/master/testGroup/testCase<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review any changes to your xml config and control files you commit,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and check strategy as outlined in case (2).<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) you are committing this master to source control, so that it gets picked up by automated builds.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, you should have a coordinated reason for overriding this default file (runOptions.xml).<br><br>&nbsp;&nbsp;&nbsp; Options:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "connectionTimeout"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "socketTimeout"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The most reasonable override in a master file's RunOptions is the timeouts:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; these may vary by service, or host<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; so one clean organization of test would be by services<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or known clusters of hosts with particular timeouts.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You could have one control file, say, "master-edge-services.xml",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; say, a time-critical cluster.&nbsp; In that control file,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set the RunOption timeouts to be low.&nbsp; In the Master, set the timeouts to be more "normal".<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the other tests will run with "normal", and tests in master-edge-services.xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; in testGroup "timeCriticalServices" will run with low timeouts.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "errorsBecomeEmptyStrings" would be set locally if you were debugging.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "dumpResourceManagerSummary" should probably be best left<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the central location in this file (runOptions.xml)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since it controls output to the console.<br><br>&nbsp;&nbsp;&nbsp; The heirarchy is:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RunOptions : class defaults<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions.xml : default for all tests<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my-master.xml :&nbsp; overrides properties for this master.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can have many masters and run them all from the command line<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or test suite by using the startup command-line parameter:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -restReplayMaster relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or for maven, surefire, etc:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -DrestReplayMaster=relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (see docs/RestReplay.html for examples).<br>&nbsp;&nbsp;&nbsp; </td>
+<td><br></td></tr>
+<tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.vars.var"></a>/restReplayMaster/vars/var</td>
           </tr>
           <tr>
@@ -526,8 +526,7 @@
             <td>Example:</td>
 
             <td>
-<div class="code">
-    &lt;restReplayMaster&gt;
+<div class="code">    &lt;restReplayMaster&gt;
         &lt;protoHostPort&gt;<b>${SNOOPSERVER}</b>&lt;/protoHostPort&gt;
         &lt;vars&gt;
             &lt;var ID="<b>PISERVER</b>"&gt;http://piserver.example.com&lt;/var&gt;
@@ -577,12 +576,8 @@
           createAssignment will go against SNOOPSERVER:  http://localhost:28082
           getAssignments will go against LASSERVER:      http://localhost:8080
           pitoken will go against PISERVER               http://piserver.example.com
-
-
-    
-<hr>
-
-    <b>But if protoHostPort were not defined in this test file, then the
+   
+<hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
 
@@ -612,9 +607,7 @@
       <b>In this case, getAssignments will use the default from protoHostPort in
       the master file:</b>
       secondTestGroup.getAssignments will go against SNOOPSERVER               http://localhost:28082
-
-
-          </run></div></td>
+<br><br></run></div></td>
           </tr>
 
 

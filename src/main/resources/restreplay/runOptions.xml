@@ -1,51 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <runOptions>
     <!--
-
-    This file is the best place to do site-wide settings for RestReplay
-
-    All of these options can be controlled in a master file, too,
-         but you should do that only in two cases:
-            1) you are developing locally, and are setting per-test cases while you run tests,
-               and you may or may not check in your changes.
-                  In this case, change any settings you like as close to the testCase as you can in the chain:
-                        runOptions/master/testGroup/testCase
-                  Review any changes to your xml config and control files you commit,
-                  and check strategy as outlined in case (2).
-
-            2) you are committing this master to source control, so that it gets picked up by automated builds.
-                   In this case, you should have a coordinated reason for overriding this default file (runOptions.xml).
-
-    Options:
-        "connectionTimeout"
-        "socketTimeout"
-            The most reasonable override in a master file's RunOptions is the timeouts:
-            these may vary by service, or host
-            so one clean organization of test would be by services
-            or known clusters of hosts with particular timeouts.
-            You could have one control file, say, "master-edge-services.xml",
-            with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,
-            say, a time-critical cluster.  In that control file,
-            set the RunOption timeouts to be low.  In the Master, set the timeouts to be more "normal".
-            All the other tests will run with "normal", and tests in master-edge-services.xml
-            in testGroup "timeCriticalServices" will run with low timeouts.
-
-        "errorsBecomeEmptyStrings" would be set locally if you were debugging.
-
-        "dumpResourceManagerSummary" should probably be best left
-           to the central location in this file (runOptions.xml)
-           since it controls output to the console.
-
-    The heirarchy is:
-       RunOptions : class defaults
-         runOptions.xml : default for all tests
-           my-master.xml :  overrides properties for this master.
-                            You can have many masters and run them all from the command line
-                            or test suite by using the startup command-line parameter:
-                                -restReplayMaster relative-path-to-master-file
-                            or for maven, surefire, etc:
-                                -DrestReplayMaster=relative-path-to-master-file
-                             (see docs/RestReplay.html for examples).
+    This file is the best place to do site-wide settings for RestReplay.
+    See documentation here:
+       doc/RestReplay.html#RestReplay-restReplayMaster.runOptions
+    or
+       http://htmlpreview.github.io/?https://raw.githubusercontent.com/dynamide/RestReplay/master/doc/RestReplay.html#RestReplay-restReplayMaster.runOptions
     -->
     <connectionTimeout>3030</connectionTimeout>
     <socketTimeout>7007</socketTimeout>
