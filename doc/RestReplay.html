@@ -1,9 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+<meta content="text/html; charset=us-ascii" http-equiv="content-type">
   <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
-  <meta content="text/html; charset=us-ascii" http-equiv="Content-Type">
+  
 
   <title>RestReplay</title>
   <style type="text/css">
@@ -118,26 +118,27 @@
     <div class="wiki-content">
     <h1><a name="RestReplay-RestReplayDocumentation" id="RestReplay-RestReplayDocumentation"></a>RestReplay Documentation</h1>
     <div class="container">
-        <center><h2>RestReplay Quick Reference</h2></center>
+        <center>
+<h2>RestReplay Quick Reference</h2></center>
         <div id="TOCDEST1" class="cheatsheet-body"></div>
         <div id="TOCDEST2" class="cheatsheet-body"></div>
     </div>
 
     <span class="main-toc">
-    <h2><a href="#RestReplay-1.Introduction" >1. Introduction</a></h2>
-    <h3><a href="#RestReplay-1.a.Features" >1.a. Features</a></h3>
-    <h3><a href="#RestReplay-1.bOverview" >1.b Overview</a></h3>
-    <h4><a href="#RestReplay-1.b.1Runtime" >1.b.1 Runtime</a></h4>
+    <h2><a href="#RestReplay-1.Introduction">1. Introduction</a></h2>
+    <h3><a href="#RestReplay-1.a.Features">1.a. Features</a></h3>
+    <h3><a href="#RestReplay-1.bOverview">1.b Overview</a></h3>
+    <h4><a href="#RestReplay-1.b.1Runtime">1.b.1 Runtime</a></h4>
 
-    <h2><a href="#RestReplay-2.ReferenceDocumentation" >2. Reference Documentation</a></h2>
-    <h3><a href="#RestReplay-2.a.Installation" >2.a. Installation</a></h3>
-    <h3><a href="#RestReplay-2.b.Configuration" >2.b. Configuration</a></h3>
-    <h4><a href="#RestReplay-2.b.1GeneralRules" >2.b.1 General Rules</a></h4>
-    <h3><a href="#RestReplay-2.cRunning" >2.c Running</a></h3>
-    <h4><a href="#RestReplay-2.c.1Commandlineparameters" >2.c.1 Command-line parameters</a></h4>
-    <h4><a href="#RestReplay-2.c.2XMLconfigurationparametersinmasterfile" >2.c.2 XML configuration parameters in <b>master</b> file</a></h4>
-    <h4><a href="#RestReplay-2.c.3XMLconfigurationparametersincontrolfile" >2.c.3 XML configuration parameters in <b>control</b> file</a></h4>
-    <h4><a href="#RestReplay-2.c.4Cleanup" >2.c.4 Cleanup</a></h4>
+    <h2><a href="#RestReplay-2.ReferenceDocumentation">2. Reference Documentation</a></h2>
+    <h3><a href="#RestReplay-2.a.Installation">2.a. Installation</a></h3>
+    <h3><a href="#RestReplay-2.b.Configuration">2.b. Configuration</a></h3>
+    <h4><a href="#RestReplay-2.b.1GeneralRules">2.b.1 General Rules</a></h4>
+    <h3><a href="#RestReplay-2.cRunning">2.c Running</a></h3>
+    <h4><a href="#RestReplay-2.c.1Commandlineparameters">2.c.1 Command-line parameters</a></h4>
+    <h4><a href="#RestReplay-2.c.2XMLconfigurationparametersinmasterfile">2.c.2 XML configuration parameters in <b>master</b> file</a></h4>
+    <h4><a href="#RestReplay-2.c.3XMLconfigurationparametersincontrolfile">2.c.3 XML configuration parameters in <b>control</b> file</a></h4>
+    <h4><a href="#RestReplay-2.c.4Cleanup">2.c.4 Cleanup</a></h4>
 
     </span>
     
@@ -254,11 +255,11 @@
       of all testGroups and tests. You may have to click "show all results" in the maven surefire report.</p>
 
       <p>RestReplay also creates a stand-alone report. Look at the command line output where RestReplay will report the location of this HTML report, e.g. something of this form:</p>
-      <pre>
-RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-reports/...
+      <pre>RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-reports/...
 </pre>This reports directory starts with an index file named after any <b>master</b> file you have run, which links to individual <b>control</b> file results.
 
-      <h2><a name="RestReplay-2.ReferenceDocumentation" id="RestReplay-2.ReferenceDocumentation"></a>2. Reference Documentation</h2>
+      
+<h2><a name="RestReplay-2.ReferenceDocumentation" id="RestReplay-2.ReferenceDocumentation"></a>2. Reference Documentation</h2>
 
       <h3><a name="RestReplay-2.a.Installation" id="RestReplay-2.a.Installation"></a>2.a. Installation</h3>
 
@@ -283,7 +284,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
       <p>To run using the maven surefire test, simply:</p>
 
       <div class="code">
-          mvn -o install test -D-restReplayBaseDir=./src/test/resources/test-data/restreplay -D-restReplayMaster=rest-replay-master.xml
+    mvn -o install test -D-restReplayBaseDir=./src/test/resources/test-data/restreplay -D-restReplayMaster=rest-replay-master.xml
       </div>
 
       <p>or</p>
@@ -334,19 +335,19 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
       &lt;<a href="#RestReplay-restReplayMaster.auths">auths</a>&gt;
           &lt;<a href="#RestReplay-restReplayMaster.auths.auth">auth</a>&gt;
       &lt;/auths&gt;
-      &lt;<a href="#RestReplay-restReplayMaster.runOptions">runOptions</a>>
-        &lt;connectionTimeout />
-        &lt;socketTimeout />
-        &lt;errorsBecomeEmptyStrings />
-      &lt;/runOptions>
-      &lt;vars>
-        &lt;<a href="#RestReplay-restReplayMaster.vars.var">var</a> />
-      &lt;/vars>
-      &lt;<a href="#RestReplay-restReplayMaster.envs">envs</a>>
-          &lt;<a href="#RestReplay-restReplayMaster.envs.vars">vars</a>>
-            &lt;<a href="#RestReplay-restReplayMaster.envs.vars.var">var</a> />
-          &lt;/vars>
-      &lt;/envs>
+      &lt;<a href="#RestReplay-restReplayMaster.runOptions">runOptions</a>&gt;
+        &lt;connectionTimeout /&gt;
+        &lt;socketTimeout /&gt;
+        &lt;errorsBecomeEmptyStrings /&gt;
+      &lt;/runOptions&gt;
+      &lt;vars&gt;
+        &lt;<a href="#RestReplay-restReplayMaster.vars.var">var</a> /&gt;
+      &lt;/vars&gt;
+      &lt;<a href="#RestReplay-restReplayMaster.envs">envs</a>&gt;
+          &lt;<a href="#RestReplay-restReplayMaster.envs.vars">vars</a>&gt;
+            &lt;<a href="#RestReplay-restReplayMaster.envs.vars.var">var</a> /&gt;
+          &lt;/vars&gt;
+      &lt;/envs&gt;
       &lt;<a href="#RestReplay-restReplayMaster.run">run</a>&gt;&lt;/run&gt;
   &lt;/restReplayMaster&gt;</pre>
       </div>
@@ -360,11 +361,11 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
             <td>child elements</td>
 
             <td>
-                dump<br />
-                auths<br />
-                runOptions<br />
-                vars<br />
-                envs<br />
+                dump<br>
+                auths<br>
+                runOptions<br>
+                vars<br>
+                envs<br>
                 run<br>
             </td>
           </tr>
@@ -391,22 +392,27 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
 
               <td>
                   <table class="matrix">
-                      <tr>
-                          <td></td><th>payloads true</th><th>payloads false</th>
+                      <tbody>
+<tr>
+                          <td><br></td><th>payloads true</th><th>payloads false</th>
                       </tr>
                       <tr>
-                          <th>auto</th><td>detail + payloads</td><td>detail <b style="color:orange;">+payloads if error</b></td>
+                          <th>auto</th><td>detail + payloads</td>
+<td>detail <b style="color:orange;">+payloads if error</b></td>
                       </tr>
                       <tr>
-                          <th>full</th><td>detail + payloads</td><td>detail</td>
+                          <th>full</th><td>detail + payloads</td>
+<td>detail</td>
                       </tr>
                       <tr>
-                          <th>detailed</th><td>detail</td><td>detail</td>
+                          <th>detailed</th><td>detail</td>
+<td>detail</td>
                       </tr>
                       <tr>
-                          <th>minimal</th><td>minimal</td><td>minimal</td>
+                          <th>minimal</th><td>minimal</td>
+<td>minimal</td>
                       </tr>
-                  </table>
+                  </tbody></table>
               </td>
           </tr>
 
@@ -415,8 +421,8 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <td>Example:</td>
 
               <td>
-                  <br />
-                  <div class="code">&lt;dump dumpServiceResult="detailed" payloads="false" /></div>
+                  <br>
+                  <div class="code">&lt;dump dumpServiceResult="detailed" payloads="false" /&gt;</div>
               </td>
           </tr>
 
@@ -431,8 +437,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <td><br></td>
 
               <td>A list of users and their related Base-64 encrypted<tt>username:password</tt>strings. You can generate these strings in number of
-                  ways, among them by using the online utility at<a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel=
-                          "nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.</td>
+                  ways, among them by using the online utility at<a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel="nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.</td>
           </tr>
 
           <tr>
@@ -464,11 +469,11 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
                   <p>Example:</p>
 
                   <div class="code">
-                      &lt;auths default="admin@example.org">
-                      &lt;auth ID="user1@museum1">dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth>
-                      &lt;auth ID="bigbird2010">YmlnYmlyZDIwMTA6YmlnYmlyZDIwMTA=&lt;/auth>
-                      &lt;auth ID="elmo2010">ZWxtbzIwMTA6ZWxtbzIwMTA=&lt;/auth>
-                      &lt;/auths>
+                      &lt;auths default="admin@example.org"&gt;
+                      &lt;auth ID="user1@museum1"&gt;dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth&gt;
+                      &lt;auth ID="bigbird2010"&gt;YmlnYmlyZDIwMTA6YmlnYmlyZDIwMTA=&lt;/auth&gt;
+                      &lt;auth ID="elmo2010"&gt;ZWxtbzIwMTA6ZWxtbzIwMTA=&lt;/auth&gt;
+                      &lt;/auths&gt;
                   </div>
               </td>
           </tr>
@@ -497,12 +502,13 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
           <tr>
             <td>Example:</td>
 
-            <td><div class="code">
-    &lt;runOptions>
-        &lt;connectionTimeout>3000&lt;/connectionTimeout>
-        &lt;socketTimeout>3000&lt;/socketTimeout>
-        &lt;errorsBecomeEmptyStrings>true&lt;/errorsBecomeEmptyStrings>
-    &lt;/runOptions>
+            <td>
+<div class="code">
+    &lt;runOptions&gt;
+        &lt;connectionTimeout&gt;3000&lt;/connectionTimeout&gt;
+        &lt;socketTimeout&gt;3000&lt;/socketTimeout&gt;
+        &lt;errorsBecomeEmptyStrings&gt;true&lt;/errorsBecomeEmptyStrings&gt;
+    &lt;/runOptions&gt;
             </div></td>
           </tr>
 
@@ -519,49 +525,50 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
           <tr>
             <td>Example:</td>
 
-            <td><div class="code">
-    &lt;restReplayMaster>
-        &lt;protoHostPort><b>${SNOOPSERVER}</b>&lt;/protoHostPort>
-        &lt;vars>
-            &lt;var ID="<b>PISERVER</b>">http://piserver.example.com&lt;/var>
-            &lt;var ID="<b>LASSERVER</b>">http://localhost:8080&lt;/var>
-            &lt;var ID="<b>SNOOPSERVER</b>">http://localhost:28082&lt;/var>
-        &lt;/vars>
+            <td>
+<div class="code">
+    &lt;restReplayMaster&gt;
+        &lt;protoHostPort&gt;<b>${SNOOPSERVER}</b>&lt;/protoHostPort&gt;
+        &lt;vars&gt;
+            &lt;var ID="<b>PISERVER</b>"&gt;http://piserver.example.com&lt;/var&gt;
+            &lt;var ID="<b>LASSERVER</b>"&gt;http://localhost:8080&lt;/var&gt;
+            &lt;var ID="<b>SNOOPSERVER</b>"&gt;http://localhost:28082&lt;/var&gt;
+        &lt;/vars&gt;
         ...
-    &lt;/restReplayMaster>
+    &lt;/restReplayMaster&gt;
 
     <b>Then, in a test file, you can use full URLs which reference these servers
     defined in the master control file:</b>
 
-    &lt;restReplay>
-        &lt;protoHostPort><b>${LASSERVER}</b>&lt;/protoHostPort>
+    &lt;restReplay&gt;
+        &lt;protoHostPort&gt;<b>${LASSERVER}</b>&lt;/protoHostPort&gt;
 
-        &lt;testGroup ID="mainTestGroup" autoDeletePOSTS="false">
+        &lt;testGroup ID="mainTestGroup" autoDeletePOSTS="false"&gt;
 
-            &lt;test ID="pitoken">
-                &lt;expectedCodes>200&lt;/expectedCodes>
-                &lt;method>POST&lt;/method>
-                &lt;uri><b>${PISERVER}</b>/v1/piapi-int/tokens&lt;/uri>
-                &lt;filename>pitoken.json&lt;/filename>
-            &lt;/test>
+            &lt;test ID="pitoken"&gt;
+                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+                &lt;method&gt;POST&lt;/method&gt;
+                &lt;uri&gt;<b>${PISERVER}</b>/v1/piapi-int/tokens&lt;/uri&gt;
+                &lt;filename&gt;pitoken.json&lt;/filename&gt;
+            &lt;/test&gt;
 
-            &lt;test ID="createAssignment">
-                &lt;expectedCodes>200&lt;/expectedCodes>
-                &lt;method>POST&lt;/method>
-                &lt;uri><b>${SNOOPSERVER}</b>/las-api/api/grid-apex/assignments&lt;/uri>
-                &lt;filename>create-assignment.json&lt;/filename>
+            &lt;test ID="createAssignment"&gt;
+                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+                &lt;method&gt;POST&lt;/method&gt;
+                &lt;uri&gt;<b>${SNOOPSERVER}</b>/las-api/api/grid-apex/assignments&lt;/uri&gt;
+                &lt;filename&gt;create-assignment.json&lt;/filename&gt;
                 ...
-            &lt;/test>
+            &lt;/test&gt;
 
-            &lt;test ID="getAssignments">
-                &lt;expectedCodes>200&lt;/expectedCodes>
-                &lt;method>GET&lt;/method>
-                &lt;uri>/las-api/api/grid-apex/assignments&lt;/uri>
-                &lt;filename>create-assignment.json&lt;/filename>
+            &lt;test ID="getAssignments"&gt;
+                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+                &lt;method&gt;GET&lt;/method&gt;
+                &lt;uri&gt;/las-api/api/grid-apex/assignments&lt;/uri&gt;
+                &lt;filename&gt;create-assignment.json&lt;/filename&gt;
                 ...
-            &lt;/test>
-        &lt;/testGroup>
-    &lt;/restReplay>
+            &lt;/test&gt;
+        &lt;/testGroup&gt;
+    &lt;/restReplay&gt;
 
       <b>"uri" values that have a full url will go to that host. If they don't have http://host:port,
         then they will use "protoHostPort" element from the test file, then the
@@ -572,41 +579,42 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
           pitoken will go against PISERVER               http://piserver.example.com
 
 
-    <hr />
+    
+<hr>
 
     <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
 
-        &lt;restReplayMaster>
-            &lt;protoHostPort><b>${SNOOPSERVER}</b>&lt;/protoHostPort>
-            &lt;vars>
-                &lt;var ID="<b>PISERVER</b>">http://piserver.example.com&lt;/var>
-                &lt;var ID="<b>LASSERVER</b>">http://localhost:8080&lt;/var>
-                &lt;var ID="<b>SNOOPSERVER</b>">http://localhost:28082&lt;/var>
-            &lt;/vars>
+        &lt;restReplayMaster&gt;
+            &lt;protoHostPort&gt;<b>${SNOOPSERVER}</b>&lt;/protoHostPort&gt;
+            &lt;vars&gt;
+                &lt;var ID="<b>PISERVER</b>"&gt;http://piserver.example.com&lt;/var&gt;
+                &lt;var ID="<b>LASSERVER</b>"&gt;http://localhost:8080&lt;/var&gt;
+                &lt;var ID="<b>SNOOPSERVER</b>"&gt;http://localhost:28082&lt;/var&gt;
+            &lt;/vars&gt;
             ...
-            <run controlFile="_self_test/dynamide.xml" testGroup="secondTestGroup" />
-        &lt;/restReplayMaster>
+            <run controlfile="_self_test/dynamide.xml" testgroup="secondTestGroup">
+        &lt;/restReplayMaster&gt;
 
-        &lt;restReplay>
-          &lt;testGroup ID="secondTestGroup" autoDeletePOSTS="false">
-            &lt;test ID="getAssignments">
-                &lt;expectedCodes>200&lt;/expectedCodes>
-                &lt;method>GET&lt;/method>
-                &lt;uri>/las-api/api/grid-apex/assignments&lt;/uri>
-                &lt;filename>create-assignment.json&lt;/filename>
+        &lt;restReplay&gt;
+          &lt;testGroup ID="secondTestGroup" autoDeletePOSTS="false"&gt;
+            &lt;test ID="getAssignments"&gt;
+                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+                &lt;method&gt;GET&lt;/method&gt;
+                &lt;uri&gt;/las-api/api/grid-apex/assignments&lt;/uri&gt;
+                &lt;filename&gt;create-assignment.json&lt;/filename&gt;
                 ...
-            &lt;/test>
-          &lt;/testGroup>
-       &lt;/restReplay>
+            &lt;/test&gt;
+          &lt;/testGroup&gt;
+       &lt;/restReplay&gt;
 
       <b>In this case, getAssignments will use the default from protoHostPort in
       the master file:</b>
       secondTestGroup.getAssignments will go against SNOOPSERVER               http://localhost:28082
 
 
-          </div></td>
+          </run></div></td>
           </tr>
 
 
@@ -622,9 +630,9 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <td>&nbsp;</td>
 
               <td>Contains blocks of vars/var elements which define variables available to all tests run by this master.
-                  <br />The calling program can supply the environment ID in the command-line parameter <b>-envID</b>.
-              <br />
-              <br />
+                  <br>The calling program can supply the environment ID in the command-line parameter <b>-envID</b>.
+              <br>
+              <br>
                   If calling restReplayInstance.readOptionsFromMasterConfigFile() programmatically, call restReplayInstance.setEnvID() first.
               </td>
           </tr>
@@ -633,7 +641,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <td>child elements</td>
 
               <td><a href="#RestReplay-restReplayMaster.envs.vars">vars</a>
-                  <br /><a href="#RestReplay-restReplayMaster.envs.vars.var">vars/var</a></td>
+                  <br><a href="#RestReplay-restReplayMaster.envs.vars.var">vars/var</a></td>
           </tr>
 
           <tr>
@@ -653,33 +661,33 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <td>Example:</td>
 
               <td>
-                  <div class="code">&lt;restReplayMaster>
-    &lt;protoHostPort>${BESERVER}&lt;/protoHostPort>
-    &lt;envs>
-        &lt;env ID="local" default="true">
-            &lt;vars>
-                &lt;var ID="LISERVER">http://li-api.example.com&lt;/var>
-                &lt;var ID="BESERVER">http://localhost:8080&lt;/var>
-                &lt;var ID="DMSERVER">http://localhost:18080&lt;/var>
-            &lt;/vars>
-        &lt;/env>
-        &lt;env ID="dev">
-            &lt;vars>
-                &lt;var ID="LISERVER">http://li-api.example.com&lt;/var>
-                &lt;var ID="BESERVER">http://be.example.com&lt;/var>
-            &lt;/vars>
-        &lt;/env>
-        &lt;env ID="qa">
-            &lt;vars>
-                &lt;var ID="LISERVER">http://li-api.example.com&lt;/var>
-                &lt;var ID="BESERVER">http://be.example.com&lt;/var>
-            &lt;/vars>
-        &lt;/env>
-    &lt;/envs>
+                  <div class="code">&lt;restReplayMaster&gt;
+    &lt;protoHostPort&gt;${BESERVER}&lt;/protoHostPort&gt;
+    &lt;envs&gt;
+        &lt;env ID="local" default="true"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://localhost:8080&lt;/var&gt;
+                &lt;var ID="DMSERVER"&gt;http://localhost:18080&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+        &lt;env ID="dev"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://be.example.com&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+        &lt;env ID="qa"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://be.example.com&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+    &lt;/envs&gt;
     ...
     </div>
 
-          <tr>
+          </td></tr><tr>
               <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.envs.vars" id="RestReplay-restReplayMaster.envs.vars"></a>/restReplayMaster/envs/vars</td>
           </tr>
 
@@ -694,7 +702,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
           </tr>
 
           <tr>
-              <td></td>
+              <td><br></td>
 
               <td>A single variable, which will be available to all tests called by this master.
                   Behaves exactly like <a href="#RestReplay-restReplayMaster.vars.var">/restReplayMaster/vars/var</a></td>
@@ -720,17 +728,17 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <td>Example:</td>
 
               <td>
-                  <span class="code">&lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /></span>
+                  <span class="code">&lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /&gt;</span>
               </td>
           </tr>
           <tr>
               <td>Example:</td>
 
               <td>
-                  <div class="code">&lt;restReplayMaster>
-                      ....
-                      &lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" />
-                      &lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" />
+                  <div class="code">&lt;restReplayMaster&gt;
+    ....
+    &lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /&gt;
+    &lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /&gt;
                   </div>
               </td>
           </tr>
@@ -829,18 +837,18 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
             <td>Example:</td>
             <td>
               <div class="code">
-    &lt;restReplay>
-      &lt;protoHostPort>...&lt;/protoHostPort>
-      &lt;testGroup ID="mainTestGroup">
-        &lt;vars>
-            &lt;var ID="<b>COURSE_ID</b>">540f4515e4b004e7d8f22fc8&lt;/var>
-            &lt;var ID="TEMPLATE_ID">87fff5f0-652d-11e4-8229-179090669834&lt;/var>
-        &lt;/vars>
+    &lt;restReplay&gt;
+      &lt;protoHostPort&gt;...&lt;/protoHostPort&gt;
+      &lt;testGroup ID="mainTestGroup"&gt;
+        &lt;vars&gt;
+            &lt;var ID="<b>COURSE_ID</b>"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
+            &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
+        &lt;/vars&gt;
         ...
-        &lt;test ID="getAssignments">
-            &lt;expectedCodes>200&lt;/expectedCodes>
-            &lt;method>GET&lt;/method>
-            &lt;uri>/las-api/api/grid-apex/courses/<b>${COURSE_ID}</b>/assignments&lt;/uri>
+        &lt;test ID="getAssignments"&gt;
+            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+            &lt;method&gt;GET&lt;/method&gt;
+            &lt;uri&gt;/las-api/api/grid-apex/courses/<b>${COURSE_ID}</b>/assignments&lt;/uri&gt;
               </div>
             </td>
           </tr>
@@ -851,38 +859,38 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
           <tr>
             <td>header</td>
             <td>A header that will be expanded just before the test is run.  If you need to force a particular test to skip including all the headers,
-            set inheritHeaders="false" on that &lt;test> node.</td>
+            set inheritHeaders="false" on that &lt;test&gt; node.</td>
           </tr>
           <tr>
             <td>Example:</td>
             <td>
               <div class="code">
-    <restReplay>
-      &lt;testGroup ID="mainTestGroup">
-        &lt;headers>
-            &lt;header name="X-ApiKey">19d26d452432968c9b636c9daf0c6d9b&lt;/header>
-            &lt;header name="x-authorization">${pitoken.got("//data")}&lt;/header>
-        &lt;/headers>
-        &lt;vars>
-            &lt;var ID="COURSE_ID">540f4515e4b004e7d8f22fc8&lt;/var>
-            &lt;var ID="TEMPLATE_ID">87fff5f0-652d-11e4-8229-179090669834&lt;/var>
-        &lt;/vars>
+    <restreplay>
+      &lt;testGroup ID="mainTestGroup"&gt;
+        &lt;headers&gt;
+            &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
+            &lt;header name="x-authorization"&gt;${pitoken.got("//data")}&lt;/header&gt;
+        &lt;/headers&gt;
+        &lt;vars&gt;
+            &lt;var ID="COURSE_ID"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
+            &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
+        &lt;/vars&gt;
 
-        &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>>
-            &lt;expectedCodes>200&lt;/expectedCodes>
-            &lt;method>POST&lt;/method>
-            &lt;uri>${PISERVER}/v1/piapi-int/tokens&lt;/uri>
-            &lt;filename>pitoken.json&lt;/filename>
-            <b>&lt-- Will NOT inherit headers --></b>
-        &lt;/test>
+        &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
+            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+            &lt;method&gt;POST&lt;/method&gt;
+            &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
+            &lt;filename&gt;pitoken.json&lt;/filename&gt;
+            <b>&lt;-- Will NOT inherit headers --&gt;</b>
+        &lt;/test&gt;
 
-        &lt;test ID="deleteTemplate">
-            &lt;expectedCodes>200&lt;/expectedCodes>
-            &lt;method>DELETE&lt;/method>
-            &lt;uri>/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri>
-            <b>&lt-- Will inherit headers: X-ApiKey and x-authorization --></b>
-        &lt;/test>
-              </div>
+        &lt;test ID="deleteTemplate"&gt;
+            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+            &lt;method&gt;DELETE&lt;/method&gt;
+            &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
+            <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
+        &lt;/test&gt;
+              </restreplay></div>
             </td>
           </tr>
 
@@ -939,9 +947,9 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <p>Example:</p>
 
               <div class="code">
-&lt;auths default="admin@example.org">
-&lt;auth ID="admin@example.org">YWRtaW5AY29sbGVjdGlvbnNwYWNlLm9yZzpBZG1pbmlzdHJhdG9y&lt;/auth>
-&lt;/auths>
+&lt;auths default="admin@example.org"&gt;
+&lt;auth ID="admin@example.org"&gt;YWRtaW5AY29sbGVjdGlvbnNwYWNlLm9yZzpBZG1pbmlzdHJhdG9y&lt;/auth&gt;
+&lt;/auths&gt;
               </div>
             </td>
           </tr>
@@ -960,7 +968,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
             <td>headers<br>
                           vars<br>
                           test
-          </tr>
+          </td></tr>
 
           <tr>
             <td>@ID</td>
@@ -983,9 +991,9 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               <p>Example:</p>
 
               <div class="code">
-&lt;testGroup ID="CRUDL" autoDeletePOSTS="true">
-  &lt;test ID="foo">....&lt;/test>
-&lt;/testGroup>
+&lt;testGroup ID="CRUDL" autoDeletePOSTS="true"&gt;
+  &lt;test ID="foo"&gt;....&lt;/test&gt;
+&lt;/testGroup&gt;
               </div>
             </td>
           </tr>
@@ -1027,14 +1035,14 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
 
             <td>
               <div class="code panel">
-&lt;test ID="oePersonauthority">
-     &lt;method>POST&lt;/method>
-     &lt;uri>/cspace-services/personauthorities/&lt;/uri>
-     &lt;part>
-         &lt;label>personauthorities_common&lt;/label>
-         &lt;filename>objectexit/oePersonauthority.xml&lt;/filename>
-     &lt;/part>
-&lt;/test>
+&lt;test ID="oePersonauthority"&gt;
+     &lt;method&gt;POST&lt;/method&gt;
+     &lt;uri&gt;/cspace-services/personauthorities/&lt;/uri&gt;
+     &lt;part&gt;
+         &lt;label&gt;personauthorities_common&lt;/label&gt;
+         &lt;filename&gt;objectexit/oePersonauthority.xml&lt;/filename&gt;
+     &lt;/part&gt;
+&lt;/test&gt;
               </div>
             </td>
           </tr>
@@ -1047,34 +1055,35 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               "permBigbird" and "accountBigbird" tests are run as user admin@example.org<br>
               and "dimension1" and "dimension1" tests are run as user bigbird2010.
 
-              <div class="code">
-&lt;!-- Set up permissions and account, and test bigbird2010 -->
-&lt;test ID="permBigbird" auth="admin@example.org">
-    &lt;method>POST&lt;/method>
-    &lt;uri>/cspace-services/authorization/permissions&lt;/uri>
-    &lt;filename>security/1-bigbird-permission.xml&lt;/filename>
-&lt;/test>
-&lt;test ID="accountBigbird">
-    &lt;method>POST&lt;/method>
-    &lt;uri>/cspace-services/accounts&lt;/uri>
-    &lt;filename>security/5-account-bigbird.xml&lt;/filename>
-&lt;/test>
-&lt;test ID="dimension1"  auth="bigbird2010">
-    &lt;method>POST&lt;/method>
-    &lt;uri>/cspace-services/dimensions/&lt;/uri>
-    &lt;part>
-        &lt;label>dimensions_common&lt;/label>
-        &lt;filename>dimension/1.xml&lt;/filename>
-    &lt;/part>
-&lt;/test>
-&lt;test ID="dimension2">
-    &lt;method>PUT&lt;/method>
-    &lt;uri>/cspace-services/dimensions/${dimension1.CSID}&lt;/uri>
-    &lt;part>
-        &lt;label>dimensions_common&lt;/label>
-        &lt;filename>dimension/2-put.xml&lt;/filename>
-    &lt;/part>
-&lt;/test>
+              
+<div class="code">
+&lt;!-- Set up permissions and account, and test bigbird2010 --&gt;
+&lt;test ID="permBigbird" auth="admin@example.org"&gt;
+    &lt;method&gt;POST&lt;/method&gt;
+    &lt;uri&gt;/cspace-services/authorization/permissions&lt;/uri&gt;
+    &lt;filename&gt;security/1-bigbird-permission.xml&lt;/filename&gt;
+&lt;/test&gt;
+&lt;test ID="accountBigbird"&gt;
+    &lt;method&gt;POST&lt;/method&gt;
+    &lt;uri&gt;/cspace-services/accounts&lt;/uri&gt;
+    &lt;filename&gt;security/5-account-bigbird.xml&lt;/filename&gt;
+&lt;/test&gt;
+&lt;test ID="dimension1"  auth="bigbird2010"&gt;
+    &lt;method&gt;POST&lt;/method&gt;
+    &lt;uri&gt;/cspace-services/dimensions/&lt;/uri&gt;
+    &lt;part&gt;
+        &lt;label&gt;dimensions_common&lt;/label&gt;
+        &lt;filename&gt;dimension/1.xml&lt;/filename&gt;
+    &lt;/part&gt;
+&lt;/test&gt;
+&lt;test ID="dimension2"&gt;
+    &lt;method&gt;PUT&lt;/method&gt;
+    &lt;uri&gt;/cspace-services/dimensions/${dimension1.CSID}&lt;/uri&gt;
+    &lt;part&gt;
+        &lt;label&gt;dimensions_common&lt;/label&gt;
+        &lt;filename&gt;dimension/2-put.xml&lt;/filename&gt;
+    &lt;/part&gt;
+&lt;/test&gt;
               </div>
             </td>
           </tr>
@@ -1111,15 +1120,16 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               then uri is /cspace-services/personauthorities/<br>
               The uri contains any required queryString parameters:
 
-              <div class="code">
-               &lt;uri>/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri>
+              
+<div class="code">
+    &lt;uri&gt;/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri&gt;
                 </div>
-              </div>
+              
 
               <p>The uri element may contain expression variables:</p>
 
               <div class="code">
-                &lt;uri>/cspace-services/personauthorities/${oePersonauthority.CSID}&lt;/uri>
+    &lt;uri&gt;/cspace-services/personauthorities/${oePersonauthority.CSID}&lt;/uri&gt;
               </div>
 
               <p>This example uses the CSID returned in the Location header the server sent back when executing &lt;test ID="oePersonauthority"&gt;</p>
@@ -1137,8 +1147,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
           </tr>
 
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts.part" id="RestReplay-restReplay.testGroup.test.parts.part"></a><a name="RestReplay-restReplay.testGroup.test.part" id=
-            "RestReplay-restReplay.testGroup.test.part"></a>/restReplay/testGroup/test/part<br>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts.part" id="RestReplay-restReplay.testGroup.test.parts.part"></a><a name="RestReplay-restReplay.testGroup.test.part" id="RestReplay-restReplay.testGroup.test.part"></a>/restReplay/testGroup/test/part<br>
             /restReplay/testGroup/test/parts/part</td>
           </tr>
 
@@ -1199,30 +1208,32 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
             <td>
               var may be dereferenced in an expression in the request payload.like this:
 
-              <div class="code">
-                &lt;depositor>${depositor}&lt;/depositor>
+              
+<div class="code">
+    &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
 
               <p>The var itself may include any expression syntax in its element text, so that vars can be set based on any previous tests or java objects in the expression namespace.<br>
               e.g.</p>
 
               <div class="code">
-                &lt;var ID="depositor">${oePersonGET.got("persons_common","//refName")}&lt;/var>
+    &lt;var ID="depositor"&gt;${oePersonGET.got("persons_common","//refName")}&lt;/var&gt;
               </div><br>
               In context, this looks like:
 
-              <div class="code">
-    &lt;test ID="oeObject">
-        &lt;method>POST&lt;/method>
-        &lt;uri>/cspace-services/objectexit/&lt;/uri>
-        &lt;part>
-            &lt;label>objectexit_common&lt;/label>
-            &lt;filename>objectexit/oeObject.xml&lt;/filename>
-            &lt;var ID="depositor">${oePersonGET.got("persons_common","//refName")}&lt;/var>
-            &lt;var ID="currentOwner">${oePersonGET.got("persons_common","//refName")}&lt;/var>
-            &lt;var ID="exitNumber">oeObject-exitnum-123&lt;/var>
-        &lt;/part>
-    &lt;/test>
+              
+<div class="code">
+    &lt;test ID="oeObject"&gt;
+        &lt;method&gt;POST&lt;/method&gt;
+        &lt;uri&gt;/cspace-services/objectexit/&lt;/uri&gt;
+        &lt;part&gt;
+            &lt;label&gt;objectexit_common&lt;/label&gt;
+            &lt;filename&gt;objectexit/oeObject.xml&lt;/filename&gt;
+            &lt;var ID="depositor"&gt;${oePersonGET.got("persons_common","//refName")}&lt;/var&gt;
+            &lt;var ID="currentOwner"&gt;${oePersonGET.got("persons_common","//refName")}&lt;/var&gt;
+            &lt;var ID="exitNumber"&gt;oeObject-exitnum-123&lt;/var&gt;
+        &lt;/part&gt;
+    &lt;/test&gt;
               </div>
 
               <p>In this example, the ServiceResult object from the previous test identified by &lt;test ID="oePersonGET"&gt; exposes a method called got(String partLabel, String elementXPath), which can extract the node text for an element in a schema
@@ -1261,7 +1272,8 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
 
-              <ul>
+              
+<ul>
                 <li>ZERO: does no checking. If the server sends a valid reponse, the reponse succeeds.</li>
 
                 <li>ADDOK: Checks for TEXT differences. Nodes added by server, are allowed. Nodes expected by test but ommitted by server are in error.</li>
@@ -1283,7 +1295,7 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
 
             <td>
               <div class="code">
-                &lt;expected level="TEXT" />
+    &lt;expected level="TEXT" /&gt;
               </div>
             </td>
           </tr>
@@ -1355,28 +1367,28 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
               if found inside a template file:</p>
 
               <div class="code">
-    &lt;!-- DON'T DO THIS IN TEMPLATE FILE -->
-    &lt;shortIdentifier>${test2.sent("pa_com","//sid")}&lt;/shortIdentifier>
+    &lt;!-- DON'T DO THIS IN TEMPLATE FILE --&gt;
+    &lt;shortIdentifier&gt;${test2.sent("pa_com","//sid")}&lt;/shortIdentifier&gt;
               </div>
 
               <p>It would be better to defined that variable in the <b>control</b> file, and then pass that single variable into the template.<br>
               e.g. define this in the template file "objectexit/res/test2GET.res.xml"</p>
 
               <div class="code">
-        &lt;shortIdentifier>${sid}&lt;/shortIdentifier>
+    &lt;shortIdentifier&gt;${sid}&lt;/shortIdentifier&gt;
               </div>
 
               <p>then instantiate that variable in the <b>control</b> file:</p>
 
               <div class="code">
-    &lt;response>
-      &lt;expected level="TEXT" />
-      &lt;part>
-        &lt;label>t2_com&lt;/label>
-        &lt;filename>objectexit/res/test2GET.res.xml&lt;/filename>
-        &lt;var ID="shortIdentifier">${test2.sent("pa_com","//id")}&lt;/var>
-      &lt;/part>
-    &lt;/response>
+    &lt;response&gt;
+      &lt;expected level="TEXT" /&gt;
+      &lt;part&gt;
+        &lt;label&gt;t2_com&lt;/label&gt;
+        &lt;filename&gt;objectexit/res/test2GET.res.xml&lt;/filename&gt;
+        &lt;var ID="shortIdentifier"&gt;${test2.sent("pa_com","//id")}&lt;/var&gt;
+      &lt;/part&gt;
+    &lt;/response&gt;
               </div>
             </td>
           </tr>
@@ -1391,13 +1403,13 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
       on these methods of org.dynamide.restreplay.RestReplay</p>
 
       <div class="code">
-        public List&lt;ServiceResult>  autoDelete(String logName);
+    public List&lt;ServiceResult&gt;  autoDelete(String logName);
       </div>
 
       <p>or</p>
 
       <div class="code">
-        public static List&lt;ServiceResult> autoDelete(Map&lt;String, ServiceResult> serviceResultsMap, String logName);
+    public static List&lt;ServiceResult&gt; autoDelete(Map&lt;String, ServiceResult&gt; serviceResultsMap, String logName);
       </div>
     </div>
   </div>
@@ -1410,5 +1422,6 @@ RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-r
     var d2 = document.getElementById("TOCDEST2");
     d2.innerHTML = tt.innerHTML;
 </script>
-</body>
-</html>
+
+
+</body></html>
