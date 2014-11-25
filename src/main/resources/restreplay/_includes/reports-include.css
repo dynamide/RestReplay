@@ -306,3 +306,27 @@ DIV.mutation {
    border: 1px solid lightblue;
    font-size: 100%;
 }
+.res-mananger-caption {
+    text-align: right;
+    width: 150px;
+    display: inline-block;
+}
+.header-label-master {
+    font-size: 110%;
+    font-weight: bold;
+    text-align: right;
+    padding-left: 20px;
+    padding-right: 8px;
+    display: inline-block;
+     font-variant: small-caps;
+}
+.run-options {
+    color: #333;
+    font-size: 100%;
+    display: inline-block;
+    border: 1px solid blue;
+    border-radius: 5px;
+    margin: 2px;
+    padding: 2px;
+    background-color: white;
+}

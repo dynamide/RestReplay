@@ -6,8 +6,8 @@
     <dump payloads="false" dumpServiceResult="minimal" />
 
     <runOptions>
-        <connectionTimeout>3000</connectionTimeout>
-        <socketTimeout>3000</socketTimeout>
+        <connectionTimeout>6600</connectionTimeout>
+        <socketTimeout>4400</socketTimeout>
         <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
     </runOptions>
 
@@ -16,14 +16,13 @@
     </vars>
 
 
-    <!--
-     <run controlFile="_self_test/dynamide.xml" testGroup="login" />
-    <run controlFile="_self_test/dynamide.xml" testGroup="main" />
-    <run controlFile="_self_test/dynamide.xml" testGroup="bugs" />
-    <run controlFile="_self_test/dynamide.xml" testGroup="debug" />
-    -->
+    <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup" />
 
-    <run controlFile="_self_test/dynamide.xml" testGroup="selftestGroup" />
+    <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup2" />
+
+    <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
+
+    <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
 
 
 </restReplayMaster>

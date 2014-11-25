@@ -184,6 +184,10 @@ public class Tools {
         return (slash>=0)?filename.substring(0, slash):"";
     }
 
+    public static String safeFilename(String relPath){
+        return relPath.replaceAll ("[\\/\\\\:\\.\\ ]", "_");
+    }
+
 
     public static String getStackTrace(Throwable e){
         return getStackTrace(e, -1);

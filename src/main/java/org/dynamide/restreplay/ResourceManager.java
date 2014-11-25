@@ -1,12 +1,15 @@
 package org.dynamide.restreplay;
 
+import org.apache.commons.io.FileUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
+import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,51 +69,105 @@ public class ResourceManager {
         org.dom4j.Document document;
         Resource resource = new Resource();
         resource.context = context;
+        resource.base = restReplayBaseDir;
+        resource.relPath = relResourcePath;
         resourceHistory.add(resource);
-        InputStream stream = RestReplay.class.getClassLoader().getResourceAsStream("restreplay/" + relResourcePath);  // restreplay/ is on the classpath (in the jar).
-        if (stream != null) {
-            document = new SAXReader().read(stream);
-            resource.provider = Resource.SOURCE.CLASSPATH;
-            resource.relPath = relResourcePath;
-            resource.foundPath = relResourcePath;
-        } else {
-            String fullPath = Tools.glue(restReplayBaseDir, "/", relResourcePath);
-            resource.relPath = relResourcePath;
-            resource.base = restReplayBaseDir;
-            File f = new File(fullPath);
-            if (!f.exists()) {
-                resource.provider = Resource.SOURCE.NOTFOUND;
-                System.out.println("ERROR: File does not exist: " + fullPath + ", calculated for: " + relResourcePath);
-                return null;
-            }
+        String fullPath = Tools.glue(restReplayBaseDir, "/", relResourcePath);
+        if (new File(fullPath).exists()) {
             document = new SAXReader().read(fullPath);
             resource.provider = Resource.SOURCE.FILE;
             resource.foundPath = fullPath;
+        } else {
+            InputStream stream = RestReplay.class.getClassLoader().getResourceAsStream("restreplay/" + relResourcePath);  // restreplay/ is on the classpath (in the jar).
+            if (stream != null) {
+                document = new SAXReader().read(stream);
+                resource.provider = Resource.SOURCE.CLASSPATH;
+                resource.relPath = relResourcePath;
+                resource.foundPath = relResourcePath;
+            } else {
+                resource.provider = Resource.SOURCE.NOTFOUND;
+                //System.out.println("ERROR: File does not exist: " + fullPath + ", calculated for: " + relResourcePath);
+                return null;
+            }
         }
         resource.document = document;
         return document;
     }
 
-    private String formatSummaryLine(String css, String name, String value){
+    public String readResource(String context, String relResourcePath, String fullPath) throws IOException {
 
-        return "&nbsp;&nbsp;<span class='"+css+"'>"+name+"</span>&nbsp;"+value;
+        org.dom4j.Document document;
+        Resource resource = new Resource();
+        resource.context = context;
+        //resource.base = restReplayBaseDir;
+        resource.relPath = relResourcePath;
+        resourceHistory.add(resource);
+
+
+        if (Tools.notBlank(relResourcePath)) {
+            InputStream stream = RestReplay.class.getClassLoader().getResourceAsStream("restreplay/" + relResourcePath);  // restreplay/ is on the classpath (in the jar).
+            if (stream != null) {
+                //System.out.println("======> found stream for relResourcePath: -->" + relResourcePath + "<--, not fullPath:-->" + fullPath + "<--");
+                String res = FileTools.convertStreamToString(stream);
+                //System.out.println("======> stream starts with:" + res.substring(0, Math.min(res.length(), 100)));
+                resource.provider = Resource.SOURCE.CLASSPATH;
+                resource.relPath = relResourcePath;
+                resource.foundPath = relResourcePath;
+                return res;
+            }
+        }
+        //System.out.println("======> using File for fullPath: "+fullPath);
+        resource.provider = Resource.SOURCE.FILE;
+        resource.foundPath = fullPath;
+        byte[] b = FileUtils.readFileToByteArray(new File(fullPath));
+        return new String(b);
     }
 
-    protected String formatSummary(){
+
+    private String formatSummaryLine(String css, String name, String value){
+        if (Tools.isBlank(value)){
+            return "";
+        }
+        return "<br />&nbsp;&nbsp;<span class='"+css+"'>"+name+"</span>&nbsp;"+value;
+    }
+
+    private String formatSummaryLinePlain(String css, String name, String value){
+        if (Tools.isBlank(value)){
+            return "";
+        }
+        return "\r\n  "+name+" "+value;
+    }
+
+    public String formatSummary(){
         StringBuffer b = new StringBuffer();
         b.append("<table class='resource-history'>");
-        final String BR = "<br />&nbsp;&nbsp;&nbsp;";
         for (Resource resource: resourceHistory){
             b.append("<tr><td>")
                     .append("<b>"+resource.relPath+"</b>")
-                    .append(BR+formatSummaryLine("SMALL", "base:", resource.base))
-                    .append(BR+formatSummaryLine("SMALL", "foundPath:",resource.foundPath))
-                    .append(BR+formatSummaryLine("SMALL", "source: ", resource.provider.toString()))
-                    .append(BR+formatSummaryLine("SMALL", "context:", resource.context))
-                    .append(BR+formatSummaryLine("SMALL", "doc:", resource.getDocumentSnippet()))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "base:", resource.base))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "foundPath:",resource.foundPath))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "source: ", resource.provider.toString()))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "context:", resource.context))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "doc:", resource.getDocumentSnippet()))
                     .append("</td></tr>");
         }
         b.append("</table>");
+        return b.toString();
+    }
+
+    public String formatSummaryPlain(){
+        StringBuffer b = new StringBuffer();
+        b.append("ResourceManager History");
+        final String BR = "\r\n";
+        for (Resource resource: resourceHistory){
+            b.append(BR)
+                    .append(resource.relPath)
+                    .append(formatSummaryLinePlain("SMALL", "base:", resource.base))
+                    .append(formatSummaryLinePlain("SMALL", "foundPath:",resource.foundPath))
+                    .append(formatSummaryLinePlain("SMALL", "source:", resource.provider.toString()))
+                    .append(formatSummaryLinePlain("SMALL", "context:", resource.context))
+                    .append(formatSummaryLinePlain("SMALL", "doc:", resource.getDocumentSnippet()));
+        }
         return b.toString();
     }
 

@@ -205,7 +205,7 @@
                     <mainClass>org.dynamide.restreplay.RestReplay</mainClass>
                     <arguments>
                         <argument>-restReplayBaseDir</argument>
-                        <argument>${basedir}/src/test/resources/test-data/restreplay</argument>
+                        <argument>${basedir}/src/main/resources/restreplay</argument>
                         <!--
                         You can run with the argument here:
                         <argument>/Users/vcrocla/src/RestReplay.pearson.basedir</argument>

@@ -53,7 +53,7 @@ public class ZipTools {
         if (parent != null) {
             File p = new File(parent);
             p.mkdirs();
-            System.out.println("Making directory: " + p.getCanonicalPath());
+            //System.out.println("Making directory: " + p.getCanonicalPath());
         }
     }
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplay>
+    <protoHostPort>${DMSERVER}</protoHostPort>
+    <testGroup ID="barGroup" autoDeletePOSTS="false">
+        <test ID="dynamideToken">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+        </test>
+    </testGroup>
+</restReplay>

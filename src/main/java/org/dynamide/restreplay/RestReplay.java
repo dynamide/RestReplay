@@ -28,19 +28,34 @@ import javax.xml.ws.Service;
  */
 public class RestReplay {
 
-    public RestReplay(String basedir, String reportsDir, ResourceManager manager){
+    public RestReplay(String basedir, String reportsDir, ResourceManager manager, RunOptions parentRunOptions){
         this.basedir = basedir;
         this.serviceResultsMap = createResultsMap();
         this.reportsList = new ArrayList<String>();
         this.reportsDir = reportsDir;
         this.resourceManager = manager;
+        if (parentRunOptions!=null) {
+            this.runOptions = parentRunOptions;
+        } else {
+            this.runOptions = new RunOptions();
+            try {
+                Document doc = this.resourceManager.getDocument("RestReplay:constructor:runOptions", basedir, RunOptions.RUN_OPTIONS_FILENAME);
+                if (doc != null) {
+                    setDefaultRunOptions(doc.getRootElement());
+                }
+            } catch (DocumentException de) {
+                System.err.println("ERROR: could not read default runOptions.xml");
+            }
+        }
     }
 
     public static class RunOptions{
+        public static final String RUN_OPTIONS_FILENAME = "runOptions.xml";
         public int connectionTimeout = 30000;   //millis until gives up on establishing a connection.
         public int socketTimeout = 30000;  //millis until gives up on data bytes transmitted, apache docs say "timeout for waiting for data".
         public boolean errorsBecomeEmptyStrings = true;
         public LEVEL acceptAlertLevel = LEVEL.OK;  //OK means breaks on WARN and ERROR.
+        public boolean dumpResourceManagerSummary = true;
         public boolean breakNow(ServiceResult.Alert alert) {
             return (alert.level.compareTo(this.acceptAlertLevel) > 0);
         }
@@ -52,6 +67,17 @@ public class RestReplay {
             }
             return false;
         }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "connectionTimeout=" + connectionTimeout +
+                    ", socketTimeout=" + socketTimeout +
+                    ", errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +
+                    ", acceptAlertLevel=" + acceptAlertLevel +
+                    ", dumpResourceManagerSummary=" + dumpResourceManagerSummary +
+                    '}';
+        }
     }
 
 
@@ -59,7 +85,7 @@ public class RestReplay {
     //TODO: make sure that the report gets all the alerts
     //TODO: check breaking scenarios and RunOptions.
     //TODO: config from master control file.
-    private RunOptions runOptions = new RunOptions();
+    private RunOptions runOptions;
 
     public RunOptions getRunOptions(){
         return runOptions;
@@ -204,7 +230,7 @@ public class RestReplay {
 
     public org.dom4j.Document openMasterConfigFile(String reason, String masterFilename) throws FileNotFoundException {
         try {
-            return getResourceManager().getDocument("openMasterConfigFile:"+reason, basedir, masterFilename);
+            return getResourceManager().getDocument("openMasterConfigFile:" + reason, basedir, masterFilename);
         } catch (DocumentException de) {
             System.out.println("$$$$$$ ERROR: " + de);
             throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + basedir + ". Exiting test. " + de);
@@ -278,12 +304,27 @@ public class RestReplay {
 
     // from xml file as xpath: "/restReplayMaster/runOptions"
     public void setDefaultRunOptions(Node runOptionsNode){
-        //document.selectSingleNode("/restReplayMaster/runOptions")
         String connectionTimeout = runOptionsNode.valueOf("connectionTimeout");
         String socketTimeout = runOptionsNode.valueOf("socketTimeout");
-        System.out.println("RunOptions: connectionTimeout: "+connectionTimeout+", socketTimeout:"+socketTimeout);
-        runOptions.connectionTimeout = Integer.parseInt(runOptionsNode.valueOf("connectionTimeout"));
-        runOptions.socketTimeout = Integer.parseInt(runOptionsNode.valueOf("socketTimeout"));
+        String errorsBecomeEmptyStrings = runOptionsNode.valueOf("errorsBecomeEmptyStrings");
+        String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
+        if (Tools.notBlank(connectionTimeout)) {
+            System.out.println("====================>>>"+connectionTimeout);
+            runOptions.connectionTimeout = Integer.parseInt(connectionTimeout);
+        }
+        if (Tools.notBlank(socketTimeout)) {
+            runOptions.socketTimeout = Integer.parseInt(socketTimeout);
+        }
+        if (Tools.notBlank(errorsBecomeEmptyStrings)) {
+            runOptions.errorsBecomeEmptyStrings = Tools.isTrue(errorsBecomeEmptyStrings);
+        }
+        if (Tools.notBlank(dumpResourceManagerSummary)) {
+            runOptions.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
+        }
+        System.out.println("setDefaultRunOptions: connectionTimeout: "+connectionTimeout
+                           +", socketTimeout:"+socketTimeout
+                           +" errorsBecomeEmptyStrings:"+errorsBecomeEmptyStrings
+                           +" dumpResourceManagerSummary:"+dumpResourceManagerSummary);
     }
 
     public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
@@ -293,7 +334,7 @@ public class RestReplay {
     /** Creates new instances of RestReplay, one for each controlFile specified in the master,
      *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
     public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
-        System.out.println(">>> masterFilename: "+masterFilename);
+        //System.out.println(">>> masterFilename: "+masterFilename);
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         org.dom4j.Document document;
         if (readOptionsFromMaster){
@@ -320,7 +361,7 @@ public class RestReplay {
             if (Tools.notBlank(this.getEnvID())){
                 envReportsDir = Tools.glue(saveReportsDir,"/",this.relativePathFromReportsDir);
             }
-            RestReplay replay = new RestReplay(basedir, envReportsDir, this.getResourceManager());//this.reportsDir);
+            RestReplay replay = new RestReplay(basedir, envReportsDir, this.getResourceManager(), this.runOptions);//this.reportsDir);
             replay.setEnvID(this.envID);  //internally sets replay.relativePathFromReportsDir
             replay.setControlFileName(controlFile);
             replay.setProtoHostPort(protoHostPort);
@@ -590,32 +631,18 @@ public class RestReplay {
         return result;
     }
 
-    public static String readResource(String relResourcePath, String fullPath) throws IOException {
-        if (Tools.notBlank(relResourcePath)) {
-            InputStream stream = RestReplay.class.getClassLoader().getResourceAsStream("restreplay/" + relResourcePath);  // restreplay/ is on the classpath (in the jar).
-            if (stream != null) {
-                System.out.println("======> found stream for relResourcePath: -->" + relResourcePath + "<--, not fullPath:-->" + fullPath + "<--");
-                String res = FileTools.convertStreamToString(stream);
-                //System.out.println("======> stream starts with:" + res.substring(0, Math.min(res.length(), 100)));
-                return res;
-            }
-        }
-        System.out.println("======> using File for fullPath: "+fullPath);
-        byte[] b = FileUtils.readFileToByteArray(new File(fullPath));
-        return new String(b);
-    }
 
 
     /* See, for example of <expected> : test/resources/test-data/restreplay/objectexit/object-exit.xml */
-    protected static String validateResponseSinglePayload(ServiceResult serviceResult,
+    protected String validateResponseSinglePayload(ServiceResult serviceResult,
                                                  Map<String, ServiceResult> serviceResultsMap,
                                                  PartsStruct expectedResponseParts,
                                                  RestReplayEval evalStruct,
                                                  RunOptions runOptions)
     throws Exception {
         String OK = "";
-        String expectedPartContent = readResource(expectedResponseParts.expectedResponseFilenameRel,
-                                                  expectedResponseParts.expectedResponseFilename);
+        String expectedPartContent = getResourceManager().readResource("validateResponseSinglePayload", expectedResponseParts.expectedResponseFilenameRel,
+                expectedResponseParts.expectedResponseFilename);
         Map<String,String> vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.  Must be there, even if empty.
         EvalResult evalResult = evalStruct.eval(expectedResponseParts.expectedResponseFilenameRel,
                                                 expectedPartContent,
@@ -654,7 +681,7 @@ public class RestReplay {
         return OK;
     }
 
-    protected static String validateResponse(ServiceResult serviceResult,
+    protected String validateResponse(ServiceResult serviceResult,
                                              Map<String, ServiceResult> serviceResultsMap,
                                              PartsStruct expectedResponseParts,
                                              RestReplayEval evalStruct,
@@ -698,7 +725,7 @@ public class RestReplay {
     private static String dumpMasterVars(Map<String, String> masterVars){
         StringBuffer buffer = new StringBuffer();
         for (Map.Entry<String,String> entry: masterVars.entrySet()){
-           buffer.append("\r\n    ").append(entry.getKey()).append(": ").append(entry.getValue());
+           buffer.append("\r\n        ").append(entry.getKey()).append(": ").append(entry.getValue());
         }
         return buffer.toString();
     }
@@ -733,7 +760,7 @@ public class RestReplay {
 
         String controlFile = Tools.glue(restReplayBaseDir, "/", controlFileName);
         org.dom4j.Document document;
-        document = getResourceManager().getDocument("runRestReplayFile:controlFileName", restReplayBaseDir, controlFileName); //will check full path first, then checks relative to PWD.
+        document = getResourceManager().getDocument("runRestReplayFile:controlFileName, test:"+testGroupID, restReplayBaseDir, controlFileName); //will check full path first, then checks relative to PWD.
         if (document==null){
             throw new FileNotFoundException("RestReplay control file ("+controlFileName+") not found in classpath, or basedir: "+restReplayBaseDir+" Exiting test.");
         }
@@ -743,7 +770,7 @@ public class RestReplay {
         Node n = document.selectSingleNode("/restReplay/protoHostPort");  //see if control file has override.
         if (null != n){
             protoHostPort = n.getText().trim();
-            System.out.println("Using protoHostPort ('"+protoHostPort+"') from restReplay file ('"+controlFileName+"'), not master.");
+            //System.out.println("Using protoHostPort ('"+protoHostPort+"') from restReplay file ('"+controlFileName+"'), not master.");
             protoHostPortFrom = "from control file.";
         }
 
@@ -761,6 +788,7 @@ public class RestReplay {
                           +"\r\nRestReplay running:"
                           +"\r\n   controlFile: "+controlFileName
                           +"\r\n   Master: "+ masterFilenameInfo
+                          +"\r\n   reports directory: "+reportsDir
                           +"\r\n   env: "+relativePathFromReportsDir
                           +"\r\n   protoHostPort: "+protoHostPort+"    "+protoHostPortFrom
                           +"\r\n   testGroup: "+testGroupID
@@ -769,6 +797,7 @@ public class RestReplay {
                           +"\r\n   masterVars: "+dumpMasterVars(masterVars)
                           +"\r\n   param_autoDeletePOSTS: "+param_autoDeletePOSTS
                           +"\r\n   Dump info: "+dump
+                          +"\r\n   RunOptions: "+getRunOptions().toString()
                           +"\r\n========================================================================"
                           +"\r\n";
         report.addRunInfo(restReplayHeader);
@@ -844,19 +873,25 @@ public class RestReplay {
         //=== Now spit out the HTML report file ===
         File m = new File(controlFileName);
         String localName = m.getName();//don't instantiate, just use File to extract file name without directory.
-        String reportName = localName+'-'+testGroupID+".html";
 
-        File resultFile = report.saveReport(restReplayBaseDir, reportsDir, reportName);
+        //String reportName = localName+'-'+testGroupID+".html";
+        String reportName = controlFileName+'-'+testGroupID+".html";
+        //System.out.println("=======================>>> report name "+reportName);
+
+        File resultFile = report.saveReport(restReplayBaseDir, reportsDir, reportName, this);
         if (resultFile!=null) {
             String toc = report.getTOC(relativePathFromReportsDir+reportName);
             reportsList.add(toc);
         }
         //================================
+        if (runOptions.dumpResourceManagerSummary){
+            System.out.println(getResourceManager().formatSummaryPlain());
+        }
 
         return results;
     }
 
-    private static ServiceResult executeTestNode(
+    private ServiceResult executeTestNode(
                                         ServiceResult serviceResult,
                                         String contentRawFromMutator,
                                         ContentMutator mutator,
@@ -1019,7 +1054,7 @@ public class RestReplay {
                 String contentRaw = "";
                 String fileName = parts.requestPayloadFilename;
                 if (contentRawFromMutator == null) {
-                    contentRaw = readResource(parts.requestPayloadFilenameRel, parts.requestPayloadFilename);//new String(FileUtils.readFileToByteArray(new File(fileName)));
+                    contentRaw = getResourceManager().readResource("executeTestNode:POST/PUT:"+testIDLabel, parts.requestPayloadFilenameRel, parts.requestPayloadFilename);//new String(FileUtils.readFileToByteArray(new File(fileName)));
                 } else {
                     contentRaw = contentRawFromMutator;
                 }
@@ -1048,7 +1083,7 @@ public class RestReplay {
                 serviceResult.time = (System.currentTimeMillis()-startTime);
 
                 if (Tools.notBlank(mutatorType)&&(contentRawFromMutator==null)){
-                    ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename);
+                    ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename, getResourceManager());
                     contentMutator.setOptions(testNode);
                     serviceResult.mutatorType = mutatorType;
                     serviceResult.mutator = contentMutator;
@@ -1443,9 +1478,10 @@ public class RestReplay {
 
             if (Tools.notEmpty(restReplayMaster)){
                 if (Tools.notEmpty(controlFilename)){
+                    //TODO: DOCO: I think this means you can run a control file directly from the command line (rather than a master).  This may be historical?  where do global options come from?
                     System.out.println("WARN: controlFilename: "+controlFilename+" will not be used because master was specified.  Running master: "+restReplayMaster);
                 }
-                RestReplay replay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager);
+                RestReplay replay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager, null);
                 replay.setEnvID(envID);
                 replay.readOptionsFromMasterConfigFile(restReplayMaster);
                 replay.setAutoDeletePOSTS(bAutoDeletePOSTS);
@@ -1461,10 +1497,10 @@ public class RestReplay {
                     dump.payloads = Tools.isTrue(dumpResultsFromCmdLine);
                 }
                 List<String> reportsList = new ArrayList<String>();
-                RunOptions runOptions = new RunOptions(); //just use defaults. won't read master file.
-                RestReplay restReplay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager);
+                //RunOptions runOptions = new RunOptions(); //just use defaults. won't read master file.
+                RestReplay restReplay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager, null);
                 restReplay.runRestReplayFile(restReplayBaseDirResolved, controlFilename, testGroupID, testID,
-                                  createResultsMap(), null, runOptions,
+                                  createResultsMap(), null, restReplay.getRunOptions(),
                                   bAutoDeletePOSTS, dump, "", null, reportsList, reportsDir,""/*no master, so no env*/, "");
                 System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }

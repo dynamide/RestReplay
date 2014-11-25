@@ -88,8 +88,8 @@ public class RestReplayReport {
 
     private String runInfo = "";
 
-    public String getPage(String basedir) throws IOException {
-        return formatPageStart(basedir)
+    public String getPage(String basedir, RestReplay restReplay) throws IOException {
+        return formatPageStart(basedir, restReplay)
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "</div>"
                 + header.toString()
                 + this.runInfo
@@ -228,6 +228,9 @@ public class RestReplayReport {
     }
 
     public String getTOC(String reportName) {
+
+        String relativeReportName = reportName; //extractRelPath(reportName).filenameOnly;
+
         StringBuffer tocBuffer = new StringBuffer();
 
         if (Tools.notBlank(reportName)) {
@@ -246,14 +249,15 @@ public class RestReplayReport {
             String sep = String.format(TOC_LINESEP, cssClassTR, cssClassTD);
             if (count>0){tocBuffer.append(sep);}
             count++;
-            tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
+            //tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
+            tocBuffer.append("<a href='" + relativeReportName + "#"+ toc.testID /*"#TOC" +toc.tocID*/ + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
                      .append((toc.children))
                      .append(TOC_CELLSEP)
-                    .append(toc.time)
-                    .append(TOC_CELLSEP)
+                     .append(toc.time)
+                     .append(TOC_CELLSEP)
                      .append(toc.detail)
                      .append(TOC_CELLSEP)
-                    .append(toc.responseCode)
+                     .append(toc.responseCode)
                      .append(TOC_CELLSEP)
                      .append(tocWarn(toc.warnings))
                      .append(TOC_CELLSEP)
@@ -339,10 +343,10 @@ public class RestReplayReport {
 
     private List<TOC> tocList = new ArrayList<TOC>();
 
-    public static String formatPageStart(String restReplayBaseDir) throws IOException {
+    public static String formatPageStart(String restReplayBaseDir, RestReplay restReplay) throws IOException {
 
-        String script = RestReplay.readResource(INCLUDES_DIR + "/reports-include.js", restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.js");
-        String style = RestReplay.readResource(INCLUDES_DIR + "/reports-include.css", restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.css");
+        String script = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js",  restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.js");
+        String style  = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.css");
         //String script = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.js");
         //String style = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.css");
         return "<html><head><script type='text/javascript'>\r\n"
@@ -352,13 +356,37 @@ public class RestReplayReport {
                 + "\r\n</style></head><body>";
     }
 
-    public File saveReport(String restReplayBaseDir, String reportsDir, String reportName) {
+    public static class FilePath {
+        public String relPath = "";
+        public String filenameOnly = "";
+    }
+    private FilePath extractRelPath(String reportName){
+        //System.out.println("=====extractRelPath========>>> reportName:"+reportName);
+        FilePath result = new FilePath();
+        File f = new File(reportName);
+        result.filenameOnly = f.getName();
+        result.relPath = Tools.getFilenamePath(f.getPath());
+        //System.out.println("=====extractRelPath========>>> result.relPath:"+result.relPath);
+        //System.out.println("=====extractRelPath========>>> result.filenameOnly:"+result.filenameOnly);
+        return result;
+    }
+
+    public File saveReport(String restReplayBaseDir, String reportsDir, String reportName, RestReplay restReplay) {
         try {
-            File resultFile = FileTools.saveFile(reportsDir, reportName, this.getPage(restReplayBaseDir), true);
+            FilePath filePath = extractRelPath(reportName);
+            String relPath = filePath.relPath;
+            String detailDirectory = Tools.join(reportsDir, relPath);
+
+            File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(restReplayBaseDir, restReplay), true);
             if (resultFile != null) {
                 String resultFileName = resultFile.getCanonicalPath();
-                //System.out.println("RestReplay summary reports saved to directory: "+resultFile.getParent());
-                System.out.println("**** \r\n**** RestReplay summary report: " + resultFileName+"\r\n**** ");
+                //System.out.println("RestReplay summary report output:"
+                //                  +"\n detailDirectory:"+detailDirectory
+                //                  +"\n reportFilenameNameOnly:"+filePath.filenameOnly
+                //                  +"\n restReplayBaseDir:"+restReplayBaseDir
+                //                  +"\n reportsDir:"+reportsDir
+                //                  +"\n reportName:"+reportName);
+                System.out.println("RestReplay summary report: " + resultFileName+"\r\n");
                 return resultFile;
             }
         } catch (Exception e) {
@@ -388,12 +416,21 @@ public class RestReplayReport {
         String relPath = Tools.getFilenamePath(f.getPath());
         String masterFilenameNameOnly = "index."
                     +(Tools.notBlank(envID)?envID+'.':"")
+                    +Tools.safeFilename(relPath)+'_'
                     + f.getName() + ".html";
+        String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
+
+        //System.out.println("RestReplay summary report output ***********>>>(saveIndexForMaster):"
+        //                +"\n restReplayBaseDir:"+restReplayBaseDir
+        //                +"\n reportsDir:"+reportsDir
+        //                +"\n localMasterFilename:"+localMasterFilename
+        //                +"\n relPath:"+relPath
+        //                +"\n masterFilenameNameOnly:"+masterFilenameNameOnly);
 
         try {
-            StringBuffer sb = new StringBuffer(formatPageStart(restReplayBaseDir));
+            StringBuffer sb = new StringBuffer(formatPageStart(restReplayBaseDir, restReplay));
             String dateStr = Tools.nowLocale();
-            sb.append("<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + dateStr + lbl(" master") + localMasterFilename + "</div>");
+            sb.append("<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
             sb.append("<div class='masterVars'>")
               .append("<span class='LABEL'>environment:</span> <span class='env'>"+envID+"</span><br />")
               .append(formatMasterVars(masterVars)).append("</div>");
@@ -401,11 +438,14 @@ public class RestReplayReport {
                 sb.append(oneToc);
                 sb.append("<hr />");
             }
+            sb.append("<h2>Run Options</h2>");
+            sb.append("<div class='run-options'>"+restReplay.getRunOptions()+"</div>");
+            sb.append("<br /><br /><hr />");
             sb.append("<h2>ResourceManager Summary</h2>");
             sb.append(restReplay.getResourceManager().formatSummary());
             sb.append(HTML_PAGE_END);
-            System.out.println("====\r\n==== Master Report Index: "+reportsDir+'/'+Tools.glue(relPath, masterFilenameNameOnly)+"\r\n====");
-            return FileTools.saveFile(Tools.join(reportsDir, relPath), masterFilenameNameOnly, sb.toString(), true);
+            System.out.println("====\r\n==== Master Report Index: "+Tools.glue(masterFilenameDirectory,masterFilenameNameOnly)+"\r\n====");
+            return FileTools.saveFile(masterFilenameDirectory, masterFilenameNameOnly, sb.toString(), true);
         } catch (Exception e) {
             System.out.println("ERROR saving RestReplay report index: in  restReplayBaseDir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" relPath:"+relPath+ " masterFilename: " + masterFilenameNameOnly + " list: " + reportsList + " error: " + e);
             return null;
@@ -426,6 +466,7 @@ public class RestReplayReport {
     protected String formatSummary(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
         fb.append("<a name='TOC" + tocID + "'></a>");
+        fb.append("<a name='" + serviceResult.testID + "'></a>");
         fb.append(detail(serviceResult, false, false, DETAIL_LINESEP, DETAIL_END, tocID));
         return fb.toString();
     }

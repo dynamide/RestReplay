@@ -14,9 +14,9 @@ import org.dom4j.Node;
 
 public class ContentMutator {
 
-    public ContentMutator(String relResourceName, String theFileName) throws IOException {
+    public ContentMutator(String relResourceName, String theFileName, ResourceManager resourceManager) throws IOException {
         fileName = theFileName;
-        contentRaw = RestReplay.readResource(relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(fileName)));
+        contentRaw = resourceManager.readResource("ContentMutator:constructor", relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(fileName)));
         jo = new JSONObject(contentRaw);
         names = JSONObject.getNames(jo);
         max = names.length;
@@ -124,11 +124,14 @@ public class ContentMutator {
     public static void main(String[]args) throws Exception {
         String relResourceName = "_self_test/content-mutator-test.json";
         String fn = "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json";
-        ContentMutator mutator = new ContentMutator(relResourceName, fn);
+        ResourceManager standaloneResourceManager = ResourceManager.createRootResourceManager();
+
+        ContentMutator mutator = new ContentMutator(relResourceName, fn, standaloneResourceManager);
         String m = mutator.mutate();
         while(m!=null){
             System.out.println(m);
             m = mutator.mutate();
         }
+        System.out.println("main done.  ResourceManager.formatSummaryPlain: "+standaloneResourceManager.formatSummaryPlain());
     }
 }

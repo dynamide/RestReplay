@@ -44,9 +44,11 @@ public class RestReplayTest {
     public static RestReplay createRestReplayForMaven() throws Exception {
         String baseDir = getBaseDirectory();
         ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
+        RestReplay.RunOptions parentRunOptions = new RestReplay.RunOptions();
         RestReplay replay = new RestReplay(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
                                            baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
-                                           rootResourceManager);
+                                           rootResourceManager,
+                                           null);
         return replay;
     }
 
@@ -54,7 +56,7 @@ public class RestReplayTest {
         String pwd = ".";
         try {
             pwd = (new File(".")).getCanonicalPath();
-            System.out.println("pwd in createRestReplayForMaven:"+pwd);
+            //System.out.println("pwd in createRestReplayForMaven:"+pwd);
         } catch (Exception e){
             System.err.println("Error trying to find current working directory: "+e);
         }
@@ -77,8 +79,8 @@ public class RestReplayTest {
         ResultSummary summary = resultSummaryForGroup(list, HTML);
         org.testng.Reporter.log(summary.table);
         ResultSummary textSummary = resultSummaryForGroup(list, TEXT);
-        System.out.println("SUMMARY: \r\n"+textSummary.table);
-        Assert.assertEquals(summary.oks, summary.total, "Expected all "+summary.total+ " RestReplay tests to pass.  See Output from test '"+testname+"'. "+summary.errorTests);
+        System.out.println("SUMMARY: "+textSummary.table);
+        Assert.assertEquals(summary.oks, summary.total, "Expected all " + summary.total + " RestReplay tests to pass.  See Output from test '" + testname + "'. " + summary.errorTests);
     }
 
 
@@ -125,7 +127,7 @@ public class RestReplayTest {
                 groupID = serviceResults.get(0).testGroupID;
                 summary.groups.add(groupID);
             }
-            buff.append(format.ROWSTART+"RestReplay testGroup "+groupID+format.ROWEND);
+            buff.append(format.ROWSTART+"RestReplay testGroup:"+groupID+format.ROWEND);
             for (ServiceResult serviceResult : serviceResults){
                 summary.total++;
                 if (serviceResult.gotExpectedResult()){
