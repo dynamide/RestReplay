@@ -21,7 +21,7 @@ import org.json.XML;
 
 
 /**  Format a report based on RestReplay ServiceResult object from a test group.
- * @author  laramie
+ * @author  Laramie Crocker
  */
 public class RestReplayReport {
     public static final String INCLUDES_DIR = "_includes";
