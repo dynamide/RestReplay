@@ -58,7 +58,7 @@ public class RestReplayTransport {
         HttpClientParams params = client.getParams();
         params.setSoTimeout(sr.socketTimeout);
         params.setConnectionManagerTimeout(sr.connectionTimeout);
-        System.out.println("setting timeouts: "+sr.socketTimeout+','+sr.connectionTimeout);
+        //System.out.println("setting timeouts: "+sr.socketTimeout+','+sr.connectionTimeout);
         client.setParams(params);
     }
 

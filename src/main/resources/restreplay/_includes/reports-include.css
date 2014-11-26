@@ -330,3 +330,6 @@ DIV.mutation {
     padding: 2px;
     background-color: white;
 }
+.cached-resource {
+    color: green;
+}

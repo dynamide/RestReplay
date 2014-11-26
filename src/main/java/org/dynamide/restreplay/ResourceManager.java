@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ResourceManager {
 
@@ -25,6 +27,7 @@ public class ResourceManager {
         public String foundPath = "";
         public SOURCE provider;
         public String context = "";
+        public boolean cached = false;
         public String getDocumentSnippet(){
             String docstring = "";
             if (document!=null){
@@ -66,6 +69,18 @@ public class ResourceManager {
     //System.out.println("$$$$$$$$ getResource "+"/restreplay/"+masterFilename+":2-->"+res2+"<--");
 
     public org.dom4j.Document getDocument(String context, String restReplayBaseDir, String relResourcePath) throws DocumentException {
+        boolean markForCache = false;
+        CachedDoc cachedDoc = docCache.get(relResourcePath);
+
+        //implement a cache that caches on the *second* access.
+        if (cachedDoc != null && cachedDoc.document != null  ){
+            if ( cachedDoc.document == null){
+                markForCache = true;
+            } else {
+                return cachedDoc.document;
+            }
+        }
+
         org.dom4j.Document document;
         Resource resource = new Resource();
         resource.context = context;
@@ -91,10 +106,40 @@ public class ResourceManager {
             }
         }
         resource.document = document;
+
+        if (markForCache){
+            System.out.println("====adding to docCache===>>>"+relResourcePath);
+            docCache.put(relResourcePath, new CachedDoc(document));  //second time actually cache it.
+            resource.cached = true;
+        } else {
+            docCache.put(relResourcePath, new CachedDoc(null));  //first time is empty string
+        }
+
         return document;
     }
 
+    private Map<String,String> cache = new HashMap<String, String>();
+
+    private Map<String,CachedDoc> docCache = new HashMap<String, CachedDoc>();
+
+    private static class CachedDoc {
+        public CachedDoc(Document document){
+            this.document = document;
+        }
+        public Document document;
+    }
+
     public String readResource(String context, String relResourcePath, String fullPath) throws IOException {
+        boolean markForCache = false;
+        String cachedResource = cache.get(relResourcePath);
+        //implement a cache that caches on the *second* access.
+        if (cachedResource != null  ){
+            if (cachedResource.length()==0){
+                markForCache = true;
+            } else {
+                return cachedResource;
+            }
+        }
 
         org.dom4j.Document document;
         Resource resource = new Resource();
@@ -113,6 +158,13 @@ public class ResourceManager {
                 resource.provider = Resource.SOURCE.CLASSPATH;
                 resource.relPath = relResourcePath;
                 resource.foundPath = relResourcePath;
+                if (markForCache){
+                    resource.cached = true;
+                    //System.out.println("====adding to cache===>>>"+relResourcePath);
+                    cache.put(relResourcePath, res);  //second time actually cache it.
+                } else {
+                    cache.put(relResourcePath, "");  //first time is empty string
+                }
                 return res;
             }
         }
@@ -120,7 +172,15 @@ public class ResourceManager {
         resource.provider = Resource.SOURCE.FILE;
         resource.foundPath = fullPath;
         byte[] b = FileUtils.readFileToByteArray(new File(fullPath));
-        return new String(b);
+        String res = new String(b);
+        if (markForCache){
+            //System.out.println("====adding to cache===>>>"+relResourcePath);
+            cache.put(relResourcePath, res);  //second time actually cache it.
+            resource.cached = true;
+        } else {
+            cache.put(relResourcePath, "");  //first time is empty string
+        }
+        return res;
     }
 
 
@@ -142,13 +202,15 @@ public class ResourceManager {
         StringBuffer b = new StringBuffer();
         b.append("<table class='resource-history'>");
         for (Resource resource: resourceHistory){
+            String css = resource.cached ? "class='cached-resource'" : "";
             b.append("<tr><td>")
-                    .append("<b>"+resource.relPath+"</b>")
+                    .append("<b "+css+">"+resource.relPath+"</b>")
                     .append(formatSummaryLine("SMALL res-mananger-caption", "base:", resource.base))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "foundPath:",resource.foundPath))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "source: ", resource.provider.toString()))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "context:", resource.context))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "doc:", resource.getDocumentSnippet()))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "cached:", resource.cached?"true":""))
                     .append("</td></tr>");
         }
         b.append("</table>");

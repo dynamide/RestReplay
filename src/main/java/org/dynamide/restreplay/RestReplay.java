@@ -41,7 +41,7 @@ public class RestReplay {
             try {
                 Document doc = this.resourceManager.getDocument("RestReplay:constructor:runOptions", basedir, RunOptions.RUN_OPTIONS_FILENAME);
                 if (doc != null) {
-                    setDefaultRunOptions(doc.getRootElement());
+                    setDefaultRunOptions(doc.getRootElement(), "default");
                 }
             } catch (DocumentException de) {
                 System.err.println("ERROR: could not read default runOptions.xml");
@@ -55,6 +55,7 @@ public class RestReplay {
         public int socketTimeout = 30000;  //millis until gives up on data bytes transmitted, apache docs say "timeout for waiting for data".
         public boolean errorsBecomeEmptyStrings = true;
         public LEVEL acceptAlertLevel = LEVEL.OK;  //OK means breaks on WARN and ERROR.
+        public boolean skipMutators = false;
         public boolean dumpResourceManagerSummary = true;
         public boolean breakNow(ServiceResult.Alert alert) {
             return (alert.level.compareTo(this.acceptAlertLevel) > 0);
@@ -76,7 +77,21 @@ public class RestReplay {
                     ", errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +
                     ", acceptAlertLevel=" + acceptAlertLevel +
                     ", dumpResourceManagerSummary=" + dumpResourceManagerSummary +
+                    ", skipMutators=" + skipMutators +
                     '}';
+        }
+
+        public String toHTML() {
+            String BR = "<br />\r\n";
+            String C = ",";
+            return "<div class='RunOptions'>{" +BR+
+                    "connectionTimeout=" + connectionTimeout +C+BR+
+                    "socketTimeout=" + socketTimeout +C+BR+
+                    "errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +C+BR+
+                    "acceptAlertLevel=" + acceptAlertLevel +C+BR+
+                    "dumpResourceManagerSummary=" + dumpResourceManagerSummary +C+BR+
+                    "skipMutators=" + skipMutators +BR+
+                    "}</div>";
         }
     }
 
@@ -269,7 +284,7 @@ public class RestReplay {
         setMasterVars(readVars(nodeWVars));
 
 
-        setDefaultRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"));
+        setDefaultRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
         return document;
     }
 
@@ -303,13 +318,14 @@ public class RestReplay {
     }
 
     // from xml file as xpath: "/restReplayMaster/runOptions"
-    public void setDefaultRunOptions(Node runOptionsNode){
+    public void setDefaultRunOptions(Node runOptionsNode, String context){
         String connectionTimeout = runOptionsNode.valueOf("connectionTimeout");
         String socketTimeout = runOptionsNode.valueOf("socketTimeout");
         String errorsBecomeEmptyStrings = runOptionsNode.valueOf("errorsBecomeEmptyStrings");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
+        String skipMutators = runOptionsNode.valueOf("skipMutators");
         if (Tools.notBlank(connectionTimeout)) {
-            System.out.println("====================>>>"+connectionTimeout);
+            //System.out.println("====================>>>"+connectionTimeout);
             runOptions.connectionTimeout = Integer.parseInt(connectionTimeout);
         }
         if (Tools.notBlank(socketTimeout)) {
@@ -321,10 +337,14 @@ public class RestReplay {
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             runOptions.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
         }
-        System.out.println("setDefaultRunOptions: connectionTimeout: "+connectionTimeout
+        if (Tools.notBlank(skipMutators)) {
+            runOptions.skipMutators = Tools.isTrue(skipMutators);
+        }
+        System.out.println("set RunOptions ("+context+"): connectionTimeout: "+connectionTimeout
                            +", socketTimeout:"+socketTimeout
                            +" errorsBecomeEmptyStrings:"+errorsBecomeEmptyStrings
-                           +" dumpResourceManagerSummary:"+dumpResourceManagerSummary);
+                           +" dumpResourceManagerSummary:"+dumpResourceManagerSummary
+                           +" skipMutators:"+skipMutators);
     }
 
     public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
@@ -723,6 +743,9 @@ public class RestReplay {
     }
 
     private static String dumpMasterVars(Map<String, String> masterVars){
+        if (masterVars == null){
+            return "";
+        }
         StringBuffer buffer = new StringBuffer();
         for (Map.Entry<String,String> entry: masterVars.entrySet()){
            buffer.append("\r\n        ").append(entry.getKey()).append(": ").append(entry.getValue());
@@ -777,8 +800,12 @@ public class RestReplay {
         String authsMapINFO;
         AuthsMap authsMap = readAuths(document);
         if (authsMap.map.size()==0){
-            authsMap = defaultAuths;
-            authsMapINFO = "Using defaultAuths from master file: "+defaultAuths;
+            if (defaultAuths!=null) {
+                authsMap = defaultAuths;
+                authsMapINFO = "Using defaultAuths from master file: " + defaultAuths;
+            } else {
+                authsMapINFO = "No Auths in control file (and no master)";
+            }
         } else {
             authsMapINFO = "Using AuthsMap from control file: "+authsMap;
         }
@@ -951,13 +978,13 @@ public class RestReplay {
             //        + serviceResult.socketTimeout);
 
             String authIDForTest = testNode.valueOf("@auth");
-            String currentAuthForTest = authsMap.map.get(authIDForTest);
+            String currentAuthForTest = (authsMap!=null) ? authsMap.map.get(authIDForTest) : "";
 
             String authForTest = "";
             if (Tools.notEmpty(currentAuthForTest)){
                 authForTest = currentAuthForTest; //else just run with current from last loop;
             }
-            if (Tools.isEmpty(authForTest)){
+            if (Tools.isEmpty(authForTest) && (defaultAuths!=null)){
                 authForTest = defaultAuths.getDefaultAuth();
             }
 
@@ -1082,7 +1109,7 @@ public class RestReplay {
                 serviceResultsMap.put("result", serviceResult);
                 serviceResult.time = (System.currentTimeMillis()-startTime);
 
-                if (Tools.notBlank(mutatorType)&&(contentRawFromMutator==null)){
+                if ( Tools.notBlank(mutatorType) && (contentRawFromMutator==null) && (!runOptions.skipMutators) ){
                     ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename, getResourceManager());
                     contentMutator.setOptions(testNode);
                     serviceResult.mutatorType = mutatorType;
@@ -1497,12 +1524,14 @@ public class RestReplay {
                     dump.payloads = Tools.isTrue(dumpResultsFromCmdLine);
                 }
                 List<String> reportsList = new ArrayList<String>();
-                //RunOptions runOptions = new RunOptions(); //just use defaults. won't read master file.
+
                 RestReplay restReplay = new RestReplay(restReplayBaseDirResolved, reportsDir, rootResourceManager, null);
+
                 restReplay.runRestReplayFile(restReplayBaseDirResolved, controlFilename, testGroupID, testID,
                                   createResultsMap(), null, restReplay.getRunOptions(),
                                   bAutoDeletePOSTS, dump, "", null, reportsList, reportsDir,""/*no master, so no env*/, "");
-                System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
+                //No need to dump the reportsList because we were just running one test, and its report gets created and reported on command line OK.
+                // System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }
         } catch (ParseException exp) {
             // oops, something went wrong

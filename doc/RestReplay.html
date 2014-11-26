@@ -120,8 +120,8 @@
     <div class="container">
         <center>
 <h2>RestReplay Quick Reference</h2></center>
-        <div id="TOCDEST1" class="cheatsheet-body"></div>
-        <div id="TOCDEST2" class="cheatsheet-body"></div>
+        
+        
     </div>
 
     <span class="main-toc">
@@ -174,47 +174,31 @@
 
       <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.b.1Runtime"></a>1.b.1 Runtime</h4>
 
-      <p>At runtime, RestReplay consults parameters passed in on the command line, or from maven surefire.</p>
+      <p>At runtime, RestReplay consults parameters passed in on the command line, or from maven surefire, or from java:exec which uses parameters found in the pom.xml project file under options for the <span style="font-style: italic; font-weight: bold;">exec-maven-plugin</span> plugin.</p>
 
-      <p>RestReplay then determines which <b>master</b> file to use. This file points to <b>control</b> files that contain tests.</p>
+      <p>RestReplay then determines which <b>master</b> file to use. This file points to <strong>testGroup</strong>s in <b>control</b> files that contain <strong>test</strong>s.</p>
 
-      <p>The default behavior of RestReplay is to look for a directory, called the RestReplay directory.<br>
-      When running inside maven surefire, this is pre-defined to be a resource directory in the source code module,</p>
-
-      <p>Maven defines a variable called basedir, which points at the project directory for the current pom.xml.<br>
-      If we build services in /src/trunk/services, then basedir=/src/trunk/services/IntegrationTests/</p>
-
-      <div class="code panel">
-      RestReplayBasedir=${basedir}/src/test/resources/test-data/restreplay
-        or:
-      /src/trunk/services/IntegrationTests/src/test/resources/test-data/restreplay
-      </div>
-
-      <p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.<br>
+      <p>The default behavior of RestReplay is to look for a directory, called the RestReplay directory.&nbsp; This is defined using<strong> -restReplayBaseDir</strong> parameter.</p>
+<p>
+      When running inside maven surefire, this is pre-defined to be a resource directory in the source code module.&nbsp; Maven defines a variable called basedir, which points at the project directory for the current pom.xml.</p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.&nbsp; You can select a particular master with the command line parameter -<strong>restReplayMaster</strong>
+<p>
       Most services should define their <b>control</b> file within their directory, e.g.</p>
 
       <div class="code panel">
-      restreplay/xml-replay-master.xml         <span class="comments">//the <b>master</b> file used by the nightly build.</span>
-      restreplay/dev-master.xml                <span class="comments">//the <b>master</b> file for local development.</span>
-      restreplay/objectexit/                   <span class="comments">//the directory for all objectexit <b>control</b> files, and request/response templates.</span>
-      restreplay/objectexit/object-exit.xml    <span class="comments">//the <b>control</b> file for objectexit.</span>
+      restreplay/master.xml                    <span class="comments">//the <b>master</b> file used by the nightly build.</span>
+      restreplay/objectexit/                   <span class="comments">//the directory for a service called, say,  objectexit, <br>                                           //  with all its <b>control</b> files, and request/response templates.</span>
+      restreplay/objectexit/object-exit.xml    <span class="comments">//the <b>control</b> file for this service, objectexit.</span>
       restreplay/objectexit/res/               <span class="comments">//a sub-directory to contain response templates.</span>
       </div>
 
-      <p>For development, you may use a predefined <b>master</b> file, called dev-master.xml, or you may define your own. See "2.c. Running"<br>
-      For integration testing, use the predefined <b>master</b> file called xml-replay-master.xml.</p>
+      <p>For development, you may define your own master. See "<a href="#RestReplay-2.cRunning">2.c. Running</a>"<br>
+      For integration testing, use the predefined <b>master</b> file called master.xml.</p>There is a test that checks the RestReplay installation itself.&nbsp; It lives in <br>&nbsp;&nbsp;&nbsp;&nbsp; _self_test/master-self-test.xml<br>
 
-      <p>Within a <b>control</b> file, RestReplay finds testGroup elements as specified on the command line or in the <b>master</b> file, <br>
-      and then runs these testGroup elements.</p>
+      <p>Within a <b>control</b> file, RestReplay finds testGroup elements as specified on the command line or in the <b>master</b> file, and then runs these testGroup elements.</p>
 
-      <p>For each testGroup, a namespace is set up that will contain the results of all tests run in that testGroup, and any variables<br>
-      defined as the test runs. This namespace contains variables that dereference to java objects, so Strings, Date objects, etc.<br>
-      may be put into the namespace. For every test, RestReplay creates a named object of type<br>
-      org.dynamide.restreplay.ServiceResult, so that after that test has run, you<br>
-      may pull fields out of the ServiceResult object, such as responseCode, fullURL, location, and CSID as calculated from the <b>Location:</b> header.</p>
+      <p>For each testGroup, a namespace is set up that will contain the results of all tests run in that testGroup, and any variables defined as the test runs. This namespace contains variables that dereference to java objects, so Strings, Date objects, etc. may be put into the namespace. For every test, RestReplay creates a named object of type org.dynamide.restreplay.ServiceResult, so that after that test has run, you may pull fields out of the ServiceResult object, such as responseCode, fullURL, location, and calculated fields such as from the <b>Location:</b> header.</p>
 
-      <p>You may also use methods on the ServiceResult object that give you XPath access to any field in any part either sent<br>
-      or recieved from the server in that test.</p>
+      <p>You may also use methods on the ServiceResult object that give you XPath access to any field in any part either sent or recieved from the server in that test.</p>
 
       <p>ServiceResult methods and fields:</p>
 
@@ -229,34 +213,27 @@
           <span class="comments">// and get the text value of node identified by xpath </span>
           public String got(String partName, String xpath);
 
-          public String CSID <span class="comments">//just the CSID of the resource created or modified.</span>
-
           public String location <span class="comments">//the Location: header value of the resource, which is a full URL.</span>
       </div>
-      <p>For each "test" node in a testGroup, RestReplay sets up a request, using the URI (which may contain expressions), the http method, and<br>
-      any parts specified for a POST or a PUT. The parts are read from text files in a directory relative to the RestReplay base directory,<br>
-      and may contain/define variables which get passed in. The value of these variables is evaluated in the <b>control</b> file just prior to<br>
-      the test node being run. So previous tests may be referenced. The parts are expanded for any expressions, and then put together<br>
-      in the appropriate http sequence and submitted to the server. The response from the server is then made available to the test to<br>
-      check using the "response" node. The "response" node allows you to specify a template file to compare, and any variables declared<br>
-      will be evaluated just prior to comparing the response from the server to the response template file.</p>
+      <p>For each "<strong>test</strong>" node in a <strong>testGroup</strong>, RestReplay sets up a request, using the URI (which may contain expressions), the http method, and any parts specified for a POST or a PUT. The parts are read from text files in a directory relative to the RestReplay base directory, and may contain/define variables which get passed in. The value of these variables is evaluated in the <b>control</b> file just prior to the <strong>test</strong> node being run. So previous tests may be referenced. The parts are expanded for any expressions, and then put together in the appropriate http sequence and submitted to the server. The response from the server is then made available to the test to check using the "response" node. The "response" node allows you to specify a template file to compare, and any&nbsp; variables declared will be evaluated just prior to comparing the response from the server to the response template file.</p>
 
-      <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup".<br>
-      If true, then RestReplay does a DELETE on each resource allocated.<br>
-      If false, RestReplay does no automatic DELETEs.<br>
-      You may also programmatically call RestReplay, in which case you can programmatically control cleanup of individual tests.<br>
-      See "2.c.4 Cleanup"</p>
+      <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup".</p>
+<ul>
+<li>
+      If true, then RestReplay does a DELETE on each resource allocated.</li>
+<li>
+      If false, RestReplay does no automatic DELETEs.</li></ul>
+<p>
+      You may also programmatically call RestReplay, in which case you can programmatically control cleanup of individual tests. See "<a href="#RestReplay-2.c.4Cleanup">2.c.4 Cleanup</a>"</p>
 
-      <p>Finally, results are aggregated and spit out to the command line console, and/or to maven surefire reports. You can customize<br>
-      how verbose these results are using the "dump" node in the <b>master</b> file.</p>
+      <p>Finally, results are aggregated and spit out to the command line console, and/or to reports. You can customize how verbose these results are using the "dump" node in the <b>master</b> file.</p>
 
-      <p>If all testGroups and all tests succeed, then RestReplay tells maven surefire that the suite succeeded. Otherwise, maven surefire is told<br>
-      that the suite failed. In this case, you may examine the console, or look at the maven surefire report, which will contain a tabular summary<br>
-      of all testGroups and tests. You may have to click "show all results" in the maven surefire report.</p>
+      <p>If all <strong>testGroup</strong>s and all tests succeed, then RestReplay tells maven surefire that the suite succeeded. Otherwise, maven surefire is told that the suite failed. In this case, you may examine the console, or look at the maven surefire report, which will contain a tabular summary of all testGroups and tests. You may have to click "show all results" in the maven surefire report.</p>
 
       <p>RestReplay also creates a stand-alone report. Look at the command line output where RestReplay will report the location of this HTML report, e.g. something of this form:</p>
-      <pre>RestReplay summary report: .../test/resources/test-data/restreplay/rest-replay-reports/...
-</pre>This reports directory starts with an index file named after any <b>master</b> file you have run, which links to individual <b>control</b> file results.
+      <div class="code">    Master Report Index: ./tests/rest-replay-reports/index.local.las-master.xml.html </div>
+      
+      <p>This reports directory starts with an index file named after any <b>master</b> file you have run, which links to individual <b>control</b> file results.</p>
 
       
 <h2><a name="RestReplay-2.ReferenceDocumentation" id="RestReplay-2.ReferenceDocumentation"></a>2. Reference Documentation</h2>
@@ -267,62 +244,117 @@
 
       <h4><a name="RestReplay-2.b.1GeneralRules" id="RestReplay-2.b.1GeneralRules"></a>2.b.1 General Rules</h4>
 
-      <p>General Variable Syntax: starts with letter or underscore (_), contains letters, numbers, underscore. No<br>
-      other special characters, especially not the dollar-sign ($).</p>
+      <p>General Variable Syntax: starts with letter or underscore (_), contains letters, numbers, underscore. No other special characters, especially not the dollar-sign ($).</p>
 
       <p>For an ID attribute to be valid, please use General Variable Syntax.</p>
 
       <p>Element names should also follow the General Variable Syntax.</p>
 
-      <p>General Filename syntax: please stick to General Variable Syntax plus hyphen (-) and period (.).<br>
-      Filenames may contain the delimiter / to denote directories. These will be transformed into platform-specific directory separators.</p>
+      <p>General Filename syntax: please stick to General Variable Syntax plus hyphen (-) and period (.).</p>
+<p>Filenames may contain the delimiter / to denote directories. These will be transformed into platform-specific directory separators.</p>
 
       <h3><a name="RestReplay-2.cRunning" id="RestReplay-2.cRunning"></a>2.c Running</h3>
 
       <p>You can run RestReplay on the command-line, or from the command-line of maven surefire.</p>
-
-      <p>To run using the maven surefire test, simply:</p>
-
-      <div class="code">
-    mvn -o install test \<br>        -D-restReplayBaseDir=./src/test/resources/test-data/restreplay \<br>        -D-restReplayMaster=rest-replay-master.xml
-      </div>
-
-      <p>or</p>
-
-      <div class="code">
-    mvn test -Dtest=RestReplayMasterTest
-      </div>
-
-      <p>To run using just one test, testGroup, or <b>control</b> file, use RestReplayDevTest, and then modify dev-master.xml, which already exists.</p>
-
-      <div class="code">
-    cd /src/trunk/services/IntegrationTests
-    vi ./src/test/resources/test-data/restreplay/dev-master.xml
-    mvn test -Dtest=RestReplayDevTest
-      </div>
-
-      <p>or define your own <b>master</b> file, which you create:</p>
-
-      <div class="code">
-    cd /src/trunk/services/IntegrationTests
-    vi ./src/test/resources/test-data/restreplay/my-master-file.xml
-    mvn test -DrestReplayMaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=RestReplayDevTest
-      </div>
-
-      <h4><a name="RestReplay-2.c.1Commandlineparameters" id="RestReplay-2.c.1Commandlineparameters"></a>2.c.1 Command-line parameters</h4>
-
-        <p>If you are using a jar distribution, then this example would run the environment <b>local</b> using the directory <b>/.tests</b>
+<p>To run from the command line, using a jar distribution, then this example would run the environment <b>local</b> using the directory <b>/.tests</b>
             for control files and will put reports in <b>/.tests/rest-replay-reports</b>.  From that directory, it will find the master
-            control file, <b>rest-replay-master.xml</b> .</p>
-
+            control file, <b>master.xml</b> .</p>
         <div class="code">
-       java -jar lib/RestReplay-1.0.3-standalone.jar \
+       java -jar lib/RestReplay-1.0.4-standalone.jar \
             -restReplayBaseDir <b>./tests</b> \
             -restReplayMaster <b>master.xml</b> \
             -envID <b>local</b>
-        </div>
+        </div><p>This would run RestReplay, telling it where to find <strong>test</strong>s, and which <strong>master</strong> to run.&nbsp; It also passes in an environment ID, which selects per-environment settings from the master file's <a href="#RestReplay-restReplayMaster.envs">&lt;env&gt;</a> section.</p>
+<p><br></p>
+<p>To run using the maven surefire test, which will find <strong>_self_test/master-self-test.xml</strong> on the path or in the Jar file:</p>
 
-      <h4><a name="RestReplay-2.c.2XMLconfigurationparametersinmasterfile" id="RestReplay-2.c.2XMLconfigurationparametersinmasterfile"></a>2.c.2 XML configuration parameters in <b>master</b> file</h4>
+      <div class="code">
+    mvn -o install
+      </div>
+<p>To run using the maven surefire test pointed at a master, e.g. master.xml in ./tests/, simply:</p>
+
+      <div class="code">
+    mvn -o install \<br>        -D-restReplayBaseDir=./tests \<br>        -D-restReplayMaster=master.xml
+      </div>
+<p>or define your own <b>master</b> file, which you create:</p>
+
+      <div class="code">
+    vi ./my-master-file.xml
+    mvn test -DrestReplayMaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=RestReplayDevTest
+      </div>
+
+      <h4><a name="RestReplay-2.c.1Commandlineparameters" id="RestReplay-2.c.1Commandlineparameters"></a>2.c.1 Command-line parameters</h4><br>
+<table class="matrix" width="100%">
+  <colgroup>
+    <col style="width:8em;">
+    <col style="width:10em;">
+    <col style="width:100px">
+  </colgroup>  
+<tbody>
+<tr>
+<th>Option</th>
+<th>Example command-line parameter</th>
+
+<th>Notes</th></tr>
+<tr>
+<td>restReplayBaseDir</td>
+<td>-restReplayBaseDir ./tests</td>
+
+<td>The path to all the tests.</td></tr>
+<tr>
+<td>reportsDir</td>
+<td>-reportsDir /mnt/reports</td>
+
+<td>Specify output reports dir, default is "rest-replay-reports" relative to restReplayBaseDir</td></tr>
+<tr>
+<td>testGroupID</td>
+<td>-testGroupID main</td>
+
+<td>Run one testGroup when running without a master.</td></tr>
+<tr>
+<td>testID</td>
+<td>-testID pitoken</td>
+
+<td>The ID from a <a href="#RestReplay-restReplay.testGroup.test">test</a> element when running one control file.</td></tr>
+<tr>
+<td>envID</td>
+<td>-envID local</td>
+
+<td>One <a href="#RestReplay-restReplayMaster.envs">env</a> ID defined in your master file.</td></tr>
+<tr>
+<td>autoDeletePOSTS</td>
+<td>-autoDeletePOSTS true</td>
+
+<td>Override the setting from the commandline, but will NOT override setting in control files.</td></tr>
+<tr>
+<td>dumpResults</td>
+<td>-dumpResults true</td>
+
+<td>If you are not running a master, you can control dumps here.</td></tr>
+<tr>
+<td>controlFilename</td>
+<td>-controlFilename my-control.xml</td>
+
+<td>Run one control file without a master.</td></tr>
+<tr>
+<td>restReplayMaster</td>
+<td>-restReplayMaster my-master.xml</td>
+
+<td>Run one master file.&nbsp; If this is set, then the options <strong>controlFilename</strong>, <strong>testGroupID</strong>, and <strong>testID</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
+      <div class="code">
+        &nbsp;&nbsp;&nbsp; mvn exec:java -DrestReplayBaseDir=./tests
+      </div>
+<p>Here are some more examples of running on the command line.</p>
+<p>In this run, we are hitting the control file pi/pitoken.xml with no master file.&nbsp; So we specify testGroupID, testID within that control file.</p>
+    
+      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -restReplayBaseDir ./tests \<br> -controlFilename pi/pitoken.xml \<br> -testGroupID main \<br> -testID pitoken
+      </div>
+      <p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/rest-replay-reports)</p>
+      
+      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -restReplayBaseDir ./tests \<br> -restReplayMaster master.xml \<br> -reportsDir ./myreports
+      </div>
+      
+<h4><a name="RestReplay-2.c.2XMLconfigurationparametersinmasterfile" id="RestReplay-2.c.2XMLconfigurationparametersinmasterfile"></a>2.c.2 XML configuration parameters in <b>master</b> file</h4>
 
       <p>Click on an element to jump to documentation for that element and its attributes.</p>
 
@@ -437,7 +469,7 @@
               <td><br></td>
 
               <td>A list of users and their related Base-64 encrypted<tt>username:password</tt>strings. You can generate these strings in number of
-                  ways, among them by using the online utility at<a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel="nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.</td>
+                  ways, among them by using the online utility at <a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel="nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.</td>
           </tr>
 
           <tr>
@@ -453,13 +485,13 @@
           <tr>
               <td>@ID</td>
 
-              <td>a cspace user ID</td>
+              <td>a user ID</td>
           </tr>
 
           <tr>
               <td>element text</td>
 
-              <td>Base-64 encrypted username:password</td>
+              <td>Base-64 encrypted username:password to be used with "Basic Authentication" the same way a browser would.</td>
           </tr>
 
           <tr>
@@ -511,7 +543,7 @@
 
           <tr>
 <td>Discussion:</td>
-<td>This file is the best place to do site-wide settings for RestReplay<br><br>&nbsp;&nbsp;&nbsp; All of these options can be controlled in a master file, too,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; but you should do that only in two cases:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1) you are developing locally, and are setting per-test cases while you run tests,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and you may or may not check in your changes.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, change any settings you like as close to the testCase as you can in the chain:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions/master/testGroup/testCase<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review any changes to your xml config and control files you commit,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and check strategy as outlined in case (2).<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) you are committing this master to source control, so that it gets picked up by automated builds.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, you should have a coordinated reason for overriding this default file (runOptions.xml).<br><br>&nbsp;&nbsp;&nbsp; Options:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "connectionTimeout"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "socketTimeout"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The most reasonable override in a master file's RunOptions is the timeouts:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; these may vary by service, or host<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; so one clean organization of test would be by services<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or known clusters of hosts with particular timeouts.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You could have one control file, say, "master-edge-services.xml",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; say, a time-critical cluster.&nbsp; In that control file,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set the RunOption timeouts to be low.&nbsp; In the Master, set the timeouts to be more "normal".<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the other tests will run with "normal", and tests in master-edge-services.xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; in testGroup "timeCriticalServices" will run with low timeouts.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "errorsBecomeEmptyStrings" would be set locally if you were debugging.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "dumpResourceManagerSummary" should probably be best left<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the central location in this file (runOptions.xml)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since it controls output to the console.<br><br>&nbsp;&nbsp;&nbsp; The heirarchy is:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RunOptions : class defaults<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions.xml : default for all tests<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my-master.xml :&nbsp; overrides properties for this master.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can have many masters and run them all from the command line<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or test suite by using the startup command-line parameter:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -restReplayMaster relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or for maven, surefire, etc:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -DrestReplayMaster=relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (see docs/RestReplay.html for examples).<br>&nbsp;&nbsp;&nbsp; </td>
+<td>{rest-replay-base-directory}/runOptions.xml is the best place to do site-wide settings for RestReplay.&nbsp; It contains a &lt;<strong>runOptions</strong>&gt; root element.<br><br>All of these options can be controlled in a master file, too.&nbsp; In this case, your master file contains &lt;<strong>runOptions</strong>&gt; under the root element &lt;<strong>restReplayMaster</strong>&gt;<br><br>When overriding RunOptions in a master file, consider these two development scenarios:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1) you are developing locally, and are setting per-test cases while you run tests,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and you may or may not check in your changes.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, change any settings you like as close to the testCase as you can in the chain:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>runOptions &gt; master &gt; testGroup &gt; testCase</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review any changes to your xml config and control files you commit,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and check strategy as outlined in case (2).<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) you are committing this master to source control, so that it gets picked up by automated builds.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, you should have a coordinated reason for overriding the default file (runOptions.xml).<br><br>&nbsp;&nbsp;&nbsp; Options:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>connectionTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>socketTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The most reasonable override in a master file's RunOptions is the timeouts:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; these may vary by service, or host<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; so one clean organization of test would be by services<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or known clusters of hosts with particular timeouts.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You could have one control file, say, "master-edge-services.xml",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; say, a time-critical cluster.&nbsp; In that control file,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set the RunOption timeouts to be low.&nbsp; In the Master, set the timeouts to be more "normal".<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the other tests will run with "normal", and tests in master-edge-services.xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; in testGroup "timeCriticalServices" will run with low timeouts.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>errorsBecomeEmptyStrings</strong>" would be set locally if you were debugging.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>dumpResourceManagerSummary</strong>" should probably be best left<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the central location in the file (runOptions.xml)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since it controls output to the console.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>skipMutators</strong>" will skip processing for Mutators.&nbsp; Mutators take one test and replays it with modified payloads.<br><br><br>&nbsp;&nbsp;&nbsp; The heirarchy is:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RunOptions : class defaults<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions.xml : default for all tests<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my-master.xml :&nbsp; overrides properties for this master.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can have many masters and run them all from the command line<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or test suite by using the startup command-line parameter:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -restReplayMaster relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or for maven, surefire, etc:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -DrestReplayMaster=relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (see docs/RestReplay.html for examples).<br>&nbsp;&nbsp;&nbsp; </td>
 <td><br></td></tr>
 <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.vars.var"></a>/restReplayMaster/vars/var</td>
@@ -577,6 +609,11 @@
           getAssignments will go against LASSERVER:      http://localhost:8080
           pitoken will go against PISERVER               http://piserver.example.com
    
+
+
+
+
+
 <hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
@@ -765,8 +802,7 @@
           &lt;<a href="#RestReplay-restReplay.testGroup.headers.header">headers</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.test">test</a>&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.method">method</a>&gt;&lt;/method&gt;
-              &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a>&gt;&lt;/uri&gt;
-              &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">vars</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a>&gt;&lt;/uri&gt;<br>              &lt;<a href="#RestReplay-restReplay.testGroup.test.filename">filename</a> /&gt;<br>              &lt;<a title="mutator" href="#RestReplay-restReplay.testGroup.test.mutator">mutator</a>&gt;<br>                  &lt;expected&gt;<br>                       &lt;code /&gt;<br>                  &lt;/expected&gt;<br>              &lt;/mutator&gt;<br>             &nbsp;&lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">vars</a>&gt;
                   &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">var /</a>&gt;
               &lt;/vars&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.parts">headers</a>&gt;
@@ -901,8 +937,7 @@
           <tr>
             <td>auths</td>
 
-            <td>This element adds to any auths placed in the <b>master</b> file. Any ID defined in the <b>control</b> file<br>
-            overrides an auth of the same ID defined in the <b>master</b> file.</td>
+            <td>This element adds to any auths placed in the <b>master</b> file. Any ID defined in the <b>control</b> file overrides an auth of the same ID defined in the <b>master</b> file.</td>
           </tr>
 
           <tr>
@@ -1027,7 +1062,7 @@
             <td>Example</td>
 
             <td>
-              <div class="code panel">
+              <div class="code">
 &lt;test ID="oePersonauthority"&gt;
      &lt;method&gt;POST&lt;/method&gt;
      &lt;uri&gt;/cspace-services/personauthorities/&lt;/uri&gt;
@@ -1049,6 +1084,29 @@
               and "dimension1" and "dimension1" tests are run as user bigbird2010.
 
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">
 &lt;!-- Set up permissions and account, and test bigbird2010 --&gt;
 &lt;test ID="permBigbird" auth="admin@example.org"&gt;
@@ -1109,11 +1167,34 @@
 
             <td>
               Examples:<br>
-              If URL is<a href="http://localhost:8180/cspace-services/personauthorities/" class="external-link" rel="nofollow">http://localhost:8180/cspace-services/personauthorities/</a><br>
+              If URL is&nbsp; <a href="http://localhost:8180/cspace-services/personauthorities/" class="external-link" rel="nofollow">http://localhost:8180/cspace-services/personauthorities/</a><br>
               then uri is /cspace-services/personauthorities/<br>
               The uri contains any required queryString parameters:
 
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;uri&gt;/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri&gt;
                 </div>
@@ -1130,6 +1211,58 @@
           </tr>
 
           <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.filename" id="RestReplay-restReplay.testGroup.test.filename"></a>/restReplay/testGroup/test/filename</td>
+          </tr>
+          
+<tr>
+<td><br></td>
+<td>If the request is not multipart, you can simply place the &lt;filename&gt; element under the &lt;test&gt; element.&nbsp; If the request is mime-multipart, this element goes in a &lt;part&gt; element.</td>
+<td><br></td></tr>
+<tr>
+<td>Example: </td>
+<td>&lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;</td>
+<td><br></td>
+</tr>
+          
+<tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.uri" id="RestReplay-restReplay.testGroup.test.mutator"></a>/restReplay/testGroup/test/mutator</td>
+          </tr>
+
+<tr>
+<td>Discussion</td>
+<td>The &lt;<strong>mutator</strong>&gt; element loads a Mutator, defined by the <strong>type</strong> attribute.&nbsp; 
+  Current, only type="ExcludeFields" is defined.<br>
+  <br>This mutator (type="ExcludeFields") looks at the JSON for a POST or PUT, and one-by-one removes the top-level fields.&nbsp; 
+  It then executes a request to the server with this mutation and reports results underneath the test, one for each variant.&nbsp; 
+  <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp; 
+  Since this mutator looks at top-level fields, each mutation is named after the missing field.&nbsp; In the example below, mutation 
+  <span style="font-weight: bold;">numOfDrafts</span> expects the server to succeed in the range 200-299.&nbsp; 
+  The mutations <strong>book_id</strong> and&nbsp; <strong>course_id</strong> are expected to be rejected by the server with 
+  response code in the 400-499 and 500-599 ranges.&nbsp; 
+  The default (<strong>*</strong>) is to expect the server to respond to all other named mutations with code 200 in the statement 
+  <b>&lt;code range="200"&gt;*&lt;/code&gt;</b></td>
+<td><br></td></tr>
+<tr>
+<td>Example:</td>
+<td>
+  <div class="code">&lt;test ID="dynamideUseMutator"&gt;
+    &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+    &lt;method&gt;POST&lt;/method&gt;
+    &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
+    &lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;
+    &lt;mutator type="ExcludeFields"&gt;
+        &lt;expected&gt;
+            &lt;code range="200"&gt;*&lt;/code&gt;
+            &lt;code range="200-299"&gt;numOfDrafts&lt;/code&gt;
+            &lt;code range="400-499,500-599"&gt;book_id, course_id&lt;/code&gt;
+        &lt;/expected&gt;
+    &lt;/mutator&gt;
+&lt;/test&gt;
+  </div></td>
+  
+  
+  <td><br></td></tr>
+<tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts" id="RestReplay-restReplay.testGroup.test.parts"></a>/restReplay/testGroup/test/parts</td>
           </tr>
 
@@ -1202,6 +1335,29 @@
               var may be dereferenced in an expression in the request payload.like this:
 
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -1215,6 +1371,29 @@
               In context, this looks like:
 
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;test ID="oeObject"&gt;
         &lt;method&gt;POST&lt;/method&gt;
@@ -1266,6 +1445,29 @@
               i.e. a child's text node is trimmed prior to comparison.)
 
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <ul>
                 <li>ZERO: does no checking. If the server sends a valid reponse, the reponse succeeds.</li>
 
@@ -1354,10 +1556,7 @@
 
             <td>
               <p>The file named in /restReplay/testGroup/test/response/part/filename is a template, which may contain variables.<br>
-              Those variables should be defined in var child elements at this level. This keeps complicated variables<br>
-              out of the template file and in the <b>control</b> file. Templates should just expose simple variables, such as ${depositor}<br>
-              and not complicated variables that dig into the objects in the namespace, e.g. this would be considered bad form<br>
-              if found inside a template file:</p>
+              Those variables should be defined in var child elements at this level. This keeps complicated variables out of the template file and in the <b>control</b> file. Templates should just expose simple variables, such as ${depositor} and not complicated variables that dig into the objects in the namespace, e.g. this would be considered bad form if found inside a template file:</p>
 
               <div class="code">
     &lt;!-- DON'T DO THIS IN TEMPLATE FILE --&gt;
@@ -1390,10 +1589,7 @@
 
       <h4><a name="RestReplay-2.c.4Cleanup" id="RestReplay-2.c.4Cleanup"></a>2.c.4 Cleanup</h4>
 
-      <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup". If true,<br>
-      then any POSTs that returned a "Location: " header will result in RestReplay sending a DELETE on that Location: URL. If false, RestReplay<br>
-      will perform no automated cleanup for that testGroup. If you called RestReplay programmatically, then you may initiate cleanup manually by calling<br>
-      on these methods of org.dynamide.restreplay.RestReplay</p>
+      <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup". If true, then any POSTs that returned a "Location: " header will result in RestReplay sending a DELETE on that Location: URL. If false, RestReplay will perform no automated cleanup for that testGroup. If you called RestReplay programmatically, then you may initiate cleanup manually by calling on these methods of org.dynamide.restreplay.RestReplay</p>
 
       <div class="code">
     public List&lt;ServiceResult&gt;  autoDelete(String logName);
@@ -1406,6 +1602,21 @@
       </div>
     </div>
   </div>
+    
+    <div class="TESTGROUP"><span class="LABEL">Test Group:</span> <a href="pi/pitoken.xml-main.html">main</a>&nbsp;&nbsp;&nbsp;<span class="LABEL">Control File:</span> pi/pitoken.xml</div><br>
+<table class="TOC_TABLE" border="1">
+<tbody>
+<tr>
+<td colspan="6" class="TOC_HDR">Summary</td></tr>
+<tr><th>testID</th><th>time(ms)</th><th>status</th><th>code</th><th>warn</th><th>error</th></tr>
+<tr>
+<td>
+<a href="pi/pitoken.xml-main.html#pitoken">pitoken</a> </td><td>307</td>
+<td><span class="OK">SUCCESS</span> </td>
+<td>201</td>
+<td><br></td>
+<td><br></td></tr></tbody></table><br>
+  
 <script>
     debugger;
     var tm = document.getElementById("TOCMASTER");
@@ -1415,6 +1626,4 @@
     var d2 = document.getElementById("TOCDEST2");
     d2.innerHTML = tt.innerHTML;
 </script>
-
-
 </body></html>

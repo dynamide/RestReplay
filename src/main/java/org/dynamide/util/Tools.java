@@ -190,7 +190,7 @@ public class Tools {
 
 
     public static String getStackTrace(Throwable e){
-        return getStackTrace(e, -1);
+        return getStackTrace(e, 0);
     }
 
     public static String getStackTrace(){

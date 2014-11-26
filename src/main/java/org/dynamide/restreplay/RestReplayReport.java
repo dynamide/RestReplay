@@ -414,9 +414,12 @@ public class RestReplayReport {
                                           RestReplay restReplay) {
         File f = new File(localMasterFilename);
         String relPath = Tools.getFilenamePath(f.getPath());
+        String relPathNameComponent = Tools.notBlank(relPath)
+                                      ? Tools.safeFilename(relPath)+'.'
+                                      : "";
         String masterFilenameNameOnly = "index."
                     +(Tools.notBlank(envID)?envID+'.':"")
-                    +Tools.safeFilename(relPath)+'_'
+                    +relPathNameComponent
                     + f.getName() + ".html";
         String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
 
@@ -439,7 +442,7 @@ public class RestReplayReport {
                 sb.append("<hr />");
             }
             sb.append("<h2>Run Options</h2>");
-            sb.append("<div class='run-options'>"+restReplay.getRunOptions()+"</div>");
+            sb.append("<div class='run-options'>"+restReplay.getRunOptions().toHTML()+"</div>");
             sb.append("<br /><br /><hr />");
             sb.append("<h2>ResourceManager Summary</h2>");
             sb.append(restReplay.getResourceManager().formatSummary());

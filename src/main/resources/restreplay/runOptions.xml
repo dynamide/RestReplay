@@ -11,5 +11,6 @@
     <socketTimeout>7007</socketTimeout>
     <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
     <dumpResourceManagerSummary>false</dumpResourceManagerSummary>
+    <skipMutators>true</skipMutators>
 </runOptions>
 
