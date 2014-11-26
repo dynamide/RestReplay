@@ -30,7 +30,7 @@ import org.apache.commons.jexl2.MapContext;
 import java.util.*;
 
 import org.dynamide.restreplay.ServiceResult.Alert.LEVEL;
-import org.dynamide.restreplay.RestReplay.RunOptions;
+import org.dynamide.restreplay.RunOptions;
 import org.dynamide.util.Tools;
 
 /**
@@ -38,11 +38,16 @@ import org.dynamide.util.Tools;
  * $LastChangedRevision:  $
  * $LastChangedDate:  $
  */
-public class RestReplayEval {
+public class Eval {
     public Map<String, ServiceResult> serviceResultsMap;
-    public JexlEngine jexl;
+    public JexlEngine jexl = new JexlEngine();   // Used for expression language expansion from uri field.
     public JexlContext jc;
     public static Tools TOOLS = new Tools();
+    public RunOptions runOptions;
+
+    public void resetContext(){
+        jc = new Eval.MapContextWKeys();//MapContext();
+    }
 
     public static class EvalResult {
         public String result = "";
@@ -72,14 +77,12 @@ public class RestReplayEval {
      *          This method continues processing each eval, which may include multiple WARN or ERROR
      *          alerts, so the caller should use Collection.addAll(EvalResult.alerts) or similar to grab all Alerts.
      */
-    public static EvalResult eval(String context,
+    public EvalResult eval(String context,
                                   String inputJexlExpression,
-                                  Map<String, ServiceResult> serviceResultsMap,
-                                  Map<String,String> vars,
-                                  JexlEngine jexl,
-                                  JexlContext jc,
-                                  RunOptions runOptions) {
+                                  Map<String,String> vars) {
         EvalResult result = new EvalResult();
+        Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
+
         try {
             jc.set("itemCSID", "${itemCSID}"); //noiseless passthru.
             for (Map.Entry<String,ServiceResult> entry: serviceResultsMap.entrySet()) {
@@ -90,7 +93,7 @@ public class RestReplayEval {
                     String value = entry.getValue();
                     String key = entry.getKey();
                     try {
-                        EvalResult innerResult = parse(context+", key:"+key, value, jexl, jc, runOptions);
+                        EvalResult innerResult = parse(context+", key:"+key, value);
                         value = innerResult.result;
                         if (innerResult.alerts.size()>0){
                             result.alerts.addAll(innerResult.alerts);
@@ -105,7 +108,7 @@ public class RestReplayEval {
                 }
             }
             jc.set("tools", TOOLS);
-            EvalResult innerResult2 = parse(context, inputJexlExpression, jexl, jc, runOptions);
+            EvalResult innerResult2 = parse(context, inputJexlExpression);
             if (innerResult2.alerts.size()>0){
                 result.alerts.addAll(innerResult2.alerts);
             }
@@ -119,11 +122,8 @@ public class RestReplayEval {
         return result;
     }
 
-    private static EvalResult parse(String context,
-                                    String in,
-                                    JexlEngine jexl,
-                                    JexlContext jc,
-                                    RunOptions runOptions) {
+    private EvalResult parse(String context,
+                                    String in) {
         EvalResult evalResult = new EvalResult();
         StringBuffer result = new StringBuffer();
         String s = in;

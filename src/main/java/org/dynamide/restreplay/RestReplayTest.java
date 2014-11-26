@@ -44,7 +44,7 @@ public class RestReplayTest {
     public static RestReplay createRestReplayForMaven() throws Exception {
         String baseDir = getBaseDirectory();
         ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
-        RestReplay.RunOptions parentRunOptions = new RestReplay.RunOptions();
+        RunOptions parentRunOptions = new RunOptions();
         RestReplay replay = new RestReplay(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
                                            baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
                                            rootResourceManager,

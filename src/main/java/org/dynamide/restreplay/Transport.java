@@ -43,7 +43,7 @@ import org.dynamide.util.Tools;
 /**
  *   @author Laramie Crocker
  */
-public class RestReplayTransport {
+public class Transport {
 
     public static String BOUNDARY = "34d97c83-0d61-4958-80ab-6bf8d362290f";
 
@@ -127,7 +127,7 @@ public class RestReplayTransport {
 
     public static ServiceResult doDELETE(ServiceResult result,
                                          String urlString, String authForTest, String testID, String fromTestID,
-                                         Map<String, String> headerMap) throws Exception {
+                                         Map<String, String> headerMap)  {
         result.failureReason = "";
         result.method = "DELETE";
         result.fullURL = urlString;
@@ -193,7 +193,7 @@ public class RestReplayTransport {
                                                             String protoHostPort,
                                                             String uri,
                                                             String method,
-                                                            RestReplayEval evalStruct,
+                                                            Eval evalStruct,
                                                             String authForTest,
                                                             String fromTestID)
                                                              throws Exception {
@@ -245,7 +245,7 @@ public class RestReplayTransport {
                                            String authForTest,
                                            String fromTestID,
                                            String requestPayloadFilename,
-                                           Map<String, String> headerMap) throws Exception {
+                                           Map<String, String> headerMap) {
         result.method = method;
         result.headerMap = headerMap;
         try {
@@ -309,7 +309,7 @@ public class RestReplayTransport {
             result.deleteURL = lh;
             result.CSID = lh;
         } catch (Throwable t2){
-            result.addError("ERROR in RestReplayTransport. ", t2);
+            result.addError("ERROR in Transport. ", t2);
         }
         return result;
     }
@@ -397,7 +397,7 @@ public class RestReplayTransport {
             result.deleteURL = deleteURL;
             result.CSID = location;
         } catch (Throwable t2){
-            result.addError("ERROR in RestReplayTransport", t2);
+            result.addError("ERROR in Transport", t2);
         }
         return result;
     }

@@ -9,6 +9,7 @@ import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -57,7 +58,18 @@ public class ResourceManager {
         }
     }
 
-    private List<Resource> resourceHistory = new ArrayList<Resource>();
+    private static final class CachedDoc {
+        public CachedDoc(Document document){
+            this.document = document;
+        }
+        public Document document;
+    }
+
+    private final List<Resource> resourceHistory = new ArrayList<Resource>();
+
+    private final Map<String,String> cache = new HashMap<String, String>();
+
+    private final Map<String,CachedDoc> docCache = new HashMap<String, CachedDoc>();
 
     public static ResourceManager createRootResourceManager(){
         return new ResourceManager();
@@ -108,7 +120,7 @@ public class ResourceManager {
         resource.document = document;
 
         if (markForCache){
-            System.out.println("====adding to docCache===>>>"+relResourcePath);
+            //System.out.println("====adding to docCache===>>>"+relResourcePath);
             docCache.put(relResourcePath, new CachedDoc(document));  //second time actually cache it.
             resource.cached = true;
         } else {
@@ -116,17 +128,6 @@ public class ResourceManager {
         }
 
         return document;
-    }
-
-    private Map<String,String> cache = new HashMap<String, String>();
-
-    private Map<String,CachedDoc> docCache = new HashMap<String, CachedDoc>();
-
-    private static class CachedDoc {
-        public CachedDoc(Document document){
-            this.document = document;
-        }
-        public Document document;
     }
 
     public String readResource(String context, String relResourcePath, String fullPath) throws IOException {
@@ -169,29 +170,35 @@ public class ResourceManager {
             }
         }
         //System.out.println("======> using File for fullPath: "+fullPath);
-        resource.provider = Resource.SOURCE.FILE;
         resource.foundPath = fullPath;
-        byte[] b = FileUtils.readFileToByteArray(new File(fullPath));
-        String res = new String(b);
-        if (markForCache){
-            //System.out.println("====adding to cache===>>>"+relResourcePath);
-            cache.put(relResourcePath, res);  //second time actually cache it.
-            resource.cached = true;
+        File fullPathFile = new File(fullPath);
+        if (fullPathFile.exists()){
+            byte[] b = FileUtils.readFileToByteArray(fullPathFile);
+            String res = new String(b);
+            resource.provider = Resource.SOURCE.FILE;
+            if (markForCache) {
+                //System.out.println("====adding to cache===>>>"+relResourcePath);
+                cache.put(relResourcePath, res);  //second time actually cache it.
+                resource.cached = true;
+            } else {
+                cache.put(relResourcePath, "");  //first time is empty string
+            }
+            return res;
         } else {
-            cache.put(relResourcePath, "");  //first time is empty string
+            resource.provider = Resource.SOURCE.NOTFOUND;
+            return "";
         }
-        return res;
     }
 
 
-    private String formatSummaryLine(String css, String name, String value){
+    private static final String formatSummaryLine(String css, String name, String value){
         if (Tools.isBlank(value)){
             return "";
         }
         return "<br />&nbsp;&nbsp;<span class='"+css+"'>"+name+"</span>&nbsp;"+value;
     }
 
-    private String formatSummaryLinePlain(String css, String name, String value){
+    private static final String formatSummaryLinePlain(String name, String value){
         if (Tools.isBlank(value)){
             return "";
         }
@@ -202,12 +209,22 @@ public class ResourceManager {
         StringBuffer b = new StringBuffer();
         b.append("<table class='resource-history'>");
         for (Resource resource: resourceHistory){
-            String css = resource.cached ? "class='cached-resource'" : "";
+            boolean notFound = resource.provider.equals(Resource.SOURCE.NOTFOUND);
+            String css;
+            if (notFound) {
+                css = "class='resource-not-found'";
+            } else {
+               css = resource.cached ? "class='resource-cached'" : "";
+            }
             b.append("<tr><td>")
-                    .append("<b "+css+">"+resource.relPath+"</b>")
+                    .append("<b " + css + ">" + resource.relPath + "</b>")
                     .append(formatSummaryLine("SMALL res-mananger-caption", "base:", resource.base))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "foundPath:",resource.foundPath))
-                    .append(formatSummaryLine("SMALL res-mananger-caption", "source: ", resource.provider.toString()))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "source: ",
+                                (notFound
+                                 ?   "<span class='resource-not-found'>"+resource.provider.toString()+"</span>"
+                                 :                                       resource.provider.toString()
+                                )))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "context:", resource.context))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "doc:", resource.getDocumentSnippet()))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "cached:", resource.cached?"true":""))
@@ -224,11 +241,12 @@ public class ResourceManager {
         for (Resource resource: resourceHistory){
             b.append(BR)
                     .append(resource.relPath)
-                    .append(formatSummaryLinePlain("SMALL", "base:", resource.base))
-                    .append(formatSummaryLinePlain("SMALL", "foundPath:",resource.foundPath))
-                    .append(formatSummaryLinePlain("SMALL", "source:", resource.provider.toString()))
-                    .append(formatSummaryLinePlain("SMALL", "context:", resource.context))
-                    .append(formatSummaryLinePlain("SMALL", "doc:", resource.getDocumentSnippet()));
+                    .append(formatSummaryLinePlain("base:", resource.base))
+                    .append(formatSummaryLinePlain("foundPath:",resource.foundPath))
+                    .append(formatSummaryLinePlain("source:", resource.provider.toString()))
+                    .append(formatSummaryLinePlain("context:", resource.context))
+                    .append(formatSummaryLinePlain("doc:", resource.getDocumentSnippet()))
+                    .append(formatSummaryLinePlain("cached:", resource.cached ? "true" : ""));
         }
         return b.toString();
     }

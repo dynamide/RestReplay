@@ -90,6 +90,7 @@ public class ServiceResult {
     public String mutatorType = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
     public ContentMutator mutator = null;
     public String mutationDetailBlockID = "";
+    public boolean mutatorSkipped = false;
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.
@@ -176,7 +177,7 @@ public class ServiceResult {
     public List<String> requestHeaders = new ArrayList<String>();  //for building report and dump
     public Map<String,String> headerMap = new HashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
     public Header[] responseHeaders = new Header[0];
-    public String responseHeadersDump = "";//This is filled in by RestReplayTransport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from RestReplayTransport.
+    public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
     public List<Alert> alerts = new ArrayList<Alert>();
 

@@ -114,10 +114,13 @@ public class RestReplayReport {
             toc.responseCode = serviceResult.responseCode;
             toc.isMutation = serviceResult.isMutation;
             toc.idFromMutator = serviceResult.idFromMutator;
-
-            MutatorChildBlock block = formatMutatorChildrenBlock(serviceResult);
-            serviceResult.mutationDetailBlockID = block.detailID;
-            toc.children = block.tocHTML;
+            if (serviceResult.mutatorSkipped) {
+                toc.children = "<span class='toc-warn'>Mutator Skipped</span>";
+            }  else {
+                MutatorChildBlock block = formatMutatorChildrenBlock(serviceResult);
+                serviceResult.mutationDetailBlockID = block.detailID;
+                toc.children = block.tocHTML;
+            }
             tocList.add(toc);
         }
         return getTOC("").toString();
@@ -126,16 +129,12 @@ public class RestReplayReport {
     private String formatMutatorSUCCESS(ServiceResult serviceResult) {
         if (serviceResult.getChildResults().size() > 0) {
             int numGotExpected = 0;
-            int numErrors = 0;
-            int numWarnings = 0;
             int numResults = 0;
             for (ServiceResult cr : serviceResult.getChildResults()) {
                 numResults++;
                 if (cr.gotExpectedResult()) {
                     numGotExpected++;
                 }
-                numErrors += alertsCount(cr.alerts, LEVEL.WARN);
-                numWarnings += alertsCount(cr.alerts, LEVEL.ERROR);
             }
             return "SUCCESS +" + numGotExpected + '/' + numResults;
         } else {
@@ -346,7 +345,7 @@ public class RestReplayReport {
     public static String formatPageStart(String restReplayBaseDir, RestReplay restReplay) throws IOException {
 
         String script = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js",  restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.js");
-        String style  = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", restReplayBaseDir+"/"+INCLUDES_DIR + "/reports-include.css");
+        String style  = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", restReplayBaseDir + "/" + INCLUDES_DIR + "/reports-include.css");
         //String script = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.js");
         //String style = FileTools.readFile(restReplayBaseDir, INCLUDES_DIR + "/reports-include.css");
         return "<html><head><script type='text/javascript'>\r\n"
@@ -433,7 +432,7 @@ public class RestReplayReport {
         try {
             StringBuffer sb = new StringBuffer(formatPageStart(restReplayBaseDir, restReplay));
             String dateStr = Tools.nowLocale();
-            sb.append("<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
+            sb.append("<div class='REPORTTIME'><b>RestReplay</b> " + lbl(" run on") + " " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
             sb.append("<div class='masterVars'>")
               .append("<span class='LABEL'>environment:</span> <span class='env'>"+envID+"</span><br />")
               .append(formatMasterVars(masterVars)).append("</div>");
