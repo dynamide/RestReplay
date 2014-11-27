@@ -116,6 +116,8 @@ public class RestReplayReport {
             toc.idFromMutator = serviceResult.idFromMutator;
             if (serviceResult.mutatorSkipped) {
                 toc.children = "<span class='toc-warn'>Mutator Skipped</span>";
+            } else if (serviceResult.mutatorSkippedByOpts){
+                toc.children = "<span class='toc-info'>Mutator Skipped (opts)</span>";
             }  else {
                 MutatorChildBlock block = formatMutatorChildrenBlock(serviceResult);
                 serviceResult.mutationDetailBlockID = block.detailID;

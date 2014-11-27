@@ -21,7 +21,10 @@ Running:
 
     mvn -o exec:java -DenvID=dev
 
+in your local, in bash you can define macros:
 
+    alias b='mvn -o -DskipTests=true install'
+    alias r='mvn -o exec:java -DenvID=local'
 
 Running with tests in some other project-based directory: 
 

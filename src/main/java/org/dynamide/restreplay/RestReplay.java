@@ -1161,12 +1161,11 @@ public class RestReplay {
         serviceResultsMap.put("result", serviceResult);
         serviceResult.time = (System.currentTimeMillis()-test.startTime);
 
-        if (   Tools.notBlank(mutatorType)
-                && (contentRawFromMutator==null)
-                && (!runOptions.skipMutators)
-                ){
+        if (   Tools.notBlank(mutatorType)  && (contentRawFromMutator==null)) {
             if ( ! serviceResult.gotExpectedResult()) {
                 serviceResult.mutatorSkipped = true;
+            } else if (runOptions.skipMutators){
+                serviceResult.mutatorSkippedByOpts = true;
             } else {
                 ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename, getResourceManager());
                 contentMutator.setOptions(test.testNode);

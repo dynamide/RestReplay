@@ -91,6 +91,7 @@ public class ServiceResult {
     public ContentMutator mutator = null;
     public String mutationDetailBlockID = "";
     public boolean mutatorSkipped = false;
+    public boolean mutatorSkippedByOpts = false;
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.

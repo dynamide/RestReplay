@@ -201,6 +201,13 @@ td, th {
     background-color: orange;
     border: 1px solid red;
 }
+.toc-info {
+    padding: 2px;
+    font-size: 60%;
+    color: black;
+    background-color: #87cefa;
+    border: 1px solid green;
+}
 
 .TOC_TABLE td {
    padding: 6px;
@@ -322,12 +329,12 @@ DIV.mutation {
 }
 .run-options {
     color: #333;
-    font-size: 100%;
+    font-size: 90%;
     display: inline-block;
     border: 1px solid blue;
     border-radius: 5px;
     margin: 2px;
-    padding: 2px;
+    padding: 30px;
     background-color: white;
 }
 .resource-cached {
