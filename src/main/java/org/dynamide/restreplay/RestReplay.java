@@ -1343,17 +1343,26 @@ public class RestReplay {
 
     public static String usage(){
         String result = "org.dynamide.restreplay.RestReplay {args}\r\n"
+                        +" args: \r\n"
                         +"  -restReplayBaseDir <dir> \r\n"
+                        +"  -reportsDir <dir> \r\n"
+                        +"  -restReplayMaster <filename> \r\n"
+                        +"  -controlFilename true|false \r\n"
+                        +"  -testGroupID <ID> \r\n"
+                        +"  -testID <ID> \r\n"
+                        +"  -dumpResults true|false \r\n"
                         +"  -envID <ID> \r\n"
+                        +"  -autoDeletePOSTS true|false \r\n"
+                        +"   \r\n"
+                        +" Note: -DautoDeletePOSTS won't force deletion if set to false in control file."
+                        +"   \r\n"
                         +" You may also override these with system args, e.g.: \r\n"
                         +"   -DrestReplayBaseDir=/path/to/dir \r\n"
+                        +"   \r\n"
                         +" These may also be passed in via the POM.\r\n"
                         +" You can also set these system args, e.g.: \r\n"
-                        +"  -DtestGroupID=<oneID> \r\n"
-                        +"  -DtestID=<one TestGroup ID>"
-                        +"  -DenvID=<environment ID>"
-                        +"  -DautoDeletePOSTS=<true|false> \r\n"
-                        +"    (note: -DautoDeletePOSTS won't force deletion if set to false in control file.";
+                        +"  -DtestGroupID=<oneID> \r\n";
+
         return result;
     }
 

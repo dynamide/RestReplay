@@ -33,8 +33,18 @@ Running with tests in some other project-based directory:
 so the restReplayBaseDir is a directory that has your test master control files, 
 and where rest-replay-reports directory will appear.
 
+Another example, pointing your basedir and master to a directory in another location: 
+   java -jar lib/RestReplay-1.0.4.standalone.jar \
+           -restReplayBaseDir /Users/vcrocla/ws/las.ws/las/restreplay/tests/ \
+           -restReplayMaster las-master.xml
 
-
+This is useful for debugging in IntelliJ:
+  Program args: 
+     -restReplayBaseDir /Users/vcrocla/ws/las.ws/las/restreplay/tests/  -restReplayMaster las-master.xml
+  Working Directory: 
+     /Users/vcrocla/src/RestReplay
+  Main Class: 
+     org.dynamide.restreplay.RestReplay
 
 ================================================================================
   History
