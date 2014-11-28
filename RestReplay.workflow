@@ -28,19 +28,19 @@ in your local, in bash you can define macros:
 
 Running with tests in some other project-based directory: 
 
-    mvn -o exec:java -DenvID=local -DrestReplayBaseDir=/Users/vcrocla/src/RestReplay.pearson.basedir -DenvID=dev
+    mvn -o exec:java -DenvID=local -Dbasedir=/Users/vcrocla/src/RestReplay.pearson.basedir -DenvID=dev
 
-so the restReplayBaseDir is a directory that has your test master control files, 
+so the basedir is a directory that has your test master control files,
 and where rest-replay-reports directory will appear.
 
 Another example, pointing your basedir and master to a directory in another location: 
    java -jar lib/RestReplay-1.0.4.standalone.jar \
-           -restReplayBaseDir /Users/vcrocla/ws/las.ws/las/restreplay/tests/ \
+           -basedir /Users/vcrocla/ws/las.ws/las/restreplay/tests/ \
            -restReplayMaster las-master.xml
 
 This is useful for debugging in IntelliJ:
   Program args: 
-     -restReplayBaseDir /Users/vcrocla/ws/las.ws/las/restreplay/tests/  -restReplayMaster las-master.xml
+     -basedir /Users/vcrocla/ws/las.ws/las/restreplay/tests/  -restReplayMaster las-master.xml
   Working Directory: 
      /Users/vcrocla/src/RestReplay
   Main Class: 
@@ -56,10 +56,10 @@ I disabled tomcat tagonomy/dynamide authentication locally to test RestReplay.
 
 2014-10-29: 
    I ran on the command line with:
-   mvn -DskipTests exec:java  -DrestReplayBaseDir=/Users/vcrocla/src/RestReplay/src/main/resources/restreplay -DrestReplayMaster=dynamide-master.xml
+   mvn -DskipTests exec:java  -Dbasedir=/Users/vcrocla/src/RestReplay/src/main/resources/restreplay -DrestReplayMaster=dynamide-master.xml
 
    This is the command line that works in the IntelliJ IDEA project: 
-     args:  -restReplayBaseDir /Users/vcrocla/src/RestReplay/src/main/resources/restreplay -restReplayMaster dynamide-master.xml
+     args:  -basedir /Users/vcrocla/src/RestReplay/src/main/resources/restreplay -restReplayMaster dynamide-master.xml
      workingdir: /Users/vcrocla/src/RestReplay
      mainclass: org.dynamide.restreplay.RestReplay
      use-classpath-of-module: org.dynamide.RestReplay

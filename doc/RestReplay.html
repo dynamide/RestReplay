@@ -180,7 +180,7 @@
 
       <p>RestReplay then determines which <b>master</b> file to use. This file points to <strong>testGroup</strong>s in <b>control</b> files that contain <strong>test</strong>s.</p>
 
-      <p>The default behavior of RestReplay is to look for a directory, called the RestReplay directory.&nbsp; This is defined using<strong> -restReplayBaseDir</strong> parameter.</p>
+      <p>The default behavior of RestReplay is to look for a directory, called the RestReplay directory.&nbsp; This is defined using<strong> -basedir</strong> parameter.</p>
 <p>
       When running inside maven surefire, this is pre-defined to be a resource directory in the source code module.&nbsp; Maven defines a variable called basedir, which points at the project directory for the current pom.xml.</p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.&nbsp; You can select a particular master with the command line parameter -<strong>restReplayMaster</strong>
 <p>
@@ -263,7 +263,7 @@
             control file, <b>master.xml</b> .</p>
         <div class="code">
        java -jar lib/RestReplay-1.0.4-standalone.jar \
-            -restReplayBaseDir <b>./tests</b> \
+            -basedir <b>./tests</b> \
             -restReplayMaster <b>master.xml</b> \
             -envID <b>local</b>
         </div><p>This would run RestReplay, telling it where to find <strong>test</strong>s, and which <strong>master</strong> to run.&nbsp; It also passes in an environment ID, which selects per-environment settings from the master file's <a href="#RestReplay-restReplayMaster.envs">&lt;env&gt;</a> section.</p>
@@ -276,7 +276,7 @@
 <p>To run using the maven surefire test pointed at a master, e.g. master.xml in ./tests/, simply:</p>
 
       <div class="code">
-    mvn -o install \<br>        -D-restReplayBaseDir=./tests \<br>        -D-restReplayMaster=master.xml
+    mvn -o install \<br>        -D-basedir=./tests \<br>        -D-restReplayMaster=master.xml
       </div>
 <p>or define your own <b>master</b> file, which you create:</p>
 
@@ -299,15 +299,15 @@
 
 <th>Notes</th></tr>
 <tr>
-<td>restReplayBaseDir</td>
-<td>-restReplayBaseDir ./tests</td>
+<td>basedir</td>
+<td>-basedir ./tests</td>
 
 <td>The path to all the tests.</td></tr>
 <tr>
-<td>reportsDir</td>
-<td>-reportsDir /mnt/reports</td>
+<td>reports</td>
+<td>-reports /mnt/reports</td>
 
-<td>Specify output reports dir, default is "rest-replay-reports" relative to restReplayBaseDir</td></tr>
+<td>Specify output reports dir, default is "rest-replay-reports" relative to basedir</td></tr>
 <tr>
 <td>testGroupID</td>
 <td>-testGroupID main</td>
@@ -334,26 +334,26 @@
 
 <td>If you are not running a master, you can control dumps here.</td></tr>
 <tr>
-<td>controlFilename</td>
-<td>-controlFilename my-control.xml</td>
+<td>control</td>
+<td>-control my-control.xml</td>
 
 <td>Run one control file without a master.</td></tr>
 <tr>
 <td>restReplayMaster</td>
 <td>-restReplayMaster my-master.xml</td>
 
-<td>Run one master file.&nbsp; If this is set, then the options <strong>controlFilename</strong>, <strong>testGroupID</strong>, and <strong>testID</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
+<td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroupID</strong>, and <strong>testID</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
       <div class="code">
-        &nbsp;&nbsp;&nbsp; mvn exec:java -DrestReplayBaseDir=./tests
+        &nbsp;&nbsp;&nbsp; mvn exec:java -Dbasedir=./tests
       </div>
 <p>Here are some more examples of running on the command line.</p>
 <p>In this run, we are hitting the control file pi/pitoken.xml with no master file.&nbsp; So we specify testGroupID, testID within that control file.</p>
     
-      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -restReplayBaseDir ./tests \<br> -controlFilename pi/pitoken.xml \<br> -testGroupID main \<br> -testID pitoken
+      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -basedir ./tests \<br> -control pi/pitoken.xml \<br> -testGroupID main \<br> -testID pitoken
       </div>
       <p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/rest-replay-reports)</p>
       
-      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -restReplayBaseDir ./tests \<br> -restReplayMaster master.xml \<br> -reportsDir ./myreports
+      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -basedir ./tests \<br> -restReplayMaster master.xml \<br> -reports ./myreports
       </div>
       
 <h4><a name="RestReplay-2.c.2XMLconfigurationparametersinmasterfile" id="RestReplay-2.c.2XMLconfigurationparametersinmasterfile"></a>2.c.2 XML configuration parameters in <b>master</b> file</h4>

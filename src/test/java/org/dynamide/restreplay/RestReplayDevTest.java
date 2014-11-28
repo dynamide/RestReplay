@@ -24,16 +24,14 @@ public class RestReplayDevTest extends RestReplayTest {
 
     //@Test
     public void runMaster() throws Exception {
-        String masterFile = System.getProperty("restReplayMaster");
-        System.err.println("\r\n\r\n\r\nrestReplayMaster~~~ "+masterFile);
+        String masterFile = System.getProperty("master");
         if (Tools.notEmpty(masterFile)){
-            System.out.println("Using masterFile specified in System property: "+masterFile);
+            System.out.println("Using master specified in System property: "+masterFile);
         } else {
             masterFile = RestReplay.DEFAULT_DEV_MASTER_CONTROL;
             System.out.println("Using default masterFile: "+masterFile);
         }
         RestReplay replay = createRestReplayForMaven();
-        //RestReplay replay = createRestReplayUsingIntegrationTestsModule("..");
         if (replay.masterConfigFileExists(masterFile)){           // CSPACE-4027
              List<List<ServiceResult>> list = replay.runMaster(masterFile);
              logTestForGroup(list, "RestReplayMasterTest");

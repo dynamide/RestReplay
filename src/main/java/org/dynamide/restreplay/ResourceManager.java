@@ -80,7 +80,7 @@ public class ResourceManager {
     //InputStream res2 = RestReplay.class.getClassLoader().getResourceAsStream("/restreplay/"+masterFilename);
     //System.out.println("$$$$$$$$ getResource "+"/restreplay/"+masterFilename+":2-->"+res2+"<--");
 
-    public org.dom4j.Document getDocument(String context, String restReplayBaseDir, String relResourcePath) throws DocumentException {
+    public org.dom4j.Document getDocument(String context, String basedir, String relResourcePath) throws DocumentException {
         boolean markForCache = false;
         CachedDoc cachedDoc = docCache.get(relResourcePath);
 
@@ -96,10 +96,10 @@ public class ResourceManager {
         org.dom4j.Document document;
         Resource resource = new Resource();
         resource.context = context;
-        resource.base = restReplayBaseDir;
+        resource.base = basedir;
         resource.relPath = relResourcePath;
         resourceHistory.add(resource);
-        String fullPath = Tools.glue(restReplayBaseDir, "/", relResourcePath);
+        String fullPath = Tools.glue(basedir, "/", relResourcePath);
         if (new File(fullPath).exists()) {
             document = new SAXReader().read(fullPath);
             resource.provider = Resource.SOURCE.FILE;
@@ -145,7 +145,7 @@ public class ResourceManager {
         org.dom4j.Document document;
         Resource resource = new Resource();
         resource.context = context;
-        //resource.base = restReplayBaseDir;
+        //resource.base = basedir;
         resource.relPath = relResourcePath;
         resourceHistory.add(resource);
 

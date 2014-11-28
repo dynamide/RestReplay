@@ -187,9 +187,9 @@
                      cd RestReplay/
                         mvn exec:java
                      or, with an override:
-                        mvn exec:java -DrestReplayBaseDir=/my/override/directory
+                        mvn exec:java -Dbasedir=/my/override/directory
                      or:
-                        mvn -DskipTests exec:java -DtestID=testfoo -DtestGroupID=bar -DrestReplayBaseDir=mojo -DautoDeletePOSTS=true
+                        mvn -DskipTests exec:java -DtestID=testfoo -DtestGroupID=bar -Dbasedir=mojo -DautoDeletePOSTS=true
                 -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -204,16 +204,16 @@
                 <configuration>
                     <mainClass>org.dynamide.restreplay.RestReplay</mainClass>
                     <arguments>
-                        <argument>-restReplayBaseDir</argument>
+                        <argument>-basedir</argument>
                         <argument>${basedir}/src/main/resources/restreplay</argument>
                         <!--
                         You can run with the argument here:
                         <argument>/Users/vcrocla/src/RestReplay.pearson.basedir</argument>
                         or you can run on the command line:
-                           mvn -o exec:java -DenvID=local -DrestReplayBaseDir=/Users/vcrocla/src/RestReplay.pearson.basedir -DenvID=dev
+                           mvn -o exec:java -DenvID=local -Dbasedir=/Users/vcrocla/src/RestReplay.pearson.basedir -DenvID=dev
                          to override this any value set here.
                         -->
-                        <argument>-restReplayMaster</argument>
+                        <argument>-master</argument>
                         <argument>master.xml</argument>
                         <!--argument>-envID</argument>
                         <argument>dev</argument-->
