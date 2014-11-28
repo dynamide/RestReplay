@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ConfigFile {
-
     private ResourceManager resourceManager;
     public ResourceManager getResourceManager(){
         return resourceManager;
@@ -16,7 +15,6 @@ public class ConfigFile {
     protected void setResourceManager(ResourceManager manager){
         resourceManager = manager;
     }
-
 
     protected String reportsDir = "";
     public String getReportsDir(){
@@ -98,8 +96,6 @@ public class ConfigFile {
         this.dump = dump;
     }
 
-
-
     public static Dump readDumpOptions(org.dom4j.Document document){
         Dump dump = Dump.getDumpConfig();
         Node dumpNode = document.selectSingleNode("//dump");
@@ -112,7 +108,6 @@ public class ConfigFile {
         }
         return dump;
     }
-
 
     public static AuthsMap readAuths(org.dom4j.Document document){
         Map<String, String> map = new HashMap<String, String>();
@@ -137,8 +132,6 @@ public class ConfigFile {
         return readVars(varNodes, vars);
     }
 
-
-
     private static Map<String,String> readVars(List<Node> varNodes, Map<String,String> vars){
         for (Node var: varNodes){
             String ID = var.valueOf("@ID");
@@ -147,6 +140,4 @@ public class ConfigFile {
         }
         return vars;
     }
-
-
 }

@@ -15,7 +15,6 @@ public class Master extends ConfigFile {
 
     public Master(String basedir, String reportsDir, ResourceManager manager){
         this.basedir = basedir;
-        ///this.serviceResultsMap = createResultsMap();
         setReportsList(new ArrayList<String>());
         this.reportsDir = reportsDir;
         setResourceManager(manager);
@@ -29,6 +28,7 @@ public class Master extends ConfigFile {
             System.err.println("ERROR: could not read default runOptions.xml");
         }
     }
+    public static final String DEFAULT_MASTER_CONTROL = "master.xml";
 
     public Map<String,String> vars = new HashMap<String,String>();
     public Map<String, String> getVars() {
@@ -37,10 +37,6 @@ public class Master extends ConfigFile {
     public void setVars(Map<String, String> masterVars) {
         this.vars = masterVars;
     }
-
-
-
-
 
     /** Optional information method: call this method after instantiating this class using the constructor RestReplay(String), which sets the basedir.  Then you
      *   pass in your relative masterFilename to that basedir to this method, which will return true if the file is readable, valid xml, etc.
@@ -59,7 +55,6 @@ public class Master extends ConfigFile {
         }
     }
 
-
     public org.dom4j.Document openMasterConfigFile(String reason, String masterFilename) throws FileNotFoundException {
         try {
             return getResourceManager().getDocument("openMasterConfigFile:" + reason, basedir, masterFilename);
@@ -68,8 +63,6 @@ public class Master extends ConfigFile {
             throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + basedir + ". Exiting test. " + de);
         }
     }
-
-
 
     /** specify the master config file, relative to getBaseDir(), but ignore any tests or testGroups in the master.
      *  Depends on this.getEnvID() being set before this method is called, otherwise uses default envID found in master.
@@ -99,8 +92,6 @@ public class Master extends ConfigFile {
             nodeWVars = masterNode;
         }
         setVars(readVars(nodeWVars));
-
-
         this.getRunOptions().addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
         return document;
     }
@@ -134,8 +125,6 @@ public class Master extends ConfigFile {
         }
         return defaultResult;
     }
-
-
 
     public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
         return runMaster(masterFilename, true);

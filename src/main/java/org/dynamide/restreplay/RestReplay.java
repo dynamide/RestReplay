@@ -24,7 +24,6 @@ public class RestReplay extends ConfigFile {
     public RestReplay(String basedir, String reportsDir, ResourceManager manager, RunOptions parentRunOptions){
         this.basedir = basedir;
         this.serviceResultsMap = createResultsMap();
-        //this.reportsList = new ArrayList<String>();
         this.reportsDir = reportsDir;
         setResourceManager(manager);
         if (parentRunOptions!=null) {
@@ -33,11 +32,8 @@ public class RestReplay extends ConfigFile {
     }
 
 
-    public static final String DEFAULT_CONTROL = "rest-replay-control.xml";
-    public static final String DEFAULT_MASTER_CONTROL = "master.xml";
-    public static final String DEFAULT_DEV_MASTER_CONTROL = "dev-master.xml";
 
-    private String controlFileName = DEFAULT_CONTROL;
+    private String controlFileName = "";
     public String getControlFileName() {
         return controlFileName;
     }
@@ -243,7 +239,7 @@ public class RestReplay extends ConfigFile {
         return fullURL;
     }
 
-    private static String CSIDfromTestID(Node testNode, Map<String, ServiceResult> serviceResultsMap){
+    private static String locationFromTestID(Node testNode, Map<String, ServiceResult> serviceResultsMap){
         String result = "";
         String fromTestID = testNode.valueOf("fromTestID");
         if (Tools.notEmpty(fromTestID)){

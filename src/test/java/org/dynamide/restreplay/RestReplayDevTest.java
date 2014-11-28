@@ -22,13 +22,16 @@ import java.util.List;
  */
 public class RestReplayDevTest extends RestReplayTest {
 
+    public static final String DEFAULT_DEV_MASTER_CONTROL = "dev-master.xml";
+
+
     //@Test
     public void runMaster() throws Exception {
         String masterFile = System.getProperty("master");
         if (Tools.notEmpty(masterFile)){
             System.out.println("Using master specified in System property: "+masterFile);
         } else {
-            masterFile = RestReplay.DEFAULT_DEV_MASTER_CONTROL;
+            masterFile = DEFAULT_DEV_MASTER_CONTROL;
             System.out.println("Using default masterFile: "+masterFile);
         }
         Master replay = createRestReplayMasterForMaven();
