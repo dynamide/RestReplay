@@ -140,4 +140,24 @@ public class ConfigFile {
         }
         return vars;
     }
+
+    public static Map<String,String> readHeaders(Node testNode,
+                                                  Eval evalStruct,
+                                                  ServiceResult serviceResult){
+        Map<String,String> headerMap = new HashMap<String,String>();
+        List<Node> headers = testNode.selectNodes("headers/header");
+        for (Node header: headers){
+            String headerValue = header.getStringValue();
+            String headerName = header.valueOf("@name");
+            //System.out.println("header from control file: "+headerName +": "+ headerValue);
+            if (headerValue.indexOf("$")>-1){
+                Eval.EvalResult evalResult = evalStruct.eval(headerName, headerValue, null);
+                headerValue = evalResult.result;
+                serviceResult.alerts.addAll(evalResult.alerts);
+            }
+            //System.out.println("eval'd header from control file: "+headerName +": "+ headerValue);
+            headerMap.put(headerName, headerValue);
+        }
+        return headerMap;
+    }
 }
