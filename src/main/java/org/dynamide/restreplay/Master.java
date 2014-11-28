@@ -96,7 +96,6 @@ public class Master extends ConfigFile {
         return document;
     }
 
-
     private static class EnvResult {
         public Node nodeWEnvs;
         public String envID;
@@ -186,5 +185,4 @@ public class Master extends ConfigFile {
         RestReplayReport.saveIndexForMaster(basedir, reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
     }
-
 }

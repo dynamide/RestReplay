@@ -31,8 +31,6 @@ public class RestReplay extends ConfigFile {
         }
     }
 
-
-
     private String controlFileName = "";
     public String getControlFileName() {
         return controlFileName;
@@ -74,7 +72,6 @@ public class RestReplay extends ConfigFile {
     }
 
     // ============== METHODS ===========================================================
-
 
     /** Use this if you wish to run named tests within a testGroup, otherwise call runTestGroup(). */
     public List<ServiceResult>  runTests(String testGroupID, String testID) throws Exception {
@@ -168,9 +165,6 @@ public class RestReplay extends ConfigFile {
         return results;
     }
 
-
-
-
     private static class PartsStruct {
         public List<Map<String,String>> varsList = new ArrayList<Map<String,String>>();
         String requestPayloadFilename = "";
@@ -214,7 +208,6 @@ public class RestReplay extends ConfigFile {
         }*/
     }
 
-
     private static String fixupFullURL(String protoHostPort, String uri){
         String fullURL;
         if (uri.startsWith("http")){
@@ -250,8 +243,6 @@ public class RestReplay extends ConfigFile {
         }
         return result;
     }
-
-
 
     /* See, for example of <expected> : test/resources/test-data/restreplay/objectexit/object-exit.xml */
     protected String validateResponseSinglePayload(ServiceResult serviceResult,
@@ -712,7 +703,6 @@ public class RestReplay extends ConfigFile {
         return serviceResult;
     }
 
-
     public static class OneTest {
         public OneTest(
                 ServiceResult serviceResult,
@@ -788,7 +778,6 @@ public class RestReplay extends ConfigFile {
         }
         serviceResultsMap.put("result", serviceResult);  //DELETES are not supposed to be available in serviceResultsMap,
         // but "result" is supposed to be available until end of test.
-
     }
 
     private void doPOSTPUT(OneTest test,
@@ -833,19 +822,23 @@ public class RestReplay extends ConfigFile {
         if (vars!=null) {
             serviceResult.addVars(vars);
         }
-        serviceResult = doPOST_PUTFromXML(
-                serviceResult,
-                contentRaw, //partsmutator,
-                fileName,
-                vars,
+        Eval.EvalResult evalResult = test.evalStruct.eval("filename:"+fileName, contentRaw, vars);
+        String contentSubstituted = evalResult.result;
+        serviceResult.alerts.addAll(evalResult.alerts);
+
+        serviceResult = Transport.doPOST_PUT(
+                serviceResult,  //brings in existing list of Alerts
                 test.fullURL,
+                contentSubstituted,
+                contentRaw,
+                Transport.BOUNDARY,
                 method,
                 contentType,
-                test.evalStruct,
                 test.authForTest,
                 test.testIDLabel,
-                test.headerMap,
-                getRunOptions());
+                fileName,
+                test.headerMap);
+
         test.results.add(serviceResult);
         serviceResultsMap.put(test.testID, serviceResult);
         serviceResultsMap.put("result", serviceResult);
@@ -1014,7 +1007,6 @@ public class RestReplay extends ConfigFile {
         return "application/xml";
     }
 		
-
     //======================== MAIN ===================================================================
 
     private static Options createOptions() {
