@@ -31,7 +31,7 @@ public class RestReplayDevTest extends RestReplayTest {
             masterFile = RestReplay.DEFAULT_DEV_MASTER_CONTROL;
             System.out.println("Using default masterFile: "+masterFile);
         }
-        RestReplay replay = createRestReplayForMaven();
+        Master replay = createRestReplayMasterForMaven();
         if (replay.masterConfigFileExists(masterFile)){           // CSPACE-4027
              List<List<ServiceResult>> list = replay.runMaster(masterFile);
              logTestForGroup(list, "RestReplayMasterTest");
@@ -92,7 +92,8 @@ public class RestReplayDevTest extends RestReplayTest {
                 long start = System.currentTimeMillis();
                 System.out.println("RUNNING Master in Worker: "+this.getName());
                 RestReplay replay = createRestReplayForMaven();//createRestReplayUsingIntegrationTestsModule("..");
-                List<List<ServiceResult>> list = replay.runMaster(masterFile);
+                Master master = createRestReplayMasterForMaven();
+                List<List<ServiceResult>> list = master.runMaster(masterFile);
                 logTestForGroup(list, "RestReplayMasterTest");
                 long stop = System.currentTimeMillis();
                 dtest.finished(this, stop-start);

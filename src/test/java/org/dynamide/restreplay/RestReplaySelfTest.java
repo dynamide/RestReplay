@@ -51,9 +51,9 @@ import java.util.Map;
  */
 public class RestReplaySelfTest extends RestReplayTest {
 
-    public static RestReplay createRestReplay() throws Exception {
+    public static Master createRestReplay() throws Exception {
         //return RestReplayTest.createRestReplayUsingIntegrationTestsModule("..");
-        return createRestReplayForMaven();
+        return createRestReplayMasterForMaven();
 
         //NOTE: this self-test lives in services/IntegrationTests, so relToServicesRoot is ".."
         //      but if you were running from, say, services/dimension/client, then relToServicesRoot would be "../.."
@@ -63,15 +63,17 @@ public class RestReplaySelfTest extends RestReplayTest {
 
     @Test
     public void runMaster() throws Exception {
-        RestReplay replay = createRestReplay();
-        List<List<ServiceResult>> list = replay.runMaster("_self_test/master-self-test.xml");
+        Master master = createRestReplay();
+        List<List<ServiceResult>> list = master.runMaster("_self_test/master-self-test.xml");
         logTestForGroup(list, "runMaster");
     }
 
     //@Test
     public void runTestGroup() throws Exception {
-        RestReplay replay = createRestReplay();
-        replay.readOptionsFromMasterConfigFile("_self_test/master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
+        RestReplay replay = createRestReplayForMaven();
+        //this used to be needed, but this test has been disabled through several refactorings, so it is
+        // doubtful this test will work.
+        // WAS: replay.readOptionsFromMasterConfigFile("_self_test/master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
         replay.setControlFileName("_self_test/dynamide.xml");
         List<ServiceResult> list = replay.runTestGroup("main");
         logTest(list, "runTestGroup");
@@ -116,7 +118,7 @@ public class RestReplaySelfTest extends RestReplayTest {
     }
 */
 
-
+/*
     //@Test
     public void runTestGroup_AllOptions() throws Exception {
         RestReplay replay = createRestReplay();  //Use the central repository.
@@ -171,5 +173,5 @@ public class RestReplaySelfTest extends RestReplayTest {
 
         logTest(list, "runTestGroup_AllOptions");
     }
-
+*/
 }

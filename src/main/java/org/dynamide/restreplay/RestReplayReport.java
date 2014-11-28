@@ -89,7 +89,7 @@ public class RestReplayReport {
     private String runInfo = "";
 
     public String getPage(String basedir, RestReplay restReplay) throws IOException {
-        return formatPageStart(basedir, restReplay)
+        return formatPageStart(basedir, restReplay.getResourceManager())
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "</div>"
                 + header.toString()
                 + this.runInfo
@@ -344,10 +344,10 @@ public class RestReplayReport {
 
     private List<TOC> tocList = new ArrayList<TOC>();
 
-    public static String formatPageStart(String basedir, RestReplay restReplay) throws IOException {
+    public static String formatPageStart(String basedir, ResourceManager rm) throws IOException {
 
-        String script = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js",  basedir+"/"+INCLUDES_DIR + "/reports-include.js");
-        String style  = restReplay.getResourceManager().readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", basedir + "/" + INCLUDES_DIR + "/reports-include.css");
+        String script = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js", basedir + "/" + INCLUDES_DIR + "/reports-include.js");
+        String style  = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", basedir + "/" + INCLUDES_DIR + "/reports-include.css");
         //String script = FileTools.readFile(basedir, INCLUDES_DIR + "/reports-include.js");
         //String style = FileTools.readFile(basedir, INCLUDES_DIR + "/reports-include.css");
         return "<html><head><script type='text/javascript'>\r\n"
@@ -412,7 +412,7 @@ public class RestReplayReport {
                                           List<String> reportsList,
                                           String envID,
                                           Map<String,String> masterVars,
-                                          RestReplay restReplay) {
+                                          Master master) {
         File f = new File(localMasterFilename);
         String relPath = Tools.getFilenamePath(f.getPath());
         String relPathNameComponent = Tools.notBlank(relPath)
@@ -432,7 +432,7 @@ public class RestReplayReport {
         //                +"\n masterFilenameNameOnly:"+masterFilenameNameOnly);
 
         try {
-            StringBuffer sb = new StringBuffer(formatPageStart(basedir, restReplay));
+            StringBuffer sb = new StringBuffer(formatPageStart(basedir, master.getResourceManager()));
             String dateStr = Tools.nowLocale();
             sb.append("<div class='REPORTTIME'><b>RestReplay</b> " + lbl(" run on") + " " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
             sb.append("<div class='masterVars'>")
@@ -443,10 +443,10 @@ public class RestReplayReport {
                 sb.append("<hr />");
             }
             sb.append("<h2>Run Options</h2>");
-            sb.append("<div class='run-options'>"+restReplay.getRunOptions().toHTML()+"</div>");
+            sb.append("<div class='run-options'>"+master.getRunOptions().toHTML()+"</div>");
             sb.append("<br /><br /><hr />");
             sb.append("<h2>ResourceManager Summary</h2>");
-            sb.append(restReplay.getResourceManager().formatSummary());
+            sb.append(master.getResourceManager().formatSummary());
             sb.append(HTML_PAGE_END);
             System.out.println("====\r\n==== Master Report Index: "+Tools.glue(masterFilenameDirectory,masterFilenameNameOnly)+"\r\n====");
             return FileTools.saveFile(masterFilenameDirectory, masterFilenameNameOnly, sb.toString(), true);

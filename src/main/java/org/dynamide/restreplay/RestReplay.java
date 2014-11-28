@@ -19,79 +19,24 @@ import org.dynamide.restreplay.ServiceResult.AlertError;
  *   See example usage in calling class RestReplayTest in services/IntegrationTests, and also in main() in this class.
  *   @author Laramie Crocker
  */
-public class RestReplay {
+public class RestReplay extends ConfigFile {
 
     public RestReplay(String basedir, String reportsDir, ResourceManager manager, RunOptions parentRunOptions){
         this.basedir = basedir;
         this.serviceResultsMap = createResultsMap();
-        this.reportsList = new ArrayList<String>();
+        //this.reportsList = new ArrayList<String>();
         this.reportsDir = reportsDir;
-        this.resourceManager = manager;
+        setResourceManager(manager);
         if (parentRunOptions!=null) {
-            this.runOptions = parentRunOptions;
-        } else {
-            this.runOptions = new RunOptions();
-            try {
-                Document doc = this.resourceManager.getDocument("RestReplay:constructor:runOptions", basedir, RunOptions.RUN_OPTIONS_FILENAME);
-                if (doc != null) {
-                    this.runOptions.addRunOptions(doc.getRootElement(), "default");
-                }
-            } catch (DocumentException de) {
-                System.err.println("ERROR: could not read default runOptions.xml");
-            }
+            setRunOptions(parentRunOptions);
         }
     }
 
-    //TODO: make sure that the report gets all the alerts
-    //TODO: check breaking scenarios and RunOptions.
-    //TODO: config from master control file.
-    private RunOptions runOptions;
-
-    public RunOptions getRunOptions(){
-        return runOptions;
-    }
-    private void setRunOptions(RunOptions options){
-        this.runOptions = options;
-    }
-
-    private ResourceManager resourceManager;
-    public ResourceManager getResourceManager(){
-        return resourceManager;
-    }
 
     public static final String DEFAULT_CONTROL = "rest-replay-control.xml";
     public static final String DEFAULT_MASTER_CONTROL = "master.xml";
     public static final String DEFAULT_DEV_MASTER_CONTROL = "dev-master.xml";
 
-    private String envID = "";
-    public String getEnvID() {
-        return envID;
-    }
-    public void setEnvID(String envID) {
-        this.envID = envID;
-        if (Tools.notBlank(envID)) {
-            this.relativePathFromReportsDir = envID + '/';
-        } else {
-            this.relativePathFromReportsDir = "";
-        }
-    }
-
-    private String reportsDir = "";
-    public String getReportsDir(){
-        return reportsDir;
-    }
-
-    private String relativePathFromReportsDir = "";
-    /** There is no setter.  It is set when you call setEnvID() */
-    public String getRelativePathFromReportsDir(){
-        return relativePathFromReportsDir;
-    }
-
-    private String basedir = ".";  //set from constructor.
-    public String getBaseDir(){
-        return basedir;
-    }
-    
     private String controlFileName = DEFAULT_CONTROL;
     public String getControlFileName() {
         return controlFileName;
@@ -106,38 +51,6 @@ public class RestReplay {
     }
     public void setMasterFilename(String val){
         this.masterFilename = val;
-    }
-
-    private String protoHostPort = "";
-    public String getProtoHostPort() {
-        return protoHostPort;
-    }
-    public void setProtoHostPort(String protoHostPort) {
-        this.protoHostPort = protoHostPort;
-    }
-
-    private boolean autoDeletePOSTS = true;
-    public boolean isAutoDeletePOSTS() {
-        return autoDeletePOSTS;
-    }
-    public void setAutoDeletePOSTS(boolean autoDeletePOSTS) {
-        this.autoDeletePOSTS = autoDeletePOSTS;
-    }
-
-    private Dump dump;
-    public Dump getDump() {
-        return dump;
-    }
-    public void setDump(Dump dump) {
-        this.dump = dump;
-    }
-
-    AuthsMap defaultAuthsMap;
-    public AuthsMap getDefaultAuthsMap(){
-        return defaultAuthsMap;
-    }
-    public void setDefaultAuthsMap(AuthsMap authsMap){
-        defaultAuthsMap = authsMap;
     }
 
     public Map<String,String> masterVars = new HashMap<String,String>();
@@ -156,13 +69,8 @@ public class RestReplay {
         return new HashMap<String, ServiceResult>();
     }
 
-    private List<String> reportsList;
-    public  List<String> getReportsList(){
-        return reportsList;
-    }
-
     public String toString(){
-        return "RestReplay{"+this.basedir+", "+this.defaultAuthsMap+", "+this.dump+", "+this.reportsDir+'}';
+        return "RestReplay{"+this.basedir+", "+this.defaultAuthsMap+", "+this.getDump()+", "+this.reportsDir+'}';
     }
 
     public static String testToString(Node testNode) {
@@ -171,155 +79,6 @@ public class RestReplay {
 
     // ============== METHODS ===========================================================
 
-    /** Optional information method: call this method after instantiating this class using the constructor RestReplay(String), which sets the basedir.  Then you
-     *   pass in your relative masterFilename to that basedir to this method, which will return true if the file is readable, valid xml, etc.
-     *   Do this in preference to  just seeing if File.exists(), because there are rules to finding the file relative to the maven test dir, yada, yada.
-     *   This method makes it easy to have a development test file that you don't check in, so that dev tests can be missing gracefully, etc.
-     */
-    public boolean masterConfigFileExists(String masterFilename){
-        try {
-            org.dom4j.Document doc = openMasterConfigFile("masterConfigFileExists", masterFilename);
-            if (doc==null){
-                return false;
-            }
-            return true;
-        } catch (Throwable t){
-            return false;
-        }
-    }
-
-    public org.dom4j.Document openMasterConfigFile(String reason, String masterFilename) throws FileNotFoundException {
-        try {
-            return getResourceManager().getDocument("openMasterConfigFile:" + reason, basedir, masterFilename);
-        } catch (DocumentException de) {
-            System.out.println("$$$$$$ ERROR: " + de);
-            throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + basedir + ". Exiting test. " + de);
-        }
-    }
-
-    /** specify the master config file, relative to getBaseDir(), but ignore any tests or testGroups in the master.
-     *  Depends on this.getEnvID() being set before this method is called, otherwise uses default envID found in master.
-     *  @return a Document object, which you don't need to use: all options will be stored in this RestReplay instance.
-     */
-    public org.dom4j.Document readOptionsFromMasterConfigFile(String masterFilename) throws FileNotFoundException {
-        org.dom4j.Document document = openMasterConfigFile("readOptionsFromMasterConfigFile", masterFilename);
-        if (document == null){
-            throw new FileNotFoundException(masterFilename);
-        }
-        Node node = document.selectSingleNode("/restReplayMaster/protoHostPort");
-        if (null!=node) {
-            protoHostPort = node.getText().trim();
-        }
-        AuthsMap authsMap = readAuths(document);
-        setDefaultAuthsMap(authsMap);
-        Dump dump = RestReplay.readDumpOptions(document);
-        setDump(dump);
-
-        String desiredEnv = this.getEnvID();
-        Node masterNode = document.selectSingleNode("/restReplayMaster");
-        EnvResult res = selectEnv(masterNode, desiredEnv);
-        Node nodeWVars = res.nodeWEnvs;
-        if (null!=nodeWVars){
-            this.setEnvID(res.envID);
-        } else {
-            nodeWVars = masterNode;
-        }
-        setMasterVars(readVars(nodeWVars));
-
-
-        this.runOptions.addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
-        return document;
-    }
-
-    private static class EnvResult {
-        public Node nodeWEnvs;
-        public String envID;
-    }
-    /** @return a Node that contains vars/var elements, based on the desired environment string passed in.
-     *          Sends back the node identified by default="true" if no name match on desiredEnv.
-     *          Only returns null if envs/env struct is not found in master file, or if no node was marked default AND
-     *          no node ID matched. */
-    private EnvResult selectEnv(Node nodeWEnvs, String desiredEnv){
-        Node defaultEnv = null;
-        EnvResult defaultResult = new EnvResult();
-        List<Node> envNodes = nodeWEnvs.selectNodes("envs/env");
-        for (Node env: envNodes){
-            String ID = env.valueOf("@ID");
-            String isDefault = env.valueOf("@default");
-            if (Tools.notBlank(isDefault)){
-                defaultResult.nodeWEnvs = env;
-                defaultResult.envID = ID;
-            }
-            if (desiredEnv.equalsIgnoreCase(ID)){
-                EnvResult result = new EnvResult();
-                result.envID = ID;
-                result.nodeWEnvs = env;
-                return result;
-            }
-        }
-        return defaultResult;
-    }
-
-    public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
-        return runMaster(masterFilename, true);
-    }
-
-    /** Creates new instances of RestReplay, one for each controlFile specified in the master,
-     *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
-    public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
-        //System.out.println(">>> masterFilename: "+masterFilename);
-        List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
-        org.dom4j.Document document;
-        if (readOptionsFromMaster){
-            document = readOptionsFromMasterConfigFile(masterFilename);  //side-effects: sets fields of "this".
-        } else {
-            document = openMasterConfigFile("runMaster", masterFilename);
-        }
-        if (document==null){
-            throw new FileNotFoundException(masterFilename);
-        }
-
-        String saveReportsDir = this.reportsDir;
-
-        String controlFile, testGroup, test;
-        List<Node> runNodes;
-        runNodes = document.selectNodes("/restReplayMaster/run");
-        for (Node runNode : runNodes) {
-            controlFile = runNode.valueOf("@controlFile");
-            testGroup = runNode.valueOf("@testGroup");
-            test = runNode.valueOf("@test"); //may be empty
-
-            String envReportsDir = saveReportsDir;
-            //Create a new instance and clone only config values, not any results maps.
-            if (Tools.notBlank(this.getEnvID())){
-                envReportsDir = Tools.glue(saveReportsDir,"/",this.relativePathFromReportsDir);
-            }
-            RestReplay replay = new RestReplay(basedir, envReportsDir, this.getResourceManager(), this.runOptions);//this.reportsDir);
-            replay.setEnvID(this.envID);  //internally sets replay.relativePathFromReportsDir
-            replay.setControlFileName(controlFile);
-            replay.setProtoHostPort(protoHostPort);
-            replay.setAutoDeletePOSTS(isAutoDeletePOSTS());
-            replay.setDump(dump);
-            replay.setDefaultAuthsMap(getDefaultAuthsMap());
-            replay.setRunOptions(this.runOptions);
-            replay.setMasterFilename(masterFilename);
-
-            Map<String,String> runVars = readVars(runNode);
-            Map<String,String> masterVarsDup = new HashMap<String,String>();
-            masterVarsDup.putAll(masterVars);
-            masterVarsDup.putAll(runVars);
-            replay.setMasterVars(masterVarsDup);
-
-            //======================== Now run *that* instance. ======================
-                List<ServiceResult> results = replay.runTests(testGroup, test);
-            //========================================================================
-
-            list.add(results);
-            this.reportsList.addAll(replay.getReportsList());   //Add all the reports from the inner replay, to our master replay's reportsList, to generate the index.html file.
-        }
-        RestReplayReport.saveIndexForMaster(basedir, reportsDir, masterFilename, this.reportsList, this.getEnvID(), masterVars, this);
-        return list;
-    }
 
     /** Use this if you wish to run named tests within a testGroup, otherwise call runTestGroup(). */
     public List<ServiceResult>  runTests(String testGroupID, String testID) throws Exception {
@@ -329,12 +88,12 @@ public class RestReplay {
                                                         testGroupID,
                                                         testID,
                                                         this.masterVars,
-                                                        this.autoDeletePOSTS,
-                                                        this.protoHostPort,
+                                                        this.isAutoDeletePOSTS(),
+                                                        this.getProtoHostPort(),
                                                         this.defaultAuthsMap,
-                                                        this.reportsList,
+                                                        this.getReportsList(),
                                                         this.reportsDir,
-                                                        this.relativePathFromReportsDir,
+                                                        this.getRelativePathFromReportsDir(),
                                                         this.getMasterFilename());
         return result;
     }
@@ -347,12 +106,12 @@ public class RestReplay {
                                                         testGroupID,
                                                         testID,
                                                         null, //masterVars -- for now, when running stand-alone test, there are no masterVars.
-                                                        this.autoDeletePOSTS,
-                                                        this.protoHostPort,
+                                                        this.isAutoDeletePOSTS(),
+                                                        this.getProtoHostPort(),
                                                         this.defaultAuthsMap,
-                                                        this.reportsList,
+                                                        this.getReportsList(),
                                                         this.reportsDir,
-                                                        this.relativePathFromReportsDir,
+                                                        this.getRelativePathFromReportsDir(),
                                                         this.getMasterFilename());
         if (result.size()>1){
             throw new IndexOutOfBoundsException("Multiple ("+result.size()+") tests with ID='"+testID+"' were found within test group '"+testGroupID+"', but there should only be one test per ID attribute.");
@@ -413,59 +172,8 @@ public class RestReplay {
         return results;
     }
 
-    public static class AuthsMap {
-        Map<String,String> map;
-        String defaultID="";
-        public String getDefaultAuth(){
-            return map.get(defaultID);
-        }
-        public String toString(){
-            return "AuthsMap: {default='"+defaultID+"'; "+map.keySet()+'}';
-        }
-    }
 
-    public static AuthsMap readAuths(org.dom4j.Document document){
-        Map<String, String> map = new HashMap<String, String>();
-        List<Node> authNodes = document.selectNodes("//auths/auth");
-        for (Node auth : authNodes) {
-            map.put(auth.valueOf("@ID"), auth.getStringValue());
-        }
-        AuthsMap authsMap = new AuthsMap();
-        Node auths = document.selectSingleNode("//auths");
-        String defaultID = "";
-        if (auths != null){
-            defaultID = auths.valueOf("@default");
-        }
-        authsMap.map = map;
-        authsMap.defaultID = defaultID;
-        return authsMap;
-    }
 
-    public static class Dump {
-        public boolean payloads = false;
-        //public static final ServiceResult.DUMP_OPTIONS dumpServiceResultOptions = ServiceResult.DUMP_OPTIONS;
-        public ServiceResult.DUMP_OPTIONS dumpServiceResult = ServiceResult.DUMP_OPTIONS.minimal;
-        public String toString(){
-            return "payloads: "+payloads+", dumpServiceResult: "+dumpServiceResult;
-        }
-    }
-
-    public static Dump getDumpConfig(){
-        return new Dump();
-    }
-
-    public static Dump readDumpOptions(org.dom4j.Document document){
-        Dump dump = getDumpConfig();
-        Node dumpNode = document.selectSingleNode("//dump");
-        if (dumpNode != null){
-            dump.payloads = Tools.isTrue(dumpNode.valueOf("@payloads"));
-            String dumpServiceResultStr = dumpNode.valueOf("@dumpServiceResult");
-            if (Tools.notEmpty(dumpServiceResultStr)){
-                dump.dumpServiceResult = ServiceResult.DUMP_OPTIONS.valueOf(dumpServiceResultStr);
-            }
-        }
-        return dump;
-    }
 
     private static class PartsStruct {
         public List<Map<String,String>> varsList = new ArrayList<Map<String,String>>();
@@ -510,20 +218,6 @@ public class RestReplay {
         }*/
     }
 
-    private static Map<String,String> readVars(Node nodeWVars){
-        Map<String,String> vars = new HashMap<String,String>();
-        List<Node> varNodes = nodeWVars.selectNodes("vars/var");
-        return readVars(varNodes, vars);
-    }
-
-    private static Map<String,String> readVars(List<Node> varNodes, Map<String,String> vars){
-        for (Node var: varNodes){
-            String ID = var.valueOf("@ID");
-            String value = var.getText();
-            vars.put(ID, value);
-        }
-        return vars;
-    }
 
     private static String fixupFullURL(String protoHostPort, String uri){
         String fullURL;
@@ -715,7 +409,7 @@ public class RestReplay {
                           +"\r\n   auths map: "+authsMapINFO
                           +"\r\n   masterVars: "+dumpMasterVars(masterVars)
                           +"\r\n   param_autoDeletePOSTS: "+param_autoDeletePOSTS
-                          +"\r\n   Dump info: "+dump
+                          +"\r\n   Dump info: "+getDump()
                           +"\r\n   RunOptions: "+getRunOptions().toString()
                           +"\r\n========================================================================"
                           +"\r\n";
@@ -732,7 +426,7 @@ public class RestReplay {
         }
 
         Eval evalStruct = new Eval();
-        evalStruct.runOptions = this.runOptions;
+        evalStruct.runOptions = this.getRunOptions();
         evalStruct.serviceResultsMap = this.serviceResultsMap;
 
         for (Node testgroup : testgroupNodes) {
@@ -796,7 +490,7 @@ public class RestReplay {
             reportsList.add(toc);
         }
         //================================
-        if (runOptions.dumpResourceManagerSummary){
+        if (getRunOptions().dumpResourceManagerSummary){
             System.out.println(getResourceManager().formatSummaryPlain());
         }
 
@@ -847,8 +541,8 @@ public class RestReplay {
             String mutatorType = testNode.valueOf("mutator/@type");
 
             //get default timeouts from master config file.
-            serviceResult.connectionTimeout = runOptions.connectionTimeout;
-            serviceResult.socketTimeout = runOptions.socketTimeout;
+            serviceResult.connectionTimeout = getRunOptions().connectionTimeout;
+            serviceResult.socketTimeout = getRunOptions().socketTimeout;
             String authIDForTest = testNode.valueOf("@auth");
             String currentAuthForTest = (authsMap!=null) ? authsMap.map.get(authIDForTest) : "";
 
@@ -1155,7 +849,7 @@ public class RestReplay {
                 test.authForTest,
                 test.testIDLabel,
                 test.headerMap,
-                runOptions);
+                getRunOptions());
         test.results.add(serviceResult);
         serviceResultsMap.put(test.testID, serviceResult);
         serviceResultsMap.put("result", serviceResult);
@@ -1164,7 +858,7 @@ public class RestReplay {
         if (   Tools.notBlank(mutatorType)  && (contentRawFromMutator==null)) {
             if ( ! serviceResult.gotExpectedResult()) {
                 serviceResult.mutatorSkipped = true;
-            } else if (runOptions.skipMutators){
+            } else if (getRunOptions().skipMutators){
                 serviceResult.mutatorSkippedByOpts = true;
             } else {
                 ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename, getResourceManager());
@@ -1187,7 +881,7 @@ public class RestReplay {
                                 contentMutator,
                                 test.testNode,//Node
                                 test.testgroup,//Node
-                                protoHostPort,//String
+                                getProtoHostPort(),//String
                                 clonedMasterVars,//Map<String,String>
                                 testElementIndex,//int
                                 test.testGroupID,//String
@@ -1209,6 +903,7 @@ public class RestReplay {
     }
 
     private void writeRowToConsoleWDump(ServiceResult serviceResult, boolean hasError, String testIDLabel){
+        Dump dump = getDump();
         boolean doingAuto = (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.auto);
         String serviceResultRow = serviceResult.dump(dump.dumpServiceResult, hasError);
         String leader = (dump.dumpServiceResult == ServiceResult.DUMP_OPTIONS.detailed) ? "RestReplay:"+testIDLabel+": ": "";
@@ -1254,16 +949,16 @@ public class RestReplay {
             for (Map.Entry<String, String> entry : exports.entrySet()) {
                 String exportID = entry.getKey();
                 String expr = entry.getValue();
-                boolean ebes = runOptions.errorsBecomeEmptyStrings;
+                boolean ebes = getRunOptions().errorsBecomeEmptyStrings;
                 try {
-                    runOptions.errorsBecomeEmptyStrings = false;
+                    getRunOptions().errorsBecomeEmptyStrings = false;
                     //System.out.println("---->eval export: "+expr);
                     EvalResult evalResult = evalStruct.eval("export vars", expr, clonedMasterVarsWTest);
                     //System.out.println("      ---->"+evalResult.result+"<--"+evalResult.alerts+serviceResult.xmlResult);
                     exportsEvald.put(exportID, evalResult.result);
                     serviceResult.alerts.addAll(evalResult.alerts);
                 } finally {
-                    runOptions.errorsBecomeEmptyStrings = ebes;
+                    getRunOptions().errorsBecomeEmptyStrings = ebes;
                 }
             }
             serviceResult.addExports(exportsEvald);
@@ -1460,18 +1155,18 @@ public class RestReplay {
                     //TODO: DOCO: I think this means you can run a control file directly from the command line (rather than a master).  This may be historical?  where do global options come from?
                     System.out.println("WARN: control: "+controlFilename+" will not be used because master was specified.  Running master: "+restReplayMaster);
                 }
-                RestReplay replay = new RestReplay(basedirResolved, reportsDir, rootResourceManager, null);
-                replay.setEnvID(envID);
-                replay.readOptionsFromMasterConfigFile(restReplayMaster);
-                replay.setAutoDeletePOSTS(bAutoDeletePOSTS);
-                Dump dumpFromMaster = replay.getDump();
+                Master master = new Master(basedirResolved, reportsDir, rootResourceManager);
+                master.setEnvID(envID);
+                master.readOptionsFromMasterConfigFile(restReplayMaster);
+                master.setAutoDeletePOSTS(bAutoDeletePOSTS);
+                Dump dumpFromMaster = master.getDump();
                 if (Tools.notEmpty(dumpResultsFromCmdLine)){
                     dumpFromMaster.payloads = Tools.isTrue(dumpResultsFromCmdLine);
                 }
-                replay.setDump(dumpFromMaster);
-                replay.runMaster(restReplayMaster, false); //false, because we already just read the options, and override a few.
+                master.setDump(dumpFromMaster);
+                master.runMaster(restReplayMaster, false); //false, because we already just read the options, and override a few.
             } else {
-                Dump dump = getDumpConfig();
+                Dump dump = Dump.getDumpConfig();
                 if (Tools.notEmpty(dumpResultsFromCmdLine)){
                     dump.payloads = Tools.isTrue(dumpResultsFromCmdLine);
                 }

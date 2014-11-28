@@ -17,8 +17,8 @@ public class RestReplayMasterTest  extends RestReplayTest {
     //@Test
     public void runMaster() throws Exception {
         //RestReplay replay = createRestReplayUsingIntegrationTestsModule("..");
-        RestReplay replay = createRestReplayForMaven();
-        List<List<ServiceResult>> list = replay.runMaster(RestReplay.DEFAULT_MASTER_CONTROL);
+        Master master = createRestReplayMasterForMaven();
+        List<List<ServiceResult>> list = master.runMaster(RestReplay.DEFAULT_MASTER_CONTROL);
         logTestForGroup(list, "RestReplayMasterTest");
     }
 }
