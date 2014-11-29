@@ -39,13 +39,13 @@ public class ConfigFile {
     //TODO: check breaking scenarios and RunOptions.
     //TODO: config from master control file.
     private RunOptions runOptions;
-
     public RunOptions getRunOptions(){
         return runOptions;
     }
     protected void setRunOptions(RunOptions options){
         this.runOptions = options;
     }
+
     private boolean autoDeletePOSTS = true;
     public boolean isAutoDeletePOSTS() {
         return autoDeletePOSTS;
@@ -170,6 +170,8 @@ public class ConfigFile {
         return headerMap;
     }
 
+    /** Prerequisites: ResourceManager has been set, basedir has been set.
+     */
     public void readDefaultRunOptions() {
         setRunOptions(new RunOptions());
         try {

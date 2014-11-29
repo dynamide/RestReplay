@@ -592,6 +592,7 @@ public class RestReplay extends ConfigFile {
                                 testID,
                                 testGroupID,
                                 fullURL,
+                                oneProtoHostPort,
                                 authForTest,
                                 startTime),
                         isPUT,
@@ -617,6 +618,7 @@ public class RestReplay extends ConfigFile {
                         testID,
                         "", //testGroupID
                         fullURL,
+                        oneProtoHostPort,
                         authForTest,
                         startTime));
             } else if (method.equalsIgnoreCase("GET")) {
@@ -695,6 +697,7 @@ public class RestReplay extends ConfigFile {
                 String testID,
                 String testGroupID,
                 String fullURL,
+                String protoHostPort,
                 String authForTest,
                 long startTime
         ) {
@@ -708,6 +711,7 @@ public class RestReplay extends ConfigFile {
             this.testID = testID;
             this.testGroupID = testGroupID;
             this.fullURL = fullURL;
+            this.protoHostPort = protoHostPort;
             this.authForTest = authForTest;
             this.startTime = startTime;
         }
@@ -723,6 +727,7 @@ public class RestReplay extends ConfigFile {
         String testGroupID;
         String fromTestID;
         String fullURL;
+        String protoHostPort;
         String authForTest;
         long startTime;
     }
@@ -852,7 +857,7 @@ public class RestReplay extends ConfigFile {
                                 contentMutator,
                                 test.testNode,//Node
                                 test.testgroup,//Node
-                                getProtoHostPort(),//String
+                                test.protoHostPort,//String    TODO!!
                                 clonedMasterVars,//Map<String,String>
                                 testElementIndex,//int
                                 test.testGroupID,//String
@@ -966,8 +971,8 @@ public class RestReplay extends ConfigFile {
         options.addOption("basedir", true, "default/basedir");
         options.addOption("reports", true, "default/reports");
         options.addOption("testGroup", true, "default/testGroup");
-        options.addOption("testID", true, "default/testID");
-        options.addOption("envID", true, "dev");
+        options.addOption("test", true, "default/test");
+        options.addOption("env", true, "dev");
         options.addOption("autoDeletePOSTS", true, "true");
         options.addOption("dumpResults", true, "true");
         options.addOption("control", true, "control.xml");
@@ -976,6 +981,7 @@ public class RestReplay extends ConfigFile {
         return options;
     }
 
+    //TODO: this is obviated......Need to set the default arg names in Apache https://commons.apache.org/proper/commons-cli/apidocs/org/apache/commons/cli/HelpFormatter.html
     public static String usage() {
         String result = "org.dynamide.restreplay.RestReplay {args}\r\n"
                 + " args: \r\n"
@@ -984,8 +990,8 @@ public class RestReplay extends ConfigFile {
                 + "  -master <filename> \r\n"
                 + "  -control <filename> \r\n"
                 + "  -testGroup <ID> \r\n"
-                + "  -testID <ID> \r\n"
-                + "  -envID <ID> \r\n"
+                + "  -test <ID> \r\n"
+                + "  -env <ID> \r\n"
                 + "  -dumpResults true|false \r\n"
                 + "  -autoDeletePOSTS true|false \r\n"
                 + "   \r\n"
@@ -996,6 +1002,23 @@ public class RestReplay extends ConfigFile {
                 + "   -Dbasedir=/path/to/dir \r\n"
                 + "   \r\n";
         return result;
+    }
+
+    public static void printHelp(Options options){
+        String header = "Run a RestReplay test, control, or master\n\n";
+        String footer = "\nDocumentation at https://github.com/dynamide/RestReplay";
+
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("RestReplay", header, options, footer, true);
+
+        System.out.println("\r\n"
+                + " Note: -DautoDeletePOSTS won't force deletion if set to false in control file."
+                + "   \r\n"
+                + "   \r\n"
+                + " You may also override these program args with system args, e.g.: \r\n"
+                + "   -Dbasedir=/path/to/dir \r\n"
+                + "   \r\n");
+
     }
 
     private static String opt(CommandLine line, String option) {
@@ -1025,14 +1048,15 @@ public class RestReplay extends ConfigFile {
             String basedir = opt(line, "basedir");
             String reportsDir = opt(line, "reports");
             String testGroupID = opt(line, "testGroup");
-            String testID = opt(line, "testID");
-            String envID = opt(line, "envID");
+            String testID = opt(line, "test");
+            String envID = opt(line, "env");
             String autoDeletePOSTS = opt(line, "autoDeletePOSTS");
             String dumpResultsFromCmdLine = opt(line, "dumpResults");
             String controlFilename = opt(line, "control");
             String restReplayMaster = opt(line, "master");
             if (line.hasOption("help")){
-               System.out.println(usage());
+               //System.out.println(usage());
+               printHelp(options);
                System.exit(0);
             }
 
@@ -1081,8 +1105,8 @@ public class RestReplay extends ConfigFile {
                             + "\r\n    control: " + controlFilename
                             + "\r\n    master: " + restReplayMaster
                             + "\r\n    testGroup: " + testGroupID
-                            + "\r\n    testID: " + testID
-                            + "\r\n    envID: " + envID
+                            + "\r\n    test: " + testID
+                            + "\r\n    env: " + envID
                             + "\r\n    autoDeletePOSTS: " + bAutoDeletePOSTS
                             + (Tools.notEmpty(restReplayMaster)
                             ? ("\r\n    will use master file: " + fMaster.getCanonicalPath())
@@ -1110,7 +1134,7 @@ public class RestReplay extends ConfigFile {
             } else {
                 //****************** RUNNING CONTROL, NO MASTER ******************************
                 RestReplay restReplay = new RestReplay(basedirResolved, reportsDir, rootResourceManager, null);
-                restReplay.readDefaultRunOptions();//prerequisites: ResourceManager has been set, basedir has been set.
+                restReplay.readDefaultRunOptions();
                 Dump dump = Dump.getDumpConfig();
                 if (Tools.notEmpty(dumpResultsFromCmdLine)) {
                     dump.payloads = bDumpResults;
@@ -1134,9 +1158,9 @@ public class RestReplay extends ConfigFile {
                 // System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }
         } catch (ParseException exp) {
-            // oops, something went wrong
             System.err.println("Cmd-line parsing failed.  Reason: " + exp.getMessage());
-            System.err.println(usage());
+            //System.err.println(usage());
+            printHelp(options);
         } catch (Exception e) {
             System.out.println("Error : " + e.getMessage());
             e.printStackTrace();

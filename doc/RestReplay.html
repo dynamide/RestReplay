@@ -264,9 +264,9 @@
         <div class="code">
        java -jar lib/RestReplay-1.0.4-standalone.jar \
             -basedir <b>./tests</b> \
-            -restReplayMaster <b>master.xml</b> \
-            -envID <b>local</b>
-        </div><p>This would run RestReplay, telling it where to find <strong>test</strong>s, and which <strong>master</strong> to run.&nbsp; It also passes in an environment ID, which selects per-environment settings from the master file's <a href="#RestReplay-restReplayMaster.envs">&lt;env&gt;</a> section.</p>
+            -master <b>master.xml</b> \
+            -env <b>local</b>
+        </div><p>This would run RestReplay, telling it where to find <strong>test</strong>s, and which <strong>master</strong> to run.&nbsp; It also passes in an environment ID, which selects per-environment settings from the master file's <a href="#RestReplay-master.envs">&lt;env&gt;</a> section.</p>
 <p><br></p>
 <p>To run using the maven surefire test, which will find <strong>_self_test/master-self-test.xml</strong> on the path or in the Jar file:</p>
 
@@ -276,13 +276,13 @@
 <p>To run using the maven surefire test pointed at a master, e.g. master.xml in ./tests/, simply:</p>
 
       <div class="code">
-    mvn -o install \<br>        -D-basedir=./tests \<br>        -D-restReplayMaster=master.xml
+    mvn -o install \<br>        -D-basedir=./tests \<br>        -D-master=master.xml
       </div>
 <p>or define your own <b>master</b> file, which you create:</p>
 
       <div class="code">
     vi ./my-master-file.xml
-    mvn test -DrestReplayMaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=RestReplayDevTest
+    mvn test -Dmaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=RestReplayDevTest
       </div>
 
       <h4><a name="RestReplay-2.c.1Commandlineparameters" id="RestReplay-2.c.1Commandlineparameters"></a>2.c.1 Command-line parameters</h4><br>
@@ -309,20 +309,20 @@
 
 <td>Specify output reports dir, default is "rest-replay-reports" relative to basedir</td></tr>
 <tr>
-<td>testGroupID</td>
-<td>-testGroupID main</td>
+<td>testGroup</td>
+<td>-testGroup main</td>
 
 <td>Run one testGroup when running without a master.</td></tr>
 <tr>
-<td>testID</td>
-<td>-testID pitoken</td>
+<td>test</td>
+<td>-test pitoken</td>
 
 <td>The ID from a <a href="#RestReplay-restReplay.testGroup.test">test</a> element when running one control file.</td></tr>
 <tr>
-<td>envID</td>
-<td>-envID local</td>
+<td>env</td>
+<td>-env local</td>
 
-<td>One <a href="#RestReplay-restReplayMaster.envs">env</a> ID defined in your master file.</td></tr>
+<td>One <a href="#RestReplay-master.envs">env</a> ID defined in your master file.</td></tr>
 <tr>
 <td>autoDeletePOSTS</td>
 <td>-autoDeletePOSTS true</td>
@@ -339,21 +339,21 @@
 
 <td>Run one control file without a master.</td></tr>
 <tr>
-<td>restReplayMaster</td>
-<td>-restReplayMaster my-master.xml</td>
+<td>master</td>
+<td>-master my-master.xml</td>
 
-<td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroupID</strong>, and <strong>testID</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
+<td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroup</strong>, and <strong>test</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
       <div class="code">
         &nbsp;&nbsp;&nbsp; mvn exec:java -Dbasedir=./tests
       </div>
 <p>Here are some more examples of running on the command line.</p>
-<p>In this run, we are hitting the control file pi/pitoken.xml with no master file.&nbsp; So we specify testGroupID, testID within that control file.</p>
+<p>In this run, we are hitting the control file pi/pitoken.xml with no master file.&nbsp; So we specify testGroup, test within that control file.</p>
     
-      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -basedir ./tests \<br> -control pi/pitoken.xml \<br> -testGroupID main \<br> -testID pitoken
+      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -basedir ./tests \<br> -control pi/pitoken.xml \<br> -testGroup main \<br> -test pitoken
       </div>
       <p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/rest-replay-reports)</p>
       
-      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -basedir ./tests \<br> -restReplayMaster master.xml \<br> -reports ./myreports
+      <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -basedir ./tests \<br> -master master.xml \<br> -reports ./myreports
       </div>
       
 <h4><a name="RestReplay-2.c.2XMLconfigurationparametersinmasterfile" id="RestReplay-2.c.2XMLconfigurationparametersinmasterfile"></a>2.c.2 XML configuration parameters in <b>master</b> file</h4>
@@ -364,31 +364,31 @@
 
       <div id="TOCMASTER" class="cheatsheet-body">
       <div class="cheatsheet-header">Master control file</div>
-      <pre>  &lt;<a href="#RestReplay-restReplayMaster">restReplayMaster</a>&gt;
-      &lt;<a href="#RestReplay-restReplayMaster.dump">dump</a>/&gt;
-      &lt;<a href="#RestReplay-restReplayMaster.auths">auths</a>&gt;
-          &lt;<a href="#RestReplay-restReplayMaster.auths.auth">auth</a>&gt;
+      <pre>  &lt;<a href="#RestReplay-master">restReplayMaster</a>&gt;
+      &lt;<a href="#RestReplay-master.dump">dump</a>/&gt;
+      &lt;<a href="#RestReplay-master.auths">auths</a>&gt;
+          &lt;<a href="#RestReplay-master.auths.auth">auth</a>&gt;
       &lt;/auths&gt;
-      &lt;<a href="#RestReplay-restReplayMaster.runOptions">runOptions</a>&gt;
+      &lt;<a href="#RestReplay-master.runOptions">runOptions</a>&gt;
         &lt;connectionTimeout /&gt;
         &lt;socketTimeout /&gt;
         &lt;errorsBecomeEmptyStrings /&gt;
       &lt;/runOptions&gt;
       &lt;vars&gt;
-        &lt;<a href="#RestReplay-restReplayMaster.vars.var">var</a> /&gt;
+        &lt;<a href="#RestReplay-master.vars.var">var</a> /&gt;
       &lt;/vars&gt;
-      &lt;<a href="#RestReplay-restReplayMaster.envs">envs</a>&gt;
-          &lt;<a href="#RestReplay-restReplayMaster.envs.vars">vars</a>&gt;
-            &lt;<a href="#RestReplay-restReplayMaster.envs.vars.var">var</a> /&gt;
+      &lt;<a href="#RestReplay-master.envs">envs</a>&gt;
+          &lt;<a href="#RestReplay-master.envs.vars">vars</a>&gt;
+            &lt;<a href="#RestReplay-master.envs.vars.var">var</a> /&gt;
           &lt;/vars&gt;
       &lt;/envs&gt;
-      &lt;<a href="#RestReplay-restReplayMaster.run">run</a>&gt;&lt;/run&gt;
+      &lt;<a href="#RestReplay-master.run">run</a>&gt;&lt;/run&gt;
   &lt;/restReplayMaster&gt;</pre>
       </div>
       <table border="1" cellpadding="3" cellspacing="0">
         <tbody>
           <tr>
-            <td colspan="3" class="pathrow element-hdr"><a name="RestReplay-restReplayMaster" id="RestReplay-restReplayMaster"></a>/restReplayMaster</td>
+            <td colspan="3" class="pathrow element-hdr"><a name="RestReplay-master" id="RestReplay-master"></a>/restReplayMaster</td>
           </tr>
 
           <tr>
@@ -405,7 +405,7 @@
           </tr>
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.dump" id="RestReplay-restReplayMaster.dump"></a>/restReplayMaster/dump</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.dump" id="RestReplay-master.dump"></a>/restReplayMaster/dump</td>
           </tr>
 
           <tr>
@@ -464,7 +464,7 @@
 
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.auths" id="RestReplay-restReplayMaster.auths"></a>/restReplayMaster/auths</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.auths" id="RestReplay-master.auths"></a>/restReplayMaster/auths</td>
           </tr>
 
           <tr>
@@ -481,7 +481,7 @@
           </tr>
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.auths.auth" id="RestReplay-restReplayMaster.auths.auth"></a>/restReplayMaster/auths/auth</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.auths.auth" id="RestReplay-master.auths.auth"></a>/restReplayMaster/auths/auth</td>
           </tr>
 
           <tr>
@@ -511,7 +511,7 @@
           </tr>
 
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.runOptions"></a>/restReplayMaster/runOptions</td>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.runOptions"></a>/restReplayMaster/runOptions</td>
           </tr>
 
           <tr>
@@ -545,10 +545,10 @@
 
           <tr>
 <td>Discussion:</td>
-<td>{rest-replay-base-directory}/runOptions.xml is the best place to do site-wide settings for RestReplay.&nbsp; It contains a &lt;<strong>runOptions</strong>&gt; root element.<br><br>All of these options can be controlled in a master file, too.&nbsp; In this case, your master file contains &lt;<strong>runOptions</strong>&gt; under the root element &lt;<strong>restReplayMaster</strong>&gt;<br><br>When overriding RunOptions in a master file, consider these two development scenarios:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1) you are developing locally, and are setting per-test cases while you run tests,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and you may or may not check in your changes.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, change any settings you like as close to the testCase as you can in the chain:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>runOptions &gt; master &gt; testGroup &gt; testCase</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review any changes to your xml config and control files you commit,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and check strategy as outlined in case (2).<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) you are committing this master to source control, so that it gets picked up by automated builds.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, you should have a coordinated reason for overriding the default file (runOptions.xml).<br><br>&nbsp;&nbsp;&nbsp; Options:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>connectionTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>socketTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The most reasonable override in a master file's RunOptions is the timeouts:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; these may vary by service, or host<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; so one clean organization of test would be by services<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or known clusters of hosts with particular timeouts.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You could have one control file, say, "master-edge-services.xml",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; say, a time-critical cluster.&nbsp; In that control file,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set the RunOption timeouts to be low.&nbsp; In the Master, set the timeouts to be more "normal".<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the other tests will run with "normal", and tests in master-edge-services.xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; in testGroup "timeCriticalServices" will run with low timeouts.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>errorsBecomeEmptyStrings</strong>" would be set locally if you were debugging.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>dumpResourceManagerSummary</strong>" should probably be best left<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the central location in the file (runOptions.xml)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since it controls output to the console.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>skipMutators</strong>" will skip processing for Mutators.&nbsp; Mutators take one test and replays it with modified payloads.<br><br><br>&nbsp;&nbsp;&nbsp; The heirarchy is:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RunOptions : class defaults<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions.xml : default for all tests<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my-master.xml :&nbsp; overrides properties for this master.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can have many masters and run them all from the command line<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or test suite by using the startup command-line parameter:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -restReplayMaster relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or for maven, surefire, etc:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -DrestReplayMaster=relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (see docs/RestReplay.html for examples).<br>&nbsp;&nbsp;&nbsp; </td>
+<td>{rest-replay-base-directory}/runOptions.xml is the best place to do site-wide settings for RestReplay.&nbsp; It contains a &lt;<strong>runOptions</strong>&gt; root element.<br><br>All of these options can be controlled in a master file, too.&nbsp; In this case, your master file contains &lt;<strong>runOptions</strong>&gt; under the root element &lt;<strong>restReplayMaster</strong>&gt;<br><br>When overriding RunOptions in a master file, consider these two development scenarios:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1) you are developing locally, and are setting per-test cases while you run tests,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and you may or may not check in your changes.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, change any settings you like as close to the testCase as you can in the chain:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>runOptions &gt; master &gt; testGroup &gt; testCase</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review any changes to your xml config and control files you commit,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and check strategy as outlined in case (2).<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) you are committing this master to source control, so that it gets picked up by automated builds.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, you should have a coordinated reason for overriding the default file (runOptions.xml).<br><br>&nbsp;&nbsp;&nbsp; Options:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>connectionTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>socketTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The most reasonable override in a master file's RunOptions is the timeouts:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; these may vary by service, or host<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; so one clean organization of test would be by services<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or known clusters of hosts with particular timeouts.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You could have one control file, say, "master-edge-services.xml",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; say, a time-critical cluster.&nbsp; In that control file,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set the RunOption timeouts to be low.&nbsp; In the Master, set the timeouts to be more "normal".<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the other tests will run with "normal", and tests in master-edge-services.xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; in testGroup "timeCriticalServices" will run with low timeouts.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>errorsBecomeEmptyStrings</strong>" would be set locally if you were debugging.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>dumpResourceManagerSummary</strong>" should probably be best left<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the central location in the file (runOptions.xml)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since it controls output to the console.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>skipMutators</strong>" will skip processing for Mutators.&nbsp; Mutators take one test and replays it with modified payloads.<br><br><br>&nbsp;&nbsp;&nbsp; The heirarchy is:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RunOptions : class defaults<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions.xml : default for all tests<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my-master.xml :&nbsp; overrides properties for this master.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can have many masters and run them all from the command line<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or test suite by using the startup command-line parameter:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -master relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or for maven, surefire, etc:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -Dmaster=relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (see docs/RestReplay.html for examples).<br>&nbsp;&nbsp;&nbsp; </td>
 <td><br></td></tr>
 <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.vars.var"></a>/restReplayMaster/vars/var</td>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.vars.var"></a>/restReplayMaster/vars/var</td>
           </tr>
           <tr>
             <td>@id</td>
@@ -656,14 +656,14 @@
 
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.envs" id="RestReplay-restReplayMaster.envs"></a>/restReplayMaster/envs</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.envs" id="RestReplay-master.envs"></a>/restReplayMaster/envs</td>
           </tr>
 
           <tr>
               <td>&nbsp;</td>
 
               <td>Contains blocks of vars/var elements which define variables available to all tests run by this master.
-                  <br>The calling program can supply the environment ID in the command-line parameter <b>-envID</b>.
+                  <br>The calling program can supply the environment ID in the command-line parameter <b>-env</b>.
               <br>
               <br>
                   If calling restReplayInstance.readOptionsFromMasterConfigFile() programmatically, call restReplayInstance.setEnvID() first.
@@ -673,14 +673,14 @@
           <tr>
               <td>child elements</td>
 
-              <td><a href="#RestReplay-restReplayMaster.envs.vars">vars</a>
-                  <br><a href="#RestReplay-restReplayMaster.envs.vars.var">vars/var</a></td>
+              <td><a href="#RestReplay-master.envs.vars">vars</a>
+                  <br><a href="#RestReplay-master.envs.vars.var">vars/var</a></td>
           </tr>
 
           <tr>
               <td>@ID</td>
 
-              <td>The environment ID, which is available for selection from the command line parameter -envID, or the call RestReplay.setEnvID()</td>
+              <td>The environment ID, which is available for selection from the command line parameter -env, or the call RestReplay.setEnvID()</td>
           </tr>
 
           <tr>
@@ -721,7 +721,7 @@
     </div>
 
           </td></tr><tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.envs.vars" id="RestReplay-restReplayMaster.envs.vars"></a>/restReplayMaster/envs/vars</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.envs.vars" id="RestReplay-master.envs.vars"></a>/restReplayMaster/envs/vars</td>
           </tr>
 
           <tr>
@@ -731,18 +731,18 @@
           </tr>
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.envs.vars.var" id="RestReplay-restReplayMaster.envs.vars.var"></a>/restReplayMaster/envs/vars/var</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.envs.vars.var" id="RestReplay-master.envs.vars.var"></a>/restReplayMaster/envs/vars/var</td>
           </tr>
 
           <tr>
               <td><br></td>
 
               <td>A single variable, which will be available to all tests called by this master.
-                  Behaves exactly like <a href="#RestReplay-restReplayMaster.vars.var">/restReplayMaster/vars/var</a></td>
+                  Behaves exactly like <a href="#RestReplay-master.vars.var">/restReplayMaster/vars/var</a></td>
           </tr>
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplayMaster.run" id="RestReplay-restReplayMaster.run"></a>/restReplayMaster/run</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.run"></a>/restReplayMaster/run</td>
           </tr>
 
           <tr>
