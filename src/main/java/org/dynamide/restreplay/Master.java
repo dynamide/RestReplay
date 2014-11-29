@@ -14,19 +14,11 @@ import java.util.Map;
 public class Master extends ConfigFile {
 
     public Master(String basedir, String reportsDir, ResourceManager manager){
-        this.basedir = basedir;
+        setBaseDir(basedir);
         setReportsList(new ArrayList<String>());
         this.reportsDir = reportsDir;
         setResourceManager(manager);
-        setRunOptions(new RunOptions());
-        try {
-            Document doc = getResourceManager().getDocument("RestReplay:constructor:runOptions", basedir, RunOptions.RUN_OPTIONS_FILENAME);
-            if (doc != null) {
-                getRunOptions().addRunOptions(doc.getRootElement(), "default");
-            }
-        } catch (DocumentException de) {
-            System.err.println("ERROR: could not read default runOptions.xml");
-        }
+        readDefaultRunOptions();//prerequisites: ResourceManager has been set.
     }
     public static final String DEFAULT_MASTER_CONTROL = "master.xml";
 
@@ -57,10 +49,10 @@ public class Master extends ConfigFile {
 
     public org.dom4j.Document openMasterConfigFile(String reason, String masterFilename) throws FileNotFoundException {
         try {
-            return getResourceManager().getDocument("openMasterConfigFile:" + reason, basedir, masterFilename);
+            return getResourceManager().getDocument("openMasterConfigFile:" + reason, getBaseDir(), masterFilename);
         } catch (DocumentException de) {
             System.out.println("$$$$$$ ERROR: " + de);
-            throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + basedir + ". Exiting test. " + de);
+            throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + getBaseDir() + ". Exiting test. " + de);
         }
     }
 
@@ -158,7 +150,7 @@ public class Master extends ConfigFile {
             if (Tools.notBlank(this.getEnvID())) {
                 envReportsDir = Tools.glue(saveReportsDir, "/", this.getRelativePathFromReportsDir());
             }
-            RestReplay replay = new RestReplay(basedir, envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
+            RestReplay replay = new RestReplay(getBaseDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
             replay.setEnvID(this.getEnvID());  //internally sets replay.relativePathFromReportsDir
             replay.setControlFileName(controlFile);
             replay.setProtoHostPort(getProtoHostPort());
@@ -182,7 +174,7 @@ public class Master extends ConfigFile {
             //========================================================================
 
         }
-        RestReplayReport.saveIndexForMaster(basedir, reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
+        RestReplayReport.saveIndexForMaster(getBaseDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
     }
 }

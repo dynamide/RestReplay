@@ -46,6 +46,15 @@ This is useful for debugging in IntelliJ:
   Main Class: 
      org.dynamide.restreplay.RestReplay
 
+This is how you run just one control file, and how in that control file, you can also run a testGroup, 
+or a single test within a testGroup: 
+   
+		java -jar target/RestReplay-1.0.4-standalone.jar \
+        -control _self_test/dynamide.xml \
+        -testGroup login \
+        -testID dynamideToken \
+        -basedir ./src/main/resources/restreplay \
+        -reports ./rest-replay-reports
 ================================================================================
   History
 ================================================================================    

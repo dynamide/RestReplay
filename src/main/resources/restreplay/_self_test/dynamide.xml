@@ -5,6 +5,9 @@
 
 
     <testGroup ID="login" autoDeletePOSTS="false">
+        <vars>
+            <var ID="DMSERVER">http://localhost:18080</var>
+        </vars>
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>

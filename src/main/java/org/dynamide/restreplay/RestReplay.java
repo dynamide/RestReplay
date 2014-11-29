@@ -24,7 +24,7 @@ import org.dynamide.restreplay.ServiceResult.AlertError;
 public class RestReplay extends ConfigFile {
 
     public RestReplay(String basedir, String reportsDir, ResourceManager manager, RunOptions parentRunOptions) {
-        this.basedir = basedir;
+        setBaseDir(basedir);
         this.serviceResultsMap = createResultsMap();
         this.reportsDir = reportsDir;
         setResourceManager(manager);
@@ -66,7 +66,7 @@ public class RestReplay extends ConfigFile {
     }
 
     public String toString() {
-        return "RestReplay{" + this.basedir + ", " + this.defaultAuthsMap + ", " + this.getDump() + ", " + this.reportsDir + '}';
+        return "RestReplay{" + getBaseDir() + ", " + defaultAuthsMap + ", " + getDump() + ", " + reportsDir + '}';
     }
 
     public static String testToString(Node testNode) {
@@ -80,7 +80,7 @@ public class RestReplay extends ConfigFile {
      */
     public List<ServiceResult> runTests(String testGroupID, String testID) throws Exception {
         List<ServiceResult> result = runRestReplayFile(
-                this.basedir,
+                this.getBaseDir(),
                 this.controlFileName,
                 testGroupID,
                 testID,
@@ -100,7 +100,7 @@ public class RestReplay extends ConfigFile {
      */
     public ServiceResult runTest(String testGroupID, String testID) throws Exception {
         List<ServiceResult> result = runRestReplayFile(
-                this.basedir,
+                this.getBaseDir(),
                 this.controlFileName,
                 testGroupID,
                 testID,
@@ -376,7 +376,7 @@ public class RestReplay extends ConfigFile {
                 + "\r\n   masterVars: " + dumpMasterVars(masterVars)
                 + "\r\n   param_autoDeletePOSTS: " + param_autoDeletePOSTS
                 + "\r\n   Dump info: " + getDump()
-                + "\r\n   RunOptions: " + getRunOptions().toString()
+                + "\r\n   RunOptions: " + getRunOptions()
                 + "\r\n========================================================================"
                 + "\r\n";
         report.addRunInfo(restReplayHeader);
@@ -962,9 +962,10 @@ public class RestReplay extends ConfigFile {
 
     private static Options createOptions() {
         Options options = new Options();
+        options.addOption("help", false, "RestReplay Help");
         options.addOption("basedir", true, "default/basedir");
         options.addOption("reports", true, "default/reports");
-        options.addOption("testGroupID", true, "default/testGroupID");
+        options.addOption("testGroup", true, "default/testGroup");
         options.addOption("testID", true, "default/testID");
         options.addOption("envID", true, "dev");
         options.addOption("autoDeletePOSTS", true, "true");
@@ -980,23 +981,20 @@ public class RestReplay extends ConfigFile {
                 + " args: \r\n"
                 + "  -basedir <dir> \r\n"
                 + "  -reports <dir> \r\n"
-                + "  -restReplayMaster <filename> \r\n"
-                + "  -control true|false \r\n"
-                + "  -testGroupID <ID> \r\n"
+                + "  -master <filename> \r\n"
+                + "  -control <filename> \r\n"
+                + "  -testGroup <ID> \r\n"
                 + "  -testID <ID> \r\n"
-                + "  -dumpResults true|false \r\n"
                 + "  -envID <ID> \r\n"
+                + "  -dumpResults true|false \r\n"
                 + "  -autoDeletePOSTS true|false \r\n"
                 + "   \r\n"
                 + " Note: -DautoDeletePOSTS won't force deletion if set to false in control file."
                 + "   \r\n"
-                + " You may also override these with system args, e.g.: \r\n"
-                + "   -Dbasedir=/path/to/dir \r\n"
                 + "   \r\n"
-                + " These may also be passed in via the POM.\r\n"
-                + " You can also set these system args, e.g.: \r\n"
-                + "  -DtestGroupID=<oneID> \r\n";
-
+                + " You may also override these program args with system args, e.g.: \r\n"
+                + "   -Dbasedir=/path/to/dir \r\n"
+                + "   \r\n";
         return result;
     }
 
@@ -1026,13 +1024,17 @@ public class RestReplay extends ConfigFile {
 
             String basedir = opt(line, "basedir");
             String reportsDir = opt(line, "reports");
-            String testGroupID = opt(line, "testGroupID");
+            String testGroupID = opt(line, "testGroup");
             String testID = opt(line, "testID");
             String envID = opt(line, "envID");
             String autoDeletePOSTS = opt(line, "autoDeletePOSTS");
             String dumpResultsFromCmdLine = opt(line, "dumpResults");
             String controlFilename = opt(line, "control");
             String restReplayMaster = opt(line, "master");
+            if (line.hasOption("help")){
+               System.out.println(usage());
+               System.exit(0);
+            }
 
             if (Tools.isBlank(reportsDir)) {
                 reportsDir = basedir + '/' + RestReplayTest.REPORTS_DIRNAME;
@@ -1078,7 +1080,7 @@ public class RestReplay extends ConfigFile {
                             + "\r\n    basedir(resolved): " + basedirResolved
                             + "\r\n    control: " + controlFilename
                             + "\r\n    master: " + restReplayMaster
-                            + "\r\n    testGroupID: " + testGroupID
+                            + "\r\n    testGroup: " + testGroupID
                             + "\r\n    testID: " + testID
                             + "\r\n    envID: " + envID
                             + "\r\n    autoDeletePOSTS: " + bAutoDeletePOSTS
@@ -1094,26 +1096,29 @@ public class RestReplay extends ConfigFile {
                     //TODO: DOCO: I think this means you can run a control file directly from the command line (rather than a master).  This may be historical?  where do global options come from?
                     System.out.println("WARN: control: " + controlFilename + " will not be used because master was specified.  Running master: " + restReplayMaster);
                 }
+                //****************** RUNNING MASTER ******************************************
                 Master master = new Master(basedirResolved, reportsDir, rootResourceManager);
                 master.setEnvID(envID);
                 master.readOptionsFromMasterConfigFile(restReplayMaster);
                 master.setAutoDeletePOSTS(bAutoDeletePOSTS);
                 Dump dumpFromMaster = master.getDump();
                 if (Tools.notEmpty(dumpResultsFromCmdLine)) {
-                    dumpFromMaster.payloads = Tools.isTrue(dumpResultsFromCmdLine);
+                    dumpFromMaster.payloads = bDumpResults;
                 }
                 master.setDump(dumpFromMaster);
                 master.runMaster(restReplayMaster, false); //false, because we already just read the options, and override a few.
             } else {
+                //****************** RUNNING CONTROL, NO MASTER ******************************
+                RestReplay restReplay = new RestReplay(basedirResolved, reportsDir, rootResourceManager, null);
+                restReplay.readDefaultRunOptions();//prerequisites: ResourceManager has been set, basedir has been set.
                 Dump dump = Dump.getDumpConfig();
                 if (Tools.notEmpty(dumpResultsFromCmdLine)) {
-                    dump.payloads = Tools.isTrue(dumpResultsFromCmdLine);
+                    dump.payloads = bDumpResults;
                 }
-                List<String> reportsList = new ArrayList<String>();
-
-                RestReplay restReplay = new RestReplay(basedirResolved, reportsDir, rootResourceManager, null);
                 restReplay.setDump(dump);
-                restReplay.runRestReplayFile(basedirResolved,
+                List<String> reportsList = new ArrayList<String>();
+                restReplay.runRestReplayFile(
+                        basedirResolved,
                         controlFilename,
                         testGroupID,
                         testID,

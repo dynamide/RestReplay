@@ -1,5 +1,7 @@
 package org.dynamide.restreplay;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dynamide.util.Tools;
 
@@ -7,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/** This is the superclass of Master and RestReplay.
+ *      RestReplay reads one control file at a time.
+ *      Master reads a master file, which spawns RestReplays for every control file it runs.
+ */
 public class ConfigFile {
     private ResourceManager resourceManager;
     public ResourceManager getResourceManager(){
@@ -21,9 +27,12 @@ public class ConfigFile {
         return reportsDir;
     }
 
-    protected String basedir = ".";  //set from constructor.
+    private String basedir = ".";  //set from constructor.
     public String getBaseDir(){
         return basedir;
+    }
+    protected void setBaseDir(String value){
+       basedir = value;
     }
 
     //TODO: make sure that the report gets all the alerts
@@ -159,5 +168,19 @@ public class ConfigFile {
             headerMap.put(headerName, headerValue);
         }
         return headerMap;
+    }
+
+    public void readDefaultRunOptions() {
+        setRunOptions(new RunOptions());
+        try {
+            Document doc = getResourceManager().getDocument("RestReplay:constructor:runOptions",
+                                                            basedir,
+                                                            RunOptions.RUN_OPTIONS_FILENAME);
+            if (doc != null) {
+                getRunOptions().addRunOptions(doc.getRootElement(), "default");
+            }
+        } catch (DocumentException de) {
+            System.err.println("ERROR: could not read default runOptions.xml");
+        }
     }
 }
