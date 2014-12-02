@@ -15,9 +15,9 @@ import org.dynamide.restreplay.Eval.EvalResult;
 import org.dynamide.restreplay.ServiceResult.AlertError;
 
 /**
- * This class is used to replay a request to the Services layer, by sending the XML payload
+ * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
  * in an appropriate Multipart request.
- * See example usage in calling class RestReplayTest in services/IntegrationTests, and also in main() in this class.
+ * See example usage in calling class RestReplayTest and RestReplaySelfTest, and also in main() in this class.
  *
  * @author Laramie Crocker
  */
@@ -76,7 +76,7 @@ public class RestReplay extends ConfigFile {
     // ============== METHODS ===========================================================
 
     /**
-     * Use this if you wish to run named tests within a testGroup, otherwise call runTestGroup().
+     * Use this if you wish to run named tests within a testGroup.
      */
     public List<ServiceResult> runTests(String testGroupID, String testID) throws Exception {
         List<ServiceResult> result = runRestReplayFile(
@@ -93,38 +93,6 @@ public class RestReplay extends ConfigFile {
                 this.getRelativePathFromReportsDir(),
                 this.getMasterFilename());
         return result;
-    }
-
-    /**
-     * Use this if you wish to specify just ONE test to run within a testGroup, otherwise call runTestGroup().
-     */
-    public ServiceResult runTest(String testGroupID, String testID) throws Exception {
-        List<ServiceResult> result = runRestReplayFile(
-                this.getBaseDir(),
-                this.controlFileName,
-                testGroupID,
-                testID,
-                null, //masterVars -- for now, when running stand-alone test, there are no masterVars.
-                this.isAutoDeletePOSTS(),
-                this.getProtoHostPort(),
-                this.defaultAuthsMap,
-                this.getReportsList(),
-                this.reportsDir,
-                this.getRelativePathFromReportsDir(),
-                this.getMasterFilename());
-        if (result.size() > 1) {
-            throw new IndexOutOfBoundsException("Multiple (" + result.size() + ") tests with ID='" + testID + "' were found within test group '" + testGroupID + "', but there should only be one test per ID attribute.");
-        }
-        return result.get(0);
-    }
-
-    /**
-     * Use this if you wish to run all tests within a testGroup.
-     */
-    public List<ServiceResult> runTestGroup(String testGroupID) throws Exception {
-        //NOTE: calling runTest with empty testID runs all tests in a test group, but don't expose this fact.
-        // Expose this method (runTestGroup) instead.
-        return runTests(testGroupID, "");
     }
 
     public List<ServiceResult> autoDelete(String logName) {
@@ -536,7 +504,6 @@ public class RestReplay extends ConfigFile {
                 Map<String, String> headerMapFromTestGroup = readHeaders(testGroupNode, evalStruct, serviceResult);
                 headerMap.putAll(headerMapFromTestGroup);
             }
-
             serviceResult.headerMap = headerMap;
             //========END Headers=====================
 
@@ -1116,10 +1083,6 @@ public class RestReplay extends ConfigFile {
             ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
 
             if (Tools.notEmpty(restReplayMaster)) {
-                if (Tools.notEmpty(controlFilename)) {
-                    //TODO: DOCO: I think this means you can run a control file directly from the command line (rather than a master).  This may be historical?  where do global options come from?
-                    System.out.println("WARN: control: " + controlFilename + " will not be used because master was specified.  Running master: " + restReplayMaster);
-                }
                 //****************** RUNNING MASTER ******************************************
                 Master master = new Master(basedirResolved, reportsDir, rootResourceManager);
                 master.setEnvID(envID);
@@ -1130,7 +1093,18 @@ public class RestReplay extends ConfigFile {
                     dumpFromMaster.payloads = bDumpResults;
                 }
                 master.setDump(dumpFromMaster);
-                master.runMaster(restReplayMaster, false); //false, because we already just read the options, and override a few.
+                if (Tools.notEmpty(controlFilename)) {
+                    //******* RUN CONTROL, using MASTER
+                    System.out.println("INFO: control: " + controlFilename + " will be used within master specified: " + restReplayMaster);
+                    master.runMaster(restReplayMaster,
+                            false,
+                            controlFilename,
+                            testGroupID,
+                            testID);
+                } else {
+                    //******** RUN MASTER
+                    master.runMaster(restReplayMaster, false); //false, because we already just read the options, and override a few.
+                }
             } else {
                 //****************** RUNNING CONTROL, NO MASTER ******************************
                 RestReplay restReplay = new RestReplay(basedirResolved, reportsDir, rootResourceManager, null);

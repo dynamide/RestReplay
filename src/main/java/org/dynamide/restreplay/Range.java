@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.*;
 
+/** Range limits can be set for a whole series, for example, range 400-499 can use the shortcuts 4x or 4xx or 4X or 4XX.
+ *
+ */
 public class Range {
     public static class RangeTupple{
         public int min = 0;

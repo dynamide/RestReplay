@@ -68,17 +68,6 @@ public class RestReplaySelfTest extends RestReplayTest {
         logTestForGroup(list, "runMaster");
     }
 
-    //@Test
-    public void runTestGroup() throws Exception {
-        RestReplay replay = createRestReplayForMaven();
-        //this used to be needed, but this test has been disabled through several refactorings, so it is
-        // doubtful this test will work.
-        // WAS: replay.readOptionsFromMasterConfigFile("_self_test/master-self-test.xml"); //or use: RestReplay.DEFAULT_MASTER_CONTROL as master filename;
-        replay.setControlFileName("_self_test/dynamide.xml");
-        List<ServiceResult> list = replay.runTestGroup("main");
-        logTest(list, "runTestGroup");
-    }
-
 /*
     @Test
     public void runOneTest() throws Exception {

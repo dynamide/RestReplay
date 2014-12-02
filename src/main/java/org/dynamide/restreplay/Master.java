@@ -117,14 +117,8 @@ public class Master extends ConfigFile {
         return defaultResult;
     }
 
-    public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
-        return runMaster(masterFilename, true);
-    }
-
-    /** Creates new instances of RestReplay, one for each controlFile specified in the master,
-     *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
-    public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
-        List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
+    private org.dom4j.Document loadDocument(String masterFilename, boolean readOptionsFromMaster)
+            throws FileNotFoundException {
         org.dom4j.Document document;
         if (readOptionsFromMaster){
             document = readOptionsFromMasterConfigFile(masterFilename);  //side-effects: sets fields of "this".
@@ -134,47 +128,78 @@ public class Master extends ConfigFile {
         if (document==null){
             throw new FileNotFoundException(masterFilename);
         }
+        return document;
+    }
 
-        String saveReportsDir = this.reportsDir;
+    public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
+        return runMaster(masterFilename, true);
+    }
 
+    /** Creates new instances of RestReplay, one for each controlFile specified in the master,
+     *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
+    public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
+        List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
+        org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         String controlFile, testGroup, test;
-        List<Node> runNodes;
-        runNodes = document.selectNodes("/restReplayMaster/run");
+        List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
         for (Node runNode : runNodes) {
             controlFile = runNode.valueOf("@controlFile");
             testGroup = runNode.valueOf("@testGroup");
             test = runNode.valueOf("@test"); //may be empty
-
-            String envReportsDir = saveReportsDir;
-            //Create a new instance and clone only config values, not any results maps.
-            if (Tools.notBlank(this.getEnvID())) {
-                envReportsDir = Tools.glue(saveReportsDir, "/", this.getRelativePathFromReportsDir());
-            }
-            RestReplay replay = new RestReplay(getBaseDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
-            replay.setEnvID(this.getEnvID());  //internally sets replay.relativePathFromReportsDir
-            replay.setControlFileName(controlFile);
-            replay.setProtoHostPort(getProtoHostPort());
-            replay.setAutoDeletePOSTS(isAutoDeletePOSTS());
-            replay.setDump(getDump());
-            replay.setDefaultAuthsMap(getDefaultAuthsMap());
-            replay.setRunOptions(this.getRunOptions());
-            replay.setMasterFilename(masterFilename);
-
             Map<String, String> runVars = readVars(runNode);
-            Map<String, String> masterVarsDup = new HashMap<String, String>();
-            masterVarsDup.putAll(getVars());
-            masterVarsDup.putAll(runVars);
-            replay.setMasterVars(masterVarsDup);
-            replay.setReportsList(getReportsList());  //they go directly in.  In future, if you want to aggregate by control file, fix it here.
-            // Add all the reports from the inner replay, to our master replay's reportsList, to generate the index.html file.
-
-
-            //======================== Now run *that* instance. ======================
-            list.add(replay.runTests(testGroup, test));
-            //========================================================================
-
+            list.add(runTest(masterFilename, controlFile, testGroup, test, runVars));
         }
         RestReplayReport.saveIndexForMaster(getBaseDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
+    }
+
+    public List<List<ServiceResult>> runMaster(String masterFilename,
+                                               boolean readOptionsFromMaster,
+                                               String controlFile,
+                                               String testGroup,
+                                               String test) throws Exception {
+        List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
+        //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
+        runTest(masterFilename, controlFile, testGroup, test, null);
+        RestReplayReport.saveIndexForMaster(getBaseDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
+        return list;
+    }
+
+    private List<ServiceResult> runTest(String masterFilename,
+                                        String controlFile,
+                                        String testGroup,
+                                        String test,
+                                        Map<String, String> runVars)
+    throws Exception {
+        String envReportsDir = this.reportsDir;
+        //Create a new instance and clone only config values, not any results maps.
+        if (Tools.notBlank(this.getEnvID())) {
+            envReportsDir = Tools.glue(this.reportsDir, "/", this.getRelativePathFromReportsDir());
+        }
+        RestReplay replay = new RestReplay(getBaseDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
+        replay.setEnvID(this.getEnvID());  //internally sets replay.relativePathFromReportsDir
+        replay.setControlFileName(controlFile);
+        replay.setProtoHostPort(getProtoHostPort());
+        replay.setAutoDeletePOSTS(isAutoDeletePOSTS());
+        replay.setDump(getDump());
+        replay.setDefaultAuthsMap(getDefaultAuthsMap());
+        replay.setRunOptions(this.getRunOptions());
+        replay.setMasterFilename(masterFilename);
+
+        //Map<String, String> runVars = readVars(runNode);
+        Map<String, String> masterVarsDup = new HashMap<String, String>();
+        masterVarsDup.putAll(getVars());
+        if (runVars!=null){
+            masterVarsDup.putAll(runVars);
+        }
+        replay.setMasterVars(masterVarsDup);
+        replay.setReportsList(getReportsList());  //they go directly in.  In future, if you want to aggregate by control file, fix it here.
+        // Add all the reports from the inner replay, to our master replay's reportsList, to generate the index.html file.
+
+
+        //======================== Now run *that* instance. ======================
+        return replay.runTests(testGroup, test);
+        //========================================================================
+
     }
 }

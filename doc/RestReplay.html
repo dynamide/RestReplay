@@ -23,7 +23,7 @@
     white-space: pre;
     font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
     border: 1px dashed rgb(187, 187, 187); margin: 0px 0px 10px; 
-    padding: 0px; 
+    padding: 10px;
     overflow: auto; color: black; 
     hidebackground-color: rgb(220, 240, 220);
     background-color: rgb(240, 250, 240);
@@ -337,15 +337,13 @@
 <td>control</td>
 <td>-control my-control.xml</td>
 
-<td>Run one control file without a master.</td></tr>
+<td>Run one control file without a master.  Requires at least <strong>testGroup</strong>, and also accepts <strong>test</strong></td></tr>
 <tr>
 <td>master</td>
 <td>-master my-master.xml</td>
 
 <td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroup</strong>, and <strong>test</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
-      <div class="code">
-        &nbsp;&nbsp;&nbsp; mvn exec:java -Dbasedir=./tests
-      </div>
+      <div class="code">mvn exec:java -Dbasedir=./tests</div>
 <p>Here are some more examples of running on the command line.</p>
 <p>In this run, we are hitting the control file pi/pitoken.xml with no master file.&nbsp; So we specify testGroup, test within that control file.</p>
     
@@ -890,14 +888,14 @@
           </tr>
           <tr>
             <td>header</td>
-            <td>A header that will be expanded just before the test is run.  If you need to force a particular test to skip including all the headers,
+            <td>A header that will be expanded just before the test is run.  If you need to force a particular test to skip including all the headers set by the testGroup,
             set inheritHeaders="false" on that &lt;test&gt; node.</td>
           </tr>
           <tr>
             <td>Example:</td>
             <td>
               <div class="code">
-    <restreplay>
+    &lt;restreplay>
       &lt;testGroup ID="mainTestGroup"&gt;
         &lt;headers&gt;
             &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
@@ -914,19 +912,47 @@
             &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
             &lt;filename&gt;pitoken.json&lt;/filename&gt;
             <b>&lt;-- Will NOT inherit headers --&gt;</b>
-        &lt;/test&gt;
-
-        &lt;test ID="deleteTemplate"&gt;
-            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
-            &lt;method&gt;DELETE&lt;/method&gt;
-            &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
-            <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
-        &lt;/test&gt;
-              </restreplay></div>
+                  &lt;test ID="deleteTemplate"&gt;
+                  &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+                  &lt;method&gt;DELETE&lt;/method&gt;
+                  &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
+                  <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
+                  &lt;/test&gt;
+              &lt;/restreplay>
+             </div>
             </td>
           </tr>
 
 
+          <tr>
+              <td>Example:</td>
+              <td>
+                  <div class="code">
+    &lt;restreplay>
+      &lt;testGroup ID="mainTestGroup"&gt;
+          &lt;headers&gt;
+             &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
+             &lt;header name="x-authorization"&gt;${pitoken.got("//data")}&lt;/header&gt;
+          &lt;/headers&gt;
+          &lt;vars&gt;
+              &lt;var ID="COURSE_ID"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
+              &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
+          &lt;/vars&gt;
+
+          &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
+              &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+              &lt;method&gt;POST&lt;/method&gt;
+              &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
+              &lt;filename&gt;pitoken.json&lt;/filename&gt;
+              <b>&lt;-- Will NOT inherit headers --&gt;</b>
+              <b>&lt;-- And can still define its own headers --&gt;</b>
+              &lt;headers&gt;
+                  &lt;header name="X-SomeParameter"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
+              &lt;/headers&gt;
+          &lt;/test&gt;
+  &lt;/restreplay></div>
+              </td>
+          </tr>
 
 
 

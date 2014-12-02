@@ -59,8 +59,10 @@ public class ContentMutator {
         return " ["+p+"] no-"+current;
     }
 
+    /** Example:
+     *    ranges[no_fieldA,no_fieldB,no_fieldC]->[[200-205,300-301,4xx], [200-205], [300-390,4xx]]
+     */
     public boolean valueInRangeForId(int value, String mutationId){
-        // ranges[no_fieldA,no_fieldB,no_fieldC]->[[200-205,300-301,4xx], [200-205], [300-390,4xx]]
         Range range = idRanges.get(mutationId);
         if (range!=null) {
             return range.valueInRange(value);
