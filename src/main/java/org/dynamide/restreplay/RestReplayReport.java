@@ -46,6 +46,9 @@ public class RestReplayReport {
 
     protected static final String DIV_END = "</div>";
 
+    protected static final String WRAP_START = "<div class='SUMMARY_WRAP'>";
+    protected static final String WRAP_END = "</div>";
+
     protected static final String PRE_START = "<pre class='SUMMARY'>";
     protected static final String PRE_END = "</pre>";
     protected static final String BR = "<br />\r\n";
@@ -479,9 +482,9 @@ public class RestReplayReport {
         StringBuffer fb = new StringBuffer();
         ServiceResult.PRETTY_FORMAT respType = serviceResult.contentTypeFromResponse();
         appendPayload(fb, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw)", "REQUESTRAW" + tocID);
-        appendPayload(fb, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID);
+        appendPayload(fb, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID, false);
         appendPayload(fb, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID);
-        appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID);
+        appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, false);
         appendPayload(fb, serviceResult.expectedContentExpanded, respType, "EXPECTED", "EXPECTED" + tocID);
         return fb.toString();
     }
@@ -498,9 +501,23 @@ public class RestReplayReport {
     }
 
     protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID) {
+        appendPayload(fb, payload, format, title, theDivID, true);
+    }
+
+
+    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, boolean usePRE) {
         if (Tools.notBlank(payload)) {
             //fb.append(BR+title+":"+BR);
             try {
+                String pre_start,
+                       pre_end;
+                if (usePRE){
+                    pre_start = PRE_START;
+                    pre_end = PRE_END;
+                } else {
+                    pre_start = WRAP_START;
+                    pre_end = WRAP_END;
+                }
                 switch (format) {
                     case XML:
                         //System.out.println("PAYLOAD:"+payloadJSONtoXML(payload));
@@ -510,18 +527,18 @@ public class RestReplayReport {
                         //System.out.println("PAYLOAD raw:" + payload);
                         String pretty = prettyPrint(payload);
                         fb.append(formatCollapse(theDivID, title));  //starts a div.
-                        fb.append(PRE_START);
+                        fb.append(pre_start);
                         fb.append(escape(pretty));
-                        fb.append(PRE_END);
+                        fb.append(pre_end);
                         fb.append(DIV_END);//ends that div.
                         break;
                     case JSON:
                     case NONE:
                         //System.out.println("PAYLOAD raw:" + payload);
                         fb.append(formatCollapse(theDivID, title));  //starts a div.
-                        fb.append(PRE_START);
+                        fb.append(pre_start);
                         fb.append(escape(payload));
-                        fb.append(PRE_END);
+                        fb.append(pre_end);
                         fb.append(DIV_END); //ends that div.
                         break;
                     default:
