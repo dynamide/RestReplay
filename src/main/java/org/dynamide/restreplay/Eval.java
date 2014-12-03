@@ -164,7 +164,7 @@ public class Eval {
             try {
                 resultObj = expr.evaluate(jc); //REM - 5/9/2011 - Usually calls back to fields and methods in ServiceResult class to do the evaluation -e.g., the "got" method.
             } catch (Throwable ex){
-                System.out.println("\r\n\r\n\r\n~~~~~~~~~~~~~~~~~~ error ");
+                System.out.println("\r\n\r\n\r\n~~~~~~~~~~~~~~~~~~ error "+ex);
                 evalResult.addAlert("Exception while evaluating variable: '"+var+"'.",// Exception: "+ex,
                         dumpContext(jc),
                         LEVEL.ERROR);
