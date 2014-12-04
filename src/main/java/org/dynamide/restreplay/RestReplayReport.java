@@ -91,8 +91,8 @@ public class RestReplayReport {
 
     private String runInfo = "";
 
-    public String getPage(String basedir, RestReplay restReplay) throws IOException {
-        return formatPageStart(basedir, restReplay.getResourceManager())
+    public String getPage(String testdir, RestReplay restReplay) throws IOException {
+        return formatPageStart(testdir, restReplay.getResourceManager())
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "</div>"
                 + header.toString()
                 + this.runInfo
@@ -347,12 +347,12 @@ public class RestReplayReport {
 
     private List<TOC> tocList = new ArrayList<TOC>();
 
-    public static String formatPageStart(String basedir, ResourceManager rm) throws IOException {
+    public static String formatPageStart(String testdir, ResourceManager rm) throws IOException {
 
-        String script = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js", basedir + "/" + INCLUDES_DIR + "/reports-include.js");
-        String style  = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", basedir + "/" + INCLUDES_DIR + "/reports-include.css");
-        //String script = FileTools.readFile(basedir, INCLUDES_DIR + "/reports-include.js");
-        //String style = FileTools.readFile(basedir, INCLUDES_DIR + "/reports-include.css");
+        String script = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js", testdir + "/" + INCLUDES_DIR + "/reports-include.js");
+        String style  = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", testdir + "/" + INCLUDES_DIR + "/reports-include.css");
+        //String script = FileTools.readFile(testdir, INCLUDES_DIR + "/reports-include.js");
+        //String style = FileTools.readFile(testdir, INCLUDES_DIR + "/reports-include.css");
         return "<html><head><script type='text/javascript'>\r\n"
                 + script
                 + "\r\n</script>\r\n<style>\r\n"
@@ -375,26 +375,26 @@ public class RestReplayReport {
         return result;
     }
 
-    public File saveReport(String basedir, String reportsDir, String reportName, RestReplay restReplay) {
+    public File saveReport(String testdir, String reportsDir, String reportName, RestReplay restReplay) {
         try {
             FilePath filePath = extractRelPath(reportName);
             String relPath = filePath.relPath;
             String detailDirectory = Tools.join(reportsDir, relPath);
 
-            File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(basedir, restReplay), true);
+            File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(testdir, restReplay), true);
             if (resultFile != null) {
                 String resultFileName = resultFile.getCanonicalPath();
                 //System.out.println("RestReplay summary report output:"
                 //                  +"\n detailDirectory:"+detailDirectory
                 //                  +"\n reportFilenameNameOnly:"+filePath.filenameOnly
-                //                  +"\n basedir:"+basedir
+                //                  +"\n testdir:"+testdir
                 //                  +"\n reportsDir:"+reportsDir
                 //                  +"\n reportName:"+reportName);
                 System.out.println("RestReplay summary report: " + resultFileName+"\r\n");
                 return resultFile;
             }
         } catch (Exception e) {
-            System.out.println("ERROR saving RestReplay report in basedir: " + reportsDir + " reportName: " + reportName + " error: " + e);
+            System.out.println("ERROR saving RestReplay report in testdir: " + reportsDir + " reportName: " + reportName + " error: " + e);
         }
         return null;
     }
@@ -409,7 +409,7 @@ public class RestReplayReport {
      *                            the returned File object if successful.
      * @return File if successful, else returns null.
      */
-    public static File saveIndexForMaster(String basedir,
+    public static File saveIndexForMaster(String testdir,
                                           String reportsDir,
                                           String localMasterFilename,
                                           List<String> reportsList,
@@ -428,14 +428,14 @@ public class RestReplayReport {
         String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
 
         //System.out.println("RestReplay summary report output ***********>>>(saveIndexForMaster):"
-        //                +"\n basedir:"+basedir
+        //                +"\n testdir:"+testdir
         //                +"\n reportsDir:"+reportsDir
         //                +"\n localMasterFilename:"+localMasterFilename
         //                +"\n relPath:"+relPath
         //                +"\n masterFilenameNameOnly:"+masterFilenameNameOnly);
 
         try {
-            StringBuffer sb = new StringBuffer(formatPageStart(basedir, master.getResourceManager()));
+            StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager()));
             String dateStr = Tools.nowLocale();
             sb.append("<div class='REPORTTIME'><b>RestReplay</b> " + lbl(" run on") + " " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
             sb.append("<div class='masterVars'>")
@@ -454,7 +454,7 @@ public class RestReplayReport {
             System.out.println("====\r\n==== Master Report Index: "+Tools.glue(masterFilenameDirectory,masterFilenameNameOnly)+"\r\n====");
             return FileTools.saveFile(masterFilenameDirectory, masterFilenameNameOnly, sb.toString(), true);
         } catch (Exception e) {
-            System.out.println("ERROR saving RestReplay report index: in  basedir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" relPath:"+relPath+ " masterFilename: " + masterFilenameNameOnly + " list: " + reportsList + " error: " + e);
+            System.out.println("ERROR saving RestReplay report index: in  testdir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" relPath:"+relPath+ " masterFilename: " + masterFilenameNameOnly + " list: " + reportsList + " error: " + e);
             return null;
         }
     }

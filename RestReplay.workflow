@@ -37,22 +37,22 @@ In your local, in bash you can define macros:
 
 Running with tests in some other project-based directory: 
 
-    mvn -o exec:java -Denv=local -Dbasedir=/Users/vcrocla/src/RestReplay.pearson.basedir -Denv=dev
+    mvn -o exec:java -Denv=local -Dtestdir=/Users/vcrocla/src/RestReplay.pearson.testdir -Denv=dev
 
-so the basedir is a directory that has your test master control files,
+so the testdir is a directory that has your test master control files,
 and where rest-replay-reports directory will appear.
 
 
 
-Another example, pointing your basedir and master to a directory in another location: 
+Another example, pointing your testdir and master to a directory in another location:
    java -jar lib/RestReplay-1.0.4.standalone.jar \
-           -basedir /Users/vcrocla/ws/las.ws/las/restreplay/tests/ \
+           -testdir /Users/vcrocla/ws/las.ws/las/restreplay/tests/ \
            -master las-master.xml
 
 
 This is useful for debugging in IntelliJ:
   Program args: 
-     -basedir /Users/vcrocla/ws/las.ws/las/restreplay/tests/  -master las-master.xml
+     -testdir /Users/vcrocla/ws/las.ws/las/restreplay/tests/  -master las-master.xml
   Working Directory: 
      /Users/vcrocla/src/RestReplay
   Main Class: 
@@ -67,7 +67,7 @@ or a single test within a testGroup:
         -control _self_test/dynamide.xml \
         -testGroup login \
         -test dynamideToken \
-        -basedir ./src/main/resources/restreplay \
+        -testdir ./src/main/resources/restreplay \
         -reports ./rest-replay-reports
 
 
@@ -88,10 +88,10 @@ I disabled tomcat tagonomy/dynamide authentication locally to test RestReplay.
 
 2014-10-29: 
    I ran on the command line with:
-   mvn -DskipTests exec:java  -Dbasedir=/Users/vcrocla/src/RestReplay/src/main/resources/restreplay -DrestReplayMaster=dynamide-master.xml
+   mvn -DskipTests exec:java  -Dtestdir=/Users/vcrocla/src/RestReplay/src/main/resources/restreplay -DrestReplayMaster=dynamide-master.xml
 
    This is the command line that works in the IntelliJ IDEA project: 
-     args:  -basedir /Users/vcrocla/src/RestReplay/src/main/resources/restreplay -master dynamide-master.xml
+     args:  -testdir /Users/vcrocla/src/RestReplay/src/main/resources/restreplay -master dynamide-master.xml
      workingdir: /Users/vcrocla/src/RestReplay
      mainclass: org.dynamide.restreplay.RestReplay
      use-classpath-of-module: org.dynamide.RestReplay

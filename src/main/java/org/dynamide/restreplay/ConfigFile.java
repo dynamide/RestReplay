@@ -27,12 +27,12 @@ public class ConfigFile {
         return reportsDir;
     }
 
-    private String basedir = ".";  //set from constructor.
-    public String getBaseDir(){
-        return basedir;
+    private String testdir = ".";  //set from constructor.
+    public String getTestDir(){
+        return testdir;
     }
-    protected void setBaseDir(String value){
-       basedir = value;
+    protected void setTestDir(String value){
+       testdir = value;
     }
 
     //TODO: make sure that the report gets all the alerts
@@ -170,13 +170,13 @@ public class ConfigFile {
         return headerMap;
     }
 
-    /** Prerequisites: ResourceManager has been set, basedir has been set.
+    /** Prerequisites: ResourceManager has been set, testdir has been set.
      */
     public void readDefaultRunOptions() {
         setRunOptions(new RunOptions());
         try {
             Document doc = getResourceManager().getDocument("RestReplay:constructor:runOptions",
-                                                            basedir,
+                                                            testdir,
                                                             RunOptions.RUN_OPTIONS_FILENAME);
             if (doc != null) {
                 getRunOptions().addRunOptions(doc.getRootElement(), "default");

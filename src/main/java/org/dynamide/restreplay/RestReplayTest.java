@@ -42,7 +42,7 @@ public class RestReplayTest {
     public static final String RESTREPLAY_REL_DIR_REPORTS_TO_MODULE= "/"+REPORTS_DIRNAME;
 
     public static RestReplay createRestReplayForMaven() throws Exception {
-        String baseDir = getBaseDirectory();
+        String baseDir = getTestDirectory();
         ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
         RestReplay replay = new RestReplay(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
                                            baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
@@ -52,7 +52,7 @@ public class RestReplayTest {
     }
 
     public static Master createRestReplayMasterForMaven() throws Exception {
-        String baseDir = getBaseDirectory();
+        String baseDir = getTestDirectory();
         ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
         Master master = new Master(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
                 baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
@@ -60,7 +60,7 @@ public class RestReplayTest {
         return master;
     }
 
-    private static String getBaseDirectory(){
+    private static String getTestDirectory(){
         String pwd = ".";
         try {
             pwd = (new File(".")).getCanonicalPath();

@@ -13,8 +13,8 @@ import java.util.Map;
 
 public class Master extends ConfigFile {
 
-    public Master(String basedir, String reportsDir, ResourceManager manager){
-        setBaseDir(basedir);
+    public Master(String testdir, String reportsDir, ResourceManager manager){
+        setTestDir(testdir);
         setReportsList(new ArrayList<String>());
         this.reportsDir = reportsDir;
         setResourceManager(manager);
@@ -30,8 +30,8 @@ public class Master extends ConfigFile {
         this.vars = masterVars;
     }
 
-    /** Optional information method: call this method after instantiating this class using the constructor RestReplay(String), which sets the basedir.  Then you
-     *   pass in your relative masterFilename to that basedir to this method, which will return true if the file is readable, valid xml, etc.
+    /** Optional information method: call this method after instantiating this class using the constructor RestReplay(String), which sets the testdir.  Then you
+     *   pass in your relative masterFilename to that testdir to this method, which will return true if the file is readable, valid xml, etc.
      *   Do this in preference to  just seeing if File.exists(), because there are rules to finding the file relative to the maven test dir, yada, yada.
      *   This method makes it easy to have a development test file that you don't check in, so that dev tests can be missing gracefully, etc.
      */
@@ -49,14 +49,14 @@ public class Master extends ConfigFile {
 
     public org.dom4j.Document openMasterConfigFile(String reason, String masterFilename) throws FileNotFoundException {
         try {
-            return getResourceManager().getDocument("openMasterConfigFile:" + reason, getBaseDir(), masterFilename);
+            return getResourceManager().getDocument("openMasterConfigFile:" + reason, getTestDir(), masterFilename);
         } catch (DocumentException de) {
             System.out.println("$$$$$$ ERROR: " + de);
-            throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in basedir: " + getBaseDir() + ". Exiting test. " + de);
+            throw new FileNotFoundException("RestReplay master control file (" + masterFilename + ") contains error or not found in testdir: " + getTestDir() + ". Exiting test. " + de);
         }
     }
 
-    /** specify the master config file, relative to getBaseDir(), but ignore any tests or testGroups in the master.
+    /** specify the master config file, relative to getTestDir(), but ignore any tests or testGroups in the master.
      *  Depends on this.getEnvID() being set before this method is called, otherwise uses default envID found in master.
      *  @return a Document object, which you don't need to use: all options will be stored in this RestReplay instance.
      */
@@ -149,7 +149,7 @@ public class Master extends ConfigFile {
             Map<String, String> runVars = readVars(runNode);
             list.add(runTest(masterFilename, controlFile, testGroup, test, runVars));
         }
-        RestReplayReport.saveIndexForMaster(getBaseDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
     }
 
@@ -161,7 +161,7 @@ public class Master extends ConfigFile {
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         runTest(masterFilename, controlFile, testGroup, test, null);
-        RestReplayReport.saveIndexForMaster(getBaseDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
     }
 
@@ -176,7 +176,7 @@ public class Master extends ConfigFile {
         if (Tools.notBlank(this.getEnvID())) {
             envReportsDir = Tools.glue(this.reportsDir, "/", this.getRelativePathFromReportsDir());
         }
-        RestReplay replay = new RestReplay(getBaseDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
+        RestReplay replay = new RestReplay(getTestDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
         replay.setEnvID(this.getEnvID());  //internally sets replay.relativePathFromReportsDir
         replay.setControlFileName(controlFile);
         replay.setProtoHostPort(getProtoHostPort());

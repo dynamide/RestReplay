@@ -23,8 +23,8 @@ import org.dynamide.restreplay.ServiceResult.AlertError;
  */
 public class RestReplay extends ConfigFile {
 
-    public RestReplay(String basedir, String reportsDir, ResourceManager manager, RunOptions parentRunOptions) {
-        setBaseDir(basedir);
+    public RestReplay(String testdir, String reportsDir, ResourceManager manager, RunOptions parentRunOptions) {
+        setTestDir(testdir);
         this.serviceResultsMap = createResultsMap();
         this.reportsDir = reportsDir;
         setResourceManager(manager);
@@ -66,7 +66,7 @@ public class RestReplay extends ConfigFile {
     }
 
     public String toString() {
-        return "RestReplay{" + getBaseDir() + ", " + defaultAuthsMap + ", " + getDump() + ", " + reportsDir + '}';
+        return "RestReplay{" + getTestDir() + ", " + defaultAuthsMap + ", " + getDump() + ", " + reportsDir + '}';
     }
 
     public static String testToString(Node testNode) {
@@ -80,7 +80,7 @@ public class RestReplay extends ConfigFile {
      */
     public List<ServiceResult> runTests(String testGroupID, String testID) throws Exception {
         List<ServiceResult> result = runRestReplayFile(
-                this.getBaseDir(),
+                this.getTestDir(),
                 this.controlFileName,
                 testGroupID,
                 testID,
@@ -156,17 +156,17 @@ public class RestReplay extends ConfigFile {
         //This method is overloaded with the isResponse boolean.  If isResponse, we are reading test/response/filename,
         //  otherwise we are reading test/filename. These should be split into two functions, because the XML structs
         //  are different--they just have the /vars element in common.
-        public static PartsStruct readParts(Node testNode, final String testID, String basedir, boolean isResponse) {
+        public static PartsStruct readParts(Node testNode, final String testID, String testdir, boolean isResponse) {
             PartsStruct resultPartsStruct = new PartsStruct();
             resultPartsStruct.startElement = testNode.valueOf("startElement");
             resultPartsStruct.label = testNode.valueOf("label");
             String filename = testNode.valueOf("filename");
             if (Tools.notEmpty(filename)) {
                 if (isResponse) {
-                    resultPartsStruct.expectedResponseFilename = basedir + '/' + filename;
+                    resultPartsStruct.expectedResponseFilename = testdir + '/' + filename;
                     resultPartsStruct.expectedResponseFilenameRel = filename;
                 } else {
-                    resultPartsStruct.requestPayloadFilename = basedir + '/' + filename;
+                    resultPartsStruct.requestPayloadFilename = testdir + '/' + filename;
                     resultPartsStruct.requestPayloadFilenameRel = filename;
                 }
                 resultPartsStruct.varsList.add(readVars(testNode));
@@ -282,7 +282,7 @@ public class RestReplay extends ConfigFile {
     //================= runRestReplayFile ======================================================
 
     public List<ServiceResult> runRestReplayFile(
-            String basedir,
+            String testdir,
             String controlFileName,
             String testGroupID,
             String oneTestID,
@@ -303,9 +303,9 @@ public class RestReplay extends ConfigFile {
         RestReplayReport report = new RestReplayReport(reportsDir);
 
         org.dom4j.Document document;
-        document = getResourceManager().getDocument("runRestReplayFile:" + controlFileName + ", test:" + testGroupID, basedir, controlFileName); //will check full path first, then checks relative to PWD.
+        document = getResourceManager().getDocument("runRestReplayFile:" + controlFileName + ", test:" + testGroupID, testdir, controlFileName); //will check full path first, then checks relative to PWD.
         if (document == null) {
-            throw new FileNotFoundException("RestReplay control file (" + controlFileName + ") not found in classpath, or basedir: " + basedir + " Exiting test.");
+            throw new FileNotFoundException("RestReplay control file (" + controlFileName + ") not found in classpath, or testdir: " + testdir + " Exiting test.");
         }
 
         String protoHostPortFrom = "from restReplay Master.";
@@ -399,7 +399,7 @@ public class RestReplay extends ConfigFile {
                         evalStruct,
                         authsMap,
                         authsFromMaster,
-                        basedir,
+                        testdir,
                         report,
                         results);
                 serviceResultsMap.remove("this");
@@ -418,7 +418,7 @@ public class RestReplay extends ConfigFile {
         String reportName = controlFileName + '-' + testGroupID + ".html";
         //System.out.println("=======================>>> report name "+reportName);
 
-        File resultFile = report.saveReport(basedir, reportsDir, reportName, this);
+        File resultFile = report.saveReport(testdir, reportsDir, reportName, this);
         if (resultFile != null) {
             String toc = report.getTOC(relativePathFromReportsDir + reportName);
             reportsList.add(toc);
@@ -444,7 +444,7 @@ public class RestReplay extends ConfigFile {
             Eval evalStruct,
             AuthsMap authsMap,
             AuthsMap defaultAuths,
-            String basedir,
+            String testdir,
             RestReplayReport report,
             List<ServiceResult> results) {
 
@@ -537,7 +537,7 @@ public class RestReplay extends ConfigFile {
             Node responseNode = testNode.selectSingleNode("response");
             PartsStruct expectedResponseParts = null;
             if (responseNode != null) {
-                expectedResponseParts = PartsStruct.readParts(responseNode, testID, basedir, true);
+                expectedResponseParts = PartsStruct.readParts(responseNode, testID, testdir, true);
                 //System.out.println("response parts: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+expectedResponseParts);
             }
 
@@ -566,7 +566,7 @@ public class RestReplay extends ConfigFile {
                         method,
                         contentRawFromMutator,
                         mutatorType,
-                        basedir,
+                        testdir,
                         clonedMasterVars,
                         testElementIndex,
                         authsMap,
@@ -738,7 +738,7 @@ public class RestReplay extends ConfigFile {
                            String method,
                            String contentRawFromMutator,
                            String mutatorType,
-                           String basedir,
+                           String testdir,
                            Map<String, String> clonedMasterVars,
                            int testElementIndex,
                            AuthsMap authsMap,
@@ -747,7 +747,7 @@ public class RestReplay extends ConfigFile {
             throws IOException {
         ServiceResult serviceResult = test.serviceResult;
 
-        PartsStruct parts = PartsStruct.readParts(test.testNode, test.testID, basedir, false);
+        PartsStruct parts = PartsStruct.readParts(test.testNode, test.testID, testdir, false);
         if (Tools.notEmpty(parts.overrideTestID)) {
             test.testID = parts.overrideTestID;
         }
@@ -831,7 +831,7 @@ public class RestReplay extends ConfigFile {
                                 test.evalStruct,//Eval
                                 authsMap,//AuthsMap
                                 defaultAuths,//AuthsMap
-                                basedir,//String
+                                testdir,//String
                                 report,//RestReplayReport
                                 test.results);//List<ServiceResult> results)
 
@@ -935,7 +935,7 @@ public class RestReplay extends ConfigFile {
     private static Options createOptions() {
         Options options = new Options();
         options.addOption("help", false, "RestReplay Help");
-        options.addOption("basedir", true, "default/basedir");
+        options.addOption("testdir", true, "default/testdir");
         options.addOption("reports", true, "default/reports");
         options.addOption("testGroup", true, "default/testGroup");
         options.addOption("test", true, "default/test");
@@ -952,7 +952,7 @@ public class RestReplay extends ConfigFile {
     public static String usage() {
         String result = "org.dynamide.restreplay.RestReplay {args}\r\n"
                 + " args: \r\n"
-                + "  -basedir <dir> \r\n"
+                + "  -testdir <dir> \r\n"
                 + "  -reports <dir> \r\n"
                 + "  -master <filename> \r\n"
                 + "  -control <filename> \r\n"
@@ -966,7 +966,7 @@ public class RestReplay extends ConfigFile {
                 + "   \r\n"
                 + "   \r\n"
                 + " You may also override these program args with system args, e.g.: \r\n"
-                + "   -Dbasedir=/path/to/dir \r\n"
+                + "   -Dtestdir=/path/to/dir \r\n"
                 + "   \r\n";
         return result;
     }
@@ -983,7 +983,7 @@ public class RestReplay extends ConfigFile {
                 + "   \r\n"
                 + "   \r\n"
                 + " You may also override these program args with system args, e.g.: \r\n"
-                + "   -Dbasedir=/path/to/dir \r\n"
+                + "   -Dtestdir=/path/to/dir \r\n"
                 + "   \r\n");
 
     }
@@ -1012,7 +1012,7 @@ public class RestReplay extends ConfigFile {
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
 
-            String basedir = opt(line, "basedir");
+            String testdir = opt(line, "testdir");
             String reportsDir = opt(line, "reports");
             String testGroupID = opt(line, "testGroup");
             String testID = opt(line, "test");
@@ -1028,10 +1028,10 @@ public class RestReplay extends ConfigFile {
             }
 
             if (Tools.isBlank(reportsDir)) {
-                reportsDir = basedir + '/' + RestReplayTest.REPORTS_DIRNAME;
+                reportsDir = testdir + '/' + RestReplayTest.REPORTS_DIRNAME;
             }
             reportsDir = Tools.fixFilename(reportsDir);
-            basedir = Tools.fixFilename(basedir);
+            testdir = Tools.fixFilename(testdir);
             controlFilename = Tools.fixFilename(controlFilename);
 
             boolean bAutoDeletePOSTS = true;
@@ -1042,8 +1042,8 @@ public class RestReplay extends ConfigFile {
             if (Tools.notEmpty(dumpResultsFromCmdLine)) {
                 bDumpResults = Tools.isTrue(dumpResultsFromCmdLine);
             }
-            if (Tools.isEmpty(basedir)) {
-                System.err.println("ERROR: basedir was not specified.");
+            if (Tools.isEmpty(testdir)) {
+                System.err.println("ERROR: testdir was not specified.");
                 return;
             }
             File f = null, fMaster = null;
@@ -1052,23 +1052,23 @@ public class RestReplay extends ConfigFile {
                     System.err.println("Exiting.  No Master file (empty) and Control file not found (empty)");
                     return;
                 }
-                f = new File(Tools.glue(basedir, "/", controlFilename));
+                f = new File(Tools.glue(testdir, "/", controlFilename));
                 if (!f.exists()) {
                     System.err.println("Control file not found: " + f.getCanonicalPath());
                     return;
                 }
             } else {
-                fMaster = new File(Tools.glue(basedir, "/", restReplayMaster));
+                fMaster = new File(Tools.glue(testdir, "/", restReplayMaster));
                 if (Tools.notEmpty(restReplayMaster) && !fMaster.exists()) {
                     System.err.println("Master file not found: " + fMaster.getCanonicalPath());
                     return;
                 }
             }
 
-            String basedirResolved = (new File(basedir)).getCanonicalPath();
+            String testdirResolved = (new File(testdir)).getCanonicalPath();
             System.out.println("RestReplay ::"
-                            + "\r\n    basedir: " + basedir
-                            + "\r\n    basedir(resolved): " + basedirResolved
+                            + "\r\n    testdir: " + testdir
+                            + "\r\n    testdir(resolved): " + testdirResolved
                             + "\r\n    control: " + controlFilename
                             + "\r\n    master: " + restReplayMaster
                             + "\r\n    testGroup: " + testGroupID
@@ -1084,7 +1084,7 @@ public class RestReplay extends ConfigFile {
 
             if (Tools.notEmpty(restReplayMaster)) {
                 //****************** RUNNING MASTER ******************************************
-                Master master = new Master(basedirResolved, reportsDir, rootResourceManager);
+                Master master = new Master(testdirResolved, reportsDir, rootResourceManager);
                 master.setEnvID(envID);
                 master.readOptionsFromMasterConfigFile(restReplayMaster);
                 master.setAutoDeletePOSTS(bAutoDeletePOSTS);
@@ -1107,7 +1107,7 @@ public class RestReplay extends ConfigFile {
                 }
             } else {
                 //****************** RUNNING CONTROL, NO MASTER ******************************
-                RestReplay restReplay = new RestReplay(basedirResolved, reportsDir, rootResourceManager, null);
+                RestReplay restReplay = new RestReplay(testdirResolved, reportsDir, rootResourceManager, null);
                 restReplay.readDefaultRunOptions();
                 Dump dump = Dump.getDumpConfig();
                 if (Tools.notEmpty(dumpResultsFromCmdLine)) {
@@ -1116,7 +1116,7 @@ public class RestReplay extends ConfigFile {
                 restReplay.setDump(dump);
                 List<String> reportsList = new ArrayList<String>();
                 restReplay.runRestReplayFile(
-                        basedirResolved,
+                        testdirResolved,
                         controlFilename,
                         testGroupID,
                         testID,

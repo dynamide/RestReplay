@@ -41,7 +41,7 @@ public class RestReplayDevTest extends RestReplayTest {
         } else {
             System.out.println("RestReplayDevTest skipping local dev test "
             		+ masterFile+" because it doesn't exist in "
-            		+ replay.getBaseDir()
+            		+ replay.getTestDir()
             		+ ".  This is expected behavior on a production installation.");
         }
     }
