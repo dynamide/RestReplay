@@ -4,6 +4,8 @@ import org.dynamide.util.GregorianCalendarDateTimeUtils;
 import org.dynamide.util.Tools;
 import org.dynamide.util.XmlTools;
 
+import java.io.PrintStream;
+
 public class Kit {
     private static Tools TOOLS = new Tools();
     private static XmlTools XMLTOOLS = new XmlTools();
@@ -18,6 +20,14 @@ public class Kit {
     }
     public static GregorianCalendarDateTimeUtils getGregorian(){
         return GREGORIAN;
+    }
+
+    public static PrintStream getOut(){
+        return System.out;
+    }
+
+    public static PrintStream getErr(){
+        return System.err;
     }
 
 }

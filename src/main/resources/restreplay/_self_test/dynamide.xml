@@ -90,7 +90,7 @@
             <uri>/tagonomy?mock=501</uri>
             <filename>_self_test/content-mutator-test.json</filename>
         </test>
-        <test ID="dynamideReturnTest">
+        <test ID="dynamideScriptTest">
             <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
@@ -100,12 +100,13 @@
             </vars>
             <exports>
                 <vars>
-                    <var ID="returnTest2"><![CDATA[${
-                            if (out != null) {
-                             out.println('Starting test script, Laramie');
-                             return 'aaa';
-                            }
-                        }]]></var>
+                    <var ID="GregorianDate"><![CDATA[${
+                        if (kit != null) {
+                           kit.out.println('Starting test script, Laramie');
+                           return ''+kit.gregorian.timestampUTC();
+                        }
+                        return "kit not defined in ScriptTest";
+                    }]]></var>
                 </vars>
             </exports>
         </test>

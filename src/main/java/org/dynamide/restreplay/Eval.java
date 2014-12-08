@@ -41,6 +41,7 @@ public class Eval {
     public JexlEngine jexl = new JexlEngine();   // Used for expression language expansion from uri field.
     public JexlContext jc;
     public static Tools TOOLS = new Tools();
+    public static Kit KIT = new Kit();
     public RunOptions runOptions;
 
     public void resetContext(){
@@ -107,6 +108,7 @@ public class Eval {
                 }
             }
             jc.set("tools", TOOLS);
+            jc.set("kit", KIT);
             EvalResult innerResult2 = parse(context, inputJexlExpression);
             if (innerResult2.alerts.size()>0){
                 result.alerts.addAll(innerResult2.alerts);
