@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
-    <protoHostPort>${DMSERVER}</protoHostPort>
+    <!--protoHostPort>${DMSERVER}</protoHostPort-->
+    <protoHostPort>http://localhost:18080</protoHostPort>
 
 
 
@@ -89,6 +90,27 @@
             <uri>/tagonomy?mock=501</uri>
             <filename>_self_test/content-mutator-test.json</filename>
         </test>
+        <test ID="dynamideReturnTest">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/dynamide-mutator.json</filename>
+            <vars>
+                <var ID="TOKEN">FOOTOKEN</var>
+            </vars>
+            <exports>
+                <vars>
+                    <var ID="returnTest2"><![CDATA[${
+                            if (out != null) {
+                             out.println('Starting test script, Laramie');
+                             return 'aaa';
+                            }
+                        }]]></var>
+                </vars>
+            </exports>
+        </test>
+
+
     </testGroup>
 
 
@@ -135,6 +157,7 @@
                     <var ID="encodedData2">${tools.encodeURLString(this.got("//data"))}</var>
                     <var ID="data">${this.got("//data")}</var>
                     <var ID="result">This case (result/this) is borked: ${result.got("//data")}</var>
+                    <var ID="returnTest">${var d = this.got("//data"); if (d.length()>0) {return true;} else {return false;}}</var>
                 </vars>
             </exports>
         </test>
@@ -143,6 +166,16 @@
             <method>GET</method>
             <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(dynamideUseTokenPUTbugs.result)}</uri>
         </test>
+    </testGroup>
+
+    <testGroup ID="debugScript">
+        <test ID="dynamideReturnTest">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/dynamide-mutator.json</filename>
+        </test>
+
     </testGroup>
 
 </restReplay>

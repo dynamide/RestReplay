@@ -13,17 +13,18 @@
     <vars>
         <var ID="DMSERVER">http://localhost:18080</var>
     </vars>
-
     <run controlFile="_self_test/dynamide.xml" testGroup="selftestGroup" />
 
-    <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup" />
+    <!--
+        <run controlFile="_self_test/dynamide.xml" testGroup="debugScript" />
+        <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup" />
 
-    <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup2" />
+        <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup2" />
 
-    <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
+        <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
 
-    <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
-
+        <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
+    -->
 
 </restReplayMaster>
 

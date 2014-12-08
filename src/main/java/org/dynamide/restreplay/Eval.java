@@ -22,11 +22,9 @@
  */
 package org.dynamide.restreplay;
 
-import org.apache.commons.jexl2.Expression;
-import org.apache.commons.jexl2.JexlContext;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.jexl2.*;
 
+import java.io.File;
 import java.util.*;
 
 import org.dynamide.restreplay.ServiceResult.Alert.LEVEL;
@@ -80,6 +78,7 @@ public class Eval {
     public EvalResult eval(String context,
                                   String inputJexlExpression,
                                   Map<String,String> vars) {
+        //doTest();
         EvalResult result = new EvalResult();
         Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
 
@@ -134,8 +133,9 @@ public class Eval {
         int cursor = 0;
         String front = "";
         while (start < len) {
-            start = in.indexOf("${", start);
-            end = in.indexOf("}", start);
+            start = in.indexOf("${", start);  //+1 for the $ sign.
+            //end = in.indexOf("}", start);
+            end = findMatchingCloseBrace(in, start+2);
             if (start < 0) {
                 String tail = in.substring(cursor);
                 result.append(tail);
@@ -154,15 +154,19 @@ public class Eval {
             }
             front = in.substring(cursor, start);
             result.append(front);
-            cursor = end + 1;                   //bump past close brace
-            var = in.substring(start + 2, end);  //+2 bump past open brace ${ and then "end" is indexed just before the close brace }
-            //s   = s.substring(end+1);         //bump past close brace
+            cursor = end;                   //bump past close brace
+            var = in.substring(start + 2, end-1);  //+2 bump past open brace ${ and then "end" is indexed just before the close brace }
             start = cursor;
 
-            Expression expr = jexl.createExpression(var);
+            //works: Expression expr = jexl.createExpression(var);
+            //experimental:
+            Script script = jexl.createScript(var);   //http://commons.apache.org/proper/commons-jexl/apidocs/org/apache/commons/jexl2/Script.html
+
             Object resultObj = null;
             try {
-                resultObj = expr.evaluate(jc); //REM - 5/9/2011 - Usually calls back to fields and methods in ServiceResult class to do the evaluation -e.g., the "got" method.
+                //jc.set("out", System.out);
+                //works: resultObj = expr.evaluate(jc); but replacing with script and not just expression:
+                resultObj = script.execute(jc);
             } catch (Throwable ex){
                 System.out.println("\r\n\r\n\r\n~~~~~~~~~~~~~~~~~~ error "+ex);
                 evalResult.addAlert("Exception while evaluating variable: '"+var+"'.",// Exception: "+ex,
@@ -189,6 +193,40 @@ public class Eval {
         return evalResult;
     }
 
+    /** @return the string up to (but not including) the matching close brace. */
+    protected static int findMatchingCloseBrace(String in, int start){
+        int len = in.length();
+        if (len<=0){
+            return -1;
+        }
+        int i = start;
+        int braces = 0;
+        char c;
+        while (i < len){
+            c = in.charAt(i);
+            i++;
+            switch (c){
+                case '\\':
+                    //bump 2;
+                    i++;  //once more to bump past escape char and escaped char.
+                    break;
+                case '{':
+                    braces++;
+                    break;
+                case '}':
+                    if (braces>0) {
+                        braces--;
+                        break;
+                    }
+                    //System.out.println("\nin: =="+in+"==,              out: =="+in.substring(start, i-1)+"==");
+                    return i;
+                default:
+                    break;
+            }
+        }
+        return -1;
+    }
+
     protected static String dumpContext(JexlContext jc){
         String result = "";
         if (jc instanceof MapContextWKeys){
@@ -205,6 +243,30 @@ public class Eval {
         public Set getKeys(){
             return this.map.keySet();
         }
+    }
+
+    private static void test(String in, int start){
+        System.out.println("test("+in+','+start+"): "+findMatchingCloseBrace(in, start));
+    }
+
+
+    public static void main(String[] args){
+        test("abc", 0);
+        test("abc", 1);
+        test("abc", 2);
+        test("abc", 3);
+
+        test("{abc", 0);
+        test("{abc", 1);
+
+        test("abc}", 0);
+        test("{abc}", 0);
+        test("{abc}", 1);
+        test("{abc{def}}", 1);
+        test("{abc}{ghi}", 1);
+        test("{{abc}{ghi}}", 1);
+        test("{a\\{bc}", 1);
+        test("{a\\{bc}}", 1);
     }
 
 
