@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
     <!--protoHostPort>${DMSERVER}</protoHostPort-->
-    <protoHostPort>http://localhost:18080</protoHostPort>
+    <protoHostPort>http://localhost:28080</protoHostPort>
 
 
 
@@ -17,7 +17,7 @@
 
     <testGroup ID="selftestGroup" autoDeletePOSTS="false">
         <vars>
-            <var ID="DMSERVER">http://localhost:18080</var>
+            <var ID="DMSERVER">http://localhost:28080</var>
         </vars>
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>

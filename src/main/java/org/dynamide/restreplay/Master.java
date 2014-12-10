@@ -1,6 +1,5 @@
 package org.dynamide.restreplay;
 
-import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dynamide.util.Tools;

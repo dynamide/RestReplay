@@ -4,6 +4,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dynamide.util.Tools;
+import org.dynamide.interpreters.EvalResult;
 
 import java.util.HashMap;
 import java.util.List;
@@ -160,8 +161,8 @@ public class ConfigFile {
             String headerName = header.valueOf("@name");
             //System.out.println("header from control file: "+headerName +": "+ headerValue);
             if (headerValue.indexOf("$")>-1){
-                Eval.EvalResult evalResult = evalStruct.eval(headerName, headerValue, null);
-                headerValue = evalResult.result;
+                EvalResult evalResult = evalStruct.eval(headerName, headerValue, null);
+                headerValue = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
             }
             //System.out.println("eval'd header from control file: "+headerName +": "+ headerValue);

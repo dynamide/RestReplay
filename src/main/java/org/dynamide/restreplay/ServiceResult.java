@@ -1,29 +1,7 @@
-/**
- * This document is a part of the source code and related artifacts
- * for CollectionSpace, an open source collections management system
- * for museums and related institutions:
- *
- * http://www.collectionspace.org
- * http://wiki.collectionspace.org
- *
- * Copyright (c) 2009 Regents of the University of California
- *
- * Licensed under the Educational Community License (ECL), Version 2.0.
- * You may not use this file except in compliance with this License.
- *
- * You may obtain a copy of the ECL 2.0 License at
- * https://source.collectionspace.org/collection-space/LICENSE.txt
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 package org.dynamide.restreplay;
 
 import org.apache.commons.httpclient.Header;
+import org.dynamide.interpreters.Alert;
 import org.dynamide.util.Tools;
 import org.json.JSONObject;
 import org.json.XML;
@@ -35,27 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: laramie
- * $LastChangedRevision:  $
- * $LastChangedDate:  $
- */
 public class ServiceResult {
-    public static class Alert {
-        public Alert(String m, String p, LEVEL l){
-            message = m;
-            context = p;
-            level = l;
-        }
-        public enum LEVEL {OK, WARN, ERROR}
-        public LEVEL level;
-        public String message = "";
-        public String context = "";
-        public static Alert alert(String m, String p, LEVEL l){
-            return new Alert(m,p,l);
-        }
 
-    }
     public static class AlertError extends Error {
         public AlertError(String msg, Alert triggeringAlert, List<Alert> allAlerts){
             super(msg);

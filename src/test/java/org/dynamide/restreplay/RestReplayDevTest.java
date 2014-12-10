@@ -1,12 +1,6 @@
 package org.dynamide.restreplay;
 
-import org.dynamide.restreplay.ServiceResult;
-import org.dynamide.restreplay.RestReplay;
-import org.dynamide.restreplay.RestReplayTest;
 import org.dynamide.util.Tools;
-
-import org.testng.annotations.Test;
-
 import java.util.ArrayList;
 import java.util.List;
 

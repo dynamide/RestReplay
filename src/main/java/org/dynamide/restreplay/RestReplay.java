@@ -2,16 +2,16 @@ package org.dynamide.restreplay;
 
 import org.apache.commons.cli.*;
 
-import org.apache.commons.jexl2.JexlEngine;
+import org.dynamide.interpreters.EvalResult;
+import org.dynamide.interpreters.RhinoInterpreter;
 import org.dynamide.util.Tools;
 import org.dom4j.*;
 
 import java.io.*;
 import java.util.*;
 
-import org.dynamide.restreplay.ServiceResult.Alert;
-import org.dynamide.restreplay.ServiceResult.Alert.LEVEL;
-import org.dynamide.restreplay.Eval.EvalResult;
+import org.dynamide.interpreters.Alert;
+import org.dynamide.interpreters.Alert.LEVEL;
 import org.dynamide.restreplay.ServiceResult.AlertError;
 
 /**
@@ -152,6 +152,9 @@ public class RestReplay extends ConfigFile {
         String overrideTestID = "";
         String startElement = "";
         String label = "";
+        String validator = "";
+        String validatorLang = "";
+        String testdir = "";
 
         //This method is overloaded with the isResponse boolean.  If isResponse, we are reading test/response/filename,
         //  otherwise we are reading test/filename. These should be split into two functions, because the XML structs
@@ -160,7 +163,14 @@ public class RestReplay extends ConfigFile {
             PartsStruct resultPartsStruct = new PartsStruct();
             resultPartsStruct.startElement = testNode.valueOf("startElement");
             resultPartsStruct.label = testNode.valueOf("label");
+            resultPartsStruct.testdir = testdir;
             String filename = testNode.valueOf("filename");
+
+            if (isResponse) {
+                resultPartsStruct.validator = testNode.valueOf("validator");
+                resultPartsStruct.validatorLang = testNode.valueOf("validator/@lang");
+            }
+
             if (Tools.notEmpty(filename)) {
                 if (isResponse) {
                     resultPartsStruct.expectedResponseFilename = testdir + '/' + filename;
@@ -211,20 +221,38 @@ public class RestReplay extends ConfigFile {
         return result;
     }
 
+    protected String validateResponse(ServiceResult serviceResult,
+                                      PartsStruct expectedResponseParts,
+                                      Eval evalStruct) {
+        String OK = "";
+        if (expectedResponseParts == null) return OK;
+        if (serviceResult == null) return OK;
+        if (serviceResult.getResult().length() == 0) return OK;
+        try {
+            return validateResponseSinglePayload(serviceResult, expectedResponseParts, evalStruct);
+        } catch (Exception e) {
+            String err = "ERROR in RestReplay.validateResponse() : " + Tools.errorToString(e, true);
+            return err;
+        }
+    }
+
     /* See, for example of <expected> : test/resources/test-data/restreplay/objectexit/object-exit.xml */
     protected String validateResponseSinglePayload(ServiceResult serviceResult,
                                                    PartsStruct expectedResponseParts,
                                                    Eval evalStruct)
-            throws Exception {
+    throws Exception {
         String OK = "";
         String expectedPartContent = getResourceManager().readResource("validateResponseSinglePayload", expectedResponseParts.expectedResponseFilenameRel,
                 expectedResponseParts.expectedResponseFilename);
-        Map<String, String> vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.  Must be there, even if empty.
+        Map<String, String> vars = null;
+        if (expectedResponseParts.varsList.size()>0) {
+            vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.  Must be there, even if empty.
+        }
         EvalResult evalResult = evalStruct.eval(expectedResponseParts.expectedResponseFilenameRel,
                 expectedPartContent,
                 vars);
 
-        expectedPartContent = evalResult.result;
+        expectedPartContent = evalResult.getResultString();
         serviceResult.alerts.addAll(evalResult.alerts);
         //TODO: may need to break if runoptions dictate.  But what to set/return?...  if (runOptions.breakNow(evalResult.alerts))
 
@@ -235,6 +263,11 @@ public class RestReplay extends ConfigFile {
                 + " fromTestID: " + serviceResult.fromTestID
                 + " URL: " + serviceResult.fullURL
                 + "}";
+
+        Object validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
+        //TODO: do something with this result, and scoop up warnings and infos and add to Report.
+        System.out.println("====> validationResult: "+validationResult);
+
         String startElement = expectedResponseParts.startElement;
         String partLabel = expectedResponseParts.label;
         if (Tools.isBlank(startElement)) {
@@ -253,20 +286,57 @@ public class RestReplay extends ConfigFile {
         return OK;
     }
 
-    protected String validateResponse(ServiceResult serviceResult,
-                                      PartsStruct expectedResponseParts,
-                                      Eval evalStruct) {
-        String OK = "";
-        if (expectedResponseParts == null) return OK;
-        if (serviceResult == null) return OK;
-        if (serviceResult.getResult().length() == 0) return OK;
-        try {
-            return validateResponseSinglePayload(serviceResult, expectedResponseParts, evalStruct);
-        } catch (Exception e) {
-            String err = "ERROR in RestReplay.validateResponse() : " + e;
-            return err;
-        }
+    private void p(String val){
+        System.out.println(val);
     }
+
+    protected Object runValidatorScript(ServiceResult serviceResult,
+                                        PartsStruct expectedResponseParts,
+                                        Eval evalStruct)
+    throws IOException {
+        String scriptFilename = expectedResponseParts.validator;
+        String testdir = expectedResponseParts.testdir;
+        String lang = expectedResponseParts.validatorLang;
+        String fullPath = Tools.join(testdir, scriptFilename);
+
+        p("scriptFilename:"+scriptFilename);
+        p("testdir:"+testdir);
+        p("lang:"+lang);
+        if (Tools.notBlank(scriptFilename)) {
+            String source = getResourceManager().readResource("runValidatorScript", scriptFilename, fullPath);
+            String resourceName = Tools.join(testdir, scriptFilename);
+            p("source:"+source);
+            if (Tools.notBlank(source)) {
+                if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JAVASCRIPT")) {
+                    return evalJavascript(resourceName, source, serviceResult);
+                } else if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JEXL")
+                        || Tools.isBlank(lang)) {
+                    //default to JEXL.
+                    EvalResult evalResult = evalJexl(evalStruct, fullPath, source, null);
+                    return evalResult.getResultString();
+                }
+            }
+        }
+        return "";
+    }
+
+    private EvalResult evalJexl(Eval evalStruct, String context, String source, Map<String,String> vars) {
+        System.out.println("@@@@@ runValidatorScript JEXL: " + context);
+        return evalStruct.eval(context, source, vars);
+    }
+
+    private Object evalJavascript(String resourceName, String source, ServiceResult serviceResult) {
+        RhinoInterpreter interpreter = new RhinoInterpreter();
+        interpreter.setVariable("serviceResult", serviceResult);
+        interpreter.setVariable("serviceResultsMap", serviceResultsMap);
+        System.out.println("@@@@@ runValidatorScript JavaScript: " + resourceName);
+
+        Object result = interpreter.eval(resourceName, source);
+
+        System.out.println("@@@@@ runValidatorScript JavaScript RESULT: " + result);
+        return result;
+    }
+
 
     private static String dumpMasterVars(Map<String, String> masterVars) {
         if (masterVars == null) {
@@ -510,12 +580,12 @@ public class RestReplay extends ConfigFile {
             String oneProtoHostPort = protoHostPort;
             if (oneProtoHostPort.indexOf("$") > -1) {
                 EvalResult evalResult = evalStruct.eval("vars to protoHostPort", oneProtoHostPort, clonedMasterVarsWTest);
-                oneProtoHostPort = evalResult.result;
+                oneProtoHostPort = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
             }
             if (uri.indexOf("$") > -1) {
                 EvalResult evalResult = evalStruct.eval("FULLURL", uri, clonedMasterVarsWTest);
-                uri = evalResult.result;
+                uri = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
             }
             String fullURL = fixupFullURL(oneProtoHostPort, uri);
@@ -623,7 +693,7 @@ public class RestReplay extends ConfigFile {
             //=====================================================
             boolean hasError = false;
 
-            String vError = validateResponse(serviceResult, expectedResponseParts, evalStruct);
+            String vError = validateResponse(serviceResult, expectedResponseParts, evalStruct);  //note that serviceResult is also available in evalStruct as "result".
 
             if (Tools.notEmpty(vError)) {
                 serviceResult.addError(vError);
@@ -775,8 +845,8 @@ public class RestReplay extends ConfigFile {
         if (vars != null) {
             serviceResult.addVars(vars);
         }
-        Eval.EvalResult evalResult = test.evalStruct.eval("filename:" + fileName, contentRaw, vars);
-        String contentSubstituted = evalResult.result;
+        EvalResult evalResult = test.evalStruct.eval("filename:" + fileName, contentRaw, vars);
+        String contentSubstituted = evalResult.getResultString();
         serviceResult.alerts.addAll(evalResult.alerts);
 
         /** Use this function for NON-multipart messages, that is, regular POSTs. */
@@ -875,12 +945,12 @@ public class RestReplay extends ConfigFile {
             if (Tools.notBlank(serviceResult.deleteURL)) {
                 serviceResult.addAlert("deleteURL computed by Location (" + serviceResult.deleteURL + ")"
                                 + " is being replaced by " + testID + ".deleteURL value: " + deleteURL
-                                + " which evaluates to: " + evalResult.result,
+                                + " which evaluates to: " + evalResult.getResultString(),
                         testIDLabel,
                         LEVEL.WARN
                 );
             }
-            serviceResult.deleteURL = evalResult.result;
+            serviceResult.deleteURL = evalResult.getResultString();
         }
     }
 
@@ -897,8 +967,8 @@ public class RestReplay extends ConfigFile {
                     getRunOptions().errorsBecomeEmptyStrings = false;
                     //System.out.println("---->eval export: "+expr);
                     EvalResult evalResult = evalStruct.eval("export vars", expr, clonedMasterVarsWTest);
-                    //System.out.println("      ---->"+evalResult.result+"<--"+evalResult.alerts+serviceResult.xmlResult);
-                    exportsEvald.put(exportID, evalResult.result);
+                    //System.out.println("      ---->"+evalResult.getResultString()+"<--"+evalResult.alerts+serviceResult.xmlResult);
+                    exportsEvald.put(exportID, evalResult.getResultString());
                     serviceResult.alerts.addAll(evalResult.alerts);
                 } finally {
                     getRunOptions().errorsBecomeEmptyStrings = ebes;

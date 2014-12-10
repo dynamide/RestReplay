@@ -13,8 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.dynamide.restreplay.ServiceResult.Alert;
-import org.dynamide.restreplay.ServiceResult.Alert.LEVEL;
+import org.dynamide.interpreters.Alert;
+import org.dynamide.interpreters.Alert.LEVEL;
 
 import org.json.JSONObject;
 import org.json.XML;

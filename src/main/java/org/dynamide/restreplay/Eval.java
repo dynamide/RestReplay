@@ -1,41 +1,13 @@
-/**
- * This document is a part of the source code and related artifacts
- * for CollectionSpace, an open source collections management system
- * for museums and related institutions:
- *
- * http://www.collectionspace.org
- * http://wiki.collectionspace.org
- *
- * Copyright (c) 2009 Regents of the University of California
- *
- * Licensed under the Educational Community License (ECL), Version 2.0.
- * You may not use this file except in compliance with this License.
- *
- * You may obtain a copy of the ECL 2.0 License at
- * https://source.collectionspace.org/collection-space/LICENSE.txt
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package org.dynamide.restreplay;
 
 import org.apache.commons.jexl2.*;
 
-import java.io.File;
 import java.util.*;
 
-import org.dynamide.restreplay.ServiceResult.Alert.LEVEL;
-import org.dynamide.restreplay.RunOptions;
+import org.dynamide.interpreters.EvalResult;
+import org.dynamide.interpreters.Alert.LEVEL;
 import org.dynamide.util.Tools;
 
-/**
- * User: laramie
- * $LastChangedRevision:  $
- * $LastChangedDate:  $
- */
 public class Eval {
     public Map<String, ServiceResult> serviceResultsMap;
     public JexlEngine jexl = new JexlEngine();   // Used for expression language expansion from uri field.
@@ -48,13 +20,7 @@ public class Eval {
         jc = new Eval.MapContextWKeys();//MapContext();
     }
 
-    public static class EvalResult {
-        public String result = "";
-        public List<ServiceResult.Alert> alerts = new ArrayList<ServiceResult.Alert>();
-        public void addAlert(String m, String p, LEVEL l){
-            this.alerts.add(new ServiceResult.Alert(m,p,l));
-        }
-    }
+
 
     /**
      * You may pass in a Jexl 2 expression, e.g. ${foo.bar} and it will be eval'd for you.
@@ -94,7 +60,7 @@ public class Eval {
                     String key = entry.getKey();
                     try {
                         EvalResult innerResult = parse(context+", key:"+key, value);
-                        value = innerResult.result;
+                        value = innerResult.getResultString();
                         if (innerResult.alerts.size()>0){
                             result.alerts.addAll(innerResult.alerts);
                         }
@@ -117,7 +83,7 @@ public class Eval {
         } catch (Throwable t) {
             String errmsg = "ERROR: could not eval jexl expression. " + t;
             System.err.println(errmsg+" Expression: "+inputJexlExpression);
-            result.addAlert(errmsg, inputJexlExpression, ServiceResult.Alert.LEVEL.ERROR);
+            result.addAlert(errmsg, inputJexlExpression, LEVEL.ERROR);
             result.result = "";
         }
         return result;
@@ -209,7 +175,6 @@ public class Eval {
             i++;
             switch (c){
                 case '\\':
-                    //bump 2;
                     i++;  //once more to bump past escape char and escaped char.
                     break;
                 case '{':
