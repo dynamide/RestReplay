@@ -51,7 +51,6 @@
             <headers>
                 <header name="x-authorization">${selftestToken.got("//data")}</header>
                 <header name="x-method">${selftestToken.method}</header>
-                <header name="x-method">${selftestTok}</header>
             </headers>
             <!--This causes a warning.  And it breaks auto delete with the erroneous url.
             Keeping this here for development of two error tests.

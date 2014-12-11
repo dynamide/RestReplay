@@ -111,7 +111,7 @@ public class RestReplayReport {
             toc.tocID = i++;//tocID;
             toc.testID = serviceResult.testID;
             toc.time = serviceResult.time;
-            toc.detail = (serviceResult.gotExpectedResult() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
+            toc.detail = (serviceResult.isSUCCESS() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
             toc.warnings = serviceResult.alertsCount(LEVEL.WARN);
             toc.errors = serviceResult.alertsCount(LEVEL.ERROR);
             toc.responseCode = serviceResult.responseCode;
