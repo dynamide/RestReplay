@@ -23,16 +23,6 @@ public class ServiceResult {
         return runOptions;
     }
 
-    public static class AlertError extends Error {
-        public AlertError(String msg, Alert triggeringAlert, List<Alert> allAlerts){
-            super(msg);
-            this.triggeringAlert = triggeringAlert;
-            this.allAlerts = allAlerts;
-        }
-        Alert triggeringAlert;
-        List<Alert> allAlerts;
-    }
-
     private List<ServiceResult>childResults = new ArrayList<ServiceResult>();
     public void addChild(ServiceResult child){
         child.setParent(this);

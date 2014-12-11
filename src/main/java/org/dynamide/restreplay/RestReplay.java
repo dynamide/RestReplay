@@ -13,7 +13,7 @@ import java.util.*;
 
 import org.dynamide.interpreters.Alert;
 import org.dynamide.interpreters.Alert.LEVEL;
-import org.dynamide.restreplay.ServiceResult.AlertError;
+import org.dynamide.interpreters.AlertError;
 
 /**
  * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
@@ -1011,7 +1011,7 @@ public class RestReplay extends ConfigFile {
 
     @SuppressWarnings({"unchecked"})
     private static final void addAlertErrorToAlerts(List<Alert> alerts, Object t) {
-        if (t instanceof ServiceResult.AlertError) {
+        if (t instanceof AlertError) {
             alerts.addAll(((AlertError) t).allAlerts);
         }
     }
