@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
-    <protoHostPort>${SELFTEST_SERVER}</protoHostPort>
     <testGroup ID="barGroup" autoDeletePOSTS="false">
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
