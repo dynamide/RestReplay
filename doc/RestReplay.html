@@ -413,19 +413,24 @@
           &lt;<a href="#RestReplay-master.auths.auth">auth</a>&gt;
       &lt;/auths&gt;
       &lt;<a href="#RestReplay-master.runOptions">runOptions</a>&gt;
-        &lt;connectionTimeout /&gt;
-        &lt;socketTimeout /&gt;
-        &lt;errorsBecomeEmptyStrings /&gt;
+          &lt;connectionTimeout /&gt;
+          &lt;socketTimeout /&gt;
+          &lt;errorsBecomeEmptyStrings /&gt;
+          &lt;acceptAlertLevel /&gt;
+          &lt;failTestOnWarnings /&gt;
+          &lt;failTestOnErrors /&gt;
+          &lt;dumpResourceManagerSummary /&gt;
+          &lt;skipMutators /&gt;
       &lt;/runOptions&gt;
       &lt;vars&gt;
-        &lt;<a href="#RestReplay-master.vars.var">var</a> /&gt;
+          &lt;<a href="#RestReplay-master.vars.var">var</a> /&gt;
       &lt;/vars&gt;
       &lt;<a href="#RestReplay-master.envs">envs</a>&gt;
           &lt;<a href="#RestReplay-master.envs.vars">vars</a>&gt;
             &lt;<a href="#RestReplay-master.envs.vars.var">var</a> /&gt;
           &lt;/vars&gt;
       &lt;/envs&gt;
-      &lt;<a href="#RestReplay-master.run">run</a>&gt;&lt;/run&gt;
+      &lt;<a href="#RestReplay-master.run">run</a> /&gt;
   &lt;/restReplayMaster&gt;</pre>
       </div>
       <table border="1" cellpadding="3" cellspacing="0">
@@ -607,7 +612,59 @@
 
           <tr>
 <td>Discussion:</td>
-<td>{rest-replay-base-directory}/runOptions.xml is the best place to do site-wide settings for RestReplay.&nbsp; It contains a &lt;<strong>runOptions</strong>&gt; root element.<br><br>All of these options can be controlled in a master file, too.&nbsp; In this case, your master file contains &lt;<strong>runOptions</strong>&gt; under the root element &lt;<strong>restReplayMaster</strong>&gt;<br><br>When overriding RunOptions in a master file, consider these two development scenarios:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1) you are developing locally, and are setting per-test cases while you run tests,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and you may or may not check in your changes.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, change any settings you like as close to the testCase as you can in the chain:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>runOptions &gt; master &gt; testGroup &gt; testCase</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Review any changes to your xml config and control files you commit,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and check strategy as outlined in case (2).<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) you are committing this master to source control, so that it gets picked up by automated builds.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In this case, you should have a coordinated reason for overriding the default file (runOptions.xml).<br><br>&nbsp;&nbsp;&nbsp; Options:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>connectionTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>socketTimeout</strong>"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The most reasonable override in a master file's RunOptions is the timeouts:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; these may vary by service, or host<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; so one clean organization of test would be by services<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or known clusters of hosts with particular timeouts.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You could have one control file, say, "master-edge-services.xml",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; say, a time-critical cluster.&nbsp; In that control file,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set the RunOption timeouts to be low.&nbsp; In the Master, set the timeouts to be more "normal".<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; All the other tests will run with "normal", and tests in master-edge-services.xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; in testGroup "timeCriticalServices" will run with low timeouts.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>errorsBecomeEmptyStrings</strong>" would be set locally if you were debugging.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>dumpResourceManagerSummary</strong>" should probably be best left<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the central location in the file (runOptions.xml)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since it controls output to the console.<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "<strong>skipMutators</strong>" will skip processing for Mutators.&nbsp; Mutators take one test and replays it with modified payloads.<br><br><br>&nbsp;&nbsp;&nbsp; The heirarchy is:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RunOptions : class defaults<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; runOptions.xml : default for all tests<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my-master.xml :&nbsp; overrides properties for this master.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can have many masters and run them all from the command line<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or test suite by using the startup command-line parameter:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -master relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or for maven, surefire, etc:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -Dmaster=relative-path-to-master-file<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (see docs/RestReplay.html for examples).<br>&nbsp;&nbsp;&nbsp; </td>
+<td>
+    <pre>{rest-replay-base-directory}/runOptions.xml is the best place to do site-wide settings for RestReplay.
+It contains a &lt;<strong>runOptions</strong>&gt; root element.
+
+All of these options can be controlled in a master file, too.
+In this case, your master file contains &lt;<strong>runOptions</strong>&gt; under the root element &lt;<strong>restReplayMaster</strong>&gt;
+
+When overriding RunOptions in a master file, consider these two development scenarios:
+            1) you are developing locally, and are setting per-test cases while you run tests,
+               and you may or may not check in your changes.
+                  In this case, change any settings you like as close to the testCase as you can in the chain:
+                        <strong>runOptions &gt; master &gt; testGroup &gt; testCase</strong>
+                  Review any changes to your xml config and control files you commit,
+                  and check strategy as outlined in case (2).
+
+            2) you are committing this master to source control, so that it gets picked up by automated builds.
+                   In this case, you should have a coordinated reason for overriding the default file (runOptions.xml).
+
+    Options:
+        "<strong>connectionTimeout</strong>"
+        "<strong>socketTimeout</strong>"
+            The most reasonable override in a master file's RunOptions is the timeouts:
+            these may vary by service, or host
+            so one clean organization of test would be by services
+            or known clusters of hosts with particular timeouts.
+            You could have one control file, say, "master-edge-services.xml",
+            with one testGroup, "timeCriticalServices", and in that testGroup put all the services from,
+            say, a time-critical cluster.  In that control file,
+            set the RunOption timeouts to be low.  In the Master, set the timeouts to be more "normal".
+            All the other tests will run with "normal", and tests in master-edge-services.xml
+            in testGroup "timeCriticalServices" will run with low timeouts.
+
+        "<strong>errorsBecomeEmptyStrings</strong>" would be set locally if you were debugging.
+
+        "<strong>dumpResourceManagerSummary</strong>" should probably be best left
+           to the central location in the file (runOptions.xml)
+           since it controls output to the console.
+
+        "<strong>skipMutators</strong>" will skip processing for Mutators.  Mutators take one test and replays it with modified payloads.
+
+
+    The heirarchy is:
+       RunOptions : class defaults
+         runOptions.xml : default for all tests
+           my-master.xml :  overrides properties for this master.
+                            You can have many masters and run them all from the command line
+                            or test suite by using the startup command-line parameter:
+                                -master relative-path-to-master-file
+                            or for maven, surefire, etc:
+                                -Dmaster=relative-path-to-master-file
+</pre>
+    (see docs/RestReplay.html for examples).
+</td>
 <td><br></td></tr>
 <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.vars.var"></a>/restReplayMaster/vars/var</td>
@@ -867,12 +924,24 @@
           &lt;<a href="#RestReplay-restReplay.testGroup.vars.var">vars</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.headers.header">headers</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.test">test</a>&gt;
-              &lt;<a href="#RestReplay-restReplay.testGroup.test.method">method</a>&gt;&lt;/method&gt;
-              &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a>&gt;&lt;/uri&gt;<br>              &lt;<a href="#RestReplay-restReplay.testGroup.test.filename">filename</a> /&gt;<br>              &lt;<a title="mutator" href="#RestReplay-restReplay.testGroup.test.mutator">mutator</a>&gt;<br>                  &lt;expected&gt;<br>                       &lt;code /&gt;<br>                  &lt;/expected&gt;<br>              &lt;/mutator&gt;<br>             &nbsp;&lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">vars</a>&gt;
-                  &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">var /</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.method">method</a> /&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a> /&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.filename">filename</a> /&gt;
+              &lt;<a title="mutator" href="#RestReplay-restReplay.testGroup.test.mutator">mutator</a>&gt;
+                  &lt;expected&gt;
+                    &lt;code /&gt;
+                  &lt;/expected&gt;
+              &lt;/mutator&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.vars.var">vars</a>&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.vars.var">var /</a>&gt;
               &lt;/vars&gt;
-              &lt;<a href="#RestReplay-restReplay.testGroup.test.parts">headers</a>&gt;
-                  &lt;<a href="#RestReplay-restReplay.testGroup.test.part">header /</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.exports">exports</a>&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var">vars</a>&gt;
+                      &lt;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var">var /</a>&gt;
+                  &lt;/vars&gt;
+              &lt;/exports&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.headers.header">headers</a>&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.headers.header">header /</a>&gt;
               &lt;/headers&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.parts">parts</a>&gt;
                   &lt;<a href="#RestReplay-restReplay.testGroup.test.part">part</a>&gt;
@@ -885,9 +954,9 @@
                   &lt;<a href="#RestReplay-restReplay.testGroup.test.response.expected">expected</a>/&gt;
                   &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts">parts</a>&gt;
                       &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part">part</a>&gt;
-                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.label">label</a>&gt;&lt;/label&gt;
-                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.f...">filename</a>&gt;&lt;/filename&gt;
-                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">var</a>&gt;&lt;/var&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.label">label</a> /&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.f...">filename</a> /&gt;
+                          &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.var">var</a> /&gt;
                       &lt;/part&gt;
                   &lt;/parts&gt;
               &lt;/response&gt;
@@ -916,108 +985,6 @@
           </tr>
 
 
-
-
-
-
-
-          <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.vars.var" id="RestReplay-restReplay.testGroup.vars.var"></a>/restReplay/vars/var</td>
-          </tr>
-          <tr>
-            <td>var</td>
-            <td>A variable that will be expanded just before the test is run.  Available to use in uri element.</td>
-          </tr>
-          <tr>
-            <td>Example:</td>
-            <td>
-              <div class="code">
-    &lt;restReplay&gt;
-      &lt;protoHostPort&gt;...&lt;/protoHostPort&gt;
-      &lt;testGroup ID="mainTestGroup"&gt;
-        &lt;vars&gt;
-            &lt;var ID="<b>COURSE_ID</b>"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
-            &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
-        &lt;/vars&gt;
-        ...
-        &lt;test ID="getAssignments"&gt;
-            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
-            &lt;method&gt;GET&lt;/method&gt;
-            &lt;uri&gt;/las-api/api/grid-apex/courses/<b>${COURSE_ID}</b>/assignments&lt;/uri&gt;
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.headers.header" id="RestReplay-restReplay.testGroup.headers.header"></a>/restReplay/headers/header</td>
-          </tr>
-          <tr>
-            <td>header</td>
-            <td>A header that will be expanded just before the test is run.  If you need to force a particular test to skip including all the headers set by the testGroup,
-            set inheritHeaders="false" on that &lt;test&gt; node.</td>
-          </tr>
-          <tr>
-            <td>Example:</td>
-            <td>
-              <div class="code">
-    &lt;restreplay&gt;
-      &lt;testGroup ID="mainTestGroup"&gt;
-        &lt;headers&gt;
-            &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
-            &lt;header name="x-authorization"&gt;${pitoken.got("//data")}&lt;/header&gt;
-        &lt;/headers&gt;
-        &lt;vars&gt;
-            &lt;var ID="COURSE_ID"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
-            &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
-        &lt;/vars&gt;
-
-        &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
-            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
-            &lt;method&gt;POST&lt;/method&gt;
-            &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
-            &lt;filename&gt;pitoken.json&lt;/filename&gt;
-            <b>&lt;-- Will NOT inherit headers --&gt;</b>
-                  &lt;test ID="deleteTemplate"&gt;
-                  &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
-                  &lt;method&gt;DELETE&lt;/method&gt;
-                  &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
-                  <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
-                  &lt;/test&gt;
-              &lt;/restreplay&gt;
-             </div>
-            </td>
-          </tr>
-
-
-          <tr>
-              <td>Example:</td>
-              <td>
-                  <div class="code">
-    &lt;restreplay&gt;
-      &lt;testGroup ID="mainTestGroup"&gt;
-          &lt;headers&gt;
-             &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
-             &lt;header name="x-authorization"&gt;${pitoken.got("//data")}&lt;/header&gt;
-          &lt;/headers&gt;
-          &lt;vars&gt;
-              &lt;var ID="COURSE_ID"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
-              &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
-          &lt;/vars&gt;
-
-          &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
-              &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
-              &lt;method&gt;POST&lt;/method&gt;
-              &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
-              &lt;filename&gt;pitoken.json&lt;/filename&gt;
-              <b>&lt;-- Will NOT inherit headers --&gt;</b>
-              <b>&lt;-- And can still define its own headers --&gt;</b>
-              &lt;headers&gt;
-                  &lt;header name="X-SomeParameter"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
-              &lt;/headers&gt;
-          &lt;/test&gt;
-  &lt;/restreplay&gt;</div>
-              </td>
-          </tr>
 
 
 
@@ -1119,6 +1086,118 @@
               </div>
             </td>
           </tr>
+
+
+
+
+
+         
+
+
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.vars.var" id="RestReplay-restReplay.testGroup.vars.var"></a>/restReplay/testGroup/vars/var</td>
+          </tr>
+          <tr>
+            <td>var</td>
+            <td>A variable that will be expanded just before the test is run.  Available to use in uri element.</td>
+          </tr>
+          <tr>
+            <td>Example:</td>
+            <td>
+              <div class="code">
+    &lt;restReplay&gt;
+      &lt;protoHostPort&gt;...&lt;/protoHostPort&gt;
+      &lt;testGroup ID="mainTestGroup"&gt;
+        &lt;vars&gt;
+            &lt;var ID="<b>COURSE_ID</b>"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
+            &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
+        &lt;/vars&gt;
+        ...
+        &lt;test ID="getAssignments"&gt;
+            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+            &lt;method&gt;GET&lt;/method&gt;
+            &lt;uri&gt;/las-api/api/grid-apex/courses/<b>${COURSE_ID}</b>/assignments&lt;/uri&gt;
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.headers.header" id="RestReplay-restReplay.testGroup.headers.header"></a>/restReplay/testGroup/headers/header</td>
+          </tr>
+          <tr>
+            <td>header</td>
+            <td>A header that will be expanded just before the test is run.  If you need to force a particular test to skip including all the headers set by the testGroup,
+            set inheritHeaders="false" on that &lt;test&gt; node.</td>
+          </tr>
+          <tr>
+            <td>Example:</td>
+            <td>
+              <div class="code">
+    &lt;restreplay&gt;
+      &lt;testGroup ID="mainTestGroup"&gt;
+        &lt;headers&gt;
+            &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
+            &lt;header name="x-authorization"&gt;${pitoken.got("//data")}&lt;/header&gt;
+        &lt;/headers&gt;
+        &lt;vars&gt;
+            &lt;var ID="COURSE_ID"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
+            &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
+        &lt;/vars&gt;
+
+        &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
+            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+            &lt;method&gt;POST&lt;/method&gt;
+            &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
+            &lt;filename&gt;pitoken.json&lt;/filename&gt;
+            <b>&lt;-- Will NOT inherit headers --&gt;</b>
+                  &lt;test ID="deleteTemplate"&gt;
+                  &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+                  &lt;method&gt;DELETE&lt;/method&gt;
+                  &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
+                  <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
+                  &lt;/test&gt;
+              &lt;/restreplay&gt;
+             </div>
+            </td>
+          </tr>
+
+
+          <tr>
+              <td>Example:</td>
+              <td>
+                  <div class="code">
+    &lt;restreplay&gt;
+      &lt;testGroup ID="mainTestGroup"&gt;
+          &lt;headers&gt;
+             &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
+             &lt;header name="x-authorization"&gt;${pitoken.got("//data")}&lt;/header&gt;
+          &lt;/headers&gt;
+          &lt;vars&gt;
+              &lt;var ID="COURSE_ID"&gt;540f4515e4b004e7d8f22fc8&lt;/var&gt;
+              &lt;var ID="TEMPLATE_ID"&gt;87fff5f0-652d-11e4-8229-179090669834&lt;/var&gt;
+          &lt;/vars&gt;
+
+          &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
+              &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+              &lt;method&gt;POST&lt;/method&gt;
+              &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
+              &lt;filename&gt;pitoken.json&lt;/filename&gt;
+              <b>&lt;-- Will NOT inherit headers --&gt;</b>
+              <b>&lt;-- And can still define its own headers --&gt;</b>
+              &lt;headers&gt;
+                  &lt;header name="X-SomeParameter"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
+              &lt;/headers&gt;
+          &lt;/test&gt;
+  &lt;/restreplay&gt;</div>
+              </td>
+          </tr>
+
+
+
+
+
+
+
 
           <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test" id="RestReplay-restReplay.testGroup.test"></a>/restReplay/testGroup/test</td>
@@ -1234,6 +1313,65 @@
               </div>
             </td>
           </tr>
+          
+          
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.vars.var" 
+                                                      id="RestReplay-restReplay.testGroup.test.vars.var"></a>
+             /restReplay/testGroup/test/vars/var</td>
+          </tr>
+          <tr>
+            <td>var</td>
+
+            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a>, but limited to one test</td>
+          </tr>
+          
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.headers.header" 
+                                                     id="RestReplay-restReplay.testGroup.test.headers.header"></a>
+              /restReplay/testGroup/test/headers/header</td>
+          </tr>
+          <tr>
+            <td>header</td>
+            <td>The same as <a href="#RestReplay-restReplay.testGroup.headers.header">restReplay/testGroup/headers/header</a>, but limited to one test</td>
+          </tr>
+
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.exports" 
+                                                     id="RestReplay-restReplay.testGroup.test.exports"></a>
+               /restReplay/testGroup/test/exports</td>
+          </tr>
+          <tr>
+            <td>exports</td>
+            <td><b>After</b> the test is run, export a variable which can be referenced by another test, and can use values from the response.  
+            You could define this in another, dependent test
+            using syntax like ${firstTest.someExpression} but using exports puts that definition closer to the test, and so makes the dependent test cleaner.</td>
+          </tr>
+          <tr>
+            <td>child elements</td>
+            <td>vars<br />vars/var  - The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a></td>
+          </tr>
+          
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.exports.vars.var" 
+                                                     id="RestReplay-restReplay.testGroup.test.exports.vars.var"></a>
+             /restReplay/testGroup/test/exports/vars/var</td>
+          </tr>
+          <tr>
+            <td>var</td>
+            <td>Evaluated <b>after</b> the test is run; otherwise similar to 
+            <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a> (and limited to one test).</td>
+          </tr>
+          
+          
+
+
+          
+          
+          
+          
+          
+          
 
           <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.method" id="RestReplay-restReplay.testGroup.test.method"></a>/restReplay/testGroup/test/method</td>
