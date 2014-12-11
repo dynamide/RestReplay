@@ -12,7 +12,7 @@
     </runOptions>
 
     <vars>
-        <var ID="DMSERVER">http://localhost:18080</var>
+        <var ID="SELFTEST_SERVER">http://localhost:18080</var>
     </vars>
 
 

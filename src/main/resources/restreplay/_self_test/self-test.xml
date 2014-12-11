@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
-    <!--protoHostPort>${DMSERVER}</protoHostPort-->
-    <protoHostPort>http://localhost:28080</protoHostPort>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
 
 
 
     <testGroup ID="login" autoDeletePOSTS="false">
-        <test ID="dynamideToken">
+        <test ID="selftestToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
@@ -17,22 +16,22 @@
 
     <testGroup ID="selftestGroup" autoDeletePOSTS="false">
         <vars>
-            <var ID="DMSERVER">http://localhost:28080</var>
+            <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
-        <test ID="dynamideToken">
+        <test ID="selftestToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
-        <test ID="dynamide1">
+        <test ID="selftest1">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
-            <uri>${DMSERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
+            <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
             <vars>
-                <var ID="TOKEN_ID">${dynamideToken.got("//status")}</var>
+                <var ID="TOKEN_ID">${selftestToken.got("//status")}</var>
             </vars>
         </test>
-        <test ID="dynamideUseMutator">
+        <test ID="selftestUseMutator">
             <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
@@ -45,13 +44,14 @@
                 </expected>
             </mutator>
         </test>
-        <test ID="dynamideUseToken">
+        <test ID="selftestUseToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
-            <uri>/tagonomy?mock=true&amp;name=dynamideUseToken</uri>
+            <uri>/tagonomy?mock=true&amp;name=selftestUseToken</uri>
             <headers>
-                <header name="x-authorization">${dynamideToken.got("//data")}</header>
-                <header name="x-method">${dynamideToken.method}</header>
+                <header name="x-authorization">${selftestToken.got("//data")}</header>
+                <header name="x-method">${selftestToken.method}</header>
+                <header name="x-method">${selftestTok}</header>
             </headers>
             <!--This causes a warning.  And it breaks auto delete with the erroneous url.
             Keeping this here for development of two error tests.
@@ -59,16 +59,16 @@
             <deleteURL>${result.url.protocol}://${result.url.authority}${result.url.path} -:: ${result.protoHostPort} ::-</deleteURL>
             -->
         </test>
-        <test ID="dynamideUseTokenPOST">
+        <test ID="selftestUseTokenPOST">
             <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>_self_test/dynamide-token-post.json</filename>
+            <filename>_self_test/selftest-token-post.json</filename>
             <vars>
-                <var ID="TOKEN">${dynamideToken.got("//data")}</var>
+                <var ID="TOKEN">${selftestToken.got("//data")}</var>
             </vars>
         </test>
-        <test ID="dynamideUseTokenPUT">
+        <test ID="selftestUseTokenPUT">
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
@@ -79,22 +79,22 @@
                 </expected>
             </mutator>
         </test>
-        <test ID="dynamideUseTokenDELETE">
+        <test ID="selftestUseTokenDELETE">
             <expectedCodes>200</expectedCodes>
             <method>DELETE</method>
             <uri>/tagonomy?mock=true</uri>
         </test>
-        <test ID="dynamide501">
+        <test ID="selftest501">
             <expectedCodes>501</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=501</uri>
             <filename>_self_test/content-mutator-test.json</filename>
         </test>
-        <test ID="dynamideScriptTest">
+        <test ID="selftestScriptTest">
             <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>_self_test/dynamide-mutator.json</filename>
+            <filename>_self_test/selftest-mutator.json</filename>
             <vars>
                 <var ID="TOKEN">FOOTOKEN</var>
             </vars>
@@ -102,10 +102,13 @@
                 <vars>
                     <var ID="GregorianDate"><![CDATA[${
                         if (kit != null) {
-                           kit.out.println('Starting test script, Laramie');
-                           return ''+kit.gregorian.timestampUTC();
+                            var ts = kit.gregorian.timestampUTC();
+                            kit.out.println('');
+                            kit.out.println('    ==> Running test script, in selftest.xml:selftestGroup:selftestScriptTest at '+ts);
+                            kit.out.println('');
+                            return ''+ts;
                         }
-                        return "kit not defined in ScriptTest";
+                        return "kit not defined in selftestScriptTest";
                     }]]></var>
                 </vars>
             </exports>
@@ -117,11 +120,11 @@
 
 
     <testGroup ID="debug"  autoDeletePOSTS="false">
-        <test ID="dynamideUseTokenPUT">
+        <test ID="selftestUseTokenPUT">
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
-            <filename>_self_test/dynamide-mutator.json</filename>
+            <filename>_self_test/selftest-mutator.json</filename>
             <vars>
                 <var ID="TOKEN">FOOTOKEN</var>
                 <var ID="mutation">${this.mutation}</var>
@@ -138,7 +141,7 @@
 
 
     <testGroup ID="bugs"  autoDeletePOSTS="false">
-        <test ID="dynamideUseTokenPUTbugs">
+        <test ID="selftestUseTokenPUTbugs">
             <!-- This case causes errors to happen in the mutated child tests, but reading the json response borks the
                  parent so it doesn't display correctly, and the children seem like top-level tests.
                  Trace this to the code that breaks on the error and trap the error correctly.
@@ -146,7 +149,7 @@
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>_self_test/dynamide-mutator.json</filename>
+            <filename>_self_test/selftest-mutator.json</filename>
             <mutator type="ExcludeFields">
                 <expected>
                     <code range="4xx">*</code>
@@ -162,19 +165,19 @@
                 </vars>
             </exports>
         </test>
-        <test ID="dynamideUseData"  autoDeletePOSTS="false">
+        <test ID="selftestUseData"  autoDeletePOSTS="false">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
-            <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(dynamideUseTokenPUTbugs.result)}</uri>
+            <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(selftestUseTokenPUTbugs.result)}</uri>
         </test>
     </testGroup>
 
     <testGroup ID="debugScript">
-        <test ID="dynamideReturnTest">
+        <test ID="selftestReturnTest">
             <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
-            <filename>_self_test/dynamide-mutator.json</filename>
+            <filename>_self_test/selftest-mutator.json</filename>
         </test>
 
     </testGroup>

@@ -1,6 +1,7 @@
 package org.dynamide.restreplay;
 
 import org.dynamide.restreplay.server.EmbeddedServer;
+import org.dynamide.util.Tools;
 import org.testng.annotations.Test;
 import java.util.List;
 
@@ -22,12 +23,22 @@ public class RestReplaySelfTest extends RestReplayTest {
 
     @Test
     public void runMaster() throws Exception {
+        String port = ""+EmbeddedServer.DEFAULT_PORT;
+        String fromProps = System.getProperty("port");
+        if (Tools.notEmpty(fromProps)) {
+            port = fromProps;
+        }
         EmbeddedServer server = new EmbeddedServer();
-        server.startServer();
-        Master master = createRestReplay();
-        List<List<ServiceResult>> list = master.runMaster("_self_test/master-self-test.xml");
-        logTestForGroup(list, "runMaster");
-        server.stopServer();
+        server.startServer(port);
+        try {
+            Master master = createRestReplay();
+            master.getVars().put("SELFTEST_PORT", port);
+
+            List<List<ServiceResult>> list = master.runMaster("_self_test/master-self-test.xml");
+            logTestForGroup(list, "runMaster");
+        } finally {
+            server.stopServer();
+        }
     }
 
 /*
@@ -90,7 +101,7 @@ public class RestReplaySelfTest extends RestReplayTest {
         //RestReplay wants to know about two files: a master and a control file
         //  The master references one to many control files.
         //  If you don't call runMaster(), you must specify the control file:
-        replay.setControlFileName("_self_test/dynamide.xml");
+        replay.setControlFileName("_self_test/self-test.xml");
 
         //These option default sensibly, some of them from the master, but here's how to set them all:
 
@@ -125,4 +136,8 @@ public class RestReplaySelfTest extends RestReplayTest {
         logTest(list, "runTestGroup_AllOptions");
     }
 */
+    public static void main(String[] args)
+    throws  Exception {
+        new RestReplaySelfTest().runMaster();
+    }
 }

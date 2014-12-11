@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplayMaster>
-    <protoHostPort>${DMSERVER}</protoHostPort>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
 
     <dump payloads="false" dumpServiceResult="minimal" />
 
@@ -10,13 +10,10 @@
         <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
     </runOptions>
 
-    <vars>
-        <var ID="DMSERVER">http://localhost:18080</var>
-    </vars>
-    <run controlFile="_self_test/dynamide.xml" testGroup="selftestGroup" />
+    <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
 
     <!--
-        <run controlFile="_self_test/dynamide.xml" testGroup="debugScript" />
+        <run controlFile="_self_test/self-test.xml" testGroup="debugScript" />
         <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup" />
 
         <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup2" />

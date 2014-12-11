@@ -10,6 +10,9 @@
     <connectionTimeout>3030</connectionTimeout>
     <socketTimeout>7007</socketTimeout>
     <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
+    <acceptAlertLevel>OK</acceptAlertLevel>
+    <failTestOnWarnings>true</failTestOnWarnings>
+    <failTestOnErrors>true</failTestOnErrors>
     <dumpResourceManagerSummary>false</dumpResourceManagerSummary>
     <skipMutators>false</skipMutators>
 </runOptions>

@@ -210,16 +210,23 @@ public class Tools {
         } catch (Exception e2)  {System.out.println("ERROR: couldn't reset() bos in Tools "+e2);}
 
         if (includeLines == 0){
-            return result;   //return all.
+            int iLeader = result.indexOf("\tat ");
+            if (iLeader>-1){
+                return result.substring(0, iLeader)+ "<pre>"+result.substring(iLeader)+"</pre>";
+            } else {
+                return "<pre>" + result + "</pre>";   //return all.
+            }
         }
         StringBuffer sb = new StringBuffer();
         int i = 0;
-        // BUG - \n is not the separator on all systems. Have to use the system line separator.
+        // TODO: BUG - \n is not the separator on all systems. Have to use the system line separator.
         String[] foo = result.split("\n");
+        sb.append("<pre>\r\n");
         for (String line: foo){
             i++;
             if (i>includeLines){
                 sb.append("  ...first "+i+" lines. "+(foo.length-i)+" more.\r\n");
+                sb.append("</pre>\r\n");
                 return sb.toString();
             }
             sb.append(line).append("\r\n");

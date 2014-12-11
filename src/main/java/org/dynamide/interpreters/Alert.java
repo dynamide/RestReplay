@@ -13,5 +13,8 @@ public class Alert {
     public static Alert alert(String m, String p, LEVEL l){
         return new Alert(m,p,l);
     }
+    public String toString(){
+        return ""+level+':'+context+':'+message;
+    }
 
 }

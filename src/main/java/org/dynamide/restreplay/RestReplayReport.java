@@ -112,8 +112,8 @@ public class RestReplayReport {
             toc.testID = serviceResult.testID;
             toc.time = serviceResult.time;
             toc.detail = (serviceResult.gotExpectedResult() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
-            toc.warnings = alertsCount(serviceResult.alerts, LEVEL.WARN);
-            toc.errors = alertsCount(serviceResult.alerts, LEVEL.ERROR);
+            toc.warnings = serviceResult.alertsCount(LEVEL.WARN);
+            toc.errors = serviceResult.alertsCount(LEVEL.ERROR);
             toc.responseCode = serviceResult.responseCode;
             toc.isMutation = serviceResult.isMutation;
             toc.idFromMutator = serviceResult.idFromMutator;
@@ -165,8 +165,8 @@ public class RestReplayReport {
                 if (childResult.gotExpectedResult()) {
                     numGotExpected++;
                 }
-                numErrors += alertsCount(childResult.alerts, LEVEL.WARN);
-                numWarnings += alertsCount(childResult.alerts, LEVEL.ERROR);
+                numErrors += childResult.alertsCount(LEVEL.WARN);
+                numWarnings += childResult.alertsCount(LEVEL.ERROR);
             }
             assert numResults == serviceResult.getChildResults().size();
             String rowid = "childresults_" + serviceResult.testID;
@@ -474,7 +474,8 @@ public class RestReplayReport {
         StringBuffer fb = new StringBuffer();
         fb.append("<a name='TOC" + tocID + "'></a>");
         fb.append("<a name='" + serviceResult.testID + "'></a>");
-        fb.append(detail(serviceResult, false, false, DETAIL_LINESEP, DETAIL_END, tocID));
+        boolean includePartSummary = true;
+        fb.append(detail(serviceResult, false, includePartSummary, DETAIL_LINESEP, DETAIL_END, tocID));
         return fb.toString();
     }
 
@@ -615,13 +616,15 @@ public class RestReplayReport {
         String mutation = s.isMutation ? " mutation" : "";
         String start = "<table border='1' class='DETAIL_TABLE "+mutation+"'><tr><td>\r\n";
 
-        String partSummary = s.partsSummary(includePartSummary);
+        boolean detailedPartSummary = false;//includes expected parts bodies.
+        String partSummary = includePartSummary ? s.partsSummary(detailedPartSummary) : "";
         String idNoMutatorID = (Tools.notEmpty(s.idFromMutator) && Tools.notEmpty(s.testID))
                                  ? s.testID.substring(0, (s.testID.length() - s.idFromMutator.length()) )
                                  : s.testID;
         String SUCCESS = formatMutatorSUCCESS(s);
+        boolean showSUCCESS = s.isSUCCESS();
         String res = start
-                + (s.gotExpectedResult() ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
+                + (showSUCCESS ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
@@ -643,7 +646,7 @@ public class RestReplayReport {
                 + (Tools.notEmpty(s.getError()) ?  alertError(s.getError()) + linesep : "")
                 + (Tools.notEmpty(s.getErrorDetail()) ?  alertError(s.getErrorDetail()) + linesep : "")
                 + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s)+exportsToHtml(s) + linesep : "")
-                + ((includePartSummary && Tools.notBlank(partSummary)) ? lbl("part summary") + partSummary + linesep : "")
+                + ((includePartSummary && Tools.notBlank(partSummary)) ? lbl("part summary") + smallblack(partSummary) + linesep : "")
                 + (includePayloads && Tools.notBlank(s.requestPayload) ? LINE + lbl("requestPayload") + LINE + CRLF + s.requestPayload + LINE : "")
                 + (includePayloads && Tools.notBlank(s.getResult()) ? LINE + lbl("result") + LINE + CRLF + s.getResult() : "")
                 + end;
@@ -689,7 +692,7 @@ public class RestReplayReport {
 
     private String alertsToHtml(List<Alert> alerts) {
         StringBuffer buffer = new StringBuffer();
-        String alertClass = "";
+        String alertClass = "AlertOK";
         for(Alert alert: alerts){
             switch (alert.level){
                 case WARN:
@@ -700,22 +703,12 @@ public class RestReplayReport {
                     break;
             }
             buffer.append("<span class='"+alertClass+"'>")
-                    .append(alert.level)  .append("<br />")
-                    .append(alert.message).append("<br />")
-                    .append(alert.context).append("<br />")
+                    .append("<span class='AlertLevel'>").append(alert.level).append("</span>")
+                    .append("<span class='AlertContext'>").append(alert.context).append("</span>")
+                    .append("<span class='AlertMessage'>").append(alert.message).append("</span>")
                     .append("</span>");
         }
         return buffer.toString();
-    }
-
-    private int alertsCount(List<Alert> alerts, LEVEL level) {
-        int count = 0;
-        for (Alert alert : alerts) {
-            if (alert.level.equals(level)) {
-                count++;
-            }
-        }
-        return count;
     }
 
     private String varsToHtml(ServiceResult result){

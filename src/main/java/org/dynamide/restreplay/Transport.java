@@ -321,7 +321,7 @@ public class Transport {
             return "";
         }
         String contentType = hdr.getValue();
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ response content type: "+contentType);
+        //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ response content type: "+contentType);
         int idx = contentType.indexOf(';');
         if (idx > -1){
             return contentType.substring(0, idx);

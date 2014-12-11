@@ -56,6 +56,14 @@ public class Eval {
             }
             if (vars!=null){
                 for (Map.Entry<String,String> entry: vars.entrySet()) {
+                    //loop over vars.  Don't overwrite, but add all the vars so that vars can themselves reference vars.
+                    String value = entry.getValue();
+                    String key = entry.getKey();
+                    if (jc.get(key)==null){
+                        jc.set(key, value);
+                    }
+                }
+                for (Map.Entry<String,String> entry: vars.entrySet()) {
                     String value = entry.getValue();
                     String key = entry.getKey();
                     try {

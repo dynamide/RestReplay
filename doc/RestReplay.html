@@ -3,6 +3,7 @@
 <head>
 <meta content="text/html; charset=us-ascii" http-equiv="content-type">
 
+
   <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
   
 
@@ -188,14 +189,15 @@
       <p>When running inside maven surefire, this is pre-defined to be a resource directory in the source code module.
           Maven defines a variable called basedir, which points at the project directory for the current pom.xml. In the pom.xml
           file, you can point maven exec:java at the testdir (called "tests" in this example) like so:
-      <div class="code panel">
-        &lt;argument>-testdir&lt;/argument>
-        &lt;argument>${basedir}/tests&lt;/argument>
+      </p>
+<div class="code panel">
+        &lt;argument&gt;-testdir&lt;/argument&gt;
+        &lt;argument&gt;${basedir}/tests&lt;/argument&gt;
       </div>
 
       See the full example of how to run maven's exec:java with command line parameters here:
     <a href="https://github.com/dynamide/RestReplay/blob/master/pom.xml">https://github.com/dynamide/RestReplay/blob/master/pom.xml</a>
-      </p>
+      <p></p>
 
       <p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.
           You can select a particular master with the command line parameter -<strong>restReplayMaster</strong></p>
@@ -289,6 +291,11 @@
       <div class="code">
     mvn -o install
       </div>
+    <p>Or, to override the port that the self-test will open, use:</p>
+      <div class="code">
+    mvn -o install -Dport=29003
+      </div>
+
 <p>To run using the maven surefire test pointed at a master, e.g. master.xml in ./tests/, simply:</p>
 
       <div class="code">
@@ -298,7 +305,7 @@
 
       <div class="code">
     vi ./my-master-file.xml
-    mvn test -Dmaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=RestReplayDevTest
+    mvn test -Dmaster=my-master-file.xml \<br>             -DforkMode=never \<br>             -Dtest=myTestID
       </div>
 
       <h4><a name="RestReplay-2.c.1Commandlineparameters" id="RestReplay-2.c.1Commandlineparameters"></a>2.c.1 Command-line parameters</h4><br>
@@ -347,18 +354,40 @@
 <tr>
 <td>dumpResults</td>
 <td>-dumpResults true</td>
+<td>If you are not running a master, you can control dumps here.</td>
+</tr>
 
-<td>If you are not running a master, you can control dumps here.</td></tr>
 <tr>
 <td>control</td>
 <td>-control my-control.xml</td>
+<td>Run one control file without a master.  Requires at least <strong>testGroup</strong>, and also accepts <strong>test</strong></td>
+</tr>
 
-<td>Run one control file without a master.  Requires at least <strong>testGroup</strong>, and also accepts <strong>test</strong></td></tr>
 <tr>
-<td>master</td>
-<td>-master my-master.xml</td>
+    <td>master</td>
+    <td>-master my-master.xml</td>
+    <td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroup</strong>, and <strong>test</strong> are ignored.</td>
+</tr>
 
-<td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroup</strong>, and <strong>test</strong> are ignored.</td></tr></tbody></table><br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
+<tr>
+    <td>selftest</td>
+    <td>-selftest</td>
+    <td>Run the self-test.  If the default port conflicts on your system, override it with -port.  The self-test spins up a basic http server, and points
+    the self-test at http://localhost:port where port is defined by the -port parameter, or uses its default.  At the end of the test, the server is stopped.</td>
+</tr>
+
+<tr>
+    <td>port</td>
+    <td>-port 8081</td>
+    <td>Allows you to override the default port that the self-test opens.  Default is 28080</td>
+</tr>
+
+
+</tbody>
+</table>
+
+
+<br>When running in Maven, you must pass these command line parameters via the Java -D mechanism, using an = sign to set the value, e.g.<br><br>
       <div class="code">mvn exec:java -Dtestdir=./tests</div>
 <p>Here are some more examples of running on the command line.</p>
 <p>In this run, we are hitting the control file pi/pitoken.xml with no master file.&nbsp; So we specify testGroup, test within that control file.</p>
@@ -531,12 +560,12 @@
           <tr>
             <td>connectionTimeout</td>
 
-            <td>Timeout for connecting to remote servers</td>
+            <td>Timeout for connecting to remote servers, in milliseconds.</td>
           </tr>
           <tr>
             <td>socketTimeout</td>
 
-            <td>Timeout for data transfer</td>
+            <td>Timeout for data transfer, in milliseconds.</td>
           </tr>
 
           <tr>
@@ -546,14 +575,33 @@
           </tr>
 
           <tr>
+<td>acceptAlertLevel</td>
+<td>A String without quotes, one of: OK, WARN, ERROR.&nbsp; (As defined in Alert.LEVEL enum.)  <br /><i><b>[Not implemented.  When implemented, will abort the testGroup or Master run if Warnings or Errors occur in individual tests.]</b></i> </td></tr>
+<tr>
+<td>failTestOnWarnings</td>
+<td>boolean: true|false.&nbsp; Simply overrides display of SUCCESS to be FAILURE for a test if there are any warnings.&nbsp; Warnings come from things like variables that are not defined but are used in expressions.&nbsp; Does not abort testGroup or Master runs.</td></tr>
+<tr>
+<td>failTestOnErrors</td>
+<td>boolean: true|false. Simply overrides display of SUCCESS to be FAILURE for a test if there are any errors.&nbsp; Errors come from things like malformed expressions, files not found, socket timeouts on URLs, etc.&nbsp; Does not abort testGroup or Master runs.</td></tr>
+<tr>
+<td>dumpResourceManagerSummary</td>
+<td>boolean: true|false. The ResourceManager finds files in the classpath and the filesystem.&nbsp; The HTML report for the Master contains a listing of all resources searched for.&nbsp; This setting allows you to dump that list to the console, if true.</td></tr>
+<tr>
+<td>skipMutators</td>
+<td>boolean: true|false. All mutators in all tests will be skipped.&nbsp; Only the test will be run, and not any variations generated by the &lt;mutator&gt; set within the test.</td></tr>
+<tr>
             <td>Example:</td>
 
             <td>
-<div class="code">    &lt;runOptions&gt;
-        &lt;connectionTimeout&gt;3000&lt;/connectionTimeout&gt;
-        &lt;socketTimeout&gt;3000&lt;/socketTimeout&gt;
-        &lt;errorsBecomeEmptyStrings&gt;true&lt;/errorsBecomeEmptyStrings&gt;
-    &lt;/runOptions&gt;           </div></td>
+<div class="code"> &lt;runOptions&gt;
+        &lt;connectionTimeout&gt;<strong>3000</strong>&lt;/connectionTimeout&gt;
+        &lt;socketTimeout&gt;<strong>3000</strong>&lt;/socketTimeout&gt;
+        &lt;errorsBecomeEmptyStrings&gt;<strong>true</strong>&lt;/errorsBecomeEmptyStrings&gt;
+        &lt;acceptAlertLevel&gt;<strong>OK</strong>&lt;/acceptAlertLevel&gt;
+        &lt;failTestOnWarnings&gt;<strong>true</strong>&lt;/failTestOnWarnings&gt;
+        &lt;failTestOnErrors&gt;<strong>true</strong>&lt;/failTestOnErrors&gt;
+        &lt;dumpResourceManagerSummary&gt;<strong>false</strong>&lt;/dumpResourceManagerSummary&gt;
+        &lt;skipMutators&gt;<strong>false</strong>&lt;/skipMutators&gt;<br>&nbsp;&lt;/runOptions&gt;           </div></td>
           </tr>
 
 
@@ -625,6 +673,7 @@
           getAssignments will go against LASSERVER:      http://localhost:8080
           pitoken will go against PISERVER               http://piserver.example.com
    
+
 
 
 
@@ -715,7 +764,7 @@
             &lt;vars&gt;
                 &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
                 &lt;var ID="BESERVER"&gt;http://localhost:8080&lt;/var&gt;
-                &lt;var ID="DMSERVER"&gt;http://localhost:18080&lt;/var&gt;
+                &lt;var ID="SELFTEST_SERVER"&gt;http://localhost:18080&lt;/var&gt;
             &lt;/vars&gt;
         &lt;/env&gt;
         &lt;env ID="dev"&gt;
@@ -911,7 +960,7 @@
             <td>Example:</td>
             <td>
               <div class="code">
-    &lt;restreplay>
+    &lt;restreplay&gt;
       &lt;testGroup ID="mainTestGroup"&gt;
         &lt;headers&gt;
             &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
@@ -934,7 +983,7 @@
                   &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
                   <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
                   &lt;/test&gt;
-              &lt;/restreplay>
+              &lt;/restreplay&gt;
              </div>
             </td>
           </tr>
@@ -944,7 +993,7 @@
               <td>Example:</td>
               <td>
                   <div class="code">
-    &lt;restreplay>
+    &lt;restreplay&gt;
       &lt;testGroup ID="mainTestGroup"&gt;
           &lt;headers&gt;
              &lt;header name="X-ApiKey"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
@@ -966,7 +1015,7 @@
                   &lt;header name="X-SomeParameter"&gt;19d26d452432968c9b636c9daf0c6d9b&lt;/header&gt;
               &lt;/headers&gt;
           &lt;/test&gt;
-  &lt;/restreplay></div>
+  &lt;/restreplay&gt;</div>
               </td>
           </tr>
 
@@ -1153,6 +1202,7 @@
 
 
 
+
 <div class="code">
 &lt;!-- Set up permissions and account, and test bigbird2010 --&gt;
 &lt;test ID="permBigbird" auth="admin@example.org"&gt;
@@ -1218,6 +1268,7 @@
               The uri contains any required queryString parameters:
 
               
+
 
 
 
@@ -1406,6 +1457,7 @@
 
 
 
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -1419,6 +1471,7 @@
               In context, this looks like:
 
               
+
 
 
 
@@ -1494,6 +1547,7 @@
               i.e. a child's text node is trimmed prior to comparison.)
 
               
+
 
 
 

@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 
 import org.dynamide.interpreters.EvalResult;
 import org.dynamide.interpreters.RhinoInterpreter;
+import org.dynamide.restreplay.server.EmbeddedServer;
 import org.dynamide.util.Tools;
 import org.dom4j.*;
 
@@ -111,7 +112,7 @@ public class RestReplay extends ConfigFile {
         for (ServiceResult pr : serviceResultsMap.values()) {
             try {
                 if (Tools.notEmpty(pr.deleteURL)) {
-                    ServiceResult deleteResult = new ServiceResult();
+                    ServiceResult deleteResult = new ServiceResult(pr.getRunOptions());
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
                     System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
@@ -119,7 +120,7 @@ public class RestReplay extends ConfigFile {
                     System.out.println("DONE AUTODELETE: ==>" + pr.deleteURL + "<== : " + deleteResult);
                     results.add(deleteResult);
                 } else {
-                    ServiceResult errorResult = new ServiceResult();
+                    ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
                     errorResult.fullURL = pr.fullURL;
                     errorResult.testGroupID = pr.testGroupID;
                     errorResult.fromTestID = pr.fromTestID;
@@ -131,7 +132,7 @@ public class RestReplay extends ConfigFile {
                 String s = (pr != null) ? "ERROR while cleaning up ServiceResult map: " + pr + " for " + pr.deleteURL + " :: " + t
                         : "ERROR while cleaning up ServiceResult map (null ServiceResult): " + t;
                 System.err.println(s);
-                ServiceResult errorResult = new ServiceResult();
+                ServiceResult errorResult = new ServiceResult(null);
                 errorResult.fullURL = pr.fullURL;
                 errorResult.testGroupID = pr.testGroupID;
                 errorResult.fromTestID = pr.fromTestID;
@@ -155,12 +156,37 @@ public class RestReplay extends ConfigFile {
         String validator = "";
         String validatorLang = "";
         String testdir = "";
+        boolean isResponse = false;
+        private boolean fnIsXML(String fn){
+            if (Tools.notBlank(fn) && fn.toUpperCase().endsWith(".XML")){
+                return true;
+            }
+            return false;
+        }
+        public boolean isXML(){
+            if (isResponse) {
+                if (fnIsXML(expectedResponseFilename)){
+                    return true;
+                } else if (fnIsXML(expectedResponseFilenameRel)){
+                    return true;
+                }
+                return false;
+            } else {
+                if (fnIsXML(requestPayloadFilename)){
+                    return true;
+                } else if (fnIsXML(requestPayloadFilenameRel)){
+                    return true;
+                }
+                return false;
+            }
+        }
 
         //This method is overloaded with the isResponse boolean.  If isResponse, we are reading test/response/filename,
         //  otherwise we are reading test/filename. These should be split into two functions, because the XML structs
         //  are different--they just have the /vars element in common.
         public static PartsStruct readParts(Node testNode, final String testID, String testdir, boolean isResponse) {
             PartsStruct resultPartsStruct = new PartsStruct();
+            resultPartsStruct.isResponse = isResponse;
             resultPartsStruct.startElement = testNode.valueOf("startElement");
             resultPartsStruct.label = testNode.valueOf("label");
             resultPartsStruct.testdir = testdir;
@@ -242,11 +268,16 @@ public class RestReplay extends ConfigFile {
                                                    Eval evalStruct)
     throws Exception {
         String OK = "";
-        String expectedPartContent = getResourceManager().readResource("validateResponseSinglePayload", expectedResponseParts.expectedResponseFilenameRel,
-                expectedResponseParts.expectedResponseFilename);
+        String expectedPartContent = "";
+        if ( Tools.notBlank(expectedResponseParts.expectedResponseFilenameRel)
+           ||Tools.notBlank(expectedResponseParts.expectedResponseFilename)){
+               expectedPartContent = getResourceManager().readResource("validateResponseSinglePayload",
+                                                                        expectedResponseParts.expectedResponseFilenameRel,
+                                                                        expectedResponseParts.expectedResponseFilename);
+        }
         Map<String, String> vars = null;
         if (expectedResponseParts.varsList.size()>0) {
-            vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.  Must be there, even if empty.
+            vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.
         }
         EvalResult evalResult = evalStruct.eval(expectedResponseParts.expectedResponseFilenameRel,
                 expectedPartContent,
@@ -257,16 +288,21 @@ public class RestReplay extends ConfigFile {
         //TODO: may need to break if runoptions dictate.  But what to set/return?...  if (runOptions.breakNow(evalResult.alerts))
 
         serviceResult.expectedContentExpanded = expectedPartContent;
-        String label = "NOLABEL";
+        String label = "";//NOLABEL";
         String leftID = "{from expected part, label:" + label + " filename: " + expectedResponseParts.expectedResponseFilename + "}";
         String rightID = "{from server, label:" + label
                 + " fromTestID: " + serviceResult.fromTestID
                 + " URL: " + serviceResult.fullURL
                 + "}";
 
-        Object validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
-        //TODO: do something with this result, and scoop up warnings and infos and add to Report.
-        System.out.println("====> validationResult: "+validationResult);
+        EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
+        String validationResultStr = validationResult != null ? validationResult.toString() : "";
+        if (Tools.notBlank(expectedResponseParts.validator) && evalResult != null){
+
+            serviceResult.addAlert("<b>validator result:</b> ["+validationResultStr+"]",
+                                   "validator: "+expectedResponseParts.validator,
+                                   validationResult.worstLevel);
+        }
 
         String startElement = expectedResponseParts.startElement;
         String partLabel = expectedResponseParts.label;
@@ -274,15 +310,19 @@ public class RestReplay extends ConfigFile {
             if (Tools.notBlank(partLabel))
                 startElement = "/document/*[local-name()='" + partLabel + "']";
         }
-        TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
-        TreeWalkResults list =
-                XmlCompareJdom.compareParts(expectedPartContent,
-                        leftID,
-                        serviceResult.getResult(),
-                        rightID,
-                        startElement,
-                        matchSpec);
-        serviceResult.addPartSummary(label, list);
+        if (Tools.notBlank(expectedPartContent) && expectedResponseParts.isXML()) {
+            if (Tools.notBlank(serviceResult.xmlResult)) {
+                TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
+                TreeWalkResults list =
+                        XmlCompareJdom.compareParts(expectedPartContent,
+                                leftID,
+                                serviceResult.xmlResult,
+                                rightID,
+                                startElement,
+                                matchSpec);
+                serviceResult.addPartSummary(label, list);
+            }
+        }
         return OK;
     }
 
@@ -290,7 +330,7 @@ public class RestReplay extends ConfigFile {
         System.out.println(val);
     }
 
-    protected Object runValidatorScript(ServiceResult serviceResult,
+    protected EvalResult runValidatorScript(ServiceResult serviceResult,
                                         PartsStruct expectedResponseParts,
                                         Eval evalStruct)
     throws IOException {
@@ -299,13 +339,9 @@ public class RestReplay extends ConfigFile {
         String lang = expectedResponseParts.validatorLang;
         String fullPath = Tools.join(testdir, scriptFilename);
 
-        p("scriptFilename:"+scriptFilename);
-        p("testdir:"+testdir);
-        p("lang:"+lang);
         if (Tools.notBlank(scriptFilename)) {
             String source = getResourceManager().readResource("runValidatorScript", scriptFilename, fullPath);
             String resourceName = Tools.join(testdir, scriptFilename);
-            p("source:"+source);
             if (Tools.notBlank(source)) {
                 if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JAVASCRIPT")) {
                     return evalJavascript(resourceName, source, serviceResult);
@@ -313,27 +349,22 @@ public class RestReplay extends ConfigFile {
                         || Tools.isBlank(lang)) {
                     //default to JEXL.
                     EvalResult evalResult = evalJexl(evalStruct, fullPath, source, null);
-                    return evalResult.getResultString();
+                    return evalResult;
                 }
             }
         }
-        return "";
+        return null;
     }
 
     private EvalResult evalJexl(Eval evalStruct, String context, String source, Map<String,String> vars) {
-        System.out.println("@@@@@ runValidatorScript JEXL: " + context);
         return evalStruct.eval(context, source, vars);
     }
 
-    private Object evalJavascript(String resourceName, String source, ServiceResult serviceResult) {
+    private EvalResult evalJavascript(String resourceName, String source, ServiceResult serviceResult) {
         RhinoInterpreter interpreter = new RhinoInterpreter();
         interpreter.setVariable("serviceResult", serviceResult);
         interpreter.setVariable("serviceResultsMap", serviceResultsMap);
-        System.out.println("@@@@@ runValidatorScript JavaScript: " + resourceName);
-
-        Object result = interpreter.eval(resourceName, source);
-
-        System.out.println("@@@@@ runValidatorScript JavaScript RESULT: " + result);
+        EvalResult result = interpreter.eval(resourceName, source);
         return result;
     }
 
@@ -455,7 +486,7 @@ public class RestReplay extends ConfigFile {
             for (Node testNode : tests) {
                 serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
                 testElementIndex++;
-                ServiceResult serviceResult = new ServiceResult();
+                ServiceResult serviceResult = new ServiceResult(getRunOptions());
                 serviceResultsMap.put("this", serviceResult);
                 executeTestNode(serviceResult,
                         null,
@@ -788,7 +819,7 @@ public class RestReplay extends ConfigFile {
             }
         } else {
             if (Tools.notEmpty(fromTestID)) {
-                serviceResult = new ServiceResult();
+                serviceResult = new ServiceResult(getRunOptions());
                 serviceResult.responseCode = 0;
                 serviceResult.addError("ID not found in element fromTestID: " + fromTestID);
                 System.err.println("****\r\nServiceResult: " + serviceResult.getError() + ". SKIPPING TEST. Full URL: " + test.fullURL);
@@ -884,7 +915,7 @@ public class RestReplay extends ConfigFile {
                 try {
                     String content = contentMutator.mutate();
                     while (content != null) {
-                        ServiceResult childResult = new ServiceResult();
+                        ServiceResult childResult = new ServiceResult(getRunOptions());
                         serviceResult.addChild(childResult);
                         serviceResultsMap.put("this", childResult);
 
@@ -1005,6 +1036,8 @@ public class RestReplay extends ConfigFile {
     private static Options createOptions() {
         Options options = new Options();
         options.addOption("help", false, "RestReplay Help");
+        options.addOption("selftest", false, "RestReplay selftest");
+        options.addOption("port", true, "RestReplay selftest port");
         options.addOption("testdir", true, "default/testdir");
         options.addOption("reports", true, "default/reports");
         options.addOption("testGroup", true, "default/testGroup");
@@ -1031,6 +1064,8 @@ public class RestReplay extends ConfigFile {
                 + "  -env <ID> \r\n"
                 + "  -dumpResults true|false \r\n"
                 + "  -autoDeletePOSTS true|false \r\n"
+                + "  -selftest \r\n"
+                + "  -port <selftest-server-port>\r\n"
                 + "   \r\n"
                 + " Note: -DautoDeletePOSTS won't force deletion if set to false in control file."
                 + "   \r\n"
@@ -1076,6 +1111,7 @@ public class RestReplay extends ConfigFile {
 
     public static void main(String[] args) throws Exception {
         Options options = createOptions();
+        EmbeddedServer selfTestServer = null;
         //System.out.println("System CLASSPATH: "+prop.getProperty("java.class.path", null));
         CommandLineParser parser = new GnuParser();
         try {
@@ -1091,10 +1127,17 @@ public class RestReplay extends ConfigFile {
             String dumpResultsFromCmdLine = opt(line, "dumpResults");
             String controlFilename = opt(line, "control");
             String restReplayMaster = opt(line, "master");
+            String selfTestPort = opt(line, "port");
             if (line.hasOption("help")){
                //System.out.println(usage());
                printHelp(options);
                System.exit(0);
+            }
+
+            if (line.hasOption("selftest")){
+                restReplayMaster = "_self_test/master-self-test.xml";
+                selfTestServer = new EmbeddedServer();
+                selfTestServer.startServer(selfTestPort);
             }
 
             if (Tools.isBlank(reportsDir)) {
@@ -1117,6 +1160,7 @@ public class RestReplay extends ConfigFile {
                 return;
             }
             File f = null, fMaster = null;
+            String fMasterPath = "";
             if (Tools.isEmpty(restReplayMaster)) {
                 if (Tools.isEmpty(controlFilename)) {
                     System.err.println("Exiting.  No Master file (empty) and Control file not found (empty)");
@@ -1128,10 +1172,14 @@ public class RestReplay extends ConfigFile {
                     return;
                 }
             } else {
-                fMaster = new File(Tools.glue(testdir, "/", restReplayMaster));
-                if (Tools.notEmpty(restReplayMaster) && !fMaster.exists()) {
-                    System.err.println("Master file not found: " + fMaster.getCanonicalPath());
-                    return;
+                if (selfTestServer==null) {
+                    //if running selfTestServer, then it loads from classpath.  Only construct full path if NOT doing selftest.
+                    fMaster = new File(Tools.glue(testdir, "/", restReplayMaster));
+                    if (Tools.notEmpty(restReplayMaster) && !fMaster.exists()) {
+                        System.err.println("Master file not found: " + fMaster.getCanonicalPath());
+                        return;
+                    }
+                    fMasterPath =  fMaster.getCanonicalPath();
                 }
             }
 
@@ -1146,7 +1194,7 @@ public class RestReplay extends ConfigFile {
                             + "\r\n    env: " + envID
                             + "\r\n    autoDeletePOSTS: " + bAutoDeletePOSTS
                             + (Tools.notEmpty(restReplayMaster)
-                            ? ("\r\n    will use master file: " + fMaster.getCanonicalPath())
+                            ? ("\r\n    will use master file: " + fMasterPath)
                             : ("\r\n    will use control file: " + f.getCanonicalPath()))
             );
 
@@ -1155,6 +1203,9 @@ public class RestReplay extends ConfigFile {
             if (Tools.notEmpty(restReplayMaster)) {
                 //****************** RUNNING MASTER ******************************************
                 Master master = new Master(testdirResolved, reportsDir, rootResourceManager);
+                if (Tools.notBlank(selfTestPort)){
+                    master.getVars().put("SELFTEST_PORT", selfTestPort);
+                }
                 master.setEnvID(envID);
                 master.readOptionsFromMasterConfigFile(restReplayMaster);
                 master.setAutoDeletePOSTS(bAutoDeletePOSTS);
@@ -1201,6 +1252,7 @@ public class RestReplay extends ConfigFile {
                 //No need to dump the reportsList because we were just running one test, and its report gets created and reported on command line OK.
                 // System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }
+
         } catch (ParseException exp) {
             System.err.println("Cmd-line parsing failed.  Reason: " + exp.getMessage());
             //System.err.println(usage());
@@ -1208,6 +1260,10 @@ public class RestReplay extends ConfigFile {
         } catch (Exception e) {
             System.out.println("Error : " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            if (selfTestServer!=null){
+                selfTestServer.stopServer();
+            }
         }
     }
 }

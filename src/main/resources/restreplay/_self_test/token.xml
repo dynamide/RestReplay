@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <restReplay>
-    <protoHostPort>${DMSERVER}</protoHostPort>
+    <protoHostPort>${SELFTEST_SERVER}</protoHostPort>
     <testGroup ID="tokenMain" autoDeletePOSTS="false">
-        <test ID="dynamideToken">
+        <test ID="selftestToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>

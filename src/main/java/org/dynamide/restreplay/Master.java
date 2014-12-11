@@ -82,7 +82,7 @@ public class Master extends ConfigFile {
         } else {
             nodeWVars = masterNode;
         }
-        setVars(readVars(nodeWVars));
+        getVars().putAll(readVars(nodeWVars));
         this.getRunOptions().addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
         return document;
     }
@@ -171,11 +171,11 @@ public class Master extends ConfigFile {
                                         Map<String, String> runVars)
     throws Exception {
         String envReportsDir = this.reportsDir;
-        //Create a new instance and clone only config values, not any results maps.
         if (Tools.notBlank(this.getEnvID())) {
             envReportsDir = Tools.glue(this.reportsDir, "/", this.getRelativePathFromReportsDir());
         }
-        RestReplay replay = new RestReplay(getTestDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());//this.reportsDir);
+        //Create a new instance and clone only config values, not any results maps.
+        RestReplay replay = new RestReplay(getTestDir(), envReportsDir, this.getResourceManager(), this.getRunOptions());
         replay.setEnvID(this.getEnvID());  //internally sets replay.relativePathFromReportsDir
         replay.setControlFileName(controlFile);
         replay.setProtoHostPort(getProtoHostPort());
@@ -185,7 +185,6 @@ public class Master extends ConfigFile {
         replay.setRunOptions(this.getRunOptions());
         replay.setMasterFilename(masterFilename);
 
-        //Map<String, String> runVars = readVars(runNode);
         Map<String, String> masterVarsDup = new HashMap<String, String>();
         masterVarsDup.putAll(getVars());
         if (runVars!=null){

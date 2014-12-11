@@ -14,6 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ServiceResult {
+    public ServiceResult(RunOptions options){
+        runOptions = options;
+    }
+
+    private RunOptions runOptions;
+    public RunOptions getRunOptions(){
+        return runOptions;
+    }
 
     public static class AlertError extends Error {
         public AlertError(String msg, Alert triggeringAlert, List<Alert> allAlerts){
@@ -85,7 +93,6 @@ public class ServiceResult {
     public int responseCode = 0;
     public String responseMessage = "";
     public String method = "";
-
     private String error = "";
     public String getError(){
         return error;
@@ -139,7 +146,6 @@ public class ServiceResult {
     public Header[] responseHeaders = new Header[0];
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
-    public List<Alert> alerts = new ArrayList<Alert>();
 
     private Map<String,String> vars = new HashMap<String,String>();
     public Map<String,String> getVars(){
@@ -157,10 +163,23 @@ public class ServiceResult {
         exports.putAll(newexports);
     }
 
+    public List<Alert> alerts = new ArrayList<Alert>();
+    public int alertsCount(Alert.LEVEL level) {
+        int count = 0;
+        for (Alert alert : alerts) {
+            if (alert.level.equals(level)) {
+                count++;
+            }
+        }
+        return count;
+    }
 
-
+    private int labelCounter = 0;
     private Map<String, TreeWalkResults> partSummaries = new HashMap<String, TreeWalkResults>();
     public void addPartSummary(String label, TreeWalkResults list){
+        if (Tools.isBlank(label)){
+            label = ""+labelCounter++;
+        }
         partSummaries.put(label, list);
     }
     public String partsSummary(boolean detailed){
@@ -172,7 +191,7 @@ public class ServiceResult {
         for (Map.Entry<String,TreeWalkResults> entry : partSummaries.entrySet()) {
             String key = entry.getKey();
             TreeWalkResults value = entry.getValue();
-            buf.append(" label:"+key+": ");
+            if (Tools.notBlank(key)){buf.append(" label:"+key+": ");}
             if (detailed){
                 buf.append("\r\n");
                 buf.append(value.fullSummary());
@@ -188,6 +207,21 @@ public class ServiceResult {
             return true;
         }
         return false;
+    }
+
+    public boolean isSUCCESS() {
+        boolean showSUCCESS = gotExpectedResult();
+        if (runOptions!=null) {
+            if (runOptions.failTestOnErrors) {
+                int iErrs = alertsCount(Alert.LEVEL.ERROR);
+                showSUCCESS = showSUCCESS && (iErrs == 0);
+            }
+            if (runOptions.failTestOnWarnings) {
+                int iWarns = alertsCount(Alert.LEVEL.WARN);
+                showSUCCESS = showSUCCESS && (iWarns == 0);
+            }
+        }
+        return showSUCCESS;
     }
 
     public boolean isDomWalkOK(){
@@ -344,8 +378,10 @@ public class ServiceResult {
         return s.toString();
     }
     public String detail(boolean includePayloads){
+        int warnings = alertsCount(Alert.LEVEL.WARN);
+        int errors =   alertsCount(Alert.LEVEL.ERROR);
         String res =  "{"
-                + ( gotExpectedResult() ? "SUCCESS" : "FAILURE"  )
+                + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )
                 + failureReason
                 +"; "+method
                 +"; "+responseCode
@@ -353,6 +389,8 @@ public class ServiceResult {
                 + ( Tools.notEmpty(testID) ? "; testID:"+testID : "" )
                 + ( Tools.notEmpty(testGroupID) ? "; testGroupID:"+testGroupID : "" )
                 + ( Tools.notEmpty(fromTestID) ? "; fromTestID:"+fromTestID : "" )
+                + ( errors>0 ? "; ERRORS:"+errors : "" )
+                + ( warnings>0 ? "; WARNINGS:"+warnings : "" )
                 + ( Tools.notEmpty(responseMessage) ? "; msg:"+responseMessage : "" )
                 +"; URL:"+fullURL
                 +"; time:"+time+"ms"
@@ -374,13 +412,17 @@ public class ServiceResult {
     }
 
     public String minimal(boolean verbosePartsSummary){
+        int warnings = alertsCount(Alert.LEVEL.WARN);
+        int errors =   alertsCount(Alert.LEVEL.ERROR);
         return "{"
-                + ( gotExpectedResult() ? "SUCCESS" : "FAILURE"  )
+                + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )
                 + failureReason
                 + ( Tools.notEmpty(testID) ? "; "+testID : "" )
                 +"; "+method
                 +"; "+responseCode
                 + (expectedCodes.size()>0 ? "; expected:"+expectedCodes : "")
+                + ( errors>0 ? "; ERRORS:"+errors : "" )
+                + ( warnings>0 ? "; WARNINGS:"+warnings : "" )
                 + ( Tools.notEmpty(responseMessage) ? "; msg:"+responseMessage : "" )
                 +"; URL:"+fullURL
                 +"; time:"+time+"ms"

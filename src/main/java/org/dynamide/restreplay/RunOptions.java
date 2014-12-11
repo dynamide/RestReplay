@@ -14,6 +14,9 @@ public class RunOptions {
     public Alert.LEVEL acceptAlertLevel = Alert.LEVEL.OK;  //OK means breaks on WARN and ERROR.
     public boolean skipMutators = false;
     public boolean dumpResourceManagerSummary = true;
+    public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
+    public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
+
     public boolean breakNow(Alert alert) {
         return (alert.level.compareTo(this.acceptAlertLevel) > 0);
     }
@@ -33,6 +36,8 @@ public class RunOptions {
                 ", socketTimeout=" + socketTimeout +
                 ", errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +
                 ", acceptAlertLevel=" + acceptAlertLevel +
+                ", failTestOnWarnings=" + failTestOnWarnings +
+                ", failTestOnErrors=" + failTestOnErrors +
                 ", dumpResourceManagerSummary=" + dumpResourceManagerSummary +
                 ", skipMutators=" + skipMutators +
                 '}';
@@ -46,6 +51,8 @@ public class RunOptions {
                 "socketTimeout=" + socketTimeout +C+BR+
                 "errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +C+BR+
                 "acceptAlertLevel=" + acceptAlertLevel +C+BR+
+                "failTestOnWarnings=" + failTestOnWarnings +C+BR+
+                "failTestOnErrors=" + failTestOnErrors +C+BR+
                 "dumpResourceManagerSummary=" + dumpResourceManagerSummary +C+BR+
                 "skipMutators=" + skipMutators +BR+
                 "}</div>";
@@ -58,8 +65,12 @@ public class RunOptions {
         String connectionTimeout = runOptionsNode.valueOf("connectionTimeout");
         String socketTimeout = runOptionsNode.valueOf("socketTimeout");
         String errorsBecomeEmptyStrings = runOptionsNode.valueOf("errorsBecomeEmptyStrings");
+        String acceptAlertLevel = runOptionsNode.valueOf("acceptAlertLevel");
+        String failTestOnWarnings = runOptionsNode.valueOf("failTestOnWarnings");
+        String failTestOnErrors = runOptionsNode.valueOf("failTestOnErrors");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
         String skipMutators = runOptionsNode.valueOf("skipMutators");
+
         if (Tools.notBlank(connectionTimeout)) {
             this.connectionTimeout = Integer.parseInt(connectionTimeout);
         }
@@ -68,6 +79,15 @@ public class RunOptions {
         }
         if (Tools.notBlank(errorsBecomeEmptyStrings)) {
             this.errorsBecomeEmptyStrings = Tools.isTrue(errorsBecomeEmptyStrings);
+        }
+        if (Tools.notBlank(acceptAlertLevel)) {
+            this.acceptAlertLevel = Alert.LEVEL.valueOf(acceptAlertLevel);
+        }
+        if (Tools.notBlank(failTestOnWarnings)) {
+            this.failTestOnWarnings = Tools.isTrue(failTestOnWarnings);
+        }
+        if (Tools.notBlank(failTestOnErrors)) {
+            this.failTestOnErrors = Tools.isTrue(failTestOnErrors);
         }
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             this.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);

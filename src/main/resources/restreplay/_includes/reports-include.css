@@ -122,6 +122,16 @@ td, th {
     background-color: #ffc;
 }
 
+.AlertOK {
+    font-size: 70%;
+    display: inline-block;
+    border: 1px solid blue;
+    border-radius: 5px;
+    margin: 3px;
+    padding: 6px;
+    background-color: white;
+}
+
 .AlertWarn {
     font-size: 70%;
     display: inline-block;
@@ -142,6 +152,22 @@ td, th {
     border: 1px solid red;
 }
 
+.AlertLevel {
+    background-color: #bbddff;
+    border: 1px solid gray;
+    margin: 2px;
+    margin-right: 3px;
+}
+.AlertContext{
+    background-color: #bbddff;
+    border: 1px solid gray;
+    margin-right: 2px;
+    font-weight: bold;
+}
+.AlertMessage {
+   display: block;
+   margin: 6px;
+}
 .vars {
     background-color: #bbddff;
     font-size: 60%;
