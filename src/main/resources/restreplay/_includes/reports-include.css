@@ -26,6 +26,10 @@ td, th {
     font-size: 100%;
 }
 
+.URL_A {
+    font-size: 10pt !important;
+}
+
 
 .REPORTTIME {
     background-color: white;
@@ -159,14 +163,19 @@ td, th {
     margin-right: 3px;
 }
 .AlertContext{
-    background-color: #bbddff;
+    background-color: #E0FFFF;
     border: 1px solid gray;
     margin-right: 2px;
-    font-weight: bold;
+    font-weight: normal;
 }
 .AlertMessage {
    display: block;
    margin: 6px;
+}
+.validator-result {
+   border: 1px solid gray;
+   padding: 2px;
+   background-color: #E0FFFF;
 }
 .vars {
     background-color: #bbddff;

@@ -112,8 +112,30 @@
                 </vars>
             </exports>
         </test>
-
-
+       <test ID="selftestUseValidator">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/selftest-number-post.json</filename>
+            <vars>
+                <var ID="COUNT">3</var>
+            </vars>
+            <response>
+                <validator lang="javascript">_self_test/res/selftest.validator.js</validator>
+            </response>
+        </test> 
+        <test ID="selftestUseValidatorExpectErrors">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/selftest-number-post.json</filename>
+            <vars>
+                <var ID="COUNT">3</var>
+            </vars>
+            <response>
+                <validator lang="javascript">_self_test/res/selftest-with-validator-errors.validator.js</validator>
+            </response>
+        </test> 
     </testGroup>
 
 

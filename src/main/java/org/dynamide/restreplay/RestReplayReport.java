@@ -627,7 +627,7 @@ public class RestReplayReport {
                 + (showSUCCESS ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
-                + s.method + SP + "<a href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
+                + s.method + SP + "<a class='URL_A' href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + formatResponseCodeBlock(s) + linesep
                 + (Tools.notBlank(s.failureReason) ? s.failureReason + linesep : "")
 
@@ -695,6 +695,9 @@ public class RestReplayReport {
         String alertClass = "AlertOK";
         for(Alert alert: alerts){
             switch (alert.level){
+                case OK:
+                    alertClass = "AlertOK";
+                    break;
                 case WARN:
                     alertClass = "AlertWarn";
                     break;

@@ -136,6 +136,13 @@ public class ServiceResult {
     public Header[] responseHeaders = new Header[0];
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
+    private transient String currentValidatorContextName = "";
+    public String getCurrentValidatorContextName(){
+        return currentValidatorContextName;
+    }
+    public void setCurrentValidatorContextName(String name){
+        currentValidatorContextName = name;
+    }
 
     private Map<String,String> vars = new HashMap<String,String>();
     public Map<String,String> getVars(){
@@ -151,6 +158,9 @@ public class ServiceResult {
     }
     public void addExports(Map<String,String> newexports){
         exports.putAll(newexports);
+    }
+    public void addExport(String key, String value){
+        exports.put(key, value);
     }
 
     public List<Alert> alerts = new ArrayList<Alert>();
@@ -509,6 +519,9 @@ public class ServiceResult {
         if (vars.containsKey(what)){
             return vars.get(what);
         }
+        if (exports.containsKey(what)){
+            return exports.get(what);
+        }
         return "";
     }
 
@@ -553,6 +566,26 @@ public class ServiceResult {
 
     public void addAlert(String message, String context, Alert.LEVEL level){
         alerts.add(new Alert(message, context, level));
+    }
+
+    public void addAlertError(String message, String context){
+        alerts.add(new Alert(message, context, Alert.LEVEL.ERROR));
+    }
+    public void addAlertWarning(String message, String context){
+        alerts.add(new Alert(message, context, Alert.LEVEL.WARN));
+    }
+    public void addAlertOK(String message, String context){
+        alerts.add(new Alert(message, context, Alert.LEVEL.OK));
+    }
+
+    public void addAlertError(String message){
+        alerts.add(new Alert(message, getCurrentValidatorContextName(), Alert.LEVEL.ERROR));
+    }
+    public void addAlertWarning(String message){
+        alerts.add(new Alert(message, getCurrentValidatorContextName(), Alert.LEVEL.WARN));
+    }
+    public void addAlertOK(String message){
+        alerts.add(new Alert(message, getCurrentValidatorContextName(), Alert.LEVEL.OK));
     }
 
 }

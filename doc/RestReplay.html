@@ -951,7 +951,8 @@ When overriding RunOptions in a master file, consider these two development scen
                   &lt;/part&gt;
               &lt;/parts&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.response">response</a>&gt;
-                  &lt;<a href="#RestReplay-restReplay.testGroup.test.response.expected">expected</a>/&gt;
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.response.expected">expected</a>/&gt;  
+                  &lt;<a href="#RestReplay-restReplay.testGroup.test.response.validator">validator</a>/&gt;  
                   &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts">parts</a>&gt;
                       &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part">part</a>&gt;
                           &lt;<a href="#RestReplay-restReplay.testGroup.test.response.parts.part.label">label</a> /&gt;
@@ -1145,18 +1146,20 @@ When overriding RunOptions in a master file, consider these two development scen
         &lt;/vars&gt;
 
         &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
+            <b>&lt;-- Will NOT inherit headers --&gt;</b>
             &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
             &lt;method&gt;POST&lt;/method&gt;
             &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
             &lt;filename&gt;pitoken.json&lt;/filename&gt;
-            <b>&lt;-- Will NOT inherit headers --&gt;</b>
-                  &lt;test ID="deleteTemplate"&gt;
-                  &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
-                  &lt;method&gt;DELETE&lt;/method&gt;
-                  &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
-                  <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
-                  &lt;/test&gt;
-              &lt;/restreplay&gt;
+        &lt;/test&gt;
+        
+        &lt;test ID="deleteTemplate"&gt;
+            <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
+            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
+            &lt;method&gt;DELETE&lt;/method&gt;
+            &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
+        &lt;/test&gt;
+    &lt;/restreplay&gt;
              </div>
             </td>
           </tr>
@@ -1221,6 +1224,14 @@ When overriding RunOptions in a master file, consider these two development scen
             <td>the ID of the /restReplay/auths/auth or /restReplayMaster/auths/auth element to use for this request.<br>
             IMPORTANT: These are sticky - they stick around until reset by the next @auth specified in a test, in exec order of the tests in this file.</td>
           </tr>
+          
+          <tr>
+            <td>@inheritHeaders</td>
+
+            <td>boolean: true|false.  Default=true. If false, headers set in the master or testGroup will not be used by this test: only headers set
+            within this test are sent to the server.</td>
+          </tr>
+
 
           <tr>
             <td>child elements</td>
@@ -1656,21 +1667,84 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response" id="RestReplay-restReplay.testGroup.test.response"></a>/restReplay/testGroup/test/response</td>
           </tr>
-
           <tr>
             <td>response</td>
-
             <td>Container for evaluating the response from the server</td>
           </tr>
 
           <tr>
             <td>child elements</td>
-
             <td>expected<br>
             parts<br>
             part</td>
           </tr>
 
+          <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.validator" id="RestReplay-restReplay.testGroup.test.response.validator"></a>/restReplay/testGroup/test/response/validator</td>
+          </tr>
+          <tr>
+            <td>validator</td>
+            <td>Contains a filename reference to a validator script.  Like all filenames in the control file it is relative to the tests directory.
+            <br />The script validates the response from the server.  Available to the validator 
+                are the request, response, and everything in the ServiceResult class, and the map of all previously run tests in this test group
+                (in the file order of the control file).</td>
+          </tr>
+
+          <tr>
+            <td>@lang</td>
+            <td>Supported values are <b>javascript</b> and <b>jexl</b>.  Default is <b>jexl</b>.  This is the language used for the validator.  
+            Jexl scripts must be surrounded by ${}, 
+            and you may have multiple blocks like that, wrapped in text, e.g. Foo${result.testID} Bar Baz ${result.gotExpectedResult()}.<br>
+            JavaScript blocks should have a return statement as the last line, or an expression as the last line, which will be the result.
+          </tr>
+          
+          <tr>
+            <td>example<br />&nbsp;(control file)</td>
+            <td><div class="code">&lt;test ID="testA">
+    &lt;uri>
+        ...
+    &lt;response>
+        &lt;validator lang="jexl"><b>assignments/res/testA.validator.jexl</b>&lt;/validator>
+    &lt;/response>
+&lt;/test>
+
+&lt;test ID="testB">
+    &lt;uri>
+        ...
+    &lt;response>
+        &lt;filename>assignments/res/testB.json&lt;/filename>
+        &lt;validator lang="javascript"><b>assignments/res/testB.validator.js</b>&lt;/validator>
+    &lt;/response>
+&lt;/test></div>
+Note: in this example, the &lt;filename> element points to a file containing the
+expected response.  RestReplay automatically compares the response to this
+expected response file for content, based on the element
+<a href="#RestReplay-restReplay.testGroup.test.response.expected">/restReplay/testGroup/test/response/expected</a>.  The validator is then run as a
+separate validation step. 
+          </tr>
+          
+          <tr>
+            <td>example<br />&nbsp;(script file)<br />&nbsp;@lang="jexl"</td>
+            <td><b>assignments/res/testA.validator.jexl</b>
+<div class="code">
+${
+ var foo = 1;
+ return result.result;
+}
+            </div>
+          </tr>  
+          <tr>
+            <td>example<br />&nbsp;(script file)<br />&nbsp;@lang="javascript"</td>
+            <td><b>assignments/res/testB.validator.js</b>
+<div class="code">
+var label = serviceResult.testIDLabel;
+var result = serviceResult.result;
+stdout.println("LOG from javascript: "+label);
+stdout.println("LOG from javascript: "+result);
+"OK from JS";
+            </div>
+          </tr>  
+          
           <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.expected" id="RestReplay-restReplay.testGroup.test.response.expected"></a>/restReplay/testGroup/test/response/expected</td>
           </tr>
@@ -1683,32 +1757,6 @@ When overriding RunOptions in a master file, consider these two development scen
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
-
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <ul>
                 <li>ZERO: does no checking. If the server sends a valid reponse, the reponse succeeds.</li>
@@ -1809,7 +1857,7 @@ When overriding RunOptions in a master file, consider these two development scen
               e.g. define this in the template file "objectexit/res/test2GET.res.xml"</p>
 
               <div class="code">
-    &lt;shortIdentifier&gt;${sid}&lt;/shortIdentifier&gt;
+    &lt;shortIdentifier&gt;<b>${sid}</b>&lt;/shortIdentifier&gt;
               </div>
 
               <p>then instantiate that variable in the <b>control</b> file:</p>
@@ -1820,7 +1868,7 @@ When overriding RunOptions in a master file, consider these two development scen
       &lt;part&gt;
         &lt;label&gt;t2_com&lt;/label&gt;
         &lt;filename&gt;objectexit/res/test2GET.res.xml&lt;/filename&gt;
-        &lt;var ID="shortIdentifier"&gt;${test2.sent("pa_com","//id")}&lt;/var&gt;
+        &lt;var ID="<b>sid</b>"&gt;${test2.sent("pa_com","//id")}&lt;/var&gt;
       &lt;/part&gt;
     &lt;/response&gt;
               </div>

@@ -299,8 +299,8 @@ public class RestReplay extends ConfigFile {
         String validationResultStr = validationResult != null ? validationResult.toString() : "";
         if (Tools.notBlank(expectedResponseParts.validator) && evalResult != null){
 
-            serviceResult.addAlert("<b>validator result:</b> ["+validationResultStr+"]",
-                                   "validator: "+expectedResponseParts.validator,
+            serviceResult.addAlert("<b>validator result:</b> <span class='validator-result'>"+validationResultStr+"</span>",
+                                   "<b>validator:</b> "+expectedResponseParts.validator,
                                    validationResult.worstLevel);
         }
 
@@ -343,13 +343,18 @@ public class RestReplay extends ConfigFile {
             String source = getResourceManager().readResource("runValidatorScript", scriptFilename, fullPath);
             String resourceName = Tools.join(testdir, scriptFilename);
             if (Tools.notBlank(source)) {
-                if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JAVASCRIPT")) {
-                    return evalJavascript(resourceName, source, serviceResult);
-                } else if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JEXL")
-                        || Tools.isBlank(lang)) {
-                    //default to JEXL.
-                    EvalResult evalResult = evalJexl(evalStruct, fullPath, source, null);
-                    return evalResult;
+                serviceResult.setCurrentValidatorContextName(scriptFilename);
+                try {
+                    if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JAVASCRIPT")) {
+                        return evalJavascript(resourceName, source, serviceResult);
+                    } else if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JEXL")
+                            || Tools.isBlank(lang)) {
+                        //default to JEXL.
+                        EvalResult evalResult = evalJexl(evalStruct, fullPath, source, null);
+                        return evalResult;
+                    }
+                } finally {
+                  serviceResult.setCurrentValidatorContextName("");
                 }
             }
         }
@@ -1136,6 +1141,9 @@ public class RestReplay extends ConfigFile {
 
             if (line.hasOption("selftest")){
                 restReplayMaster = "_self_test/master-self-test.xml";
+                if (Tools.isBlank(selfTestPort)){
+                    selfTestPort = ""+EmbeddedServer.DEFAULT_PORT;
+                }
                 selfTestServer = new EmbeddedServer();
                 selfTestServer.startServer(selfTestPort);
             }
