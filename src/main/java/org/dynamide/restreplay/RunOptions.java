@@ -31,16 +31,16 @@ public class RunOptions {
 
     @Override
     public String toString() {
+        String CR = ",\n\t\t";
         return "{" +
-                "connectionTimeout=" + connectionTimeout +
-                ", socketTimeout=" + socketTimeout +
-                ", errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +
-                ", acceptAlertLevel=" + acceptAlertLevel +
-                ", failTestOnWarnings=" + failTestOnWarnings +
-                ", failTestOnErrors=" + failTestOnErrors +
-                ", dumpResourceManagerSummary=" + dumpResourceManagerSummary +
-                ", skipMutators=" + skipMutators +
-                '}';
+                "connectionTimeout=" + connectionTimeout + CR +
+                " socketTimeout=" + socketTimeout + CR+
+                " errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings + CR+
+                " acceptAlertLevel=" + acceptAlertLevel + CR+
+                " failTestOnWarnings=" + failTestOnWarnings + CR+
+                " failTestOnErrors=" + failTestOnErrors + CR+
+                " dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
+                " skipMutators=" + skipMutators + "\n\t\t}";
     }
 
     public String toHTML() {

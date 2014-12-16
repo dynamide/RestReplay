@@ -22,6 +22,11 @@ public class Kit {
         return GREGORIAN;
     }
 
+    /** Milliseconds from start time as definded by the Date class. */
+    public static Long now(){
+        return new Long((new java.util.Date()).getTime());
+    }
+
     public static PrintStream getOut(){
         return System.out;
     }

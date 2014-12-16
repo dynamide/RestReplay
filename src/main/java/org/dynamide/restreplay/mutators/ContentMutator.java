@@ -1,5 +1,7 @@
-package org.dynamide.restreplay;
+package org.dynamide.restreplay.mutators;
 
+import org.dynamide.restreplay.Range;
+import org.dynamide.restreplay.ResourceManager;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -10,28 +12,31 @@ import java.util.Map;
 
 import org.dom4j.Node;
 
-public class ContentMutator {
+/** ContentMutator implements the basic, common functionality of all IMutators.
+ *  Specifically, this class provides logic around the Range class, and stores the raw content from the init.
+ *  Mostly IMutator implementors will just want to implement
+ *  Use a descendent of this class (or other implementations that fulfill IMutator).
+ *  That descendent should be registered in MutatorFactor.registerMutator(...), installed mutators are initialized in the static block in MutatorFactory.
+ *  Create an IMutator by calling the factory: MutatorFactory.createMutator(...).
+ */
+public abstract class ContentMutator implements IMutator {
 
-    public ContentMutator(String relResourceName, String theFileName, ResourceManager resourceManager) throws IOException {
-        fileName = theFileName;
-        contentRaw = resourceManager.readResource("ContentMutator:constructor", relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(fileName)));
-        jo = new JSONObject(contentRaw);
-        names = JSONObject.getNames(jo);
-        max = names.length;
-        dest = new String[max-1];
+    public void init(String relResourceName, String theFileName, ResourceManager resourceManager) throws IOException {
+        contentRawFilename = theFileName;
+        contentRaw = resourceManager.readResource("ContentMutator:constructor", relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(contentRawFilename)));
     }
-    String[] dest;
-    private JSONObject jo;
-    private String[] names;
-    private String contentRaw = "";
-    private int p = -1;
-    private final int max;
-    private String current;
-    private final String fileName;
+
+    private String contentRaw;
+    protected String getContentRaw(){
+        return contentRaw;
+    }
+
+    private String contentRawFilename;
+    public String getContentRawFilename(){
+        return contentRawFilename;
+    }
+
     private final Map<String,Range> idRanges = new HashMap<String, Range>();
-    public String getMutationID(){
-        return "no_"+current;
-    }
 
     public String shortName(){
         return "ContentMutator";
@@ -39,8 +44,7 @@ public class ContentMutator {
 
     public String toString(){
         StringBuffer b = new StringBuffer();
-        b.append("ContentMutator["+fileName+"]:")
-         .append("names:" + Arrays.toString(names))
+        b.append("ContentMutator["+ contentRawFilename +"]:")
          .append(";idRanges:" + idRangesToString());
         return b.toString();
     }
@@ -51,10 +55,6 @@ public class ContentMutator {
             b.append(entry.getKey()+":"+entry.getValue()+";");
         }
         return b.toString();
-    }
-
-    public String getID(){
-        return " ["+p+"] no-"+current;
     }
 
     /** Example:
@@ -91,20 +91,6 @@ public class ContentMutator {
         return "";
     }
 
-    /** @return null when list is exhausted.*/
-    public String mutate(){
-        p++;
-        if (p>=max){
-            return null;
-        }
-        System.arraycopy(names, 0, dest, 0, p - 0);
-        System.arraycopy(names, p + 1, dest, p, max - p - 1);
-        current = names[p];
-        //System.out.println(String.format("names%s, dest%s, p%d, max%d, names.length%d", Arrays.toString(names), Arrays.toString(dest), p, max, names.length));
-        JSONObject subset = new JSONObject(jo, dest);
-        return subset.toString();
-    }
-
     public void setOptions(Node testNode){
         List<Node> nodes = testNode.selectNodes("mutator/expected/code");
         for (Node codeNode: nodes){
@@ -118,20 +104,8 @@ public class ContentMutator {
                 idRanges.put(id, range);
             }
         }
-        //System.out.println("\r\n\r\n[[[[[["+fileName+"]]]]]]]]]]]]]]]]]]" + toString());
+        //System.out.println("\r\n\r\n[[[[[["+contentRawFilename+"]]]]]]]]]]]]]]]]]]" + toString());
     }
 
-    public static void main(String[]args) throws Exception {
-        String relResourceName = "_self_test/content-mutator-test.json";
-        String fn = "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json";
-        ResourceManager standaloneResourceManager = ResourceManager.createRootResourceManager();
 
-        ContentMutator mutator = new ContentMutator(relResourceName, fn, standaloneResourceManager);
-        String m = mutator.mutate();
-        while(m!=null){
-            System.out.println(m);
-            m = mutator.mutate();
-        }
-        System.out.println("main done.  ResourceManager.formatSummaryPlain: "+standaloneResourceManager.formatSummaryPlain());
-    }
 }

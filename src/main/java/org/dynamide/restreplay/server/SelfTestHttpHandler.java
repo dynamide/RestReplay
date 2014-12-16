@@ -2,6 +2,7 @@ package org.dynamide.restreplay.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.dynamide.util.Tools;
 
 import java.io.IOException;
 import java.net.URI;
@@ -56,7 +57,12 @@ public class SelfTestHttpHandler implements HttpHandler {
                     }
                     String mutation = extractFirstParam(paramsMap, "mutation");
                     if (mutation != null && mutation.length() > 0) {
-                        writeResponse(t, 400, JSON, "{\"result\":\"ERROR\", \"method\":\"" + method + "\", \n\"req\": " + body + "}}}");
+                        int code = 400;
+                        String forceCode = extractFirstParam(paramsMap, "forceCode");
+                        if (Tools.notBlank(forceCode)){
+                            code = Integer.parseInt(forceCode);
+                        }
+                        writeResponse(t, code, JSON, "{\"result\":\"ERROR\", \"method\":\"" + method + "\", \n\"req\": " + body + "}}}");
                     } else {
                         addHeader(t, "Location", "http://localhost:28080/tagonomy?mock=true");
                         writeResponse(t, "{\"result\":\"OK\", \"method\":\"" + method + "\", \n\"req\": " + body + "}", JSON);

@@ -4,6 +4,9 @@ import org.apache.commons.cli.*;
 
 import org.dynamide.interpreters.EvalResult;
 import org.dynamide.interpreters.RhinoInterpreter;
+import org.dynamide.restreplay.mutators.ContentMutator;
+import org.dynamide.restreplay.mutators.IMutator;
+import org.dynamide.restreplay.mutators.MutatorFactory;
 import org.dynamide.restreplay.server.EmbeddedServer;
 import org.dynamide.util.Tools;
 import org.dom4j.*;
@@ -65,6 +68,11 @@ public class RestReplay extends ConfigFile {
     public static Map<String, ServiceResult> createResultsMap() {
         return new HashMap<String, ServiceResult>();
     }
+
+    public List<EvalResult> evalReport;
+
+    public static Tools TOOLS = new Tools();
+    public static Kit KIT = new Kit();
 
     public String toString() {
         return "RestReplay{" + getTestDir() + ", " + defaultAuthsMap + ", " + getDump() + ", " + reportsDir + '}';
@@ -268,18 +276,41 @@ public class RestReplay extends ConfigFile {
                                                    Eval evalStruct)
     throws Exception {
         String OK = "";
+
+        EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
+        String validationResultStr = validationResult != null ? validationResult.toString() : "";
+        if (Tools.notBlank(expectedResponseParts.validator) && validationResult != null){
+            serviceResult.addAlert("<b>validator result:</b> <span class='validator-result'>"+validationResultStr+"</span>",
+                    "<b>validator:</b> "+expectedResponseParts.validator,
+                    validationResult.worstLevel);
+        }
+
+        //The deal is: you may specify expectedResponseFilenameRel OR expectedResponseFilename, so we have to do this weird logic with expectedPartContent.
         String expectedPartContent = "";
         if ( Tools.notBlank(expectedResponseParts.expectedResponseFilenameRel)
            ||Tools.notBlank(expectedResponseParts.expectedResponseFilename)){
                expectedPartContent = getResourceManager().readResource("validateResponseSinglePayload",
                                                                         expectedResponseParts.expectedResponseFilenameRel,
                                                                         expectedResponseParts.expectedResponseFilename);
+            if (Tools.isBlank(expectedPartContent)){
+                serviceResult.addAlert("expectedResponseParts specified a file, but the file was empty. "
+                                          +"filenameRel: '"+expectedResponseParts.expectedResponseFilenameRel+"' filename: '"+expectedResponseParts.expectedResponseFilename+"'",
+                                        "validateResponseSinglePayload",
+                                        LEVEL.WARN
+                                      );
+            }
         }
+        if (Tools.isBlank(expectedPartContent)){
+            return OK;
+        }
+
         Map<String, String> vars = null;
         if (expectedResponseParts.varsList.size()>0) {
             vars = expectedResponseParts.varsList.get(0);  //just one part, so just one varsList.
         }
-        EvalResult evalResult = evalStruct.eval(expectedResponseParts.expectedResponseFilenameRel,
+        String theContext = expectedResponseParts.expectedResponseFilenameRel;
+
+        EvalResult evalResult = evalStruct.eval(theContext,
                 expectedPartContent,
                 vars);
 
@@ -294,15 +325,6 @@ public class RestReplay extends ConfigFile {
                 + " fromTestID: " + serviceResult.fromTestID
                 + " URL: " + serviceResult.fullURL
                 + "}";
-
-        EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
-        String validationResultStr = validationResult != null ? validationResult.toString() : "";
-        if (Tools.notBlank(expectedResponseParts.validator) && evalResult != null){
-
-            serviceResult.addAlert("<b>validator result:</b> <span class='validator-result'>"+validationResultStr+"</span>",
-                                   "<b>validator:</b> "+expectedResponseParts.validator,
-                                   validationResult.worstLevel);
-        }
 
         String startElement = expectedResponseParts.startElement;
         String partLabel = expectedResponseParts.label;
@@ -369,6 +391,8 @@ public class RestReplay extends ConfigFile {
         RhinoInterpreter interpreter = new RhinoInterpreter();
         interpreter.setVariable("serviceResult", serviceResult);
         interpreter.setVariable("serviceResultsMap", serviceResultsMap);
+        interpreter.setVariable("kit", KIT);
+        interpreter.setVariable("tools", TOOLS);
         EvalResult result = interpreter.eval(resourceName, source);
         return result;
     }
@@ -516,6 +540,8 @@ public class RestReplay extends ConfigFile {
             }
         }
 
+        this.evalReport = evalStruct.getEvalReport();
+
         //=== Now spit out the HTML report file ===
         File m = new File(controlFileName);
         String localName = m.getName();//don't instantiate, just use File to extract file name without directory.
@@ -540,7 +566,7 @@ public class RestReplay extends ConfigFile {
     private ServiceResult executeTestNode(
             ServiceResult serviceResult,
             String contentRawFromMutator,
-            ContentMutator mutator,
+            IMutator mutator,
             Node testNode,
             Node testGroupNode,
             String protoHostPort,
@@ -564,7 +590,8 @@ public class RestReplay extends ConfigFile {
         if (contentRawFromMutator != null) {
             serviceResult.isMutation = true;
         }
-        serviceResult.mutator = mutator;
+
+        //NOPE. TODO: make sure this is done by parent.  20141215. was:     serviceResult.mutator = mutator;
 
         Map<String, String> clonedMasterVarsWTest = new HashMap<String, String>();
 
@@ -600,6 +627,7 @@ public class RestReplay extends ConfigFile {
             serviceResult.idFromMutator = idFromMutator;
             serviceResult.auth = authForTest;
             serviceResult.method = method;
+            evalStruct.setCurrentTestIDLabel(serviceResult.testIDLabel);
 
 
             //====Headers==========================
@@ -881,7 +909,7 @@ public class RestReplay extends ConfigFile {
         if (vars != null) {
             serviceResult.addVars(vars);
         }
-        EvalResult evalResult = test.evalStruct.eval("filename:" + fileName, contentRaw, vars);
+        EvalResult evalResult = test.evalStruct.eval("expand req. file:" + parts.requestPayloadFilenameRel, contentRaw, vars);
         String contentSubstituted = evalResult.getResultString();
         serviceResult.alerts.addAll(evalResult.alerts);
 
@@ -910,41 +938,53 @@ public class RestReplay extends ConfigFile {
             } else if (getRunOptions().skipMutators) {
                 serviceResult.mutatorSkippedByOpts = true;
             } else {
-                ContentMutator contentMutator = new ContentMutator(parts.requestPayloadFilenameRel, parts.requestPayloadFilename, getResourceManager());
-                contentMutator.setOptions(test.testNode);
-                serviceResult.mutatorType = mutatorType;
-                serviceResult.mutator = contentMutator;
-
-
-                ServiceResult holdThis = serviceResultsMap.get("this");
                 try {
-                    String content = contentMutator.mutate();
-                    while (content != null) {
+                    IMutator mutator
+                         = MutatorFactory.createMutator(mutatorType,
+                                                        parts.requestPayloadFilenameRel,
+                                                        parts.requestPayloadFilename,
+                                                        getResourceManager(),
+                                                        test.testNode);
+                    serviceResult.mutatorType = mutatorType;
+                    serviceResult.mutator = mutator;
+
+                    ServiceResult holdThis = serviceResultsMap.get("this");
+                    try {
                         ServiceResult childResult = new ServiceResult(getRunOptions());
                         serviceResult.addChild(childResult);
                         serviceResultsMap.put("this", childResult);
+                        childResult.mutator = mutator;
+                        String content = mutator.mutate(clonedMasterVars);
+                        while (content != null) {
+                            executeTestNode(
+                                    childResult,
+                                    content,
+                                    mutator,
+                                    test.testNode,//Node
+                                    test.testgroup,//Node
+                                    test.protoHostPort,//String    TODO!!
+                                    clonedMasterVars,//Map<String,String>
+                                    testElementIndex,//int
+                                    test.testGroupID,//String
+                                    test.evalStruct,//Eval
+                                    authsMap,//AuthsMap
+                                    defaultAuths,//AuthsMap
+                                    testdir,//String
+                                    report,//RestReplayReport
+                                    test.results);//List<ServiceResult> results)
 
-                        executeTestNode(
-                                childResult,
-                                content,
-                                contentMutator,
-                                test.testNode,//Node
-                                test.testgroup,//Node
-                                test.protoHostPort,//String    TODO!!
-                                clonedMasterVars,//Map<String,String>
-                                testElementIndex,//int
-                                test.testGroupID,//String
-                                test.evalStruct,//Eval
-                                authsMap,//AuthsMap
-                                defaultAuths,//AuthsMap
-                                testdir,//String
-                                report,//RestReplayReport
-                                test.results);//List<ServiceResult> results)
+                            childResult = new ServiceResult(getRunOptions());
+                            serviceResult.addChild(childResult);
+                            serviceResultsMap.put("this", childResult);
+                            childResult.mutator = mutator;
 
-                        content = contentMutator.mutate();
+                            content = mutator.mutate(clonedMasterVars);
+                        }
+                    } finally {
+                        if (holdThis != null) serviceResultsMap.put("this", holdThis);
                     }
-                } finally {
-                    if (holdThis != null) serviceResultsMap.put("this", holdThis);
+                } catch (Exception e){
+                    serviceResult.addAlert("Could not create ContentMutator from factory",  Tools.getStackTrace(e), LEVEL.ERROR);
                 }
             }
         }

@@ -15,6 +15,19 @@ public class Eval {
     public static Tools TOOLS = new Tools();
     public static Kit KIT = new Kit();
     public RunOptions runOptions;
+    private List<EvalResult> evalReport = new ArrayList<EvalResult>();
+    public List<EvalResult> getEvalReport() {
+        return evalReport;
+    }
+    private String currentTestIDLabel = "";
+    public void setCurrentTestIDLabel(String val){
+        currentTestIDLabel =  val;
+
+        EvalResult label = new EvalResult();
+        label.isDummy = true;
+        label.testIDLabel = val;
+        evalReport.add(label);
+    }
 
     public void resetContext(){
         jc = new Eval.MapContextWKeys();//MapContext();
@@ -45,12 +58,15 @@ public class Eval {
     public EvalResult eval(String context,
                                   String inputJexlExpression,
                                   Map<String,String> vars) {
-        //doTest();
         EvalResult result = new EvalResult();
+        result.context = context;
+        result.expression = inputJexlExpression;
         Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
 
         try {
             jc.set("itemCSID", "${itemCSID}"); //noiseless passthru.
+            jc.set("tools", TOOLS);
+            jc.set("kit", KIT);
             for (Map.Entry<String,ServiceResult> entry: serviceResultsMap.entrySet()) {
                 jc.set(entry.getKey(), entry.getValue());
             }
@@ -67,32 +83,33 @@ public class Eval {
                     String value = entry.getValue();
                     String key = entry.getKey();
                     try {
-                        EvalResult innerResult = parse(context+", key:"+key, value);
+                        EvalResult innerResult = parse(context+", ID: <b>"+key+"</b>", value);
                         value = innerResult.getResultString();
                         if (innerResult.alerts.size()>0){
                             result.alerts.addAll(innerResult.alerts);
                         }
                         vars.put(key, value); //replace template value with actual value.
+                        evalReport.add(innerResult);
                     } catch (Exception e){
                         value = "ERROR_IN_EVAL: "+e;
-                        String ctx = context + " key: "+key+" value:"+value;
+                        String ctx = context + " ID: <b>"+key+"</b> value:"+value;
                         result.addAlert(value, ctx, LEVEL.WARN);
                     }
                     jc.set(key, value);
                 }
             }
-            jc.set("tools", TOOLS);
-            jc.set("kit", KIT);
             EvalResult innerResult2 = parse(context, inputJexlExpression);
             if (innerResult2.alerts.size()>0){
                 result.alerts.addAll(innerResult2.alerts);
             }
             result.result = innerResult2.result;
+            evalReport.add(result);
         } catch (Throwable t) {
             String errmsg = "ERROR: could not eval jexl expression. " + t;
             System.err.println(errmsg+" Expression: "+inputJexlExpression);
             result.addAlert(errmsg, inputJexlExpression, LEVEL.ERROR);
             result.result = "";
+            evalReport.add(result);
         }
         return result;
     }
@@ -100,6 +117,8 @@ public class Eval {
     private EvalResult parse(String context,
                                     String in) {
         EvalResult evalResult = new EvalResult();
+        evalResult.context = context;
+        evalResult.expression = in;
         StringBuffer result = new StringBuffer();
         String s = in;
         String var = "";

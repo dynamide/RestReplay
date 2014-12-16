@@ -2,6 +2,8 @@ package org.dynamide.restreplay;
 
 import org.apache.commons.httpclient.Header;
 import org.dynamide.interpreters.Alert;
+import org.dynamide.restreplay.mutators.ContentMutator;
+import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.util.Tools;
 import org.json.JSONObject;
 import org.json.XML;
@@ -45,7 +47,8 @@ public class ServiceResult {
     public String idFromMutator = ""; //if a mutator turns a test into many tests, each gets a unique mutator id, as a subset of one of the test cases.
     public boolean isMutation = false;
     public String mutatorType = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
-    public ContentMutator mutator = null;
+    public IMutator mutator = null;
+    public IMutator getMutator(){return mutator;}
     public String mutationDetailBlockID = "";
     public boolean mutatorSkipped = false;
     public boolean mutatorSkippedByOpts = false;
@@ -486,8 +489,9 @@ public class ServiceResult {
 
     //TODO: add a way to get at headers in Headers[] either in a separate method or in get().
 
-    //makes these accessible by Jexl. We could also just add getters to each of these.  Jexl will case-insensitively read related gettters.
-
+    /* Responding to these string names makes these accessible by Jexl.
+    We could also just add getters to any class field, for example, as is done for mutator/getMutator.
+    Jexl will case-insensitively read related gettters.*/
     public Object get(String what){
         if ("CSID".equals(what)){
             return CSID;

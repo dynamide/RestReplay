@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EvalResult {
+    public String context = "";     //informational
+    public String expression = "";  //informational
+    public String testIDLabel = ""; //informational
+    public boolean isDummy = false;
+
     public Object result = "";
     public Alert.LEVEL worstLevel = Alert.LEVEL.OK;
     public String getResultString(){

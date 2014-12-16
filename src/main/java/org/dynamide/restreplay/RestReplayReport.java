@@ -1,5 +1,6 @@
 package org.dynamide.restreplay;
 
+import org.dynamide.interpreters.EvalResult;
 import org.dynamide.util.XmlTools;
 import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
@@ -52,6 +53,7 @@ public class RestReplayReport {
     protected static final String PRE_START = "<pre class='SUMMARY'>";
     protected static final String PRE_END = "</pre>";
     protected static final String BR = "<br />\r\n";
+    protected static final String HR = "<br /><hr />\r\n";
 
     protected static final String DETAIL_HDR = "<h2 class='DETAIL_HDR'>Test Details</h2>";
     protected static final String DETAIL_LINESEP = "</td></tr>\r\n<tr><td>";
@@ -101,6 +103,8 @@ public class RestReplayReport {
                 + BR
                 + DETAIL_HDR
                 + reportsListToString()
+                + HR
+                + evalReportToString(restReplay)
                 + HTML_PAGE_END;
     }
 
@@ -230,6 +234,28 @@ public class RestReplayReport {
         }
         return buffer.toString();
     }
+
+    public String evalReportToString(RestReplay replay){
+        StringBuffer b = new StringBuffer();
+        b.append("<div class='evalReport'><h2 class='evalReportTitle'>Eval Report</h2>");
+        for (EvalResult evalResult: replay.evalReport){
+            if (evalResult.isDummy) {
+                b.append("<div class='evalReportTestIDLabel'>"+evalResult.testIDLabel+"</div>");
+            } else {
+                b.append("<div class='evalReportRow'>")
+                 .append("<span class='evalReportContext'>")
+                 .append(evalResult.context)
+                 .append("</span><span class='evalReportExpression'>")
+                 .append(evalResult.expression)
+                 .append("</span><span class='evalReportValue'>")
+                 .append(evalResult.result.toString())
+                 .append("</span></div>");
+            }
+        }
+        b.append("</div>");
+        return b.toString();
+    }
+
 
     public String getTOC(String reportName) {
 

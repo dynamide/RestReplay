@@ -18,6 +18,7 @@
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
+
         <test ID="selftestToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -52,11 +53,6 @@
                 <header name="x-authorization">${selftestToken.got("//data")}</header>
                 <header name="x-method">${selftestToken.method}</header>
             </headers>
-            <!--This causes a warning.  And it breaks auto delete with the erroneous url.
-            Keeping this here for development of two error tests.
-            TODO: Develop tests that fire these, and also demonstrate the ways to construct a url, and a deleteURL.
-            <deleteURL>${result.url.protocol}://${result.url.authority}${result.url.path} -:: ${result.protoHostPort} ::-</deleteURL>
-            -->
         </test>
         <test ID="selftestUseTokenPOST">
             <expectedCodes>200</expectedCodes>
@@ -136,6 +132,51 @@
                 <validator lang="javascript">_self_test/res/selftest-with-validator-errors.validator.js</validator>
             </response>
         </test> 
+        <test ID="selftestEmptyExpectedResponseFile">
+            <expectedCodes>200</expectedCodes>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/selftest-number-post.json</filename>
+            <vars>
+                <var ID="COUNT">3</var>
+            </vars>
+            <response>
+                <filename>_self_test/res/empty-file.json</filename>
+            </response>
+        </test>
+
+        <test ID="selftestUseVarMutator">
+            <expectedCodes>200</expectedCodes>
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
+            <filename>_self_test/var-mutator-test.json</filename>
+            <vars>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+                <var idbase="FOOBAR">${this.testID}</var>
+            </vars>
+            <mutator type="VarMutator">
+                <expected>
+                    <code range="4xx">*</code>
+                </expected>
+                <vars ID="0">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                </vars>
+                <vars ID="1">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                </vars>
+                <vars ID="2">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                </vars>
+                <vars ID="3">
+                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                </vars>
+            </mutator>
+        </test>
     </testGroup>
 
 
@@ -191,6 +232,23 @@
             <method>GET</method>
             <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(selftestUseTokenPUTbugs.result)}</uri>
         </test>
+
+        <test ID="selftestUseToken">
+            <!-- this one works above, but had this warning comment.  If you need to look into it, the case and the comment are here.-->
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>/tagonomy?mock=true&amp;name=selftestUseToken</uri>
+            <headers>
+                <header name="x-authorization">${selftestToken.got("//data")}</header>
+                <header name="x-method">${selftestToken.method}</header>
+            </headers>
+            <!--This causes a warning.  And it breaks auto delete with the erroneous url.
+            Keeping this here for development of two error tests.
+            TODO: Develop tests that fire these, and also demonstrate the ways to construct a url, and a deleteURL.
+            <deleteURL>${result.url.protocol}://${result.url.authority}${result.url.path} -:: ${result.protoHostPort} ::-</deleteURL>
+            -->
+        </test>
+
     </testGroup>
 
     <testGroup ID="debugScript">
