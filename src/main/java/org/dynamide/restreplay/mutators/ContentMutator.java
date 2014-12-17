@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +36,7 @@ public abstract class ContentMutator implements IMutator {
         return contentRawFilename;
     }
 
-    private final Map<String,Range> idRanges = new HashMap<String, Range>();
+    private final Map<String,Range> idRanges = new LinkedHashMap<String, Range>();
 
     public String shortName(){
         return "ContentMutator";

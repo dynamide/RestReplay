@@ -19,6 +19,9 @@ public class Eval {
     public List<EvalResult> getEvalReport() {
         return evalReport;
     }
+    protected void addToEvalReport(EvalResult result){
+        evalReport.add(result);
+    }
     private String currentTestIDLabel = "";
     public void setCurrentTestIDLabel(String val){
         currentTestIDLabel =  val;
@@ -26,7 +29,7 @@ public class Eval {
         EvalResult label = new EvalResult();
         label.isDummy = true;
         label.testIDLabel = val;
-        evalReport.add(label);
+        addToEvalReport(label);
     }
 
     public void resetContext(){
@@ -84,12 +87,13 @@ public class Eval {
                     String key = entry.getKey();
                     try {
                         EvalResult innerResult = parse(context+", ID: <b>"+key+"</b>", value);
+                        innerResult.nestingLevel = 1;
                         value = innerResult.getResultString();
                         if (innerResult.alerts.size()>0){
                             result.alerts.addAll(innerResult.alerts);
                         }
                         vars.put(key, value); //replace template value with actual value.
-                        evalReport.add(innerResult);
+                        addToEvalReport(innerResult);
                     } catch (Exception e){
                         value = "ERROR_IN_EVAL: "+e;
                         String ctx = context + " ID: <b>"+key+"</b> value:"+value;
@@ -103,13 +107,13 @@ public class Eval {
                 result.alerts.addAll(innerResult2.alerts);
             }
             result.result = innerResult2.result;
-            evalReport.add(result);
+            addToEvalReport(result);
         } catch (Throwable t) {
             String errmsg = "ERROR: could not eval jexl expression. " + t;
             System.err.println(errmsg+" Expression: "+inputJexlExpression);
             result.addAlert(errmsg, inputJexlExpression, LEVEL.ERROR);
             result.result = "";
-            evalReport.add(result);
+            addToEvalReport(result);
         }
         return result;
     }
@@ -233,7 +237,7 @@ public class Eval {
     }
 
     public static class MapContextWKeys extends MapContext implements JexlContext {
-        private Map<String,Object> map = new HashMap();
+        private Map<String,Object> map = new LinkedHashMap();
         public Set getKeys(){
             return this.map.keySet();
         }

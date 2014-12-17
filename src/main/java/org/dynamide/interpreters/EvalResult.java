@@ -9,6 +9,7 @@ public class EvalResult {
     public String expression = "";  //informational
     public String testIDLabel = ""; //informational
     public boolean isDummy = false;
+    public int nestingLevel = 0;
 
     public Object result = "";
     public Alert.LEVEL worstLevel = Alert.LEVEL.OK;

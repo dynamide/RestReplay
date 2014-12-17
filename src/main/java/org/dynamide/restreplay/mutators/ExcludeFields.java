@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ExcludeFields extends ContentMutator {
@@ -71,7 +71,7 @@ public class ExcludeFields extends ContentMutator {
                                             standaloneResourceManager,
                                             null);
 
-        Map<String, String> clonedMasterVars = new HashMap<String, String>();
+        Map<String, String> clonedMasterVars = new LinkedHashMap<String, String>();
         String m = mutator.mutate(clonedMasterVars);
         while(m!=null){
             System.out.println(m);

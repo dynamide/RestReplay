@@ -15,17 +15,17 @@ public class VarMutator extends ContentMutator implements IMutator {
     }
 
     private int index = 0;
-    //private String currentVar = "";
-    private List<VarTemplate> varList = new ArrayList<VarTemplate>();
+
     private List<List<VarTemplate>> spaces = new ArrayList<List<VarTemplate>>();
 
     public void setOptions(Node testNode){
         List<Node> vars = testNode.selectNodes("mutator/vars");
         for (Node oneVarsNode: vars){
             List<Node> nodes = oneVarsNode.selectNodes("var");
-            for (Node codeNode : nodes) {
-                String idbase = codeNode.valueOf("@idbase");
-                String template = codeNode.valueOf(".");
+            List<VarTemplate> varList = new ArrayList<VarTemplate>();
+            for (Node varNode : nodes) {
+                String idbase = varNode.valueOf("@idbase");
+                String template = varNode.valueOf(".");
                 varList.add(new VarTemplate(idbase, template));
             }
             spaces.add(varList);
@@ -36,10 +36,12 @@ public class VarMutator extends ContentMutator implements IMutator {
         if (index+1>spaces.size()){
             return null;
         }
+
         List<VarTemplate> localVarList = spaces.get(index);
         for (VarTemplate vt: localVarList) {
             clonedMasterVars.put(vt.ID, vt.template);
         }
+
         index++;
         return getContentRaw();
     }

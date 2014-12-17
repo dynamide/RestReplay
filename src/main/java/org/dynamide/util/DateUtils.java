@@ -175,6 +175,25 @@ public class DateUtils {
               return false;
           }
           return true;
-      }
+    }
+
+    public String getMonthName(Object millis){
+        Date date = new Date(Long.parseLong(millis.toString()));
+        //Date date = new Date(millis);
+        return (new SimpleDateFormat("MMMM")).format(date);
+    }
+
+
+    public static String getDayOfMonth(Object millis){
+        Date date = new Date(Long.parseLong(millis.toString()));
+        String d = (new SimpleDateFormat("DD")).format(date);
+        System.out.println("==========================>>>>>>>>>>>>>>>>>>"+d);
+        return d;
+    }
+
+    public static void main(String[]args){
+        System.out.println("DayOfMonth: "+(new DateUtils()).getDayOfMonth(1420862400000L));
+        System.out.println("MonthName:"  +(new DateUtils()).getMonthName(1420862400000L));
+    }
      
 }

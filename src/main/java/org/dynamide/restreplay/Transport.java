@@ -180,7 +180,7 @@ public class Transport {
             throw new Exception("filesList and partsList must not be empty and must have the same number of items each.");
         }
         String content = DD + BOUNDARY;
-        Map<String, String> contentRaw = new HashMap<String, String>();
+        Map<String, String> contentRaw = new LinkedHashMap<String, String>();
         for (int i=0; i<partsList.size(); i++){
             String fileName = filesList.get(i);
             String commonPartName = partsList.get(i);

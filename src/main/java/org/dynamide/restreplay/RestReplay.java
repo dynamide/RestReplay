@@ -53,7 +53,7 @@ public class RestReplay extends ConfigFile {
         this.masterFilename = val;
     }
 
-    public Map<String, String> masterVars = new HashMap<String, String>();
+    public Map<String, String> masterVars = new LinkedHashMap<String, String>();
     public Map<String, String> getMasterVars() {
         return masterVars;
     }
@@ -66,7 +66,7 @@ public class RestReplay extends ConfigFile {
         return serviceResultsMap;
     }
     public static Map<String, ServiceResult> createResultsMap() {
-        return new HashMap<String, ServiceResult>();
+        return new LinkedHashMap<String, ServiceResult>();
     }
 
     public List<EvalResult> evalReport;
@@ -498,7 +498,7 @@ public class RestReplay extends ConfigFile {
 
             //vars var = get control file vars and merge masterVars into it, replacing
             Map<String, String> testGroupVars = readVars(testgroup);
-            Map<String, String> clonedMasterVars = new HashMap<String, String>();
+            Map<String, String> clonedMasterVars = new LinkedHashMap<String, String>();
             if (null != masterVars) {
                 clonedMasterVars.putAll(masterVars);
             }
@@ -513,26 +513,41 @@ public class RestReplay extends ConfigFile {
             }
             int testElementIndex = -1;
             for (Node testNode : tests) {
-                serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
-                testElementIndex++;
-                ServiceResult serviceResult = new ServiceResult(getRunOptions());
-                serviceResultsMap.put("this", serviceResult);
-                executeTestNode(serviceResult,
-                        null,
-                        null,
-                        testNode,
-                        testgroup,
-                        protoHostPort,
-                        clonedMasterVars,
-                        testElementIndex,
-                        testGroupID,
-                        evalStruct,
-                        authsMap,
-                        authsFromMaster,
-                        testdir,
-                        report,
-                        results);
-                serviceResultsMap.remove("this");
+                String iterations = testNode.valueOf("@loop");
+                int iIterations = 1;
+                if (Tools.notBlank(iterations)){
+
+                    EvalResult evalResult = evalStruct.eval("calculate @loop", iterations, clonedMasterVars);
+                    iterations = evalResult.getResultString();
+                    //serviceResult.alerts.addAll(evalResult.alerts);
+
+                    iIterations = Integer.parseInt(iterations);
+                    System.out.println("=============================doing iterations of testNode================>>>"+iIterations);
+                }
+                for (int itnum = 0; itnum < iIterations; itnum++) {
+                    serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
+                    testElementIndex++;
+                    ServiceResult serviceResult = new ServiceResult(getRunOptions());
+                    serviceResult.loopIndex = itnum;
+                    serviceResultsMap.put("this", serviceResult);
+                    executeTestNode(serviceResult,
+                            null,
+                            null,
+                            testNode,
+                            testgroup,
+                            protoHostPort,
+                            clonedMasterVars,
+                            null,
+                            testElementIndex,
+                            testGroupID,
+                            evalStruct,
+                            authsMap,
+                            authsFromMaster,
+                            testdir,
+                            report,
+                            results);
+                    serviceResultsMap.remove("this");
+                }
             }
             serviceResultsMap.remove("result");
             if (Tools.isTrue(autoDeletePOSTS) && param_autoDeletePOSTS) {
@@ -571,6 +586,7 @@ public class RestReplay extends ConfigFile {
             Node testGroupNode,
             String protoHostPort,
             Map<String, String> clonedMasterVars,
+            Map<String, String> mutatorScopeVars,
             int testElementIndex,
             String testGroupID,
             Eval evalStruct,
@@ -593,11 +609,14 @@ public class RestReplay extends ConfigFile {
 
         //NOPE. TODO: make sure this is done by parent.  20141215. was:     serviceResult.mutator = mutator;
 
-        Map<String, String> clonedMasterVarsWTest = new HashMap<String, String>();
+        Map<String, String> clonedMasterVarsWTest = new LinkedHashMap<String, String>();
 
         try {
             clonedMasterVarsWTest.putAll(clonedMasterVars);
             clonedMasterVarsWTest.putAll(readVars(testNode));
+            if (mutatorScopeVars!=null){
+                clonedMasterVarsWTest.putAll(mutatorScopeVars);
+            }
             String testID = testNode.valueOf("@ID") + (Tools.notBlank(idFromMutator) ? "_" + idFromMutator : "");
             lastTestID = testID;
             String testIDLabel = Tools.notEmpty(testID) ? (testGroupID + '.' + testID) : (testGroupID + '.' + testElementIndex)
@@ -701,7 +720,7 @@ public class RestReplay extends ConfigFile {
                         contentRawFromMutator,
                         mutatorType,
                         testdir,
-                        clonedMasterVars,
+                        clonedMasterVarsWTest,
                         testElementIndex,
                         authsMap,
                         defaultAuths,
@@ -904,6 +923,7 @@ public class RestReplay extends ConfigFile {
                     parts.requestPayloadFilename);
         } else {
             contentRaw = contentRawFromMutator;
+            vars = clonedMasterVars;
         }
         //TODO: confirm current behavior: why do I add vars AFTER the call?
         if (vars != null) {
@@ -932,8 +952,8 @@ public class RestReplay extends ConfigFile {
         serviceResultsMap.put("result", serviceResult);
         serviceResult.time = (System.currentTimeMillis() - test.startTime);
 
-        if (Tools.notBlank(mutatorType) && (contentRawFromMutator == null)) {
-            if (!serviceResult.gotExpectedResult()) {
+        if (Tools.notBlank(mutatorType) && (contentRawFromMutator == null)) {  //means we have a mutator, but we are not in a nested call already.
+            if (!serviceResult.gotExpectedResult() && getRunOptions().skipMutatorsOnFailure) {
                 serviceResult.mutatorSkipped = true;
             } else if (getRunOptions().skipMutators) {
                 serviceResult.mutatorSkippedByOpts = true;
@@ -948,22 +968,25 @@ public class RestReplay extends ConfigFile {
                     serviceResult.mutatorType = mutatorType;
                     serviceResult.mutator = mutator;
 
+                    Map<String, String> mutatorScopeVars = new LinkedHashMap<String, String>();
+
                     ServiceResult holdThis = serviceResultsMap.get("this");
                     try {
                         ServiceResult childResult = new ServiceResult(getRunOptions());
                         serviceResult.addChild(childResult);
                         serviceResultsMap.put("this", childResult);
                         childResult.mutator = mutator;
-                        String content = mutator.mutate(clonedMasterVars);
+                        String content = mutator.mutate(mutatorScopeVars);
                         while (content != null) {
                             executeTestNode(
                                     childResult,
-                                    content,
+                                    content,  //only in a mutation is this parameter sent.  We are sending it here.
                                     mutator,
                                     test.testNode,//Node
                                     test.testgroup,//Node
                                     test.protoHostPort,//String    TODO!!
                                     clonedMasterVars,//Map<String,String>
+                                    mutatorScopeVars,//Map<String,String>
                                     testElementIndex,//int
                                     test.testGroupID,//String
                                     test.evalStruct,//Eval
@@ -978,10 +1001,11 @@ public class RestReplay extends ConfigFile {
                             serviceResultsMap.put("this", childResult);
                             childResult.mutator = mutator;
 
-                            content = mutator.mutate(clonedMasterVars);
+                            content = mutator.mutate(mutatorScopeVars);
                         }
                     } finally {
                         if (holdThis != null) serviceResultsMap.put("this", holdThis);
+
                     }
                 } catch (Exception e){
                     serviceResult.addAlert("Could not create ContentMutator from factory",  Tools.getStackTrace(e), LEVEL.ERROR);
@@ -1034,7 +1058,7 @@ public class RestReplay extends ConfigFile {
         Node exportsNode = testNode.selectSingleNode("exports");
         if (exportsNode != null) {
             Map<String, String> exports = readVars(exportsNode);
-            Map<String, String> exportsEvald = new HashMap<String, String>();
+            Map<String, String> exportsEvald = new LinkedHashMap<String, String>();
             for (Map.Entry<String, String> entry : exports.entrySet()) {
                 String exportID = entry.getKey();
                 String expr = entry.getValue();

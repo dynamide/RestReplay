@@ -18,7 +18,7 @@
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
-
+<!--
         <test ID="selftestToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -144,6 +144,34 @@
                 <filename>_self_test/res/empty-file.json</filename>
             </response>
         </test>
+-->
+        <test ID="selftestUseVarMutator">
+            <expectedCodes>200</expectedCodes>
+            <method>PUT</method>
+            <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
+            <filename>_self_test/var-mutator-test.json</filename>
+            <vars>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
+                <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+            </vars>
+            <mutator type="VarMutator">
+                <expected>
+                    <code range="4xx">*</code>
+                </expected>
+                <vars ID="0">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
+                    <var idbase="VarTestMessage">${this.testID} set in mutation ID=0.</var>
+                </vars>
+            </mutator>
+        </test>
+    </testGroup>
+
+
+
+    <testGroup ID="debug"  autoDeletePOSTS="false">
 
         <test ID="selftestUseVarMutator">
             <expectedCodes>200</expectedCodes>
@@ -154,7 +182,9 @@
                 <var ID="DAYS">${24*60*60*1000}</var>
                 <var ID="BASE_DATE">${tools.now()}</var>
                 <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
-                <var idbase="FOOBAR">${this.testID}</var>
+                <var ID="FOOBAR">${this.testID}</var>
+                <var ID="DueDate2">Due ${BASE_DATE} -basedate</var>
+                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
             </vars>
             <mutator type="VarMutator">
                 <expected>
@@ -162,7 +192,7 @@
                 </expected>
                 <vars ID="0">
                     <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
-                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                    <var idbase="FOOBAR">${this.testID} set in 0.</var>
                 </vars>
                 <vars ID="1">
                     <var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}</var>
@@ -177,11 +207,8 @@
                 </vars>
             </mutator>
         </test>
-    </testGroup>
 
 
-
-    <testGroup ID="debug"  autoDeletePOSTS="false">
         <test ID="selftestUseTokenPUT">
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>

@@ -235,20 +235,48 @@ public class RestReplayReport {
         return buffer.toString();
     }
 
+    private String dotdotdot(String value, int newlen){
+        if (value.length()>newlen){
+            value = value.substring(0, newlen) + "...";
+        }
+        return value;
+    }
+
+
     public String evalReportToString(RestReplay replay){
         StringBuffer b = new StringBuffer();
         b.append("<div class='evalReport'><h2 class='evalReportTitle'>Eval Report</h2>");
         for (EvalResult evalResult: replay.evalReport){
+            String trimmedExpression = evalResult.expression;
+            String trimmedResult = evalResult.getResultString();
+
+            switch (replay.getRunOptions().evalReportLevel) {
+                case ALL:
+                    break;
+                case SHORT:
+                    trimmedExpression = dotdotdot(trimmedExpression, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
+                    trimmedResult = dotdotdot(trimmedResult, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
+                    break;
+                case NONE:
+                    trimmedResult = "";
+                    trimmedExpression = "";
+                    break;
+            }
+
+            String nestClass = "evalReport-level0";
+            if (evalResult.nestingLevel == 1){
+                nestClass = " evalReport-level1";
+            }
             if (evalResult.isDummy) {
                 b.append("<div class='evalReportTestIDLabel'>"+evalResult.testIDLabel+"</div>");
             } else {
-                b.append("<div class='evalReportRow'>")
+                b.append("<div class='evalReportRow "+nestClass+"'>")
                  .append("<span class='evalReportContext'>")
                  .append(evalResult.context)
                  .append("</span><span class='evalReportExpression'>")
-                 .append(evalResult.expression)
+                 .append(trimmedExpression)
                  .append("</span><span class='evalReportValue'>")
-                 .append(evalResult.result.toString())
+                 .append(trimmedResult)
                  .append("</span></div>");
             }
         }
@@ -420,7 +448,7 @@ public class RestReplayReport {
                 return resultFile;
             }
         } catch (Exception e) {
-            System.out.println("ERROR saving RestReplay report in testdir: " + reportsDir + " reportName: " + reportName + " error: " + e);
+            System.out.println("ERROR saving RestReplay report in testdir: " + reportsDir + " reportName: " + reportName + " error: " + e+Tools.errorToString(e, true));
         }
         return null;
     }
@@ -755,7 +783,7 @@ public class RestReplayReport {
 
     private String exportsToHtml(ServiceResult result){
         StringBuffer b = new StringBuffer();
-        for (Map.Entry<String,String> entry: result.getExports().entrySet()){
+        for (Map.Entry<String,Object> entry: result.getExports().entrySet()){
             b.append("<span class='exports'>")
                     .append(entry.getKey())
                     .append(": ")

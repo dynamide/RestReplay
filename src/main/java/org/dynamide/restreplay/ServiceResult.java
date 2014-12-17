@@ -11,7 +11,7 @@ import org.json.XML;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +52,10 @@ public class ServiceResult {
     public String mutationDetailBlockID = "";
     public boolean mutatorSkipped = false;
     public boolean mutatorSkippedByOpts = false;
+    public int loopIndex = 0;
+    public int getLoopIndex(){
+        return loopIndex;
+    }
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.
@@ -135,7 +139,7 @@ public class ServiceResult {
     public String failureReason = "";
     public String expectedContentExpanded = "";
     public List<String> requestHeaders = new ArrayList<String>();  //for building report and dump
-    public Map<String,String> headerMap = new HashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
+    public Map<String,String> headerMap = new LinkedHashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
     public Header[] responseHeaders = new Header[0];
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
@@ -147,7 +151,7 @@ public class ServiceResult {
         currentValidatorContextName = name;
     }
 
-    private Map<String,String> vars = new HashMap<String,String>();
+    private Map<String,String> vars = new LinkedHashMap<String,String>();
     public Map<String,String> getVars(){
         return vars;
     }
@@ -155,14 +159,17 @@ public class ServiceResult {
         vars.putAll(newVars);
     }
 
-    private Map<String,String> exports = new HashMap<String,String>();
-    public Map<String, String> getExports() {
+    private Map<String,Object> exports = new LinkedHashMap<String,Object>();
+    public Map<String, Object> getExports() {
         return exports;
     }
     public void addExports(Map<String,String> newexports){
         exports.putAll(newexports);
     }
     public void addExport(String key, String value){
+        exports.put(key, value);
+    }
+    public void addExport(String key, Object value){
         exports.put(key, value);
     }
 
@@ -178,7 +185,7 @@ public class ServiceResult {
     }
 
     private int labelCounter = 0;
-    private Map<String, TreeWalkResults> partSummaries = new HashMap<String, TreeWalkResults>();
+    private Map<String, TreeWalkResults> partSummaries = new LinkedHashMap<String, TreeWalkResults>();
     public void addPartSummary(String label, TreeWalkResults list){
         if (Tools.isBlank(label)){
             label = ""+labelCounter++;
@@ -345,7 +352,7 @@ public class ServiceResult {
             failureReason = "";
             return isDomWalkOK();
         }
-        failureReason = " : STATUS CODE UNEXPECTED; ";
+        failureReason = " : STATUS CODE ("+responseCode+") UNEXPECTED; ";
         return false;
     }
 

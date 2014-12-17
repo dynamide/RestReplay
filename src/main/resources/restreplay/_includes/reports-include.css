@@ -173,6 +173,7 @@ td, th {
    margin: 6px;
 }
 .validator-result {
+display: inline-block;
    border: 1px solid gray;
    padding: 2px;
    background-color: #E0FFFF;
@@ -286,7 +287,8 @@ tr.mutationTR {
   background-color: white;
 }
 .mutationsubscript{
-  color: #dc5c05;
+  color: rgb(17,126,33);
+  foo: #dc5c05;
 }
 DIV.payloads {
     margin-left: 5px;
@@ -425,6 +427,7 @@ DIV.mutation {
     background-color: Aquamarine;
     display: inline-block;
     margin: 2px;
+    padding: 2px;
     margin-left: 5px;
 }
 .evalReportValue {
@@ -436,4 +439,11 @@ DIV.mutation {
     margin: 2px;
     padding: 3px;
      margin-left: 5px;
+}
+.evalReport-level0 {
+    padding-left: 2px;
+}
+.evalReport-level1 {
+    padding-left: 25px;
+    background-color: #cceeff;
 }

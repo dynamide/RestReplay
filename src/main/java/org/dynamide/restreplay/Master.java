@@ -6,7 +6,7 @@ import org.dynamide.util.Tools;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public class Master extends ConfigFile {
     }
     public static final String DEFAULT_MASTER_CONTROL = "master.xml";
 
-    public Map<String,String> vars = new HashMap<String,String>();
+    public Map<String,String> vars = new LinkedHashMap<String,String>();
     public Map<String, String> getVars() {
         return vars;
     }
@@ -185,7 +185,7 @@ public class Master extends ConfigFile {
         replay.setRunOptions(this.getRunOptions());
         replay.setMasterFilename(masterFilename);
 
-        Map<String, String> masterVarsDup = new HashMap<String, String>();
+        Map<String, String> masterVarsDup = new LinkedHashMap<String, String>();
         masterVarsDup.putAll(getVars());
         if (runVars!=null){
             masterVarsDup.putAll(runVars);

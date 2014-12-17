@@ -3,12 +3,12 @@ package org.dynamide.restreplay.mutators;
 import org.dom4j.Node;
 import org.dynamide.restreplay.ResourceManager;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MutatorFactory {
 
-    private static Map<String, String> mTypes = new HashMap<String, String>();
+    private static Map<String, String> mTypes = new LinkedHashMap<String, String>();
 
     static {
         registerMutator("ExcludeFields", "org.dynamide.restreplay.mutators.ExcludeFields");

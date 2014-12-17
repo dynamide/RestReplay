@@ -6,7 +6,7 @@ import org.dom4j.Node;
 import org.dynamide.util.Tools;
 import org.dynamide.interpreters.EvalResult;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -120,7 +120,7 @@ public class ConfigFile {
     }
 
     public static AuthsMap readAuths(org.dom4j.Document document){
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new LinkedHashMap<String, String>();
         List<Node> authNodes = document.selectNodes("//auths/auth");
         for (Node auth : authNodes) {
             map.put(auth.valueOf("@ID"), auth.getStringValue());
@@ -137,7 +137,7 @@ public class ConfigFile {
     }
 
     public static Map<String,String> readVars(Node nodeWVars){
-        Map<String,String> vars = new HashMap<String,String>();
+        Map<String,String> vars = new LinkedHashMap<String,String>();
         List<Node> varNodes = nodeWVars.selectNodes("vars/var");
         return readVars(varNodes, vars);
     }
@@ -154,7 +154,7 @@ public class ConfigFile {
     public static Map<String,String> readHeaders(Node testNode,
                                                   Eval evalStruct,
                                                   ServiceResult serviceResult){
-        Map<String,String> headerMap = new HashMap<String,String>();
+        Map<String,String> headerMap = new LinkedHashMap<String,String>();
         List<Node> headers = testNode.selectNodes("headers/header");
         for (Node header: headers){
             String headerValue = header.getStringValue();

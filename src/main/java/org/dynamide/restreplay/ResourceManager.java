@@ -13,7 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,9 +67,9 @@ public class ResourceManager {
 
     private final List<Resource> resourceHistory = new ArrayList<Resource>();
 
-    private final Map<String,String> cache = new HashMap<String, String>();
+    private final Map<String,String> cache = new LinkedHashMap<String, String>();
 
-    private final Map<String,CachedDoc> docCache = new HashMap<String, CachedDoc>();
+    private final Map<String,CachedDoc> docCache = new LinkedHashMap<String, CachedDoc>();
 
     public static ResourceManager createRootResourceManager(){
         return new ResourceManager();

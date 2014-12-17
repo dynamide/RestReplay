@@ -7,15 +7,21 @@ import org.dynamide.util.Tools;
 import java.util.List;
 
 public class RunOptions {
+    public static enum EVAL_REPORT_LEVEL {NONE, SHORT, ALL};
+    public final static int MAX_CHARS_FOR_REPORT_LEVEL_SHORT = 300;
+
+    public EVAL_REPORT_LEVEL evalReportLevel = EVAL_REPORT_LEVEL.SHORT;
     public static final String RUN_OPTIONS_FILENAME = "runOptions.xml";
     public int connectionTimeout = 30000;   //millis until gives up on establishing a connection.
     public int socketTimeout = 30000;  //millis until gives up on data bytes transmitted, apache docs say "timeout for waiting for data".
     public boolean errorsBecomeEmptyStrings = true;
     public Alert.LEVEL acceptAlertLevel = Alert.LEVEL.OK;  //OK means breaks on WARN and ERROR.
     public boolean skipMutators = false;
+    public boolean skipMutatorsOnFailure = true;
     public boolean dumpResourceManagerSummary = true;
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
+
 
     public boolean breakNow(Alert alert) {
         return (alert.level.compareTo(this.acceptAlertLevel) > 0);
@@ -39,7 +45,9 @@ public class RunOptions {
                 " acceptAlertLevel=" + acceptAlertLevel + CR+
                 " failTestOnWarnings=" + failTestOnWarnings + CR+
                 " failTestOnErrors=" + failTestOnErrors + CR+
+                " evalReportLevel=" + evalReportLevel +CR+
                 " dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
+                " skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
                 " skipMutators=" + skipMutators + "\n\t\t}";
     }
 
@@ -53,7 +61,9 @@ public class RunOptions {
                 "acceptAlertLevel=" + acceptAlertLevel +C+BR+
                 "failTestOnWarnings=" + failTestOnWarnings +C+BR+
                 "failTestOnErrors=" + failTestOnErrors +C+BR+
+                "evalReportLevel=" + evalReportLevel +C+BR+
                 "dumpResourceManagerSummary=" + dumpResourceManagerSummary +C+BR+
+                "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
                 "}</div>";
     }
@@ -70,6 +80,8 @@ public class RunOptions {
         String failTestOnErrors = runOptionsNode.valueOf("failTestOnErrors");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
         String skipMutators = runOptionsNode.valueOf("skipMutators");
+        String skipMutatorsOnFailure = runOptionsNode.valueOf("skipMutatorsOnFailure");
+        String evalReportLevel = runOptionsNode.valueOf("evalReportLevel");
 
         if (Tools.notBlank(connectionTimeout)) {
             this.connectionTimeout = Integer.parseInt(connectionTimeout);
@@ -92,8 +104,14 @@ public class RunOptions {
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             this.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
         }
+        if (Tools.notBlank(evalReportLevel)) {
+            this.evalReportLevel = EVAL_REPORT_LEVEL.valueOf(evalReportLevel);
+        }
         if (Tools.notBlank(skipMutators)) {
             this.skipMutators = Tools.isTrue(skipMutators);
+        }
+        if (Tools.notBlank(skipMutatorsOnFailure)) {
+            this.skipMutatorsOnFailure = Tools.isTrue(skipMutatorsOnFailure);
         }
         System.out.println("set RunOptions ("+context+"): "+toString());
     }

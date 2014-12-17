@@ -14,7 +14,7 @@ public class RhinoInterpreter {
 
     private ScriptEngine m_Interpreter;
 
-    private Map<String, Object> m_variables = new HashMap<String, Object>();
+    private Map<String, Object> m_variables = new LinkedHashMap<String, Object>();
 
     public void setVariable(String name, Object value) {
         m_variables.put(name, value);

@@ -1,2 +1,2 @@
 {"var was":"${DUE_DATE_MILLIS}",
- "FOOBAR was:":"${FOOBAR}"}
+ "VarTestMessage was:":"${VarTestMessage}"}

@@ -13,7 +13,7 @@ import org.jaxen.jdom.JDOMXPath;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -138,7 +138,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
             return false;
         }
         List l = left.getChildren();
-        Map foundRightMap = new HashMap();
+        Map foundRightMap = new LinkedHashMap();
         List<String> foundRepeatingList = new ArrayList<String>();
         boolean result = true;
         for (Object o : l) {
