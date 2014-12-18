@@ -368,7 +368,7 @@ public class RestReplay extends ConfigFile {
                 serviceResult.setCurrentValidatorContextName(scriptFilename);
                 try {
                     if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JAVASCRIPT")) {
-                        return evalJavascript(resourceName, source, serviceResult);
+                        return evalJavascript(evalStruct, resourceName, source, serviceResult);
                     } else if (Tools.notBlank(lang) && lang.equalsIgnoreCase("JEXL")
                             || Tools.isBlank(lang)) {
                         //default to JEXL.
@@ -387,13 +387,14 @@ public class RestReplay extends ConfigFile {
         return evalStruct.eval(context, source, vars);
     }
 
-    private EvalResult evalJavascript(String resourceName, String source, ServiceResult serviceResult) {
+    private EvalResult evalJavascript(Eval evalStruct, String resourceName, String source, ServiceResult serviceResult) {
         RhinoInterpreter interpreter = new RhinoInterpreter();
         interpreter.setVariable("serviceResult", serviceResult);
         interpreter.setVariable("serviceResultsMap", serviceResultsMap);
         interpreter.setVariable("kit", KIT);
         interpreter.setVariable("tools", TOOLS);
         EvalResult result = interpreter.eval(resourceName, source);
+        evalStruct.addToEvalReport(result);
         return result;
     }
 
@@ -514,21 +515,28 @@ public class RestReplay extends ConfigFile {
             int testElementIndex = -1;
             for (Node testNode : tests) {
                 String iterations = testNode.valueOf("@loop");
+                boolean doingIterations = false;
                 int iIterations = 1;
                 if (Tools.notBlank(iterations)){
+                    try {
+                        EvalResult evalResult = evalStruct.eval("calculate @loop", iterations, clonedMasterVars);
+                        iterations = evalResult.getResultString();
+                        //serviceResult.alerts.addAll(evalResult.alerts);
 
-                    EvalResult evalResult = evalStruct.eval("calculate @loop", iterations, clonedMasterVars);
-                    iterations = evalResult.getResultString();
-                    //serviceResult.alerts.addAll(evalResult.alerts);
-
-                    iIterations = Integer.parseInt(iterations);
-                    System.out.println("=============================doing iterations of testNode================>>>"+iIterations);
+                        iIterations = Integer.parseInt(iterations);
+                        doingIterations = true;
+                        System.out.println("=============================doing iterations of testNode================>>>" + iIterations);
+                    } catch (Throwable t){
+                        System.out.println("======NOT doing iterations because loop expression failed:"+iterations);
+                    }
                 }
                 for (int itnum = 0; itnum < iIterations; itnum++) {
                     serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
                     testElementIndex++;
                     ServiceResult serviceResult = new ServiceResult(getRunOptions());
-                    serviceResult.loopIndex = itnum;
+                    if (doingIterations){
+                        serviceResult.loopIndex = itnum;
+                    }
                     serviceResultsMap.put("this", serviceResult);
                     executeTestNode(serviceResult,
                             null,
@@ -617,7 +625,10 @@ public class RestReplay extends ConfigFile {
             if (mutatorScopeVars!=null){
                 clonedMasterVarsWTest.putAll(mutatorScopeVars);
             }
-            String testID = testNode.valueOf("@ID") + (Tools.notBlank(idFromMutator) ? "_" + idFromMutator : "");
+            int loopIndex =  serviceResult.getLoopIndex();
+            String testID = testNode.valueOf("@ID")
+                               + (Tools.notBlank(idFromMutator) ? "_" + idFromMutator : "")
+                               + (loopIndex > -1 ? "_"+loopIndex : "");
             lastTestID = testID;
             String testIDLabel = Tools.notEmpty(testID) ? (testGroupID + '.' + testID) : (testGroupID + '.' + testElementIndex)
                     + "mut:" + idFromMutator + ";";
@@ -1058,7 +1069,7 @@ public class RestReplay extends ConfigFile {
         Node exportsNode = testNode.selectSingleNode("exports");
         if (exportsNode != null) {
             Map<String, String> exports = readVars(exportsNode);
-            Map<String, String> exportsEvald = new LinkedHashMap<String, String>();
+            Map<String, Object> exportsEvald = new LinkedHashMap<String, Object>();
             for (Map.Entry<String, String> entry : exports.entrySet()) {
                 String exportID = entry.getKey();
                 String expr = entry.getValue();

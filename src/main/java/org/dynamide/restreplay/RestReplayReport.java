@@ -105,6 +105,7 @@ public class RestReplayReport {
                 + reportsListToString()
                 + HR
                 + evalReportToString(restReplay)
+                +restReplay.getResourceManager().readResource("RestReplayReport.getPage.readFooter", "_includes/html-footer.html", "_includes/html-footer.html")
                 + HTML_PAGE_END;
     }
 

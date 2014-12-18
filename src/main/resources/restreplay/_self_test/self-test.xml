@@ -18,7 +18,6 @@
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
-<!--
         <test ID="selftestToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
@@ -144,7 +143,6 @@
                 <filename>_self_test/res/empty-file.json</filename>
             </response>
         </test>
--->
         <test ID="selftestUseVarMutator">
             <expectedCodes>200</expectedCodes>
             <method>PUT</method>

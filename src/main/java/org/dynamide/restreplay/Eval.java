@@ -175,7 +175,7 @@ public class Eval {
             }
             String resultStr;
             if (null == resultObj){
-                evalResult.addAlert("null found while evaluating variable: '"+var+"'",
+                evalResult.addAlert("Variable not found: '"+var+"'",
                         dumpContext(jc),
                         LEVEL.WARN);
                 if (runOptions.errorsBecomeEmptyStrings){

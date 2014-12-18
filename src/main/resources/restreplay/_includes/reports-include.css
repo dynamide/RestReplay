@@ -173,7 +173,7 @@ td, th {
    margin: 6px;
 }
 .validator-result {
-display: inline-block;
+   display: inline-block;
    border: 1px solid gray;
    padding: 2px;
    background-color: #E0FFFF;
@@ -191,7 +191,7 @@ display: inline-block;
     background-color: #99ddff;
     font-size: 60%;
     display: inline-block;
-    border: 1px solid black;
+    border: 2px solid green;
     border-radius: 5px;
     margin: 2px;
     padding: 2px;

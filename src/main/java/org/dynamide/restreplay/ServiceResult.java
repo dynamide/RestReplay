@@ -52,7 +52,7 @@ public class ServiceResult {
     public String mutationDetailBlockID = "";
     public boolean mutatorSkipped = false;
     public boolean mutatorSkippedByOpts = false;
-    public int loopIndex = 0;
+    public int loopIndex = -1;
     public int getLoopIndex(){
         return loopIndex;
     }
@@ -163,12 +163,12 @@ public class ServiceResult {
     public Map<String, Object> getExports() {
         return exports;
     }
-    public void addExports(Map<String,String> newexports){
+    public void addExports(Map<String,Object> newexports){
         exports.putAll(newexports);
     }
-    public void addExport(String key, String value){
-        exports.put(key, value);
-    }
+    //public void addExport(String key, String value){
+    //    exports.put(key, value);
+    //}
     public void addExport(String key, Object value){
         exports.put(key, value);
     }
