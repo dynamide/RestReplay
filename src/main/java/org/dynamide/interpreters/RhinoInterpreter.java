@@ -28,6 +28,9 @@ public class RhinoInterpreter {
 
     public EvalResult eval(String resourceName, String source) {
         EvalResult result = new EvalResult();
+        result.context = resourceName;
+        result.expression = source;
+        //System.out.println("======================================^^^+++++++++++++ resourceName : "+resourceName+" source: "+source);
         try{
             getInterpreter();
             synchronized (m_Interpreter){

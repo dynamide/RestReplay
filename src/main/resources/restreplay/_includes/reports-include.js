@@ -1,4 +1,5 @@
 function toggleDiv(divid){
+function toggleDiv(divid){
     if(document.getElementById(divid).style.display == 'none'){
       document.getElementById(divid).style.display = 'block';
     }else{
@@ -127,8 +128,8 @@ function hideresults(rowid, obj){
             }
         }
         var b = document.querySelectorAll("DIV#"+rowid);
-        for ( t = 0; t < b.length; ++t ) {
-           var div = b[t];
+        for ( var dt = 0; dt < b.length; ++dt ) {
+           var div = b[dt];
             if (expanding){
                 div.style.display = 'block';
             } else {

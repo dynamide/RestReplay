@@ -1232,6 +1232,24 @@ When overriding RunOptions in a master file, consider these two development scen
             within this test are sent to the server.</td>
           </tr>
 
+          <tr>
+              <td>@loop</td>
+
+              <td><i>OPTIONAL. </i> integer.  Default=1. Sets the number of loops to run. Repeats the service call loop times.  Within validators, scripts, and expressions, the value of the current loop
+                  index (zero-based) is <b>this.LoopIndex</b>
+                  <br />
+
+                  Use 0 (zero) to exclude this test. The test will not run or show up in reports.
+                  (NOTE: Normally, you'll want to exclude tests by putting them in another testGroup.)
+
+                  <br />
+                  <br />Example:  (loop 3 times, from loopyTest_0 to loopyTest_2 )
+                  <div class="code">Example:
+                      &lt;test ID="loopyTest" loop="3">...
+                      </div>
+                  </td>
+          </tr>
+
 
           <tr>
             <td>child elements</td>
@@ -1477,20 +1495,35 @@ When overriding RunOptions in a master file, consider these two development scen
 
 <tr>
 <td>Discussion</td>
-<td>The &lt;<strong>mutator</strong>&gt; element loads a Mutator, defined by the <strong>type</strong> attribute.&nbsp; 
-  Current, only type="ExcludeFields" is defined.<br>
-  <br>This mutator (type="ExcludeFields") looks at the JSON for a POST or PUT, and one-by-one removes the top-level fields.&nbsp; 
-  It then executes a request to the server with this mutation and reports results underneath the test, one for each variant.&nbsp; 
-  <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp; 
-  Since this mutator looks at top-level fields, each mutation is named after the missing field.&nbsp; In the example below, mutation 
-  <span style="font-weight: bold;">numOfDrafts</span> expects the server to succeed in the range 200-299.&nbsp; 
-  The mutations <strong>book_id</strong> and&nbsp; <strong>course_id</strong> are expected to be rejected by the server with 
-  response code in the 400-499 and 500-599 ranges.&nbsp; 
-  The default (<strong>*</strong>) is to expect the server to respond to all other named mutations with code 200 in the statement 
-  <b>&lt;code range="200"&gt;*&lt;/code&gt;</b></td>
+<td>The &lt;<strong>mutator</strong>&gt; element loads a Mutator, defined by the <strong>type</strong> attribute.&nbsp;
+  Currently, defined mutators are: "ExcludeFields" and "VarMutator".<br>
+  <br>Mutators look at the JSON for a POST or PUT, and mutates the payload somehow.  They make the mutation ID and Index available.
+  <br />
+    It then executes a request to the server with this mutation and reports results underneath the test, one for each variant.&nbsp;
+  <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
+  Each mutation is named using a strategy of the mutator implementation, and may reflect the index, or a key field.
+    &nbsp; In the example below, mutation
+  <span style="font-weight: bold;">numOfDrafts</span> expects the server to succeed in the range 200-299.&nbsp;
+  The mutations <strong>book_id</strong> and&nbsp; <strong>course_id</strong> are expected to be rejected by the server with
+  response code in the 400-499 and 500-599 ranges.&nbsp;
+  The default (<strong>*</strong>) is to expect the server to respond to all other named mutations with code 200 in the statement
+  <b>&lt;code range="200"&gt;*&lt;/code&gt;</b>
+    <br />
+    <br />
+    See also: <a href="#RestReplay-restReplay.testGroup.test">Looping tests with test@loop</a>
+
+</td>
 <td><br></td></tr>
 <tr>
-<td>Example:</td>
+  <td>ExcludeFields - Discussion</td>
+  <td>This mutator (type="ExcludeFields") looks at the JSON for a POST or PUT, and one-by-one removes the top-level fields.&nbsp;
+      It then executes a request to the server with this mutation and reports results underneath the test, one for each variant.&nbsp;
+      <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
+      Since this mutator looks at top-level fields, each mutation is named after the missing field.&nbsp;
+  </td>
+  <td><br></td></tr>
+<tr>
+<td>ExcludeFields Example:</td>
 <td>
   <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
@@ -1509,6 +1542,53 @@ When overriding RunOptions in a master file, consider these two development scen
   
   
   <td><br></td></tr>
+
+          <tr>
+              <td>VarMutator Example:</td>
+              <td>
+                  VarMutator re-applies the service call, once for each of these vars blocks, which set vars before the call, in the file-order of the vars groups.
+                  IDs are informational strings--set to any alphanumeric string.  Here is an example from the RestReplay self-test.
+                  <div class="code">
+&lt;test ID="selftestUseVarMutator">
+    &lt;expectedCodes>200&lt;/expectedCodes>
+    &lt;method>PUT&lt;/method>
+    &lt;uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300&lt;/uri>
+    &lt;filename>_self_test/var-mutator-test.json&lt;/filename>
+    &lt;vars>
+        &lt;var ID="DAYS">${24*60*60*1000}&lt;/var>
+        &lt;var ID="BASE_DATE">${tools.now()}&lt;/var>
+        &lt;var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}&lt;/var>
+        &lt;var ID="FOOBAR">${this.testID}&lt;/var>
+        &lt;var ID="DueDate2">Due ${BASE_DATE} -basedate&lt;/var>
+        &lt;var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}&lt;/var>
+    &lt;/vars>
+    &lt;mutator type="VarMutator">
+        &lt;expected>
+            &lt;code range="4xx">*&lt;/code>
+        &lt;/expected>
+        &lt;vars ID="0">
+            &lt;var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}&lt;/var>
+            &lt;var idbase="FOOBAR">${this.testID} set in 0.&lt;/var>
+        &lt;/vars>
+        &lt;vars ID="1">
+            &lt;var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}&lt;/var>
+            &lt;var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var>
+        &lt;/vars>
+        &lt;vars ID="2">
+            &lt;var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}&lt;/var>
+            &lt;var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var>
+        &lt;/vars>
+        &lt;vars ID="3">
+            &lt;var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var>
+        &lt;/vars>
+    &lt;/mutator>
+&lt;/test>
+
+                  </div>
+              </td>
+
+
+              <td><br></td></tr>
 <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.parts" id="RestReplay-restReplay.testGroup.test.parts"></a>/restReplay/testGroup/test/parts</td>
           </tr>
@@ -1688,6 +1768,42 @@ When overriding RunOptions in a master file, consider these two development scen
             <br />The script validates the response from the server.  Available to the validator 
                 are the request, response, and everything in the ServiceResult class, and the map of all previously run tests in this test group
                 (in the file order of the control file).</td>
+          </tr>
+
+
+          <tr>
+              <td>variables in context</td>
+              <td><div class="code">
+serviceResult          - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.
+serviceResultsMap      - a map of all previously run tests, kept in insertion order of the tests run.
+                          Key is the ID of the test element.
+this.mutator.getIndex() - zero-based index of which mutation loop this is.
+kit                     - instance of org.dynamide.restreplay.Kit
+tools                     - instance of org.dynamide.util.Tools
+              </div>
+              </td>
+          </tr>
+
+          <tr>
+              <td>Useful methods in context objects</td>
+
+              <td>
+                  These and other public variables are avaiable in the context hanging off the base objects in the context.
+                  See also the javadoc or source for the classes, for example org.dynamide.restreplay.ServiceResult.
+              <div class="code">
+this.mutationID
+this.mutator.getIndex()
+this.testID
+this.testGroupID
+this.testIDLabel
+this.idFromMutator
+this.loopIndex
+this.fullURL
+this.deleteURL
+
+kit.dates.*
+              </div>
+              </td>
           </tr>
 
           <tr>

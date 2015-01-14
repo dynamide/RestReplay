@@ -525,9 +525,8 @@ public class RestReplay extends ConfigFile {
 
                         iIterations = Integer.parseInt(iterations);
                         doingIterations = true;
-                        System.out.println("=============================doing iterations of testNode================>>>" + iIterations);
                     } catch (Throwable t){
-                        System.out.println("======NOT doing iterations because loop expression failed:"+iterations);
+                        System.out.println("\n======NOT doing iterations because loop expression failed:"+iterations+"\n");
                     }
                 }
                 for (int itnum = 0; itnum < iIterations; itnum++) {

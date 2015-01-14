@@ -19,6 +19,14 @@ Building:
       which should be copied to any deployed clients.
 
 =============================================================
+Deploy to Revel/LAS: 
+=============================================================
+   cd ~/src/RestReplay
+   mvn -DskipTests install
+   cd ~/ws/las.ws/las/restreplay
+   ./c
+
+=============================================================
 Running: 
 =============================================================
 For a "qa" environment set up in the master file:

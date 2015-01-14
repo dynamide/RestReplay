@@ -186,8 +186,7 @@ public class DateUtils {
 
     public static String getDayOfMonth(Object millis){
         Date date = new Date(Long.parseLong(millis.toString()));
-        String d = (new SimpleDateFormat("DD")).format(date);
-        System.out.println("==========================>>>>>>>>>>>>>>>>>>"+d);
+        String d = (new SimpleDateFormat("dd")).format(date);
         return d;
     }
 

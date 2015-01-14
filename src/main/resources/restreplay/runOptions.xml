@@ -11,7 +11,7 @@
     <socketTimeout>7007</socketTimeout>
     <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
     <acceptAlertLevel>OK</acceptAlertLevel>
-    <failTestOnWarnings>true</failTestOnWarnings>
+    <failTestOnWarnings>false</failTestOnWarnings>
     <failTestOnErrors>true</failTestOnErrors>
     <dumpResourceManagerSummary>false</dumpResourceManagerSummary>
     <skipMutators>false</skipMutators>
