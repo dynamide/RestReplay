@@ -6,7 +6,7 @@
 
     <testGroup ID="login" autoDeletePOSTS="false">
         <test ID="selftestToken">
-            <expectedCodes>200</expectedCodes>
+
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
@@ -19,12 +19,11 @@
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
         <test ID="selftestToken">
-            <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
         <test ID="selftest1">
-            <expectedCodes>200</expectedCodes>
+
             <expected>
                  <code range="3x"/>
                  <code range="1x"/>
@@ -37,7 +36,6 @@
             </vars>
         </test>
         <test ID="selftestUseMutator">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/content-mutator-test.json</filename>
@@ -50,7 +48,6 @@
             </mutator>
         </test>
         <test ID="selftestUseToken">
-            <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=true&amp;name=selftestUseToken</uri>
             <headers>
@@ -59,7 +56,6 @@
             </headers>
         </test>
         <test ID="selftestUseTokenPOST">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-token-post.json</filename>
@@ -68,7 +64,6 @@
             </vars>
         </test>
         <test ID="selftestUseTokenPUT">
-            <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
             <filename>_self_test/content-mutator-test.json</filename>
@@ -79,18 +74,18 @@
             </mutator>
         </test>
         <test ID="selftestUseTokenDELETE">
-            <expectedCodes>200</expectedCodes>
             <method>DELETE</method>
             <uri>/tagonomy?mock=true</uri>
         </test>
         <test ID="selftest501">
-            <expectedCodes>501</expectedCodes>
+            <expected>
+                <code range="501"/>
+            </expected>
             <method>PUT</method>
             <uri>/tagonomy?mock=501</uri>
             <filename>_self_test/content-mutator-test.json</filename>
         </test>
         <test ID="selftestScriptTest">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-mutator.json</filename>
@@ -113,7 +108,6 @@
             </exports>
         </test>
        <test ID="selftestUseValidator">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -125,7 +119,6 @@
             </response>
         </test> 
         <test ID="selftestUseValidatorExpectErrors">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -137,7 +130,6 @@
             </response>
         </test> 
         <test ID="selftestEmptyExpectedResponseFile">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -149,7 +141,6 @@
             </response>
         </test>
         <test ID="selftestUseVarMutator">
-            <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
             <filename>_self_test/var-mutator-test.json</filename>
@@ -177,7 +168,6 @@
     <testGroup ID="debug"  autoDeletePOSTS="false">
 
         <test ID="selftestUseVarMutator">
-            <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
             <filename>_self_test/var-mutator-test.json</filename>
@@ -213,7 +203,6 @@
 
 
         <test ID="selftestUseTokenPUT">
-            <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
             <filename>_self_test/selftest-mutator.json</filename>
@@ -238,7 +227,6 @@
                  parent so it doesn't display correctly, and the children seem like top-level tests.
                  Trace this to the code that breaks on the error and trap the error correctly.
             -->
-            <expectedCodes>200</expectedCodes>
             <method>PUT</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-mutator.json</filename>
@@ -258,14 +246,12 @@
             </exports>
         </test>
         <test ID="selftestUseData"  autoDeletePOSTS="false">
-            <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(selftestUseTokenPUTbugs.result)}</uri>
         </test>
 
         <test ID="selftestUseToken">
             <!-- this one works above, but had this warning comment.  If you need to look into it, the case and the comment are here.-->
-            <expectedCodes>200</expectedCodes>
             <method>GET</method>
             <uri>/tagonomy?mock=true&amp;name=selftestUseToken</uri>
             <headers>
@@ -283,7 +269,6 @@
 
     <testGroup ID="debugScript">
         <test ID="selftestReturnTest">
-            <expectedCodes>200</expectedCodes>
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-mutator.json</filename>

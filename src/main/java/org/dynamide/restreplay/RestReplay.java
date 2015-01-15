@@ -984,12 +984,14 @@ public class RestReplay extends ConfigFile {
 
                     ServiceResult holdThis = serviceResultsMap.get("this");
                     try {
-                        ServiceResult childResult = new ServiceResult(getRunOptions());
-                        serviceResult.addChild(childResult);
-                        serviceResultsMap.put("this", childResult);
-                        childResult.mutator = mutator;
+                        ServiceResult childResult;
                         String content = mutator.mutate(mutatorScopeVars);
                         while (content != null) {
+                            childResult = new ServiceResult(getRunOptions());
+                            serviceResult.addChild(childResult);
+                            serviceResultsMap.put("this", childResult);
+                            childResult.mutator = mutator;
+
                             executeTestNode(
                                     childResult,
                                     content,  //only in a mutation is this parameter sent.  We are sending it here.
@@ -1008,16 +1010,10 @@ public class RestReplay extends ConfigFile {
                                     report,//RestReplayReport
                                     test.results);//List<ServiceResult> results)
 
-                            childResult = new ServiceResult(getRunOptions());
-                            serviceResult.addChild(childResult);
-                            serviceResultsMap.put("this", childResult);
-                            childResult.mutator = mutator;
-
                             content = mutator.mutate(mutatorScopeVars);
                         }
                     } finally {
                         if (holdThis != null) serviceResultsMap.put("this", holdThis);
-
                     }
                 } catch (Exception e){
                     serviceResult.addAlert("Could not create ContentMutator from factory",  Tools.getStackTrace(e), LEVEL.ERROR);

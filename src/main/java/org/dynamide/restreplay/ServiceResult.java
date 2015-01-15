@@ -145,7 +145,8 @@ public class ServiceResult {
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
     public List<Range> ranges = new ArrayList<Range>();
-
+    public final static Range DEFAULT_SUCCESS_RANGE = new Range("2x");
+    /** if xml sets no expectedCodes AND sets no expected/code nodes, then DEFAULT_SUCCESS_RANGE is used. */
     public void initExpectedCodeRanges(Node testNode) {
         List<Node> nodes = testNode.selectNodes("expected/code");
         for (Node codeNode : nodes) {
@@ -342,6 +343,13 @@ public class ServiceResult {
                 ServiceResult p = this.getParent();
                 expectedCodesFrom = p.expectedCodes;
                 gotExpectedResultBecause = " parent["+p.testID+']';
+            }
+        }
+
+        if (ranges.size()==0 && expectedCodesFrom.size()==0){
+            if (DEFAULT_SUCCESS_RANGE.valueInRange(responseCode)){
+                failureReason = "";
+                return isDomWalkOK();
             }
         }
 
