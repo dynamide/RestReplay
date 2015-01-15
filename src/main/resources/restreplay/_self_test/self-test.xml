@@ -25,6 +25,11 @@
         </test>
         <test ID="selftest1">
             <expectedCodes>200</expectedCodes>
+            <expected>
+                 <code range="3x"/>
+                 <code range="1x"/>
+                 <code range="2x">All</code>
+            </expected>
             <method>GET</method>
             <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
             <vars>

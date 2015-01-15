@@ -1,6 +1,7 @@
 package org.dynamide.restreplay;
 
 import org.apache.commons.httpclient.Header;
+import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
 import org.dynamide.restreplay.mutators.ContentMutator;
 import org.dynamide.restreplay.mutators.IMutator;
@@ -143,6 +144,17 @@ public class ServiceResult {
     public Header[] responseHeaders = new Header[0];
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Integer> expectedCodes = new ArrayList<Integer>();
+    public List<Range> ranges = new ArrayList<Range>();
+
+    public void initExpectedCodeRanges(Node testNode) {
+        List<Node> nodes = testNode.selectNodes("expected/code");
+        for (Node codeNode : nodes) {
+            Range range = new Range(codeNode.valueOf("@range"));
+            ranges.add(range);
+        }
+    }
+
+
     private transient String currentValidatorContextName = "";
     public String getCurrentValidatorContextName(){
         return currentValidatorContextName;
@@ -333,6 +345,16 @@ public class ServiceResult {
             }
         }
 
+        for (Range range: ranges){
+            System.out.println(this.testID+" range "+range);
+            if (range.valueInRange(responseCode)){
+                System.out.println(this.testID+" responseCode: "+responseCode+" is IN range: "+range);
+                failureReason = "";
+                gotExpectedResultBecause += " range: "+range;
+                return isDomWalkOK();
+            }
+        }
+
         for (Integer oneExpected : expectedCodesFrom){
             if (responseCode == oneExpected){
                 failureReason = "";
@@ -424,13 +446,15 @@ public class ServiceResult {
     public String minimal(boolean verbosePartsSummary){
         int warnings = alertsCount(Alert.LEVEL.WARN);
         int errors =   alertsCount(Alert.LEVEL.ERROR);
+        String expected = (expectedCodes.size()>0 ? "; expected:"+expectedCodes : "");
+        if (ranges.size()>0){ expected = "; expected:"+ranges; }
         return "{"
                 + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )
                 + failureReason
                 + ( Tools.notEmpty(testID) ? "; "+testID : "" )
                 +"; "+method
                 +"; "+responseCode
-                + (expectedCodes.size()>0 ? "; expected:"+expectedCodes : "")
+                + expected
                 + ( errors>0 ? "; ERRORS:"+errors : "" )
                 + ( warnings>0 ? "; WARNINGS:"+warnings : "" )
                 + ( Tools.notEmpty(responseMessage) ? "; msg:"+responseMessage : "" )

@@ -174,7 +174,7 @@ public class RestReplayReport {
                 numWarnings += childResult.alertsCount(LEVEL.ERROR);
             }
             assert numResults == serviceResult.getChildResults().size();
-            String rowid = "childresults_" + serviceResult.testID;
+            String rowid = "childresults_" + serviceResult.testGroupID+'_'+serviceResult.testID;
             //Don't change parentage of these tags, there is javascript that does el.parentElement.parentElement.
             block.tocHTML = "<span class='childResults' onclick='hideresults(\"" + rowid + "\", this);'>"
                     + "<table id='" + rowid + "' class='child-results-summary'>"
@@ -710,7 +710,9 @@ public class RestReplayReport {
 
     private String formatResponseCodeBlock(ServiceResult s){
         String sExpected = "";
-        if (s.expectedCodes.size() > 0) {
+        if (s.ranges.size()>0) {
+            sExpected = lbl("  expected")+s.ranges;
+        } else if  (s.expectedCodes.size() > 0) {
             sExpected = lbl("  expected") + s.expectedCodes;
             //+ small("  from "+s.gotExpectedResultBecause);
         }

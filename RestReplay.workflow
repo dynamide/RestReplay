@@ -22,7 +22,7 @@ Building:
 Deploy to Revel/LAS: 
 =============================================================
    cd ~/src/RestReplay
-   mvn -DskipTests install
+   mvn -o -DskipTests install
    cd ~/ws/las.ws/las/restreplay
    ./c
 

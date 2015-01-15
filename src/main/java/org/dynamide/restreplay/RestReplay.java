@@ -695,6 +695,8 @@ public class RestReplay extends ConfigFile {
                     }
                 }
                 serviceResult.expectedCodes = expectedCodes;
+
+                serviceResult.initExpectedCodeRanges(testNode);
             }
 
             Node responseNode = testNode.selectSingleNode("response");
