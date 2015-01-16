@@ -5,6 +5,7 @@
 
 
 
+
   <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
   
 
@@ -747,6 +748,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
@@ -1323,6 +1325,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <div class="code">
 &lt;!-- Set up permissions and account, and test bigbird2010 --&gt;
 &lt;test ID="permBigbird" auth="admin@example.org"&gt;
@@ -1388,6 +1391,7 @@ When overriding RunOptions in a master file, consider these two development scen
               Here are other range examples: 
                   
               
+
 
 
 <div class="code"> &lt;code range="100" /&gt;
@@ -1515,6 +1519,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <div class="code">
     &lt;uri&gt;/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri&gt;
                 </div>
@@ -1595,6 +1600,7 @@ When overriding RunOptions in a master file, consider these two development scen
   
   Example showing default wildcard.  Mutations that are not book_id, and course_id are expected to get a 200 response code:
   
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1610,14 +1616,15 @@ When overriding RunOptions in a master file, consider these two development scen
   
   This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
   
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
     &lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;
     &lt;mutator type="ExcludeFields"&gt;
         &lt;expected&gt;
-            &lt;code range="200"&gt;*&lt;/code&gt;;
-            &lt;code range="202" /&gt;
+            &lt;code range="200"&gt;*&lt;/code&gt;
+            &lt;code range="202" /&gt;<span style="color: #cc0000;">&lt;!-- error: this will be a duplicate for * --&gt;</span>
             &lt;code range="400-499,500-599"&gt;book_id, course_id&lt;/code&gt;
         &lt;/expected&gt;
     &lt;/mutator&gt;
@@ -1634,6 +1641,7 @@ When overriding RunOptions in a master file, consider these two development scen
                   VarMutator re-applies the service call, once for each of these vars blocks, which set vars before the call, in the file-order of the vars groups.
                   IDs are informational strings--set to any alphanumeric string.  Here is an example from the RestReplay self-test.
                   
+
 
 
 
@@ -1783,6 +1791,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -1796,6 +1805,7 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
 
 
 
@@ -1899,6 +1909,7 @@ tools                     - instance of org.dynamide.util.Tools
 
 
 
+
 <div class="code">
 this.mutationID
 this.mutator.getIndex()
@@ -1983,6 +1994,7 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+
 
 
 
