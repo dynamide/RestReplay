@@ -686,16 +686,6 @@ public class RestReplay extends ConfigFile {
             serviceResult.protoHostPort = oneProtoHostPort;
 
             if (mutator == null) {
-                List<Integer> expectedCodes = new ArrayList<Integer>();
-                String expectedCodesStr = testNode.valueOf("expectedCodes");
-                if (Tools.notEmpty(expectedCodesStr)) {
-                    String[] codesArray = expectedCodesStr.split(",");
-                    for (String code : codesArray) {
-                        expectedCodes.add(new Integer(code.trim()));
-                    }
-                }
-                serviceResult.expectedCodes = expectedCodes;
-
                 serviceResult.initExpectedCodeRanges(testNode);
             }
 

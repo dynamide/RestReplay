@@ -143,10 +143,9 @@ public class ServiceResult {
     public Map<String,String> headerMap = new LinkedHashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
     public Header[] responseHeaders = new Header[0];
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
-    public List<Integer> expectedCodes = new ArrayList<Integer>();
     public List<Range> ranges = new ArrayList<Range>();
     public final static Range DEFAULT_SUCCESS_RANGE = new Range("2x");
-    /** if xml sets no expectedCodes AND sets no expected/code nodes, then DEFAULT_SUCCESS_RANGE is used. */
+    /** if xml sets no expected/code nodes, then DEFAULT_SUCCESS_RANGE is used. */
     public void initExpectedCodeRanges(Node testNode) {
         List<Node> nodes = testNode.selectNodes("expected/code");
         for (Node codeNode : nodes) {
@@ -407,7 +406,7 @@ public class ServiceResult {
                 + failureReason
                 +"; "+method
                 +"; "+responseCode
-                + ( (expectedCodes.size()>0) ? "; expectedCodes:"+expectedCodes : "" )
+                + ( (ranges.size()>0) ? "; expected:"+ranges : "" )
                 + ( Tools.notEmpty(testID) ? "; testID:"+testID : "" )
                 + ( Tools.notEmpty(testGroupID) ? "; testGroupID:"+testGroupID : "" )
                 + ( Tools.notEmpty(fromTestID) ? "; fromTestID:"+fromTestID : "" )
@@ -436,7 +435,7 @@ public class ServiceResult {
     public String minimal(boolean verbosePartsSummary){
         int warnings = alertsCount(Alert.LEVEL.WARN);
         int errors =   alertsCount(Alert.LEVEL.ERROR);
-        String expected = (expectedCodes.size()>0 ? "; expected:"+expectedCodes : "");
+        String expected = "";
         if (ranges.size()>0){ expected = "; expected:"+ranges; }
         return "{"
                 + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )

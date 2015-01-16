@@ -4,6 +4,7 @@
 <meta content="text/html; charset=us-ascii" http-equiv="content-type">
 
 
+
   <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
   
 
@@ -160,7 +161,7 @@
 
         <li>Multiple tests can be grouped in a testGroup element, and each test may refer to previous tests within testGroup.</li>
 
-        <li>Automatic cleanup of resources allocated within a testGroup.</li>
+        <li>Optional Automatic cleanup of resources allocated within a testGroup.</li>
 
         <li>Send and receive JSON and XML payloads or MIME-multipart payloads.</li>
 
@@ -169,6 +170,7 @@
         <li>Variable expansion in: URLs, headers, request payloads, and response payloads.</li>
 
         <li>Simple reporting of results on console and in surefire reports.</li>
+<li>Full reporting of results in html report output directory.</li>
 
         <li>Programmatic interface for driving the tests and testGroups, and for finer control of reporting and cleanup.</li>
       </ul>
@@ -197,7 +199,7 @@
 
       See the full example of how to run maven's exec:java with command line parameters here:
     <a href="https://github.com/dynamide/RestReplay/blob/master/pom.xml">https://github.com/dynamide/RestReplay/blob/master/pom.xml</a>
-      <p></p>
+      
 
       <p>Within the RestReplay directory, there are various <b>master</b> files, some control files, and directories for each service.
           You can select a particular master with the command line parameter -<strong>restReplayMaster</strong></p>
@@ -246,7 +248,7 @@
 <p>
       You may also programmatically call RestReplay, in which case you can programmatically control cleanup of individual tests. See "<a href="#RestReplay-2.c.4Cleanup">2.c.4 Cleanup</a>"</p>
 
-      <p>Finally, results are aggregated and spit out to the command line console, and/or to reports. You can customize how verbose these results are using the "dump" node in the <b>master</b> file.</p>
+      <p>Finally, results are aggregated and spit out to the command line console, and/or to reports. You can customize how verbose these results are using the "dump" node in the <b>master</b> file.&nbsp; Regardless of dump settings, all results go to the stand-alone html reports.</p>
 
       <p>If all <strong>testGroup</strong>s and all tests succeed, then RestReplay tells maven surefire that the suite succeeded. Otherwise, maven surefire is told that the suite failed. In this case, you may examine the console, or look at the maven surefire report, which will contain a tabular summary of all testGroups and tests. You may have to click "show all results" in the maven surefire report.</p>
 
@@ -394,7 +396,13 @@
     
       <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -testdir ./tests \<br> -control pi/pitoken.xml \<br> -testGroup main \<br> -test pitoken
       </div>
-      <p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/rest-replay-reports)</p>
+      <p><br></p>
+<p>In this run, we are running with a -master and a -control, AND a -testGroup.&nbsp; This runs only that testGroup, but picks up vars and headers from the master.</p>
+          <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br>  -testdir ./tests \<br>  -master my-master.xml <br>  -control myservice/myservice.xml \<br>  -testGroup deleteAllWidgets
+      </div>
+      
+<p><br></p>
+<p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/rest-replay-reports)</p>
       
       <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -testdir ./tests \<br> -master master.xml \<br> -reports ./myreports
       </div>
@@ -459,9 +467,8 @@
           <tr>
               <td>@dumpServiceResult</td>
 
-              <td>minimal - a one-line display<br>
-                  detailed - enough information to debug<br>
-                  full - more verbose, includes payloads</td>
+              <td>auto - like detailed, but always shows payloads if there is an error<br>full - like detailed, but defaults to showing payloads<br>detailed - enough information to debug<br>minimal - a one-line display<br>
+                  </td>
           </tr>
 
           <tr>
@@ -581,7 +588,7 @@
 
           <tr>
 <td>acceptAlertLevel</td>
-<td>A String without quotes, one of: OK, WARN, ERROR.&nbsp; (As defined in Alert.LEVEL enum.)  <br /><i><b>[Not implemented.  When implemented, will abort the testGroup or Master run if Warnings or Errors occur in individual tests.]</b></i> </td></tr>
+<td>A String without quotes, one of: OK, WARN, ERROR.&nbsp; (As defined in Alert.LEVEL enum.)  <br><i><b>[Not implemented.  When implemented, will abort the testGroup or Master run if Warnings or Errors occur in individual tests.]</b></i> </td></tr>
 <tr>
 <td>failTestOnWarnings</td>
 <td>boolean: true|false.&nbsp; Simply overrides display of SUCCESS to be FAILURE for a test if there are any warnings.&nbsp; Warnings come from things like variables that are not defined but are used in expressions.&nbsp; Does not abort testGroup or Master runs.</td></tr>
@@ -698,14 +705,12 @@ When overriding RunOptions in a master file, consider these two development scen
         &lt;testGroup ID="mainTestGroup" autoDeletePOSTS="false"&gt;
 
             &lt;test ID="pitoken"&gt;
-                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
                 &lt;method&gt;POST&lt;/method&gt;
                 &lt;uri&gt;<b>${PISERVER}</b>/v1/piapi-int/tokens&lt;/uri&gt;
                 &lt;filename&gt;pitoken.json&lt;/filename&gt;
             &lt;/test&gt;
 
             &lt;test ID="createAssignment"&gt;
-                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
                 &lt;method&gt;POST&lt;/method&gt;
                 &lt;uri&gt;<b>${SNOOPSERVER}</b>/las-api/api/grid-apex/assignments&lt;/uri&gt;
                 &lt;filename&gt;create-assignment.json&lt;/filename&gt;
@@ -713,7 +718,6 @@ When overriding RunOptions in a master file, consider these two development scen
             &lt;/test&gt;
 
             &lt;test ID="getAssignments"&gt;
-                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
                 &lt;method&gt;GET&lt;/method&gt;
                 &lt;uri&gt;/las-api/api/grid-apex/assignments&lt;/uri&gt;
                 &lt;filename&gt;create-assignment.json&lt;/filename&gt;
@@ -730,6 +734,12 @@ When overriding RunOptions in a master file, consider these two development scen
           getAssignments will go against LASSERVER:      http://localhost:8080
           pitoken will go against PISERVER               http://piserver.example.com
    
+
+
+
+
+
+
 
 
 
@@ -755,7 +765,6 @@ When overriding RunOptions in a master file, consider these two development scen
         &lt;restReplay&gt;
           &lt;testGroup ID="secondTestGroup" autoDeletePOSTS="false"&gt;
             &lt;test ID="getAssignments"&gt;
-                &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
                 &lt;method&gt;GET&lt;/method&gt;
                 &lt;uri&gt;/las-api/api/grid-apex/assignments&lt;/uri&gt;
                 &lt;filename&gt;create-assignment.json&lt;/filename&gt;
@@ -926,10 +935,11 @@ When overriding RunOptions in a master file, consider these two development scen
           &lt;<a href="#RestReplay-restReplay.testGroup.test">test</a>&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.method">method</a> /&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a> /&gt;
-              &lt;<a href="#RestReplay-restReplay.testGroup.test.filename">filename</a> /&gt;
-              &lt;<a title="mutator" href="#RestReplay-restReplay.testGroup.test.mutator">mutator</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.filename">filename</a> /&gt;<br>              &lt;<a href="#RestReplay-restReplay.testGroup.test.expected.code">expected</a>&gt;
+                &lt;<a href="#RestReplay-restReplay.testGroup.test.expected.code">code</a> /&gt;
+              &lt;/expected&gt;<br>             &nbsp;&lt;<a title="mutator" href="#RestReplay-restReplay.testGroup.test.mutator">mutator</a>&gt;
                   &lt;expected&gt;
-                    &lt;code /&gt;
+                    &lt;<a href="#RestReplay-restReplay.testGroup.test.mutator">code</a> /&gt;
                   &lt;/expected&gt;
               &lt;/mutator&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.vars.var">vars</a>&gt;
@@ -1115,7 +1125,6 @@ When overriding RunOptions in a master file, consider these two development scen
         &lt;/vars&gt;
         ...
         &lt;test ID="getAssignments"&gt;
-            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
             &lt;method&gt;GET&lt;/method&gt;
             &lt;uri&gt;/las-api/api/grid-apex/courses/<b>${COURSE_ID}</b>/assignments&lt;/uri&gt;
               </div>
@@ -1147,7 +1156,6 @@ When overriding RunOptions in a master file, consider these two development scen
 
         &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
             <b>&lt;-- Will NOT inherit headers --&gt;</b>
-            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
             &lt;method&gt;POST&lt;/method&gt;
             &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
             &lt;filename&gt;pitoken.json&lt;/filename&gt;
@@ -1155,7 +1163,6 @@ When overriding RunOptions in a master file, consider these two development scen
         
         &lt;test ID="deleteTemplate"&gt;
             <b>&lt;-- Will inherit headers: X-ApiKey and x-authorization --&gt;</b>
-            &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
             &lt;method&gt;DELETE&lt;/method&gt;
             &lt;uri&gt;/las-api/api/grid-apex/courses/${COURSE_ID}/templates/${TEMPLATE_ID}&lt;/uri&gt;
         &lt;/test&gt;
@@ -1181,7 +1188,6 @@ When overriding RunOptions in a master file, consider these two development scen
           &lt;/vars&gt;
 
           &lt;test ID="pitoken" <span class="note1">inheritHeaders="false"</span>&gt;
-              &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
               &lt;method&gt;POST&lt;/method&gt;
               &lt;uri&gt;${PISERVER}/v1/piapi-int/tokens&lt;/uri&gt;
               &lt;filename&gt;pitoken.json&lt;/filename&gt;
@@ -1237,15 +1243,15 @@ When overriding RunOptions in a master file, consider these two development scen
 
               <td><i>OPTIONAL. </i> integer.  Default=1. Sets the number of loops to run. Repeats the service call loop times.  Within validators, scripts, and expressions, the value of the current loop
                   index (zero-based) is <b>this.LoopIndex</b>
-                  <br />
+                  <br>
 
                   Use 0 (zero) to exclude this test. The test will not run or show up in reports.
                   (NOTE: Normally, you'll want to exclude tests by putting them in another testGroup.)
 
-                  <br />
-                  <br />Example:  (loop 3 times, from loopyTest_0 to loopyTest_2 )
+                  <br>
+                  <br>Example:  (loop 3 times, from loopyTest_0 to loopyTest_2 )
                   <div class="code">Example:
-                      &lt;test ID="loopyTest" loop="3">...
+                      &lt;test ID="loopyTest" loop="3"&gt;...
                       </div>
                   </td>
           </tr>
@@ -1255,7 +1261,7 @@ When overriding RunOptions in a master file, consider these two development scen
             <td>child elements</td>
 
             <td>method<br>
-            uri<br>
+            uri<br>expected<br>
             part<br>
             parts</td>
           </tr>
@@ -1286,6 +1292,12 @@ When overriding RunOptions in a master file, consider these two development scen
               and "dimension1" and "dimension1" tests are run as user bigbird2010.
 
               
+
+
+
+
+
+
 
 
 
@@ -1345,19 +1357,58 @@ When overriding RunOptions in a master file, consider these two development scen
           
           
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.vars.var" 
-                                                      id="RestReplay-restReplay.testGroup.test.vars.var"></a>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.vars.var" id="RestReplay-restReplay.testGroup.test.vars.var"></a>
              /restReplay/testGroup/test/vars/var</td>
           </tr>
           <tr>
             <td>var</td>
+            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a>, but limited to one test</td></tr>
+            <tr>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.expected.code" id="RestReplay-restReplay.testGroup.test.expected.code"></a>
+              /restReplay/testGroup/test/expected/code</td>
+            <td><br></td></tr>
+            <tr>
+            <td>code</td>
 
-            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a>, but limited to one test</td>
+            <td>zero to many <strong>&lt;code range="" /&gt; </strong>elements.&nbsp; The child or text of this element may be empty when this is a child of <strong>test</strong>, and not a child of <strong>mutator</strong>. <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
+  In the example below, mutation
+  <span style="font-weight: bold;">numOfDrafts</span> expects the server to succeed in the range 200-299.&nbsp;
+  If you don't specify test/expected/code/ then the default is as though you specified
+  <b>&lt;expected&gt;&lt;code range="2x"/&gt;&lt;/expected&gt;</b>
+    <br><br>
+  <div class="code">&lt;test ID="specificCodes"&gt;
+    &lt;method&gt;GET&lt;/method&gt;<br>   &nbsp;&lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
+    &lt;expected&gt;  <br>            &lt;code range="200" /&gt;
+            &lt;code range="202,204-206" /&gt;
+    &lt;/expected&gt;    <br>&lt;/test&gt;  </div>
+              
+              These ranges work like printer page ranges: from-to, inclusive.  x or X or XX or xx are all wildcards for the http response code groups,
+              so 2X and 2xx both expand to 200-299.  range="200" only succeeds if server sends exactly 200, but range="2x" succeeds if server sends 
+              a 200, a 201, a 202, and so on. 
+              Here are other range examples: 
+                  
+              
+
+
+<div class="code"> &lt;code range="100" /&gt;
+ &lt;code range="1xx" /&gt;
+ &lt;code range="2xx" /&gt;
+ &lt;code range="2x" /&gt;
+ &lt;code range="2XX" /&gt;
+ &lt;code range="2X" /&gt;
+ &lt;code range="3xx" /&gt;
+ &lt;code range="2xx" /&gt;
+ &lt;code range="4xx" /&gt;
+ &lt;code range="5xx" /&gt;
+ &lt;code range="100,200,300" /&gt;
+ &lt;code range="100-400" /&gt;
+ &lt;code range="202,204-206" /&gt;
+ &lt;code range="100-201,300-399,404-499" /&gt;</div>
+              </td>
           </tr>
           
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.headers.header" 
-                                                     id="RestReplay-restReplay.testGroup.test.headers.header"></a>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.headers.header" id="RestReplay-restReplay.testGroup.test.headers.header"></a>
               /restReplay/testGroup/test/headers/header</td>
           </tr>
           <tr>
@@ -1366,8 +1417,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.exports" 
-                                                     id="RestReplay-restReplay.testGroup.test.exports"></a>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.exports" id="RestReplay-restReplay.testGroup.test.exports"></a>
                /restReplay/testGroup/test/exports</td>
           </tr>
           <tr>
@@ -1378,12 +1428,11 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
             <td>child elements</td>
-            <td>vars<br />vars/var  - The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a></td>
+            <td>vars<br>vars/var  - The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a></td>
           </tr>
           
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.exports.vars.var" 
-                                                     id="RestReplay-restReplay.testGroup.test.exports.vars.var"></a>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.exports.vars.var" id="RestReplay-restReplay.testGroup.test.exports.vars.var"></a>
              /restReplay/testGroup/test/exports/vars/var</td>
           </tr>
           <tr>
@@ -1460,6 +1509,12 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
 <div class="code">
     &lt;uri&gt;/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri&gt;
                 </div>
@@ -1498,7 +1553,7 @@ When overriding RunOptions in a master file, consider these two development scen
 <td>The &lt;<strong>mutator</strong>&gt; element loads a Mutator, defined by the <strong>type</strong> attribute.&nbsp;
   Currently, defined mutators are: "ExcludeFields" and "VarMutator".<br>
   <br>Mutators look at the JSON for a POST or PUT, and mutates the payload somehow.  They make the mutation ID and Index available.
-  <br />
+  <br>
     It then executes a request to the server with this mutation and reports results underneath the test, one for each variant.&nbsp;
   <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
   Each mutation is named using a strategy of the mutator implementation, and may reflect the index, or a key field.
@@ -1508,8 +1563,8 @@ When overriding RunOptions in a master file, consider these two development scen
   response code in the 400-499 and 500-599 ranges.&nbsp;
   The default (<strong>*</strong>) is to expect the server to respond to all other named mutations with code 200 in the statement
   <b>&lt;code range="200"&gt;*&lt;/code&gt;</b>
-    <br />
-    <br />
+    <br>
+    <br>
     See also: <a href="#RestReplay-restReplay.testGroup.test">Looping tests with test@loop</a>
 
 </td>
@@ -1519,14 +1574,12 @@ When overriding RunOptions in a master file, consider these two development scen
   <td>This mutator (type="ExcludeFields") looks at the JSON for a POST or PUT, and one-by-one removes the top-level fields.&nbsp;
       It then executes a request to the server with this mutation and reports results underneath the test, one for each variant.&nbsp;
       <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
-      Since this mutator looks at top-level fields, each mutation is named after the missing field.&nbsp;
-  </td>
+      Since this mutator looks at top-level fields, each mutation is named after the missing field.&nbsp;Note that when <strong>expected/code</strong> nodes are used under <strong>mutator</strong> elements, then <strong>code</strong> must contain mutation ids, or the wildcard (*).&nbsp; If you omit the id or the wildcard, that code range will default as though you <em>had</em> used * and will conflict with any other wildcard code ranges.</td>
   <td><br></td></tr>
 <tr>
-<td>ExcludeFields Example:</td>
+<td><a name="test.mutator.expected.code"></a>ExcludeFields Example:</td>
 <td>
   <div class="code">&lt;test ID="dynamideUseMutator"&gt;
-    &lt;expectedCodes&gt;200&lt;/expectedCodes&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
     &lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;
@@ -1538,7 +1591,39 @@ When overriding RunOptions in a master file, consider these two development scen
         &lt;/expected&gt;
     &lt;/mutator&gt;
 &lt;/test&gt;
-  </div></td>
+  </div>
+  
+  Example showing default wildcard.  Mutations that are not book_id, and course_id are expected to get a 200 response code:
+  
+<div class="code">&lt;test ID="dynamideUseMutator"&gt;
+    &lt;method&gt;POST&lt;/method&gt;
+    &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
+    &lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;
+    &lt;mutator type="ExcludeFields"&gt;
+        &lt;expected&gt;
+            &lt;code range="200" /&gt;
+            &lt;code range="400-499,500-599"&gt;book_id, course_id&lt;/code&gt;
+        &lt;/expected&gt;
+    &lt;/mutator&gt;
+&lt;/test&gt;
+  </div>
+  
+  This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
+  
+<div class="code">&lt;test ID="dynamideUseMutator"&gt;
+    &lt;method&gt;POST&lt;/method&gt;
+    &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
+    &lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;
+    &lt;mutator type="ExcludeFields"&gt;
+        &lt;expected&gt;
+            &lt;code range="200"&gt;*&lt;/code&gt;;
+            &lt;code range="202" /&gt;
+            &lt;code range="400-499,500-599"&gt;book_id, course_id&lt;/code&gt;
+        &lt;/expected&gt;
+    &lt;/mutator&gt;
+&lt;/test&gt;
+  </div>
+  </td>
   
   
   <td><br></td></tr>
@@ -1548,41 +1633,46 @@ When overriding RunOptions in a master file, consider these two development scen
               <td>
                   VarMutator re-applies the service call, once for each of these vars blocks, which set vars before the call, in the file-order of the vars groups.
                   IDs are informational strings--set to any alphanumeric string.  Here is an example from the RestReplay self-test.
-                  <div class="code">
-&lt;test ID="selftestUseVarMutator">
-    &lt;expectedCodes>200&lt;/expectedCodes>
-    &lt;method>PUT&lt;/method>
-    &lt;uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300&lt;/uri>
-    &lt;filename>_self_test/var-mutator-test.json&lt;/filename>
-    &lt;vars>
-        &lt;var ID="DAYS">${24*60*60*1000}&lt;/var>
-        &lt;var ID="BASE_DATE">${tools.now()}&lt;/var>
-        &lt;var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}&lt;/var>
-        &lt;var ID="FOOBAR">${this.testID}&lt;/var>
-        &lt;var ID="DueDate2">Due ${BASE_DATE} -basedate&lt;/var>
-        &lt;var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}&lt;/var>
-    &lt;/vars>
-    &lt;mutator type="VarMutator">
-        &lt;expected>
-            &lt;code range="4xx">*&lt;/code>
-        &lt;/expected>
-        &lt;vars ID="0">
-            &lt;var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}&lt;/var>
-            &lt;var idbase="FOOBAR">${this.testID} set in 0.&lt;/var>
-        &lt;/vars>
-        &lt;vars ID="1">
-            &lt;var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}&lt;/var>
-            &lt;var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var>
-        &lt;/vars>
-        &lt;vars ID="2">
-            &lt;var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}&lt;/var>
-            &lt;var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var>
-        &lt;/vars>
-        &lt;vars ID="3">
-            &lt;var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var>
-        &lt;/vars>
-    &lt;/mutator>
-&lt;/test>
+                  
+
+
+
+
+
+<div class="code">
+&lt;test ID="selftestUseVarMutator"&gt;
+    &lt;method&gt;PUT&lt;/method&gt;
+    &lt;uri&gt;/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300&lt;/uri&gt;
+    &lt;filename&gt;_self_test/var-mutator-test.json&lt;/filename&gt;
+    &lt;vars&gt;
+        &lt;var ID="DAYS"&gt;${24*60*60*1000}&lt;/var&gt;
+        &lt;var ID="BASE_DATE"&gt;${tools.now()}&lt;/var&gt;
+        &lt;var ID="DUE_DATE_MILLIS"&gt;${BASE_DATE +0 * DAYS}&lt;/var&gt;
+        &lt;var ID="FOOBAR"&gt;${this.testID}&lt;/var&gt;
+        &lt;var ID="DueDate2"&gt;Due ${BASE_DATE} -basedate&lt;/var&gt;
+        &lt;var ID="DueDate"&gt;Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}&lt;/var&gt;
+    &lt;/vars&gt;
+    &lt;mutator type="VarMutator"&gt;
+        &lt;expected&gt;
+            &lt;code range="4xx"&gt;*&lt;/code&gt;
+        &lt;/expected&gt;
+        &lt;vars ID="0"&gt;
+            &lt;var idbase="DUE_DATE_MILLIS"&gt;${BASE_DATE +1 * DAYS}&lt;/var&gt;
+            &lt;var idbase="FOOBAR"&gt;${this.testID} set in 0.&lt;/var&gt;
+        &lt;/vars&gt;
+        &lt;vars ID="1"&gt;
+            &lt;var idbase="DUE_DATE_MILLIS"&gt;${BASE_DATE +2 * DAYS}&lt;/var&gt;
+            &lt;var idbase="FOOBAR"&gt;${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var&gt;
+        &lt;/vars&gt;
+        &lt;vars ID="2"&gt;
+            &lt;var idbase="DUE_DATE_MILLIS"&gt;${BASE_DATE +3 * DAYS}&lt;/var&gt;
+            &lt;var idbase="FOOBAR"&gt;${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var&gt;
+        &lt;/vars&gt;
+        &lt;vars ID="3"&gt;
+            &lt;var idbase="FOOBAR"&gt;${this.testID + ' mutator index: ' + this.mutator.getIndex() }&lt;/var&gt;
+        &lt;/vars&gt;
+    &lt;/mutator&gt;
+&lt;/test&gt;
 
                   </div>
               </td>
@@ -1687,6 +1777,12 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -1700,6 +1796,12 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
+
+
+
+
+
 
 
 
@@ -1765,7 +1867,7 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>validator</td>
             <td>Contains a filename reference to a validator script.  Like all filenames in the control file it is relative to the tests directory.
-            <br />The script validates the response from the server.  Available to the validator 
+            <br>The script validates the response from the server.  Available to the validator 
                 are the request, response, and everything in the ServiceResult class, and the map of all previously run tests in this test group
                 (in the file order of the control file).</td>
           </tr>
@@ -1773,7 +1875,8 @@ When overriding RunOptions in a master file, consider these two development scen
 
           <tr>
               <td>variables in context</td>
-              <td><div class="code">
+              <td>
+<div class="code">
 serviceResult          - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.
 serviceResultsMap      - a map of all previously run tests, kept in insertion order of the tests run.
                           Key is the ID of the test element.
@@ -1790,7 +1893,13 @@ tools                     - instance of org.dynamide.util.Tools
               <td>
                   These and other public variables are avaiable in the context hanging off the base objects in the context.
                   See also the javadoc or source for the classes, for example org.dynamide.restreplay.ServiceResult.
-              <div class="code">
+              
+
+
+
+
+
+<div class="code">
 this.mutationID
 this.mutator.getIndex()
 this.testID
@@ -1812,35 +1921,36 @@ kit.dates.*
             Jexl scripts must be surrounded by ${}, 
             and you may have multiple blocks like that, wrapped in text, e.g. Foo${result.testID} Bar Baz ${result.gotExpectedResult()}.<br>
             JavaScript blocks should have a return statement as the last line, or an expression as the last line, which will be the result.
-          </tr>
+          </td></tr>
           
           <tr>
-            <td>example<br />&nbsp;(control file)</td>
-            <td><div class="code">&lt;test ID="testA">
-    &lt;uri>
+            <td>example<br>&nbsp;(control file)</td>
+            <td>
+<div class="code">&lt;test ID="testA"&gt;
+    &lt;uri&gt;
         ...
-    &lt;response>
-        &lt;validator lang="jexl"><b>assignments/res/testA.validator.jexl</b>&lt;/validator>
-    &lt;/response>
-&lt;/test>
+    &lt;response&gt;
+        &lt;validator lang="jexl"&gt;<b>assignments/res/testA.validator.jexl</b>&lt;/validator&gt;
+    &lt;/response&gt;
+&lt;/test&gt;
 
-&lt;test ID="testB">
-    &lt;uri>
+&lt;test ID="testB"&gt;
+    &lt;uri&gt;
         ...
-    &lt;response>
-        &lt;filename>assignments/res/testB.json&lt;/filename>
-        &lt;validator lang="javascript"><b>assignments/res/testB.validator.js</b>&lt;/validator>
-    &lt;/response>
-&lt;/test></div>
-Note: in this example, the &lt;filename> element points to a file containing the
+    &lt;response&gt;
+        &lt;filename&gt;assignments/res/testB.json&lt;/filename&gt;
+        &lt;validator lang="javascript"&gt;<b>assignments/res/testB.validator.js</b>&lt;/validator&gt;
+    &lt;/response&gt;
+&lt;/test&gt;</div>
+Note: in this example, the &lt;filename&gt; element points to a file containing the
 expected response.  RestReplay automatically compares the response to this
 expected response file for content, based on the element
 <a href="#RestReplay-restReplay.testGroup.test.response.expected">/restReplay/testGroup/test/response/expected</a>.  The validator is then run as a
 separate validation step. 
-          </tr>
+          </td></tr>
           
           <tr>
-            <td>example<br />&nbsp;(script file)<br />&nbsp;@lang="jexl"</td>
+            <td>example<br>&nbsp;(script file)<br>&nbsp;@lang="jexl"</td>
             <td><b>assignments/res/testA.validator.jexl</b>
 <div class="code">
 ${
@@ -1848,9 +1958,9 @@ ${
  return result.result;
 }
             </div>
-          </tr>  
+          </td></tr>  
           <tr>
-            <td>example<br />&nbsp;(script file)<br />&nbsp;@lang="javascript"</td>
+            <td>example<br>&nbsp;(script file)<br>&nbsp;@lang="javascript"</td>
             <td><b>assignments/res/testB.validator.js</b>
 <div class="code">
 var label = serviceResult.testIDLabel;
@@ -1859,7 +1969,7 @@ stdout.println("LOG from javascript: "+label);
 stdout.println("LOG from javascript: "+result);
 "OK from JS";
             </div>
-          </tr>  
+          </td></tr>  
           
           <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.response.expected" id="RestReplay-restReplay.testGroup.test.response.expected"></a>/restReplay/testGroup/test/response/expected</td>
@@ -1873,6 +1983,12 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+
+
+
+
+
+
 
 <ul>
                 <li>ZERO: does no checking. If the server sends a valid reponse, the reponse succeeds.</li>

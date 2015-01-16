@@ -712,9 +712,6 @@ public class RestReplayReport {
         String sExpected = "";
         if (s.ranges.size()>0) {
             sExpected = lbl("  expected")+s.ranges;
-        } else if  (s.expectedCodes.size() > 0) {
-            sExpected = lbl("  expected") + s.expectedCodes;
-            //+ small("  from "+s.gotExpectedResultBecause);
         }
         if (s.mutator!=null && Tools.notBlank(s.idFromMutator)) {
             sExpected = lbl("  expected") + s.mutator.expectedRangeForID(s.idFromMutator)
