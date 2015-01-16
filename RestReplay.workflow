@@ -1,13 +1,19 @@
 
 =============================================================
-Doco: 
+Doco:
 =============================================================
     doc/RestReplay.html
+
+    cp doco to public site:
+	    on git server,
+        cd ~/git/RestReplay/doc
+        git pull
+        cp RestReplay.html ~/sites/dynamide.com/RestReplay/doc/index.html
 
 =============================================================
 Building:
 =============================================================
-    The first time: 
+    The first time:
 
         mvn install
 
@@ -19,7 +25,7 @@ Building:
       which should be copied to any deployed clients.
 
 =============================================================
-Deploy to Revel/LAS: 
+Deploy to Revel/LAS:
 =============================================================
    cd ~/src/RestReplay
    mvn -o -DskipTests install
@@ -27,7 +33,7 @@ Deploy to Revel/LAS:
    ./c
 
 =============================================================
-Running: 
+Running:
 =============================================================
 For a "qa" environment set up in the master file:
 
@@ -43,7 +49,7 @@ In your local, in bash you can define macros:
     alias r='mvn -o exec:java -Denv=local'
     alias c='cp ~/src/RestReplay/target/RestReplay-1.0.4-standalone.jar ~/ws/las.ws/las/restreplay/lib'
 
-Running with tests in some other project-based directory: 
+Running with tests in some other project-based directory:
 
     mvn -o exec:java -Denv=local -Dtestdir=/Users/vcrocla/src/RestReplay.pearson.testdir -Denv=dev
 
@@ -59,18 +65,18 @@ Another example, pointing your testdir and master to a directory in another loca
 
 
 This is useful for debugging in IntelliJ:
-  Program args: 
+  Program args:
      -testdir /Users/vcrocla/ws/las.ws/las/restreplay/tests/  -master las-master.xml
-  Working Directory: 
+  Working Directory:
      /Users/vcrocla/src/RestReplay
-  Main Class: 
+  Main Class:
      org.dynamide.restreplay.RestReplay
 
 
 
-This is how you run just one control file, and how in that control file, you can also run a testGroup, 
-or a single test within a testGroup: 
-   
+This is how you run just one control file, and how in that control file, you can also run a testGroup,
+or a single test within a testGroup:
+
 		java -jar target/RestReplay-1.0.4-standalone.jar \
         -control _self_test/dynamide.xml \
         -testGroup login \
@@ -89,16 +95,16 @@ TODO:
 =============================================================
   History
 =============================================================
-Run maven locally: 
+Run maven locally:
     http://jojovedder.blogspot.com/2009/04/running-maven-offline-using-local.html
-    
+
 I disabled tomcat tagonomy/dynamide authentication locally to test RestReplay.
 
-2014-10-29: 
+2014-10-29:
    I ran on the command line with:
    mvn -DskipTests exec:java  -Dtestdir=/Users/vcrocla/src/RestReplay/src/main/resources/restreplay -DrestReplayMaster=dynamide-master.xml
 
-   This is the command line that works in the IntelliJ IDEA project: 
+   This is the command line that works in the IntelliJ IDEA project:
      args:  -testdir /Users/vcrocla/src/RestReplay/src/main/resources/restreplay -master dynamide-master.xml
      workingdir: /Users/vcrocla/src/RestReplay
      mainclass: org.dynamide.restreplay.RestReplay
@@ -106,7 +112,7 @@ I disabled tomcat tagonomy/dynamide authentication locally to test RestReplay.
 
 2014-11-29:
    I fixed a bug where the protoHostPort was not being passed to mutators.
-   Command line to check this was: 
+   Command line to check this was:
 
 
 
