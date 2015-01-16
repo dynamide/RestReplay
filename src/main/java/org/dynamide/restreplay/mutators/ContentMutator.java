@@ -2,6 +2,7 @@ package org.dynamide.restreplay.mutators;
 
 import org.dynamide.restreplay.Range;
 import org.dynamide.restreplay.ResourceManager;
+import org.dynamide.util.Tools;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -95,13 +96,18 @@ public abstract class ContentMutator implements IMutator {
         List<Node> nodes = testNode.selectNodes("mutator/expected/code");
         for (Node codeNode: nodes){
             Range range = new Range(codeNode.valueOf("@range"));
-            String[] ids = codeNode.getStringValue().trim().split("\\s*,\\s*");
-            for (String id: ids) {
-                if (null != idRanges.get(id)) {
-                    throw new IllegalArgumentException("Test node defines exclusion test case with multiple ranges: "+id
-                                                      +" Please make sure this id appears in only one &lt;code> element.");
+            String stringRanges = codeNode.getStringValue().trim();
+            if (Tools.isBlank(stringRanges)){
+                idRanges.put("*", range);
+            } else {
+                String[] ids = stringRanges.split("\\s*,\\s*");
+                for (String id : ids) {
+                    if (null != idRanges.get(id)) {
+                        throw new IllegalArgumentException("Test node defines exclusion test case with multiple ranges: " + id
+                                + " Please make sure this id appears in only one &lt;code> element.");
+                    }
+                    idRanges.put(id, range);
                 }
-                idRanges.put(id, range);
             }
         }
         //System.out.println("\r\n\r\n[[[[[["+contentRawFilename+"]]]]]]]]]]]]]]]]]]" + toString());

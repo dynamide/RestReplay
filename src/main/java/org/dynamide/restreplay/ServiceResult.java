@@ -325,7 +325,7 @@ public class ServiceResult {
         //    return false;
         //}
 
-        List<Integer>  expectedCodesFrom = expectedCodes;
+        List<Range> rangesList = ranges;
 
         gotExpectedResultBecause = " test["+testID+']';
         if (null!=mutator && Tools.notEmpty(idFromMutator)){
@@ -333,7 +333,7 @@ public class ServiceResult {
             boolean hasRange = mutator.hasRangeForId(idFromMutator);
             if(hasRange) {
                 gotExpectedResultBecause = " mutator["+idFromMutator+']';
-                boolean found = (mutator.valueInRangeForId(responseCode, idFromMutator));
+                boolean found = mutator.valueInRangeForId(responseCode, idFromMutator);
                 //System.out.println(" found("+idFromMutator+"): "+found);
                 return found;
             } else {
@@ -341,47 +341,29 @@ public class ServiceResult {
             }
             if (this.getParent() != null){
                 ServiceResult p = this.getParent();
-                expectedCodesFrom = p.expectedCodes;
-                gotExpectedResultBecause = " parent["+p.testID+']';
+                if (p.ranges.size()>0){
+                    rangesList = p.ranges;
+                    //System.out.println("---> ranges: "+ranges + "rangeList: "+rangesList);
+                    gotExpectedResultBecause = " parent["+p.testID+']';
+                }
             }
         }
 
-        if (ranges.size()==0 && expectedCodesFrom.size()==0){
+        if (ranges.size()==0){
             if (DEFAULT_SUCCESS_RANGE.valueInRange(responseCode)){
                 failureReason = "";
                 return isDomWalkOK();
             }
         }
 
-        for (Range range: ranges){
-            System.out.println(this.testID+" range "+range);
+        for (Range range: rangesList){
             if (range.valueInRange(responseCode)){
-                System.out.println(this.testID+" responseCode: "+responseCode+" is IN range: "+range);
                 failureReason = "";
                 gotExpectedResultBecause += " range: "+range;
                 return isDomWalkOK();
             }
         }
 
-        for (Integer oneExpected : expectedCodesFrom){
-            if (responseCode == oneExpected){
-                failureReason = "";
-                return isDomWalkOK();
-            }
-        }
-        if ( expectedCodesFrom.size()>0 && codeInSuccessRange(responseCode)){ //none found, but result expected.
-            for (Integer oneExpected : expectedCodesFrom){
-                if ( ! codeInSuccessRange(oneExpected)){
-                    failureReason = "";
-                    return isDomWalkOK();
-                }
-            }
-        }
-        boolean ok = codeInSuccessRange(responseCode);
-        if (ok) {
-            failureReason = "";
-            return isDomWalkOK();
-        }
         failureReason = " : STATUS CODE ("+responseCode+") UNEXPECTED; ";
         return false;
     }

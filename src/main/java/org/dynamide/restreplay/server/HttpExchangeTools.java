@@ -10,7 +10,7 @@ import java.util.*;
 
 public class HttpExchangeTools {
 
-    public static void writeResponse(HttpExchange t, String response, String mimeType)
+    public static void writeResponse(HttpExchange t, String mimeType, String response)
     throws IOException {
         writeResponse(t, 200, mimeType, response);
     }
@@ -119,7 +119,7 @@ public class HttpExchangeTools {
         hdrList.add("mojo");
         hdrList.add("nixon");
         headers.put("x-my-header", hdrList);
-        writeResponse(t, response, "text/plain");
+        writeResponse(t, "text/plain", response);
     }
 
 }

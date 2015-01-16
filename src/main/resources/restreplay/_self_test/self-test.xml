@@ -23,11 +23,10 @@
             <uri>/tagonomy?mock=token</uri>
         </test>
         <test ID="selftest1">
-
             <expected>
                  <code range="3x"/>
                  <code range="1x"/>
-                 <code range="2x">All</code>
+                 <code range="2x"></code>
             </expected>
             <method>GET</method>
             <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
@@ -142,7 +141,13 @@
         </test>
         <test ID="selftestUseVarMutator">
             <method>PUT</method>
-            <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
+            <expected>
+                <code range="202"/>
+                <comment>because emptyMutationResponseCode=202 is sent in uri.
+                         Each non-empty mutation (child test) will return a 406, hardcoded on the server side of this test,
+                         because typical use case is seeing if removing fields makes the service complain.</comment>
+            </expected>
+            <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=202</uri>
             <filename>_self_test/var-mutator-test.json</filename>
             <vars>
                 <var ID="DAYS">${24*60*60*1000}</var>
@@ -153,7 +158,7 @@
             </vars>
             <mutator type="VarMutator">
                 <expected>
-                    <code range="4xx">*</code>
+                    <code range="406"></code>
                 </expected>
                 <vars ID="0">
                     <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
@@ -164,9 +169,61 @@
     </testGroup>
 
 
+    <testGroup ID="testMutatorExpectedCodes"  autoDeletePOSTS="false">
+        <test ID="varMutatorExpectedCodes">
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=401</uri>
+            <filename>_self_test/var-mutator-test.json</filename>
+            <expected>
+                <code range="401">*</code>
+            </expected>
+            <vars>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+                <var ID="FOOBAR">${this.testID}</var>
+                <var ID="DueDate2">Due ${BASE_DATE} -basedate</var>
+                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
+                <var ID="VarTestMessage">Base message set here as default (varMutatorExpectedCodes).</var>
+            </vars>
+            <mutator type="VarMutator">
+                <expected>
+                    <code range="406">*</code>
+                </expected>
+                <vars ID="0">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID} set in 0.</var>
+                </vars>
+                <vars ID="1">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                </vars>
+            </mutator>
+        </test>
+        <test ID="ExcludeFieldsMutatorExpectedCodes">
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
+            <filename>_self_test/selftest-mutator.json</filename>
+            <expected>
+                <code range="2x"/>
+            </expected>
+            <vars>
+                <var ID="TOKEN">FOOTOKEN</var>
+                <var ID="mutation">${this.mutation}</var>
+            </vars>
+            <mutator type="ExcludeFields">
+                <expected>
+                    <code range="202">no_optionalField</code>
+                    <code range="4x">*</code>
+                </expected>
+            </mutator>
+        </test>
+    </testGroup>
+
+
+
 
     <testGroup ID="debug"  autoDeletePOSTS="false">
-
         <test ID="selftestUseVarMutator">
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
@@ -200,7 +257,9 @@
                 </vars>
             </mutator>
         </test>
+    </testGroup>
 
+    <testGroup ID="debugMutators2"  autoDeletePOSTS="false">
 
         <test ID="selftestUseTokenPUT">
             <method>PUT</method>

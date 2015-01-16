@@ -19,6 +19,7 @@ public class VarMutator extends ContentMutator implements IMutator {
     private List<List<VarTemplate>> spaces = new ArrayList<List<VarTemplate>>();
 
     public void setOptions(Node testNode){
+        super.setOptions(testNode);
         List<Node> vars = testNode.selectNodes("mutator/vars");
         for (Node oneVarsNode: vars){
             List<Node> nodes = oneVarsNode.selectNodes("var");

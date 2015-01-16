@@ -275,8 +275,8 @@ public class Transport {
                 result.addError("TIMEOUT. "+e.getLocalizedMessage());
             } catch (Throwable t){
                 //System.err.println("ERROR getting content from response: "+t);
-                result.addError("Error in doPOST_PUT. "+t.toString(), t);
-                System.out.println(t.getMessage() + "   :: stack trace \r\n" + getStackTrace(t));
+                result.addError("Error in doPOST_PUT. url:"+urlString+" "+t.toString(), t);
+                System.out.println(t.getMessage() +" url: "+urlString+"  :: stack trace \r\n" + getStackTrace(t));
             } finally {
                 wr.close();
             }

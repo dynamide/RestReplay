@@ -11,8 +11,9 @@
     </runOptions>
 
 
-
     <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
+
+    <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
 
     <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup">
         <vars>
@@ -30,8 +31,10 @@
 
     <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
 
+
     <!--
     <run controlFile="_self_test/self-test.xml" testGroup="debugScript" />
+
     -->
 </restReplayMaster>
 
