@@ -6,12 +6,9 @@ Doco:
 
     cp doco to public site:
 	    on git server,
-        cd ~/git/RestReplay/doc
+        cd ~/git/RestReplayGithub
         git pull
-        cp RestReplay.html ~/sites/dynamide.com/RestReplay/doc/index.html
-
-    the new way:
-    cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay/doc
+        cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay
 =============================================================
 Building:
 =============================================================
