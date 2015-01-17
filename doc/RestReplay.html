@@ -279,6 +279,8 @@
   <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
   <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
 ]]></script>
+  <p>See also: <a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a> for an example of using a more complicated Jexl expression.</p>
+    
 <h4><a name="1.c.2.ValuesInContexts"></a>1.c.2 Values in Contexts</h4>
 <p>In Jexl Expressions</p>
 <p>
@@ -319,6 +321,11 @@ for (var i=0; i&lt;r.count; i++){
                     <tr><th>serviceResult.result</th>
 <td>  The body of the response.  If it is JSON, you can turn it into a javascript object with:
   
+
+
+
+
+
 
 
 
@@ -404,6 +411,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="RestR
 <p>Vars in different xml config elements have different scoping rules.</p>
 <p>Here are the places vars can exist:</p>
 <p>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a><br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a></p>
+<p> See also: <a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a> for an example of using a more complicated Jexl expression as a var.</p>
 <h4><a name="1.c.5.Headers"></a>1.c.5 Headers</h4>
 <h4><a name="1.c.6.Expected.Codes"></a>1.c.6 Expected Codes</h4>
 <h4><a name="1.c.7.Mutators"></a>1.c.7 Mutators</h4>
@@ -1000,6 +1008,11 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
 <hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
@@ -1384,34 +1397,8 @@ When overriding RunOptions in a master file, consider these two development scen
             </td>
           </tr>
           
+          
           <tr>
-            </tr><tr>
-            <td>Example:</td>
-            <td>
-              This example shows that in a var, you can use <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expressions</a>. 
-              <br>Note that <b>kit</b> is predefined to be valid inside a Jexl evaluator.<br>Note the use of CDATA to protect the jexl from xml rules.&nbsp; If you don't use the characters: &lt;,&nbsp; and &amp;, you can skip the CDATA.<br>The CDATA begins with <strong style="color: #3366ff;">&lt;![CDATA[</strong> and ends with <strong><span style="color: #3333ff;">]]&gt;&nbsp;</span></strong> <br>The Jexl begins with <strong style="color: #3366ff;">${</strong> and ends with <strong style="color: #3366ff;">}</strong><br>
-<div class="code"> &lt;var ID="MyGregorianDate"&gt;&lt;![CDATA[<br>  <strong style="color: #3366ff;">${</strong>
-     if (kit != null) {
-        var ts = kit.gregorian.timestampUTC();
-        kit.out.println('');
-        kit.out.println(' ==&gt; Running test script, in selftest.xml:selftestGroup:selftestScriptTest at '+ts);
-        kit.out.println('');
-        return ''+ts;
-     }
-     return "kit not defined in selftestScriptTest";
-  <strong style="color: #3366ff;">}</strong><br>]]&gt;&lt;/var&gt;               </div>
-            </td>
-          </tr>
-          <tr>
-          
-          
-          
-          
-          
-          
-          
-
-          </tr><tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.headers.header" id="RestReplay-restReplay.testGroup.headers.header"></a>/restReplay/testGroup/headers/header</td>
           </tr>
           <tr>
@@ -1671,6 +1658,11 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
 <div class="code"> &lt;code range="100" /&gt;
  &lt;code range="1xx" /&gt;
  &lt;code range="2xx" /&gt;
@@ -1765,6 +1757,11 @@ When overriding RunOptions in a master file, consider these two development scen
               The uri contains any required queryString parameters:
 
               
+
+
+
+
+
 
 
 
@@ -1954,6 +1951,11 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1969,6 +1971,11 @@ When overriding RunOptions in a master file, consider these two development scen
   
   This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
   
+
+
+
+
+
 
 
 
@@ -2236,6 +2243,11 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -2249,6 +2261,11 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
+
+
+
+
 
 
 
@@ -2449,6 +2466,11 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+
+
+
+
+
 
 
 
@@ -2737,6 +2759,11 @@ if (r && r.count){
 
 
 
+
+
+
+
+
 <pre class="brush: xml; gutter: false;">var ordersArray = kit.newStringArray(theCount);</pre>
     
        <p>Then we run the delete test, which looks at the array of order IDs in the export getOrdersAfterCreate.ORDER_IDS.
@@ -2752,6 +2779,11 @@ if (r && r.count){
     <p>Specifically, if getOrdersAfterCreate.ORDER_IDS is an array of string like ["abc123","abc456"],
         <br>then in memory it looks like this:
         
+
+
+
+
+
 
 
 
@@ -2804,6 +2836,11 @@ if (r && r.count){
     </blockquote>
     because the first time through the loop,
     
+
+
+
+
+
 
 
 
@@ -2948,11 +2985,20 @@ if (r && r.count){
   <h3><a name="RestReplay-3.a.x.MoreExamples"></a>3.a.x More Examples</h3>
 <p>The best source for examples are the ones that run every time we build or install RestReplay: our _self-test.  
    This ships with every RestReplay.jar, and can be unpacked from there, or can be seen on our <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">_self-test GitHub page</a>.
-                                                               <br />
-                                                               <br />Especially, you can see all our tests here:
-                                                               <br /><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/self-test.xml">self-test.xml</a>
-                                                               <br /><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/master-self-test.xml">master-self-test.xml</a>
-      </p>
+                                                               <br>
+                                                               <br>Especially, you can see all our tests here:
+                                                               <br><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/self-test.xml">self-test.xml</a>
+                                                               <br><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/master-self-test.xml">master-self-test.xml</a>
+                                                               <br>You can run these tests with a command line like this, which will dump reports into the current directory in a directory called ./rest-replay-reports 
+                                                               <br>  
+                                                               </p><div class="code">   java -jar ./RestReplay-1.0.4-standalone.jar -selftest -testdir ./</div>
+                                                               <br>
+                                                               <p>You can unpack the examples with this command:</p>
+                                                               
+                                                               <div class="code">   jar xvf ./RestReplay-1.0.4-standalone.jar</div>
+                                                               <p>Once unpacked, you'll see our _self-test in ./restreplay/_self_test/, 
+                                                               and you notice that ./restreplay/ is our effective -testdir.</p>
+      
 <hr>
 
 
