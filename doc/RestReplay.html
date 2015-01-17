@@ -1427,9 +1427,13 @@ When overriding RunOptions in a master file, consider these two development scen
             <tr>
             <td>code</td>
 
-            <td>&lt;expected&gt; contains zero to many <strong>&lt;code range="" /&gt; </strong>elements.&nbsp; The child or text of this element may be empty when this is a child of <strong>test</strong>, and not a child of <strong>mutator</strong>.&nbsp;&nbsp; When the tag is found under <a href="#RestReplay-restReplay.testGroup.test.mutator">&lt;mutator&gt;&lt;expected&gt;&lt;code&gt;</a> , then additional rules apply--please see that section.<br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
-  In the example below, mutation
-  <span style="font-weight: bold;">numOfDrafts</span> expects the server to succeed in the range 200-299.&nbsp;
+            <td>&lt;expected&gt; contains zero to many <strong>&lt;code range="" /&gt; </strong>elements.&nbsp;
+                The child or text of this element may be empty when this is a child of <strong>test</strong>,
+                and not a child of <strong>mutator</strong>.&nbsp;&nbsp;
+                When the tag is found under <a href="#RestReplay-restReplay.testGroup.test.mutator">&lt;mutator&gt;&lt;expected&gt;&lt;code&gt;</a> ,
+                then additional rules apply--please see that section.<br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
+
+  
   If you don't specify test/expected/code/ then the default is as though you specified
   <b>&lt;expected&gt;&lt;code range="2x"/&gt;&lt;/expected&gt;</b>
     <br><br>
