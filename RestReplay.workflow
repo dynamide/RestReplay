@@ -10,6 +10,8 @@ Doco:
         git pull
         cp RestReplay.html ~/sites/dynamide.com/RestReplay/doc/index.html
 
+    the new way:
+    cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay/doc
 =============================================================
 Building:
 =============================================================
