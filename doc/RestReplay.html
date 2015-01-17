@@ -1433,9 +1433,9 @@ When overriding RunOptions in a master file, consider these two development scen
                 When the tag is found under <a href="#RestReplay-restReplay.testGroup.test.mutator">&lt;mutator&gt;&lt;expected&gt;&lt;code&gt;</a> ,
                 then additional rules apply--please see that section.<br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
 
-  
+
   If you don't specify test/expected/code/ then the default is as though you specified
-  <b>&lt;expected&gt;&lt;code range="2x"/&gt;&lt;/expected&gt;</b>
+  <br /><b>&lt;expected&gt;&lt;code range="2x"/&gt;&lt;/expected&gt;</b>
     <br><br>
   <div class="code">&lt;test ID="specificCodes"&gt;
     &lt;method&gt;GET&lt;/method&gt;<br>   &nbsp;&lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1736,8 +1736,12 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
               <td>VarMutator Example:</td>
               <td>
-                  VarMutator re-applies the service call, once for each of these vars blocks, which set vars before the call, in the file-order of the vars groups.
+                  <p>VarMutator re-applies the service call, once for each of these vars blocks, which set vars before the call, in the file-order of the vars groups.
                   IDs are informational strings--set to any alphanumeric string.  Here is an example from the RestReplay self-test.
+                  </p>
+
+                  <p>Note that inside the test, you can use this.mutator.getMutationID() which will return the ID attribute
+                      for this var, and this.mutator.getIndex() to get the loop index. </p>
                   
 
 
@@ -2069,6 +2073,8 @@ this.addExport(key,value)
   
 this.mutationID
 this.mutator.getIndex()
+this.mutator.getMutationID()
+
 this.testID
 this.testGroupID
 this.testIDLabel
@@ -2078,6 +2084,7 @@ this.fullURL
 this.deleteURL
 
 kit.dates.*
+kit.newStringArray(size)
               </div>
               </td>
           </tr>
@@ -2323,7 +2330,10 @@ stdout.println("LOG from javascript: "+result);
 
      ]]></script>
 
-    <p>We could set up two tests in one testGroup in RestReplay: one to call the service to get this list, and a second to
+    <p>Let's say previous tests have populated some Orders, and now we want to clean them all up.  We could use <a href="#RestReplay-restReplay.testGroup">autoDeletePOST</a>
+        or set up Delete URLs, but
+        here is how to set up the REST workflow manually.
+        We could set up two tests in one testGroup in RestReplay: one to call the service to get this list, and a second to
     delete all the resources found on the list.</p>
 
 
