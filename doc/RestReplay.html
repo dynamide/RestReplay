@@ -7,6 +7,7 @@
 
 
 
+
   <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
   
 
@@ -148,7 +149,7 @@
     <h2><a href="#RestReplay-1.Introduction">1. Introduction</a></h2>
     <h3><a href="#RestReplay-1.a.Features">1.a. Features</a></h3>
     <h3><a href="#RestReplay-1.bOverview">1.b Overview</a></h3>
-    <h4><a href="#RestReplay-1.b.1Runtime">1.b.1 Runtime</a></h4>
+    <h4><a href="#RestReplay-1.d.1Runtime">1.d.1 Runtime</a></h4>
 
     <h2><a href="#RestReplay-2.ReferenceDocumentation">2. Reference Documentation</a></h2>
     <h3><a href="#RestReplay-2.a.Installation">2.a. Installation</a></h3>
@@ -212,8 +213,156 @@
 <p>After the tests have run, RestReplay compiles a directory of stand-alone reports that drill down from your high level view (the Master) to the detail view (the individual testGroup/test reports).&nbsp; Tweaking the RunOptions gives you control over the output on the command line, and also in the HTML report.&nbsp; These reports do not depend on anything else, and can be archived, since they show stats, results, documentation of your APIs, and contain all the input and output payloads.&nbsp; </p>
 <p>After the tests have run, you can check the code coverage of your services layer with external tools such as <a href="http://www.eclemma.org/">EclEmma</a>, and also use other queries to check the state of your datastores.&nbsp; </p>
 <p>RestReplay tests your services, but it also drives them exactly as a user or bot would, so think of the next steps in your integration testing.</p>
+<h3><a name="RestReplay-1.c.Concepts"></a>1.c Concepts</h3>
+<p>See the <a href="#RestReplay-2.ReferenceDocumentation">Reference Documentation</a> for syntax, structure, discussion, and examples of code.&nbsp; This section covers concepts that are common to many of the configurable and scriptable elements documented in the <a href="#RestReplay-2.ReferenceDocumentation">Reference Documentation</a>.</p>
+<h4><a name="1c.1.Vars"></a>1c.1 Expressions</h4>
+<p>Expressions are defined using <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl syntax</a>. </p>
+<p>Expressions are always evaluated in a context. <em>(Actually, a series of nested contexts, similar to Javascript scoping.&nbsp; RestReplay automatically provides these contexts, for each testGroup, eachTest, and each evaluation.)&nbsp;</em> Some values and tools will always be <a href="#1c.1.ValuesInContexts">available in the context</a>, such as "kit", "tools", and "this".&nbsp; For running tests, all previously run tests are available, by ID, in the context.&nbsp; So any value sent to or received from a service, either from URLs, Headers, or payloads, can be retrieved using an expression.</p>
+<p>An expression is evaluated just before it is used.&nbsp; (Subsequent evaluations use the latest values available from referenced data sources.) An expression in a test will not be evaluated until that test is run.&nbsp; Expressions stored elsewhere and referenced (such as Master vars, and headers) are also evaluated just as the test is run.&nbsp;&nbsp; Exported vars are run after the test is run, and retain their values for the rest of the run through the testGroup.</p>
+<p>Expressions are strings.&nbsp; They are surrounded by bash-like braces: ${ORDER_ID}&nbsp; looks up the value of the expression ORDER_ID.&nbsp; If ORDER_ID is defined in the "context" then its value is returned.&nbsp; Say ORDER_ID is set to a string: "abc123" , then the expression's value is like so: </p>
+<table class="matrix" border="1" cellpadding="2" cellspacing="0">
+<tbody>
+<tr>
+<th>expression</th>
+<th>value</th></tr>
+<tr>
+<td>${ORDER_ID}</td>
+<td>abc123</td></tr></tbody></table>
+      <p>Now we could use this value in an expression to get a resource by URL:</p>
+ <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[     <uri>http://example.com/query?order_id=${ORDER_ID}</uri>]]></script>
+      <p>and RestReplay will hit the service:</p>
+      <script type="syntaxhighlighter" class="brush: xml; gutter: false;"><![CDATA[     http://example.com/query?order_id=abc123]]></script>
+<p>You can also have more complicated expressions, like:</p>
+<script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+  <var ID="DAYS">${24*60*60*1000}</var>
+  <var ID="BASE_DATE">${tools.now()}</var>
+  <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+  <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
+  <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+]]></script>
+<h4><a name="1c.1.ValuesInContexts"></a>1c.2 reference: Values in Contexts</h4>
+<p>In Jexl Expressions</p>
+<p>
+<table class="matrix">
+                    <tbody>
+<tr><th>serviceResult</th>
+<td>  org.dynamide.restreplay.ServiceResult  - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.</td></tr> 
+<tr><th>this</th>
+<td>  org.dynamide.restreplay.ServiceResult  - also stored as "serviceResult". </td></tr> 
+                    <tr><th>serviceResultsMap</th>
+<td>  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;  - a map of all previously run tests in this same testGroup, kept in insertion order of the tests run.
+                    Key is the ID of the test element.</td></tr> 
+                    <tr><th>tools</th>
+<td>  org.dynamide.util.Tools</td></tr>
+                    <tr><th>kit</th>
+<td>  org.dynamide.restreplay.Kit</td></tr>
+                    <tr><th>this.mutator.getIndex()</th>
+<td> - zero-based index of which mutation loop this is.</td></tr>
+                    <tr><th>__FILE__</th>
+<td> String name of the validator file. (only avaliable in validators)</td></tr>
+<tr>
+<th>this.LoopIndex</th>
+<td>If this test is run as a loop, then you can know the zero-based loop index by calling  <b>this.LoopIndex</b> </td></tr>
+                </tbody></table>
+      </p>
 
-      <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.b.1Runtime"></a>1.b.1 Runtime</h4>
+<p>Javascript contexts get the same objects.&nbsp; Additionally, the following methods are useful in javascript.&nbsp; Note that "<strong>this</strong>" in Javascript is NOT the <strong>serviceResult</strong>.</p>
+<p>
+      <table class="matrix">
+                    <tbody>
+<tr><th>kit.newStringArray(int)</th>
+<td>  
+<pre>var stringArray = kit.newStringArray(r.count);
+for (var i=0; i&lt;r.count; i++){
+    stringArray[i] = r.orders[i].order_id;
+}</pre>
+      </td></tr> 
+                    <tr><th>serviceResult.result</th>
+<td>  The body of the response.  If it is JSON:
+  
+
+
+
+
+
+
+
+<pre>var r = JSON.parse(serviceResult.result);</pre>
+      
+      
+      
+      
+      
+      
+      </td></tr> 
+                    <tr><th><br></th>
+<td style="height: 18px;">  <br></td></tr>
+                    <tr><th>serviceResult.mutator.getIndex()</th>
+<td>  zero-based index of which mutation loop this is.</td></tr>
+                    <tr><th>serviceResult.mutator.getMutationId()</th>
+<td> Unique string name of this mutation, formatted by the mutator.</td></tr>
+                    <tr><th><br></th>
+<td><br></td></tr>
+<tr>
+<th><br></th>
+<td><br></td></tr>
+                </tbody></table>
+      </p>
+<h4><a name="1c.1.Vars"></a>1c.3 Common Useful Methods in Contexts</h4>
+<p>Note that the variable named "<b>this"</b> is equivalent to <b>serviceResult</b> in the following examples, e.g. these two statements are identical: </p>
+<ul>
+<li><strong>this</strong>.addExport("myexport", "Foo Bar") </li>
+<li><strong>serviceResult</strong>.addExport("myexport", "Foo Bar").</li></ul>
+<p>
+      <table class="matrix">
+                    <tbody>
+<tr><th>this.addExport(key,value)</th>
+<td>  Creates a var as an export, available to subsequent tests.<br>Exports added with this.addExport() get tracked automatically if called from a Validator, and the 
+list of exports added per validator is shown in the detail report as an 
+Alert 
+                from the validator.  The values of these exports can 
+then be seen in the variables row (exports are a different background 
+color--see Legend at bottom of page).<br>See the discussion under <a href="RestReplay-3.a.1.DELETE">3.a.1.DELETE</a> for an example of using addExport().</td></tr> 
+                    <tr><th>this.testID</th>
+<td>  <br></td></tr> 
+                    <tr><th>this.testGroupID</th>
+<td style="height: 18px;">  <br></td></tr>
+                    <tr>
+<th>this.testIDLabel</th>
+<td><br></td></tr>
+<tr>
+<th>this.idFromMutator</th>
+<td><br></td></tr>
+<tr>
+<th>this.fullURL</th>
+<td><br></td></tr>
+<tr>
+<th>this.deleteURL</th>
+<td><br></td></tr>
+<tr><th>this.mutator.getIndex()</th>
+<td>  zero-based index of which mutation loop this is.</td></tr>
+                    <tr><th>this.mutator.getMutationId()</th>
+<td> Unique string name of this mutation, formatted by the mutator.</td></tr>
+                    <tr><th>  this.mutationID</th>
+<td>Same as this.getMutationId()</td></tr>
+<tr>
+<th>kit.dates.*</th>
+<td><br></td></tr>
+                </tbody></table>
+      
+      </p>
+<h4><a name="1c.1.Vars"></a>1c.4 Vars</h4>
+<h4><a name="1.c.2.Headers"></a>1.c.5 Headers</h4>
+<h4><a name="1.c.3.Expected.Codes"></a>1.c.6 Expected Codes</h4>
+<h4><a name="1.c.4.Mutators"></a>1.c.7 Mutators</h4>
+<h4><a name="1.c.5-Looping"></a>1.c.8 Looping</h4>
+<p>You can loop tests two ways with RestReplay.&nbsp; First, you can use &lt;test ID="myLoopyTest" loop="2"&gt;...&lt;/test&gt; to loop a test.&nbsp; Of course, the value provided to the loop parameter can be a Jexl Expression, so you can run the loop a variable number of times: </p>
+<p>&lt;test ID="deleteOrders" loop="${size(ordersListTest.ORDER_IDS)}"&gt;</p>
+<p>See a full example in <a href="#RestReplay-3.a.1.DELETE">3.a.1 DELETE</a></p>
+  <p>You can also loop using a <a href="#RestReplay-restReplay.testGroup.test.mutator">VarMutator.</a></p>
+<h4><a name="1.c.6.AutoDelete"></a>1.c.9 AutoDelete</h4>
+<a href="#RestReplay-restReplay.testGroup">AutoDelete</a> is turned on with global parameters and testGroup parameters.<br><br>RestReplay keeps track of the<strong> Location</strong> header sent by services. This allows you to later delete that resource.&nbsp; Some services do not follow this pattern of returning a <strong>Location</strong> header after creating a resource with a POST, so RestReplay lets you define an expression for the DeleteURL.&nbsp; <br><br>If <a href="#RestReplay-restReplay.testGroup">AutoDelete</a>  is on for your testGroup, then if either of Location or DeleteURL are set, then at the end of a testGroup, then RestReplay will call DELETE on the Location or DeleteURL for every test that used POSTs.<br>
+<h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.d.1Runtime"></a>1.d.1 Runtime</h4>
 
       <p>At runtime, RestReplay consults parameters passed in on the command line, or from maven surefire,
           or from java:exec which uses parameters found in the pom.xml project file under options for the <span style="font-style: italic; font-weight: bold;">exec-maven-plugin</span> plugin.</p>
@@ -316,7 +465,7 @@
         So in our jar file is the resource
         <b>src/main/resources/restreplay/_includes/reports-include.css</b>, which you can override with a copy in your -testdir directory structure
         like so, where <b>TEST_DIR</b> is the direcotry where you have told RestReplay is the root of all your tests:
-        <br /><b>TEST_DIR/_includes/reports-include.css</b></p>
+        <br><b>TEST_DIR/_includes/reports-include.css</b></p>
 
       <h3><a name="RestReplay-2.b.Configuration" id="RestReplay-2.b.Configuration"></a>2.b. Configuration</h3>
 
@@ -796,6 +945,25 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
@@ -1192,6 +1360,25 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <ul>
                 <li><b>serviceResult</b>&nbsp;  org.dynamide.restreplay.ServiceResult</li> 
                 <li><b>serviceResultsMap</b>&nbsp;  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;</li> 
@@ -1435,7 +1622,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
   If you don't specify test/expected/code/ then the default is as though you specified
-  <br /><b>&lt;expected&gt;&lt;code range="2x"/&gt;&lt;/expected&gt;</b>
+  <br><b>&lt;expected&gt;&lt;code range="2x"/&gt;&lt;/expected&gt;</b>
     <br><br>
   <div class="code">&lt;test ID="specificCodes"&gt;
     &lt;method&gt;GET&lt;/method&gt;<br>   &nbsp;&lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1448,6 +1635,25 @@ When overriding RunOptions in a master file, consider these two development scen
               a 200, a 201, a 202, and so on. <br><br>Here are other range examples: 
                   
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1597,6 +1803,25 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;uri&gt;/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri&gt;
                 </div>
@@ -1688,6 +1913,25 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1703,6 +1947,25 @@ When overriding RunOptions in a master file, consider these two development scen
   
   This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1914,6 +2177,25 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -1927,6 +2209,25 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2018,75 +2319,17 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
               <td>variables in context</td>
             <td>
-                <table class="matrix">
-                    <tbody>
-<tr><th>serviceResult</th>
-<td>  org.dynamide.restreplay.ServiceResult  - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.</td></tr> 
-                    <tr><th>serviceResultsMap</th>
-<td>  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;  - a map of all previously run tests in this same testGroup, kept in insertion order of the tests run.
-                    Key is the ID of the test element.</td></tr> 
-                    <tr><th>tools</th>
-<td>  org.dynamide.util.Tools</td></tr>
-                    <tr><th>kit</th>
-<td>  org.dynamide.restreplay.Kit</td></tr>
-                    <tr><th>this.mutator.getIndex()</th>
-<td> - zero-based index of which mutation loop this is.</td></tr>
-                    <tr><th>__FILE__</th>
-<td> String name of the validator file.</td></tr>
-<tr>
-<th>this.LoopIndex</th>
-<td>If this test is run as a loop, then you can know the zero-based loop index by calling  <b>this.LoopIndex</b> </td></tr>
-                </tbody></table>
+                
 
-              </td>
+              The standard <a href="#1c.1.ValuesInContexts">Values in Contexts</a> apply, depending on whether you are using Javascript or Jexl.&nbsp; Additionally, the value __FILE__ is the full path to the validator.</td>
           </tr>
 
           <tr>
-              <td>Useful methods in context objects</td>
+              <td>Exports are tracked</td>
 
               <td>
-                  These and other public variables are avaiable in the context hanging off the base objects in the context.
-                  See also the javadoc or source for the classes, for example org.dynamide.restreplay.ServiceResult.
-              
-
-
-
-
-
-
-<p>Exports added with this.addExport() get tracked automatically, and the list of exports added per validator is shown in the detail report as an Alert 
-                from the validator.  The values of these exports can then be seen in the variables row (exports are a different background color--see Legend at bottom of page).</p>
-
-
-
-
-
-
-
-                
-<p>Note that <b>this</b> is equivalent to <b>serviceResult</b> in the following examples, e.g. these two statements are identical: </p>
-<ul>
-<li><strong>this</strong>.addExport("myexport", "Foo Bar") </li>
-<li><strong>serviceResult</strong>.addExport("myexport", "Foo Bar").</li></ul>
-<div class="code">
-this.addExport(key,value)
-  
-this.mutationID
-this.mutator.getIndex()
-this.mutator.getMutationID()
-
-this.testID
-this.testGroupID
-this.testIDLabel
-this.idFromMutator
-this.LoopIndex
-this.fullURL
-this.deleteURL
-
-kit.dates.*
-kit.newStringArray(size)
-              </div>
-              </td>
+                  <p>Exports added with this.addExport() get tracked automatically, and the list of exports added per validator is shown in the detail report as an Alert 
+                from the validator.  The values of these exports can then be seen in the variables row (exports are a different background color--see Legend at bottom of page).</p></td>
           </tr>
 
           <tr>
@@ -2157,6 +2400,25 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2337,8 +2599,7 @@ stdout.println("LOG from javascript: "+result);
     delete all the resources found on the list.</p>
 
 
-        <pre class="brush: xml; ">
-        <test id="getOrdersAfterCreate">
+        <pre class="brush: xml; ">        <test id="getOrdersAfterCreate">
             <method>GET</method>
             <uri>/api/orders</uri>
             <response>
@@ -2387,10 +2648,30 @@ if (r && r.count){
            This validator builds up a Java Array of String, then passes back to the test as an export.
        </p>
     <p>Note that to create Java arrays of String, or String[], you must call either the long version:
-        <pre class="brush: xml; gutter: false;">var ordersArray = java.lang.reflect.Array.newInstance(java.lang.String, r.count);</pre>
+        </p>
+<pre class="brush: xml; gutter: false;">var ordersArray = java.lang.reflect.Array.newInstance(java.lang.String, r.count);</pre>
     or the short version:
-        <pre class="brush: xml; gutter: false;">var ordersArray = kit.newStringArray(theCount);</pre>
-    </p>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<pre class="brush: xml; gutter: false;">var ordersArray = kit.newStringArray(theCount);</pre>
+    
        <p>Then we run the delete test, which looks at the array of order IDs in the export getOrdersAfterCreate.ORDER_IDS.
        This works because getOrdersAfterCreate is the name of the test, and each test stores its exported vars for
        use by subsequent tests.</p>
@@ -2402,9 +2683,29 @@ if (r && r.count){
     <p>Also, <b>this.LoopIndex</b> is a loop counter provided by RestReplay when looping.</p>
 
     <p>Specifically, if getOrdersAfterCreate.ORDER_IDS is an array of string like ["abc123","abc456"],
-        <br />then in memory it looks like this:
-        <table class="matrix" >
-            <tr>
+        <br>then in memory it looks like this:
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table class="matrix">
+            <tbody>
+<tr>
                 <th>0</th>
                 <td>abc123</td>
 
@@ -2413,28 +2714,48 @@ if (r && r.count){
                 <th>1</th>
                 <td>abc456</td>
             </tr>
-        </table>
+        </tbody></table>
     </p>
 
     <p>
     Then size(getOrdersAfterCreate.ORDER_IDS)
         is 2, and loop="${size(getOrdersAfterCreate.ORDER_IDS)}" turns into loop="2", so RestReplay will run deleteOrders 2 times
         so that the following 2 URI's get hit:
-    <blockquote>
+    </p>
+<blockquote>
         DELETE /api/orders/abc123
-        <br />DELETE /api/orders/abc456
+        <br>DELETE /api/orders/abc456
     </blockquote>
     because the first time through the loop,
-    <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri></pre>
-    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[0]}</uri></pre>
-    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/abc123</uri></pre>
-    <br />
-    <br />Then the second time through,
-    <br /><pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri></pre>
-    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[1]}</uri></pre>
-    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/abc456</uri></pre>
+    
 
-    </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri></pre>
+    <br>becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[0]}</uri></pre>
+    <br>becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/abc123</uri></pre>
+    <br>
+    <br>Then the second time through,
+    <br><pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri></pre>
+    <br>becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[1]}</uri></pre>
+    <br>becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/abc456</uri></pre>
+
+    
 
 
     <h3><a name="RestReplay-3.a.2.XPath" id="RestReplay-3.a.2.XPath"></a>3.a.2 Using XPath to dig elements out of XML or JSON.</h3>
