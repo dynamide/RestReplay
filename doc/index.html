@@ -32,8 +32,22 @@
   }
   .brdr {
     border: 1px solid gray;
+    
+  }
+
+  .rounded {
+      border-radius: 5px;
+  }
+  .square {
+    border-radius: 1px;
   }
    
+  .rounded A {
+    font-weight: bold;
+  }
+  .rounded {
+  text-align: center;
+  }
   </style>
 
 
@@ -42,12 +56,12 @@
 <body>
   <center>
 <h1>RestReplay</h1>
-    <table class="matrix"  style="width: 80%; border-spacing: 20px;" border="0" cellspacing="10">
+    <table class="matrix"  style="width: 80%; border-spacing: 10px;" border="0" cellspacing="10">
 <tbody>
 <tr>
-  <th colspan="3" rowspan="1" style="background-color: white;"><span style="font-size: 12pt;">RestReplay is a framework to automate calling your REST Services Layer</span>
+  <th class="rounded" colspan="3" rowspan="1" style="background-color: white;"><span style="font-size: 12pt;">RestReplay is a framework to automate calling your REST Services Layer</span>
   <center>
-      <table class="matrix"  border="0" cellspacing="10" style="width: 60%; font-size: 10pt;">
+      <table class="matrix square"  border="0" cellspacing="10" style="width: 60%; font-size: 10pt;">
 <tbody>
 <tr>
 <td class="brdr" colspan="2" rowspan="1" style="width: 100%; background-color: #cdde07;">Automate sequences and workflows</td>
@@ -56,14 +70,14 @@
 <td><br></td></tr>
 <tr>
 <td style="width:30%; "><br></td>
-<td colspan="2" style="width: 70%; background-color: #04cade;">drive code coverage</td>
-<td style="background-color: #99ff99;"><span style="font-weight: bold;">regressions</span></td>
+<td class="brdr" colspan="2" style="width: 70%; background-color: #04cade;">drive code coverage</td>
+<td class="brdr" style="background-color: #99ff99;"><span style="font-weight: bold;">regressions</span></td>
 <td><br></td></tr>
 <tr>
 <td><br></td>
 <td class="brdr" colspan="2" style="width: 100%; background-color: #ffcc66;">drive integration tests</td>
 <td><br></td>
-<td style="background-color: #f8ef08;">dashboard: services health</td></tr>
+<td class="brdr" style="background-color: #f8ef08;">dashboard: services health</td></tr>
 <tr>
 <td class="brdr" colspan="2" style="width: 100%; background-color: #fda803;">Communicate APIs and Integration Issues</td>
 <td><br></td>
@@ -73,8 +87,8 @@
   </center>
 </th></tr>
 <tr>
-  <td style="background-color: white; padding: 10px;"><a href="RestReplay.html">Documentation and Overview</a></td>
-<td style="background-color: white; padding: 10px;"><a href="http://dynamide.org/RestReplay/javadoc/">Javadoc</a></td>
-<td style="background-color: white; padding: 10px;"><a href="https://github.com/dynamide/RestReplay">Source Code at Github</a></td></tr></tbody></table>
+  <td class="rounded" style="background-color: white; padding: 10px;"><a href="RestReplay.html">Documentation and Overview</a></td>
+<td class="rounded" style="background-color: white; padding: 10px;"><a href="http://dynamide.org/RestReplay/javadoc/">Javadoc</a></td>
+<td class="rounded" style="background-color: white; padding: 10px;"><a href="https://github.com/dynamide/RestReplay">Source Code at Github</a></td></tr></tbody></table>
   </center>
 </body></html>
