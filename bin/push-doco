@@ -1,1 +1,2 @@
-ssh laramiessh@b-rant.com 'cd ~/git/RestReplayGithub; git pull; cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay; ls -lat ~/sites/dynamide.com/RestReplay/doc/;'
+echo ssh-ing with $RESTREPLAY_SSH
+ssh $RESTREPLAY_SSH  'cd ~/git/RestReplayGithub; git pull; cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay; ls -lat ~/sites/dynamide.com/RestReplay/doc/;'
