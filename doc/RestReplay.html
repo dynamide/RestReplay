@@ -15,7 +15,32 @@
   <style type="text/css">
   h1, h2, h3, h4, h5 {
     font-family: Helvetica, 'San Serif';
+      margin-top: 20px;
+      border-bottom: 1px solid black;
+      
   }
+    .main-toc h1 {
+      margin:8px;
+      margin-left: 0px;
+      border-bottom: none;
+    }
+    .main-toc h2 {
+      margin: 5px;
+      margin-left: 10px;
+      border-bottom: none;
+    }
+    .main-toc h3 {
+      margin: 3px;
+      margin-left: 20px;
+      border-bottom: none;
+    }
+    .main-toc h4 {
+      margin: 2px;
+      margin-left: 30px;
+      border-bottom: none;
+    }
+    
+    
   td a {
     font-weight: bold;
   }
@@ -78,7 +103,8 @@
       .matrix th {
           text-align: left;
       }
-      #content {
+  #content {
+      width: 95%;
       margin: 20px;
       border: 0px solid green;
   }
@@ -136,19 +162,30 @@
 <body>
   <div id="content" class="page view">
     <div class="wiki-content">
+      
     <h1><a name="RestReplay-RestReplayDocumentation" id="RestReplay-RestReplayDocumentation"></a>RestReplay Documentation</h1>
-    <div class="container">
+      <div class="container" style="width: 90%; margin: 50px;">
         <center>
-<h2>RestReplay Quick Reference</h2></center>
-      <div id="TOCDEST1" class="cheatsheet-body">&nbsp;</div>
-        <div id="TOCDEST2" class="cheatsheet-body">&nbsp;</div>   
-        
+        <h2>RestReplay Quick Reference</h2></center>
+        <div id="TOCDEST1" class="cheatsheet-body">&nbsp;</div>
+        <div id="TOCDEST2" class="cheatsheet-body">&nbsp;</div>
     </div>
 
     <span class="main-toc">
     <h2><a href="#RestReplay-1.Introduction">1. Introduction</a></h2>
     <h3><a href="#RestReplay-1.a.Features">1.a. Features</a></h3>
     <h3><a href="#RestReplay-1.bOverview">1.b Overview</a></h3>
+<h3><a href="#RestReplay-1.c.Concepts">1.c Concepts</a></h3>
+<h4><a href="#1.c.1.Expressions">1.c.1 Expressions</a></h4>
+<h4><a href="#1.c.2.ValuesInContexts">1.c.2 Values in Contexts</a></h4>
+<h4><a href="#1.c.3.CommonUsefulMethodsInContexts">1.c.3 Common Useful Methods in Contexts</a></h4>
+<h4><a href="#1.c.4.Vars">1.c.4 Vars</a></h4>
+<h4><a href="#1.c.5.Headers">1.c.5 Headers</a></h4>
+<h4><a href="#1.c.6.Expected.Codes">1.c.6 Expected Codes</a></h4>
+<h4><a href="#1.c.7.Mutators">1.c.7 Mutators</a></h4>
+<h4><a href="#1.c.8-Looping">1.c.8 Looping</a></h4>
+<h4><a href="#1.c.9.AutoDelete">1.c.9 AutoDelete</a></h4>      
+      
     <h4><a href="#RestReplay-1.d.1Runtime">1.d.1 Runtime</a></h4>
 
     <h2><a href="#RestReplay-2.ReferenceDocumentation">2. Reference Documentation</a></h2>
@@ -163,7 +200,9 @@
     <h2><a href="#RestReplay-3.Examples">3. RestReplay Examples</a></h2>
     <h3><a href="#RestReplay-3.a.1.DELETE">3.a.1 Using DELETE for lists of resources.</a></h3>
     <h3><a href="#RestReplay-3.a.2.XPath">3.a.2 Using XPath to dig elements out of XML or JSON.</a></h3>
-    <h3><a href="#RestReplay-3.a.3.XPath">3.a.2 Using XPath part 2</a></h3>
+    <h3><a href="#RestReplay-3.a.3.XPath">3.a.3 Using XPath part 2</a></h3>
+    <h3><a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a></h3>
+    <h3><a href="#RestReplay-3.a.x.MoreExamples">3.a.x More Examples</a></h3>
     </span>
     
 
@@ -215,7 +254,7 @@
 <p>RestReplay tests your services, but it also drives them exactly as a user or bot would, so think of the next steps in your integration testing.</p>
 <h3><a name="RestReplay-1.c.Concepts"></a>1.c Concepts</h3>
 <p>See the <a href="#RestReplay-2.ReferenceDocumentation">Reference Documentation</a> for syntax, structure, discussion, and examples of code.&nbsp; This section covers concepts that are common to many of the configurable and scriptable elements documented in the <a href="#RestReplay-2.ReferenceDocumentation">Reference Documentation</a>.</p>
-<h4><a name="1c.1.Vars"></a>1c.1 Expressions</h4>
+<h4><a name="1.c.1.Expressions"></a>1.c.1 Expressions</h4>
 <p>Expressions are defined using <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl syntax</a>. </p>
 <p>Expressions are always evaluated in a context. <em>(Actually, a series of nested contexts, similar to Javascript scoping.&nbsp; RestReplay automatically provides these contexts, for each testGroup, eachTest, and each evaluation.)&nbsp;</em> Some values and tools will always be <a href="#1c.1.ValuesInContexts">available in the context</a>, such as "kit", "tools", and "this".&nbsp; For running tests, all previously run tests are available, by ID, in the context.&nbsp; So any value sent to or received from a service, either from URLs, Headers, or payloads, can be retrieved using an expression.</p>
 <p>An expression is evaluated just before it is used.&nbsp; (Subsequent evaluations use the latest values available from referenced data sources.) An expression in a test will not be evaluated until that test is run.&nbsp; Expressions stored elsewhere and referenced (such as Master vars, and headers) are also evaluated just as the test is run.&nbsp;&nbsp; Exported vars are run after the test is run, and retain their values for the rest of the run through the testGroup.</p>
@@ -240,22 +279,22 @@
   <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
   <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
 ]]></script>
-<h4><a name="1c.1.ValuesInContexts"></a>1c.2 reference: Values in Contexts</h4>
+<h4><a name="1.c.2.ValuesInContexts"></a>1.c.2 Values in Contexts</h4>
 <p>In Jexl Expressions</p>
 <p>
 <table class="matrix">
                     <tbody>
 <tr><th>serviceResult</th>
-<td>  org.dynamide.restreplay.ServiceResult  - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.</td></tr> 
+<td>  <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/restreplay/ServiceResult.html">org.dynamide.restreplay.ServiceResult</a>  - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.</td></tr> 
 <tr><th>this</th>
-<td>  org.dynamide.restreplay.ServiceResult  - also stored as "serviceResult". </td></tr> 
+<td>  <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/restreplay/ServiceResult.html">org.dynamide.restreplay.ServiceResult</a>  - also stored as "serviceResult". </td></tr> 
                     <tr><th>serviceResultsMap</th>
 <td>  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;  - a map of all previously run tests in this same testGroup, kept in insertion order of the tests run.
                     Key is the ID of the test element.</td></tr> 
                     <tr><th>tools</th>
-<td>  org.dynamide.util.Tools</td></tr>
+<td>  <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/util/Tools.html">org.dynamide.util.Tools</a></td></tr>
                     <tr><th>kit</th>
-<td>  org.dynamide.restreplay.Kit</td></tr>
+<td style="height: 19px;">  <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/restreplay/Kit.html">org.dynamide.restreplay.Kit</a></td></tr>
                     <tr><th>this.mutator.getIndex()</th>
 <td> - zero-based index of which mutation loop this is.</td></tr>
                     <tr><th>__FILE__</th>
@@ -278,8 +317,17 @@ for (var i=0; i&lt;r.count; i++){
 }</pre>
       </td></tr> 
                     <tr><th>serviceResult.result</th>
-<td>  The body of the response.  If it is JSON:
+<td>  The body of the response.  If it is JSON, you can turn it into a javascript object with:
   
+
+
+
+
+
+
+
+
+
 
 
 
@@ -308,7 +356,7 @@ for (var i=0; i&lt;r.count; i++){
 <td><br></td></tr>
                 </tbody></table>
       </p>
-<h4><a name="1c.1.Vars"></a>1c.3 Common Useful Methods in Contexts</h4>
+<h4><a name="1.c.3.CommonUsefulMethodsInContexts"></a>1.c.3 Common Useful Methods in Contexts</h4>
 <p>Note that the variable named "<b>this"</b> is equivalent to <b>serviceResult</b> in the following examples, e.g. these two statements are identical: </p>
 <ul>
 <li><strong>this</strong>.addExport("myexport", "Foo Bar") </li>
@@ -351,16 +399,20 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="RestR
                 </tbody></table>
       
       </p>
-<h4><a name="1c.1.Vars"></a>1c.4 Vars</h4>
-<h4><a name="1.c.2.Headers"></a>1.c.5 Headers</h4>
-<h4><a name="1.c.3.Expected.Codes"></a>1.c.6 Expected Codes</h4>
-<h4><a name="1.c.4.Mutators"></a>1.c.7 Mutators</h4>
-<h4><a name="1.c.5-Looping"></a>1.c.8 Looping</h4>
+<h4><a name="1.c.4.Vars"></a>1.c.4 Vars</h4>
+<p>The vars/var tag appears in several places in the configuration file trees.<br>They use the same rules discussed under <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>.</p>
+<p>Vars in different xml config elements have different scoping rules.</p>
+<p>Here are the places vars can exist:</p>
+<p>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a><br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a></p>
+<h4><a name="1.c.5.Headers"></a>1.c.5 Headers</h4>
+<h4><a name="1.c.6.Expected.Codes"></a>1.c.6 Expected Codes</h4>
+<h4><a name="1.c.7.Mutators"></a>1.c.7 Mutators</h4>
+<h4><a name="1.c.8-Looping"></a>1.c.8 Looping</h4>
 <p>You can loop tests two ways with RestReplay.&nbsp; First, you can use &lt;test ID="myLoopyTest" loop="2"&gt;...&lt;/test&gt; to loop a test.&nbsp; Of course, the value provided to the loop parameter can be a Jexl Expression, so you can run the loop a variable number of times: </p>
 <p>&lt;test ID="deleteOrders" loop="${size(ordersListTest.ORDER_IDS)}"&gt;</p>
 <p>See a full example in <a href="#RestReplay-3.a.1.DELETE">3.a.1 DELETE</a></p>
   <p>You can also loop using a <a href="#RestReplay-restReplay.testGroup.test.mutator">VarMutator.</a></p>
-<h4><a name="1.c.6.AutoDelete"></a>1.c.9 AutoDelete</h4>
+<h4><a name="1.c.9.AutoDelete"></a>1.c.9 AutoDelete</h4>
 <a href="#RestReplay-restReplay.testGroup">AutoDelete</a> is turned on with global parameters and testGroup parameters.<br><br>RestReplay keeps track of the<strong> Location</strong> header sent by services. This allows you to later delete that resource.&nbsp; Some services do not follow this pattern of returning a <strong>Location</strong> header after creating a resource with a POST, so RestReplay lets you define an expression for the DeleteURL.&nbsp; <br><br>If <a href="#RestReplay-restReplay.testGroup">AutoDelete</a>  is on for your testGroup, then if either of Location or DeleteURL are set, then at the end of a testGroup, then RestReplay will call DELETE on the Location or DeleteURL for every test that used POSTs.<br>
 <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.d.1Runtime"></a>1.d.1 Runtime</h4>
 
@@ -884,6 +936,9 @@ When overriding RunOptions in a master file, consider these two development scen
             <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.vars.var"></a>/restReplayMaster/vars/var</td>
           </tr>
           <tr>
+<td><br></td>
+<td>See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td></tr>
+<tr>
             <td>@id</td>
 
             <td>The name of the variable.  var elements declared here are available to all tests.  These are useful for
@@ -941,25 +996,6 @@ When overriding RunOptions in a master file, consider these two development scen
           getAssignments will go against LASSERVER:      http://localhost:8080
           pitoken will go against PISERVER               http://piserver.example.com
    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1082,7 +1118,7 @@ When overriding RunOptions in a master file, consider these two development scen
               <td><br></td>
 
               <td>A single variable, which will be available to all tests called by this master.
-<br>                  Behaves exactly like <a href="#RestReplay-master.vars.var">/restReplayMaster/vars/var</a> <br>See examples at <a href="#RestReplay-master.envs">/restReplayMaster/envs</a><br>See also: discussion of var expression syntax at <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a></td>
+<br>                  Behaves exactly like <a href="#RestReplay-master.vars.var">/restReplayMaster/vars/var</a>&nbsp; except that the vars come from the <a href="#RestReplay-master.envs">environment</a> specified.<br>See examples at <a href="#RestReplay-master.envs">/restReplayMaster/envs</a><br>See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td>
           </tr>
 
           <tr>
@@ -1324,7 +1360,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
             <td>var</td>
-            <td>A variable that will be expanded just before the test is run.  Available to use in uri element.<br>The body of the element is a Jexl2 Expression, discussed below.<br><br>The vars/var tag appears in other places in the tree.<br>They use the same rules discussed here, but have different scoping rules.<br>See also: <br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a><br><br>For more programmatic horsepower (such as javascript/rhino, and XPath expressions) see the discussion on response validators:<br>&nbsp; &nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.response.validator">/restReplay/testGroup/test/response/validator</a>.</td>
+            <td>A variable that will be expanded just before the test is run.  Available to use in uri element.<br>The body of the element is a&nbsp; <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expression</a>, discussed in this document under <a href="#1.c.1.Expressions">1.c.1 Expressions</a> and <a href="#1.c.2.ValuesInContexts">1.c.2 Values in Contexts</a>.<br><br>See also: <a href="#1.c.4.Vars">1.c.4 Vars</a><br><br>For more programmatic horsepower (such as javascript/rhino, and XPath expressions) see the discussion on response validators:<br>&nbsp; &nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.response.validator">/restReplay/testGroup/test/response/validator</a>.</td>
           </tr>
           <tr>
 <td>@ID</td>
@@ -1347,48 +1383,7 @@ When overriding RunOptions in a master file, consider these two development scen
               </div>
             </td>
           </tr>
-          <tr>
-            <td>Jexl Expressions:</td>
-            <td>
-              Vars and expressions use <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expressions</a>. 
-              <br>
-              These variables are pre-defined by RestReplay into the Jexl Context (inside vars and expressions), and their backing Java class type is shown: 
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<ul>
-                <li><b>serviceResult</b>&nbsp;  org.dynamide.restreplay.ServiceResult</li> 
-                <li><b>serviceResultsMap</b>&nbsp;  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;</li> 
-                <li><b>tools</b>&nbsp;  org.dynamide.util.Tools</li>
-                  <li><b>kit</b>&nbsp;  org.dynamide.restreplay.Kit</li>
-              </ul>
-              
-              
-            </td>
-          </tr>
+          
           <tr>
             </tr><tr>
             <td>Example:</td>
@@ -1606,7 +1601,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
             <td>var</td>
-            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>, but limited to one test</td></tr>
+            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>, but limited to one test.&nbsp; See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td></tr>
             <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.expected.code" id="RestReplay-restReplay.testGroup.test.expected.code"></a>
               /restReplay/testGroup/test/expected/code</td>
@@ -1635,6 +1630,15 @@ When overriding RunOptions in a master file, consider these two development scen
               a 200, a 201, a 202, and so on. <br><br>Here are other range examples: 
                   
               
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1715,7 +1719,7 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>var</td>
             <td>Evaluated <b>after</b> the test is run; otherwise similar to 
-            <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a> (and limited to one test).</td>
+            <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a> (and limited to one test). See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td>
           </tr>
           
           
@@ -1761,6 +1765,15 @@ When overriding RunOptions in a master file, consider these two development scen
               The uri contains any required queryString parameters:
 
               
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1932,6 +1945,15 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1947,6 +1969,15 @@ When overriding RunOptions in a master file, consider these two development scen
   
   This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
   
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2196,6 +2227,15 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -2209,6 +2249,15 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2400,6 +2449,15 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2670,6 +2728,15 @@ if (r && r.count){
 
 
 
+
+
+
+
+
+
+
+
+
 <pre class="brush: xml; gutter: false;">var ordersArray = kit.newStringArray(theCount);</pre>
     
        <p>Then we run the delete test, which looks at the array of order IDs in the export getOrdersAfterCreate.ORDER_IDS.
@@ -2685,6 +2752,15 @@ if (r && r.count){
     <p>Specifically, if getOrdersAfterCreate.ORDER_IDS is an array of string like ["abc123","abc456"],
         <br>then in memory it looks like this:
         
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2728,6 +2804,15 @@ if (r && r.count){
     </blockquote>
     because the first time through the loop,
     
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2838,6 +2923,41 @@ if (r && r.count){
         </headers>
     </test>
       ]]></script>
+      
+      
+      
+       <h3><a name="RestReplay-3.a.4.JexlScript"></a>3.a.4 Jexl Script</h3>
+      <p>Expressions in Jexl can span multiple lines, and have return statements, so they can be used as scripts.  In this example, 
+      a complicated expression is made manageable by breaking it into lines and steps.  But it is still one "expression".</p>
+        
+        This example shows that in a var, you can use <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expressions</a>. 
+              <br>Note that <b>kit</b> is predefined to be valid inside a Jexl evaluator.<br>Note the use of CDATA to protect the jexl from xml rules.&nbsp; If you don't use the characters: &lt;,&nbsp; and &amp;, you can skip the CDATA.<br>The CDATA begins with <strong style="color: #3366ff;">&lt;![CDATA[</strong> and ends with <strong><span style="color: #3333ff;">]]&gt;&nbsp;</span></strong> <br>The Jexl begins with <strong style="color: #3366ff;">${</strong> and ends with <strong style="color: #3366ff;">}</strong><br>
+<div class="code"> &lt;var ID="MyGregorianDate"&gt;&lt;![CDATA[<br>  <strong style="color: #3366ff;">${</strong>
+     if (kit != null) {
+        var ts = kit.gregorian.timestampUTC();
+        kit.out.println('');
+        kit.out.println(' ==&gt; Running test script, in selftest.xml:selftestGroup:selftestScriptTest at '+ts);
+        kit.out.println('');
+        return ''+ts;
+     }
+     return "kit not defined in selftestScriptTest";
+  <strong style="color: #3366ff;">}</strong><br>]]&gt;&lt;/var&gt;               </div>
+    
+                                                               
+                                                               
+  <h3><a name="RestReplay-3.a.x.MoreExamples"></a>3.a.x More Examples</h3>
+<p>The best source for examples are the ones that run every time we build or install RestReplay: our _self-test.  
+   This ships with every RestReplay.jar, and can be unpacked from there, or can be seen on our <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">_self-test GitHub page</a>.
+                                                               <br />
+                                                               <br />Especially, you can see all our tests here:
+                                                               <br /><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/self-test.xml">self-test.xml</a>
+                                                               <br /><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/master-self-test.xml">master-self-test.xml</a>
+      </p>
+<hr>
+
+
+      
+      
       
         
 
