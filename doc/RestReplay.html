@@ -418,13 +418,16 @@
 <tr>
 <td>control</td>
 <td>-control my-control.xml</td>
-<td>Run one control file without a master.  Requires at least <strong>testGroup</strong>, and also accepts <strong>test</strong></td>
+<td>Run one control file, optionally without a master.  Requires at least <strong>testGroup</strong>, and also accepts <strong>test</strong>. If you
+run with a master, then masterVars and master headers are pulled in first.  Otherwise, all vars and headers must run
+stand-alone within the control file.</td>
 </tr>
 
 <tr>
     <td>master</td>
     <td>-master my-master.xml</td>
-    <td>Run one master file.&nbsp; If this is set, then the options <strong>control</strong>, <strong>testGroup</strong>, and <strong>test</strong> are ignored.</td>
+    <td>Run one master file.&nbsp; If this is set, and the option <strong>control</strong> is used, then <strong>testGroup</strong>, and <strong>test</strong> are used, otherwise
+        <strong>testGroup</strong> and <strong>test</strong> are ignored.</td>
 </tr>
 
 <tr>
