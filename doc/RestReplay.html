@@ -2463,7 +2463,7 @@ if (r && r.count){
     <p>Subsequent tests can now make the token available to their own templates like so: </p>
 
     <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
-            <test ID="selftestUseTokenPOST">
+            <test ID="UseTokenPOST">
                 <method>POST</method>
                 <uri>/tagonomy?mock=true</uri>
                 <filename>_self_test/selftest-token-post.json</filename>
@@ -2474,7 +2474,7 @@ if (r && r.count){
  ]]></script>
     <p>or can use the token in the URI like so:</p>
     <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
-    <test ID="selftestUseToken">
+    <test ID="UseToken">
         <method>GET</method>
         <uri>/tagonomy?mock=true&amp;token=${selftestToken.got("//data")}</uri>
     </test>
@@ -2501,7 +2501,7 @@ if (r && r.count){
 
     <p>After which you can use the token in the URI like so:</p>
     <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
-    <test ID="selftestUseToken">
+    <test ID="UseToken">
         <method>GET</method>
         <uri>/tagonomy?mock=true&amp;token=${selftestToken.TOKEN}</uri>
     </test>
@@ -2509,7 +2509,7 @@ if (r && r.count){
 
     <p>or you can use the token in headers like so:</p>
     <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
-    <test ID="selftestUseToken">
+    <test ID="UseToken">
         <method>GET</method>
         <uri>/tagonomy?mock=true</uri>
         <headers>
