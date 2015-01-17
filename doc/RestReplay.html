@@ -6,6 +6,7 @@
 
 
 
+
   <meta name="generator" content="HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.12), see www.w3.org">
   
 
@@ -18,6 +19,10 @@
     font-weight: bold;
   }
 
+  .mojonixon {
+    padding-left: 20px;
+    border: none;
+  }
   .element-hdr, .pathrow {
     font-size: 100%; line-height: 13pt; color: rgb(51, 51, 51); font-weight: bold; background-image: none; background-color: rgb(173, 216, 230);
   }
@@ -69,6 +74,9 @@
       border: 1px solid gray;
       background-color: #eee;
   }
+  .matrix th {
+      text-align: left;
+  }
   #content {
       margin: 20px;
       border: 0px solid green;
@@ -115,6 +123,13 @@
   }
 
   </style>
+  
+  <script src="js/syntaxhighlighter_3.0.83/scripts/shCore.js" type="text/javascript"></script>
+  <script src="js/syntaxhighlighter_3.0.83/scripts/shBrushJScript.js" type="text/javascript"></script>
+  <script src="js/syntaxhighlighter_3.0.83/scripts/shBrushXml.js" type="text/javascript"></script>
+  <link href="js/syntaxhighlighter_3.0.83/styles/shCore.css" rel="stylesheet" type="text/css">
+  <link href="js/syntaxhighlighter_3.0.83/styles/shThemeDefault.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body>
@@ -144,14 +159,21 @@
     <h4><a href="#RestReplay-2.c.2XMLconfigurationparametersinmasterfile">2.c.2 XML configuration parameters in <b>master</b> file</a></h4>
     <h4><a href="#RestReplay-2.c.3XMLconfigurationparametersincontrolfile">2.c.3 XML configuration parameters in <b>control</b> file</a></h4>
     <h4><a href="#RestReplay-2.c.4Cleanup">2.c.4 Cleanup</a></h4>
-
+    <h2><a href="#RestReplay-3.Examples">3. RestReplay Examples</a></h2>
+    <h3><a href="#RestReplay-3.a.1.DELETE">3.a.1 Using DELETE for lists of resources.</a></h3>
+    <h3><a href="#RestReplay-3.a.2.XPath">3.a.2 Using XPath to dig elements out of XML or JSON.</a></h3>
+    <h3><a href="#RestReplay-3.a.3.XPath">3.a.2 Using XPath part 2</a></h3>
     </span>
     
 
     <h2><a name="RestReplay-1.Introduction" id="RestReplay-1.Introduction"></a>1. RestReplay Introduction</h2>
 
       <p><span class="Apple-style-span">RestReplay is a utility to send REST requests to the services layer (including JSON, XML, and multipart XML requests), read responses, and compare<br>
-      the resulting payloads with templates.</span></p>
+      the resulting payloads with templates.&nbsp; <br></span></p>
+<p><span class="Apple-style-span">RestReplay is designed for simple, file-based, DRY configuration, that is programmable by beginning programmers. (It also has APIs for advanced users who wish to drive the tests from Java, or extend test types by writing plugins.)&nbsp; Mostly you can find configuration examples of chaining tests, looping tests, and validating result IDs in our self-test that is included in the distribution jar.&nbsp; RestReplay is also designed to be configured many ways, for many kinds of projects.&nbsp; A good, safe bet is to follow the style in our self-test.&nbsp; All configuration parameters are covered below, in the order of the configuration XML files, after the discussion of the command line.<br></span></p>
+<p><span class="Apple-style-span">RestReplay lets you automate entire workflows over your REST layer.&nbsp; You can login, request resources and APIs, extract data from the response, such as resource IDs, and use these IDs in subsequent tests.&nbsp; For example, each of these would be a test within one testGroup:&nbsp; login, PUT a new order and extract the ID returned, GET the latest list of orders, GET the invoice for the order ID, DELETE the order, GET the order to make sure it is gone.&nbsp; Each test could have a small bit of code to count json arrays, dig in with jsonp or XPath, etc.&nbsp; </span><span class="Apple-style-span"><span class="Apple-style-span">These are documented below.</span></span></p>
+<p><span class="Apple-style-span"><span class="Apple-style-span"></span>Most things are done for you by the framework, so you just specify the URL, the type of request, and create files for any POST or upload content, and hit Go!&nbsp; RestReplay runs your request, and reports on the result.&nbsp; Many times, success in testing and monitoring is just knowing that a particular sequence of HTTP transactions succeeded.&nbsp;&nbsp; For these kinds of testing, there is no programming.&nbsp; You'll merely replace values with variables that you define, such as ${ORDER_ID}, as you wire the tests together.&nbsp; <br></span></p>
+<p><span class="Apple-style-span">Using the examples in our <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">self-test</a>, the documentation below, the <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl Documentation</a>, and our <a href="http://dynamide.org/RestReplay/javadoc/">Javadoc</a>, you can also program RestReplay to do more complicated workflows. <br></span></p>
 
       <h3><a name="RestReplay-1.a.Features" id="RestReplay-1.a.Features"></a>1.a. Features</h3>
 
@@ -159,24 +181,37 @@
         <li>Completely configurable via XML.</li>
 
         <li>Abstracts each transaction with server as a "test".</li>
+<li>Tests are easily configured to: </li>
+<ul>
+<li>loop a number of times</li>
+<li>re-run over a list of values for one variable, or multiple variables</li>
+<li>mutate requests to send automatically variable data such as dates</li>
+<li>mutate requests to remove required and optional fields to test service schema compliance</li></ul>
+<li>All request payloads and expected response payload templates are stored as files within the deployed test.</li>
 
-        <li>Multiple tests can be grouped in a testGroup element, and each test may refer to previous tests within testGroup.</li>
+        <li>Multiple tests can be grouped in a testGroup element, and each test may refer to previous tests within testGroup.&nbsp; </li>
+<li>This naturally models workflows from UX hitting a&nbsp; REST services layer, e.g. a resource is created in one test, then its ID, available in the response, is used by the next test to modify that resource.</li>
+<li>TestGroups are run by Master control files, which let you centralize environments, e.g. testing against dev, qa, production.</li>
 
         <li>Optional Automatic cleanup of resources allocated within a testGroup.</li>
 
         <li>Send and receive JSON and XML payloads or MIME-multipart payloads.</li>
-
-        <li>File-based request and response payloads.</li>
-
-        <li>Variable expansion in: URLs, headers, request payloads, and response payloads.</li>
+<li>Variable expansion in: URLs, headers, request payloads, and response payloads.</li>
+<li>Javascript(Rhino) and Jexl2 for scripting and expression evaluation.</li>
 
         <li>Simple reporting of results on console and in surefire reports.</li>
 <li>Full reporting of results in html report output directory.</li>
 
-        <li>Programmatic interface for driving the tests and testGroups, and for finer control of reporting and cleanup.</li>
+        <li>Java programmatic interface for driving the tests and testGroups, and for finer control of reporting and cleanup.</li>
       </ul>
 
       <h3><a name="RestReplay-1.bOverview" id="RestReplay-1.bOverview"></a>1.b Overview</h3>
+<p>RestReplay is run from the command line (or ant, maven, or Jenkins).&nbsp; It reads your configuration files, and along with startup parameters, determines which testGroups and which tests to run.&nbsp; Along the way, it initializes and evaluates any variables you have set up, such as hosts, ports, resource IDs, logins, and so on.&nbsp; </p>
+<p>It runs the tests in the order you define, synchronously.&nbsp; As each test is run, it exports variables which become available to subsequent tests.&nbsp; Also after each test, the response is evaluated for schema correctness, and any Validator you have defined can run using Jexl or Javascript code.&nbsp; </p>
+<p>So you can think of it following stories, or use cases, or workflows, exercising your services layer.&nbsp; </p>
+<p>After the tests have run, RestReplay compiles a directory of stand-alone reports that drill down from your high level view (the Master) to the detail view (the individual testGroup/test reports).&nbsp; Tweaking the RunOptions gives you control over the output on the command line, and also in the HTML report.&nbsp; These reports do not depend on anything else, and can be archived, since they show stats, results, documentation of your APIs, and contain all the input and output payloads.&nbsp; </p>
+<p>After the tests have run, you can check the code coverage of your services layer with external tools such as <a href="http://www.eclemma.org/">EclEmma</a>, and also use other queries to check the state of your datastores.&nbsp; </p>
+<p>RestReplay tests your services, but it also drives them exactly as a user or bot would, so think of the next steps in your integration testing.</p>
 
       <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.b.1Runtime"></a>1.b.1 Runtime</h4>
 
@@ -262,6 +297,26 @@
 <h2><a name="RestReplay-2.ReferenceDocumentation" id="RestReplay-2.ReferenceDocumentation"></a>2. Reference Documentation</h2>
 
       <h3><a name="RestReplay-2.a.Installation" id="RestReplay-2.a.Installation"></a>2.a. Installation</h3>
+      <p>RestReplay is downloaded as a jar, so you simply put this jar on your classpath and run it, with some options.
+      Alternatively, you can integrate RestReplay into your Maven build.  To run it on Jenkins, just make RestReplay.jar available
+      on the Jenkins job's classpath, and use the command line parameters.</p>
+
+    <p>To see the structure of the testdir that will hold your tests, un-jar the RestReplay.jar file, and look for
+     the subdirectory src/main/resources/restreplay/.  This is our -testdir.  In it we have defined a project
+    called _self-test.  The _self-test project has working, precise tests that cover most of our functionality.  To
+        write tests, you'll want to look at a body of tests, such as our _self-test which has great examples,
+        and uses the organizational features of RestReplay.
+        You should also have a -testdir, and have some organization that stores tests by groups that
+    make sense for your project. Feel free to mimic the structure of _self-test.  But know that RestReplay
+    can run this _self-test from the classpath, that is, from the copy inside the jar file.  So if you don't obscure the
+    name _self-test, then you can always run our test suite on startup, which simply tests that everything works
+    from RestReplay, over http to a local, temporary test service it spins up.  You can copy, and or override the _self-test to do your bidding if you need a custom setup.
+    This works because the tests are found on your -testdir path first, and if not, are looked up from the jar file.
+    In this same way, the reports use our CSS file, which you can override once you see the path from the jar file.
+        So in our jar file is the resource
+        <b>src/main/resources/restreplay/_includes/reports-include.css</b>, which you can override with a copy in your -testdir directory structure
+        like so, where <b>TEST_DIR</b> is the direcotry where you have told RestReplay is the root of all your tests:
+        <br /><b>TEST_DIR/_includes/reports-include.css</b></p>
 
       <h3><a name="RestReplay-2.b.Configuration" id="RestReplay-2.b.Configuration"></a>2.b. Configuration</h3>
 
@@ -442,7 +497,9 @@
       &lt;<a href="#RestReplay-master.run">run</a> /&gt;
   &lt;/restReplayMaster&gt;</pre>
       </div>
-      <table border="1" cellpadding="3" cellspacing="0">
+
+
+              <table border="1" cellpadding="3" cellspacing="0">
         <tbody>
           <tr>
             <td colspan="3" class="pathrow element-hdr"><a name="RestReplay-master" id="RestReplay-master"></a>/restReplayMaster</td>
@@ -559,7 +616,7 @@
                   <p>Example:</p>
 
                   <div class="code">&lt;auths default="admin@example.org"&gt;
-    &lt;auth ID="user1@museum1"&gt;dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth&gt;
+    &lt;auth ID="admin@example.org"&gt;dXNlcjFAbXVzZXVtMS5vcmc6dXNlcjFAbXVzZXVtMS5vcmc=&lt;/auth&gt;
     &lt;auth ID="bigbird2010"&gt;YmlnYmlyZDIwMTA6YmlnYmlyZDIwMTA=&lt;/auth&gt;
     &lt;auth ID="elmo2010"&gt;ZWxtbzIwMTA6ZWxtbzIwMTA=&lt;/auth&gt;
 &lt;/auths&gt;                  </div>
@@ -632,11 +689,8 @@ When overriding RunOptions in a master file, consider these two development scen
                and you may or may not check in your changes.
                   In this case, change any settings you like as close to the testCase as you can in the chain:
                         <strong>runOptions &gt; master &gt; testGroup &gt; testCase</strong>
-                  Review any changes to your xml config and control files you commit,
-                  and check strategy as outlined in case (2).
-
-            2) you are committing this master to source control, so that it gets picked up by automated builds.
-                   In this case, you should have a coordinated reason for overriding the default file (runOptions.xml).
+                  But feel free to change runOptions.xml and your master file, which ever is easiest.<br>	          Before committing your code, validate that you no longer need those options, <br>                     or consider coordinating the change with the team, since these settings affect many tests.<br><br>            2) you are committing this master to source control, so that it gets picked up by automated builds.
+                   In this case, you should have a reason, coordinated with your team, <br>                   for overriding the default file (runOptions.xml) or the master for each project.
 
     Options:
         "<strong>connectionTimeout</strong>"
@@ -739,19 +793,8 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
-
-
-
-
-
-
-
-
-
-
 <hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
-
 
         &lt;restReplayMaster&gt;
             &lt;protoHostPort&gt;<b>${SNOOPSERVER}</b>&lt;/protoHostPort&gt;
@@ -777,8 +820,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
       <b>In this case, getAssignments will use the default from protoHostPort in
       the master file:</b>
-      secondTestGroup.getAssignments will go against SNOOPSERVER               http://localhost:28082
-<br><br></run></div></td>
+      secondTestGroup.getAssignments will go against SNOOPSERVER               http://localhost:28082<br></run></div></td>
           </tr>
 
 
@@ -869,7 +911,7 @@ When overriding RunOptions in a master file, consider these two development scen
               <td><br></td>
 
               <td>A single variable, which will be available to all tests called by this master.
-                  Behaves exactly like <a href="#RestReplay-master.vars.var">/restReplayMaster/vars/var</a></td>
+<br>                  Behaves exactly like <a href="#RestReplay-master.vars.var">/restReplayMaster/vars/var</a> <br>See examples at <a href="#RestReplay-master.envs">/restReplayMaster/envs</a><br>See also: discussion of var expression syntax at <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a></td>
           </tr>
 
           <tr>
@@ -890,9 +932,8 @@ When overriding RunOptions in a master file, consider these two development scen
 
           <tr>
               <td>Example:</td>
-
-              <td>
-                  <span class="code">&lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /&gt;</span>
+<td>
+                  <div class="code">&lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /&gt;</div>
               </td>
           </tr>
           <tr>
@@ -1112,9 +1153,12 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
             <td>var</td>
-            <td>A variable that will be expanded just before the test is run.  Available to use in uri element.</td>
+            <td>A variable that will be expanded just before the test is run.  Available to use in uri element.<br>The body of the element is a Jexl2 Expression, discussed below.<br><br>The vars/var tag appears in other places in the tree.<br>They use the same rules discussed here, but have different scoping rules.<br>See also: <br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a><br><br>For more programmatic horsepower (such as javascript/rhino, and XPath expressions) see the discussion on response validators:<br>&nbsp; &nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.response.validator">/restReplay/testGroup/test/response/validator</a>.</td>
           </tr>
           <tr>
+<td>@ID</td>
+<td>The ID attribute of var makes that variable available in the test's namespace under that ID.&nbsp; So requests can use ${COURSE_ID} to get the value 540f4515e4b004e7d8f22fc8 because COURSE_ID was the ID attribute value, in this next example. In other words, the value of the ID becomes a variable in the target language.&nbsp; </td></tr>
+<tr>
             <td>Example:</td>
             <td>
               <div class="code">
@@ -1132,8 +1176,57 @@ When overriding RunOptions in a master file, consider these two development scen
               </div>
             </td>
           </tr>
-
           <tr>
+            <td>Jexl Expressions:</td>
+            <td>
+              Vars and expressions use <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expressions</a>. 
+              <br>
+              These variables are pre-defined by RestReplay into the Jexl Context (inside vars and expressions), and their backing Java class type is shown: 
+              
+
+
+
+
+
+
+<ul>
+                <li><b>serviceResult</b>&nbsp;  org.dynamide.restreplay.ServiceResult</li> 
+                <li><b>serviceResultsMap</b>&nbsp;  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;</li> 
+                <li><b>tools</b>&nbsp;  org.dynamide.util.Tools</li>
+                  <li><b>kit</b>&nbsp;  org.dynamide.restreplay.Kit</li>
+              </ul>
+              
+              
+            </td>
+          </tr>
+          <tr>
+            </tr><tr>
+            <td>Example:</td>
+            <td>
+              This example shows that in a var, you can use <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expressions</a>. 
+              <br>Note that <b>kit</b> is predefined to be valid inside a Jexl evaluator.<br>Note the use of CDATA to protect the jexl from xml rules.&nbsp; If you don't use the characters: &lt;,&nbsp; and &amp;, you can skip the CDATA.<br>The CDATA begins with <strong style="color: #3366ff;">&lt;![CDATA[</strong> and ends with <strong><span style="color: #3333ff;">]]&gt;&nbsp;</span></strong> <br>The Jexl begins with <strong style="color: #3366ff;">${</strong> and ends with <strong style="color: #3366ff;">}</strong><br>
+<div class="code"> &lt;var ID="MyGregorianDate"&gt;&lt;![CDATA[<br>  <strong style="color: #3366ff;">${</strong>
+     if (kit != null) {
+        var ts = kit.gregorian.timestampUTC();
+        kit.out.println('');
+        kit.out.println(' ==&gt; Running test script, in selftest.xml:selftestGroup:selftestScriptTest at '+ts);
+        kit.out.println('');
+        return ''+ts;
+     }
+     return "kit not defined in selftestScriptTest";
+  <strong style="color: #3366ff;">}</strong><br>]]&gt;&lt;/var&gt;               </div>
+            </td>
+          </tr>
+          <tr>
+          
+          
+          
+          
+          
+          
+          
+
+          </tr><tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.headers.header" id="RestReplay-restReplay.testGroup.headers.header"></a>/restReplay/testGroup/headers/header</td>
           </tr>
           <tr>
@@ -1243,7 +1336,7 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
               <td>@loop</td>
 
-              <td><i>OPTIONAL. </i> integer.  Default=1. Sets the number of loops to run. Repeats the service call loop times.  Within validators, scripts, and expressions, the value of the current loop
+              <td><i>OPTIONAL. </i> integer.  Default=1. Sets the number of loops to run. Repeats the service call <em><strong>loop</strong></em> times.  Within validators, scripts, and expressions, the value of the current loop
                   index (zero-based) is <b>this.LoopIndex</b>
                   <br>
 
@@ -1252,9 +1345,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
                   <br>
                   <br>Example:  (loop 3 times, from loopyTest_0 to loopyTest_2 )
-                  <div class="code">Example:
-                      &lt;test ID="loopyTest" loop="3"&gt;...
-                      </div>
+                  <div class="code">    &lt;test ID="loopyTest" loop="3"&gt;...                  </div>
                   </td>
           </tr>
 
@@ -1289,56 +1380,17 @@ When overriding RunOptions in a master file, consider these two development scen
             <td>Example</td>
 
             <td>
-              This example shows switching auths between tests, and how the auths are sticky.<br>
-              "permBigbird" and "accountBigbird" tests are run as user admin@example.org<br>
-              and "dimension1" and "dimension1" tests are run as user bigbird2010.
-
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="code">
-&lt;!-- Set up permissions and account, and test bigbird2010 --&gt;
+              This example shows switching auths between tests, and how the auths are sticky -- they stick around until another is set, or reset with auth="".<br>
+              <br>"permBigbird" and "accountBigbird" tests are run as user <em>admin@example.org</em>.<br><br>"dimension1" and "dimension1" tests are run as user <em>bigbird2010</em>.<br><br>This would test the flow of allowing an admin account to change a regular user's permissions and accounts, then testing that that regular user can access other services.<br><div class="code">
 &lt;test ID="permBigbird" auth="admin@example.org"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/cspace-services/authorization/permissions&lt;/uri&gt;
     &lt;filename&gt;security/1-bigbird-permission.xml&lt;/filename&gt;
-&lt;/test&gt;
-&lt;test ID="accountBigbird"&gt;
+&lt;/test&gt;<br><br>&lt;test ID="accountBigbird"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/cspace-services/accounts&lt;/uri&gt;
     &lt;filename&gt;security/5-account-bigbird.xml&lt;/filename&gt;
-&lt;/test&gt;
-&lt;test ID="dimension1"  auth="bigbird2010"&gt;
+&lt;/test&gt;<br><br>&lt;test ID="dimension1"  auth="bigbird2010"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/cspace-services/dimensions/&lt;/uri&gt;
     &lt;part&gt;
@@ -1346,15 +1398,14 @@ When overriding RunOptions in a master file, consider these two development scen
         &lt;filename&gt;dimension/1.xml&lt;/filename&gt;
     &lt;/part&gt;
 &lt;/test&gt;
-&lt;test ID="dimension2"&gt;
+<br>&lt;test ID="dimension2"&gt;
     &lt;method&gt;PUT&lt;/method&gt;
     &lt;uri&gt;/cspace-services/dimensions/${dimension1.CSID}&lt;/uri&gt;
     &lt;part&gt;
         &lt;label&gt;dimensions_common&lt;/label&gt;
         &lt;filename&gt;dimension/2-put.xml&lt;/filename&gt;
     &lt;/part&gt;
-&lt;/test&gt;
-              </div>
+&lt;/test&gt;              </div>
             </td>
           </tr>
           
@@ -1365,7 +1416,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
             <td>var</td>
-            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">restReplay/testGroup/vars/var</a>, but limited to one test</td></tr>
+            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>, but limited to one test</td></tr>
             <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.expected.code" id="RestReplay-restReplay.testGroup.test.expected.code"></a>
               /restReplay/testGroup/test/expected/code</td>
@@ -1373,7 +1424,7 @@ When overriding RunOptions in a master file, consider these two development scen
             <tr>
             <td>code</td>
 
-            <td>zero to many <strong>&lt;code range="" /&gt; </strong>elements.&nbsp; The child or text of this element may be empty when this is a child of <strong>test</strong>, and not a child of <strong>mutator</strong>. <br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
+            <td>&lt;expected&gt; contains zero to many <strong>&lt;code range="" /&gt; </strong>elements.&nbsp; The child or text of this element may be empty when this is a child of <strong>test</strong>, and not a child of <strong>mutator</strong>.&nbsp;&nbsp; When the tag is found under <a href="#RestReplay-restReplay.testGroup.test.mutator">&lt;mutator&gt;&lt;expected&gt;&lt;code&gt;</a> , then additional rules apply--please see that section.<br><br>The &lt;<strong>code</strong>&gt; element defines acceptable HTTP response codes for groups of mutations.&nbsp;
   In the example below, mutation
   <span style="font-weight: bold;">numOfDrafts</span> expects the server to succeed in the range 200-299.&nbsp;
   If you don't specify test/expected/code/ then the default is as though you specified
@@ -1385,12 +1436,21 @@ When overriding RunOptions in a master file, consider these two development scen
             &lt;code range="202,204-206" /&gt;
     &lt;/expected&gt;    <br>&lt;/test&gt;  </div>
               
-              These ranges work like printer page ranges: from-to, inclusive.  x or X or XX or xx are all wildcards for the http response code groups,
+              These range attributes work like printer page ranges.&nbsp;&nbsp; It is a string that contains a comma separated list of ranges, where a range is a low and a high, inclusive.&nbsp; A single number without a hyphen is a range with the high and the low being the same.&nbsp; A list may be a single number or series wildcard, in which case there are no commas.<br><br><em>Basic syntax examples for the range attribute: </em><br><strong>200</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The range will be from 200 to 200, exluding all other 2x values such as 201.<br><strong>2x</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The range will be from 200-299.<br><strong>200-209</strong>&nbsp;&nbsp;&nbsp;&nbsp; from-to, inclusive.&nbsp; Internally these map to <em>ranges (org.dynamide.restreplay.Range)</em>.<br><strong>200,201,204</strong> &nbsp;&nbsp; comma separated list. response codes 200, 201, and 204 are acceptable, but 202, 203 are not, nor any other codes.&nbsp; Call these <em>lists</em>.<br><strong>2x,301-302</strong> &nbsp;&nbsp; commas and&nbsp; <em>ranges</em> (pairs separated by hyphens) may be combined. &nbsp; <br>&nbsp;<strong>x </strong><em>or</em><strong> xx </strong><em>or</em><strong> X </strong><em>or</em><strong> XX</strong>&nbsp;&nbsp;&nbsp; are all wildcards for the http response code groups,
               so 2X and 2xx both expand to 200-299.  range="200" only succeeds if server sends exactly 200, but range="2x" succeeds if server sends 
-              a 200, a 201, a 202, and so on. 
-              Here are other range examples: 
+              a 200, a 201, a 202, and so on. <br><br>Here are other range examples: 
                   
               
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1520,6 +1580,16 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;uri&gt;/cspace-services/objectexit/?sortBy=&amp;pgNum=2&amp;pgSz=1&lt;/uri&gt;
                 </div>
@@ -1541,7 +1611,7 @@ When overriding RunOptions in a master file, consider these two development scen
           
 <tr>
 <td><br></td>
-<td>If the request is not multipart, you can simply place the &lt;filename&gt; element under the &lt;test&gt; element.&nbsp; If the request is mime-multipart, this element goes in a &lt;part&gt; element.</td>
+<td>If the request is not multipart, you can simply place the &lt;filename&gt; element under the &lt;test&gt; element.&nbsp; If the request is mime-multipart, this element goes in a &lt;part&gt; element. Like all filenames in RestReplay, the value is relative to the <strong>-testdir</strong> directory.</td>
 <td><br></td></tr>
 <tr>
 <td>Example: </td>
@@ -1569,8 +1639,8 @@ When overriding RunOptions in a master file, consider these two development scen
   The default (<strong>*</strong>) is to expect the server to respond to all other named mutations with code 200 in the statement
   <b>&lt;code range="200"&gt;*&lt;/code&gt;</b>
     <br>
-    <br>
-    See also: <a href="#RestReplay-restReplay.testGroup.test">Looping tests with test@loop</a>
+    <em><br>See also </em><a href="#RestReplay-restReplay.testGroup.test.expected.code">&lt;test&gt;&lt;expected&gt;&lt;code&gt;</a> documentation for how <strong>code</strong> ranges work outside of mutators.<br><em>See also</em> <a href="#RestReplay-restReplay.testGroup.test.response.expected">&lt;test&gt;&lt;response&gt;&lt;expected level=""&gt;</a> documentation for how the <strong>expected</strong> tag implements tree matching.<br>
+    <em>See also</em>: <a href="#RestReplay-restReplay.testGroup.test">Looping tests with test@loop</a>
 
 </td>
 <td><br></td></tr>
@@ -1601,6 +1671,16 @@ When overriding RunOptions in a master file, consider these two development scen
   Example showing default wildcard.  Mutations that are not book_id, and course_id are expected to get a 200 response code:
   
 
+
+
+
+
+
+
+
+
+
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1617,6 +1697,16 @@ When overriding RunOptions in a master file, consider these two development scen
   This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
   
 
+
+
+
+
+
+
+
+
+
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1624,7 +1714,8 @@ When overriding RunOptions in a master file, consider these two development scen
     &lt;mutator type="ExcludeFields"&gt;
         &lt;expected&gt;
             &lt;code range="200"&gt;*&lt;/code&gt;
-            &lt;code range="202" /&gt;<span style="color: #cc0000;">&lt;!-- error: this will be a duplicate for * --&gt;</span>
+            &lt;code range="202"&gt;<span style="color: #cc0000;"><span style="color: black;">&lt;/code&gt;</span>      &lt;!-- error: this will be a duplicate for * --&gt;</span>
+            &lt;code range="202" /&gt;<span style="color: #cc0000;">           &lt;!-- same error with stand-alone tag --&gt;</span>
             &lt;code range="400-499,500-599"&gt;book_id, course_id&lt;/code&gt;
         &lt;/expected&gt;
     &lt;/mutator&gt;
@@ -1641,6 +1732,16 @@ When overriding RunOptions in a master file, consider these two development scen
                   VarMutator re-applies the service call, once for each of these vars blocks, which set vars before the call, in the file-order of the vars groups.
                   IDs are informational strings--set to any alphanumeric string.  Here is an example from the RestReplay self-test.
                   
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1744,7 +1845,7 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>var</td>
 
-            <td>Declares a variable to be made available to the expansion of the part template.</td>
+            <td>Declares a variable to be made available to the expansion of the part template.<br>See also<a href="#RestReplay-restReplay.testGroup.vars.var"> /restReplay/testGroup/vars/var</a> for a discussion of the expression languaged used inside a var.</td>
           </tr>
 
           <tr>
@@ -1792,6 +1893,16 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -1805,6 +1916,16 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1885,15 +2006,27 @@ When overriding RunOptions in a master file, consider these two development scen
 
           <tr>
               <td>variables in context</td>
-              <td>
-<div class="code">
-serviceResult          - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.
-serviceResultsMap      - a map of all previously run tests, kept in insertion order of the tests run.
-                          Key is the ID of the test element.
-this.mutator.getIndex() - zero-based index of which mutation loop this is.
-kit                     - instance of org.dynamide.restreplay.Kit
-tools                     - instance of org.dynamide.util.Tools
-              </div>
+            <td>
+                <table class="matrix">
+                    <tbody>
+<tr><th>serviceResult</th>
+<td>  org.dynamide.restreplay.ServiceResult  - also stored as "this". Contains all vars and results, as well as IDs, timing, stati, etc.</td></tr> 
+                    <tr><th>serviceResultsMap</th>
+<td>  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;  - a map of all previously run tests in this same testGroup, kept in insertion order of the tests run.
+                    Key is the ID of the test element.</td></tr> 
+                    <tr><th>tools</th>
+<td>  org.dynamide.util.Tools</td></tr>
+                    <tr><th>kit</th>
+<td>  org.dynamide.restreplay.Kit</td></tr>
+                    <tr><th>this.mutator.getIndex()</th>
+<td> - zero-based index of which mutation loop this is.</td></tr>
+                    <tr><th>__FILE__</th>
+<td> String name of the validator file.</td></tr>
+<tr>
+<th>this.LoopIndex</th>
+<td>If this test is run as a loop, then you can know the zero-based loop index by calling  <b>this.LoopIndex</b> </td></tr>
+                </tbody></table>
+
               </td>
           </tr>
 
@@ -1910,14 +2043,30 @@ tools                     - instance of org.dynamide.util.Tools
 
 
 
+<p>Exports added with this.addExport() get tracked automatically, and the list of exports added per validator is shown in the detail report as an Alert 
+                from the validator.  The values of these exports can then be seen in the variables row (exports are a different background color--see Legend at bottom of page).</p>
+
+
+
+
+
+
+
+                
+<p>Note that <b>this</b> is equivalent to <b>serviceResult</b> in the following examples, e.g. these two statements are identical: </p>
+<ul>
+<li><strong>this</strong>.addExport("myexport", "Foo Bar") </li>
+<li><strong>serviceResult</strong>.addExport("myexport", "Foo Bar").</li></ul>
 <div class="code">
+this.addExport(key,value)
+  
 this.mutationID
 this.mutator.getIndex()
 this.testID
 this.testGroupID
 this.testIDLabel
 this.idFromMutator
-this.loopIndex
+this.LoopIndex
 this.fullURL
 this.deleteURL
 
@@ -2002,6 +2151,16 @@ stdout.println("LOG from javascript: "+result);
 
 
 
+
+
+
+
+
+
+
+
+
+
 <ul>
                 <li>ZERO: does no checking. If the server sends a valid reponse, the reponse succeeds.</li>
 
@@ -2023,7 +2182,8 @@ stdout.println("LOG from javascript: "+result);
             <td>Example:</td>
 
             <td>
-              <div class="code">
+              <div class="code">...
+  &lt;response&gt;
     &lt;expected level="TEXT" /&gt;
               </div>
             </td>
@@ -2134,6 +2294,216 @@ stdout.println("LOG from javascript: "+result);
       <div class="code">
     public static List&lt;ServiceResult&gt; autoDelete(Map&lt;String, ServiceResult&gt; serviceResultsMap, String logName);
       </div>
+
+
+    <h2><a name="RestReplay-3.Examples" id="RestReplay-3.Examples"></a>3. RestReplay Examples</h2>
+
+    <h3><a name="RestReplay-3.a.1.DELETE" id="RestReplay-3.a.1.DELETE"></a>3.a.1 Using DELETE for lists of resources.</h3>
+
+    <p>Say we had a service listening on <b>/api/orders</b> that would return a list of orders we had created.  It might return JSON like this:</p>
+    <script type="syntaxhighlighter" class="brush: js"><![CDATA[
+      {
+        "count":2,
+        "orders": [
+            "order_id":"abc123",
+            "items":[]
+        ],
+        [
+            "order_id":"abc456",
+            "items":[]
+        ]
+      }
+
+     ]]></script>
+
+    <p>We could set up two tests in one testGroup in RestReplay: one to call the service to get this list, and a second to
+    delete all the resources found on the list.</p>
+
+
+        <pre class="brush: xml; ">
+        <test id="getOrdersAfterCreate">
+            <method>GET</method>
+            <uri>/api/orders</uri>
+            <response>
+                <validator lang="javascript">orders/res/getOrdersAfterCreate.validator.js</validator>
+            </response>
+        </test>
+
+
+          <test id="deleteOrders" loop="${size(getOrdersAfterCreate.ORDER_IDS)}">
+              <method>DELETE</method>
+              <uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri>
+          </test>
+        </pre>
+
+    <p>The first test calls the file <b>orders/res/getOrdersAfterCreate.validator.js</b>  Here is what is in that file:</p>
+
+    <script type="syntaxhighlighter" class="brush: js"><![CDATA[
+var r = JSON.parse(serviceResult.result);
+
+if (r && r.count){
+    var stringArray = kit.newStringArray(r.count);
+    for (var i=0; i<r.count; i++){
+        stringArray[i] = r.orders[i].order_id;
+    }
+    serviceResult.addExport("ORDER_IDS", stringArray);
+    "OK";
+}
+
+
+       ]]></script>
+
+
+
+
+
+    <p>Now let's walk through what we have done.</p>
+    <p>In this example, we first run a test called getOrdersAfterCreate, which gets the list of orders,
+        after some other tests have created Order resources on the server.
+       </p>
+
+       <p>
+        After the response comes back, RestReplay runs any validator found,
+           in this case orders/res/getOrdersAfterCreate.validator.js which is shown below.
+           This validator looks into the JSON that came back, and digs out the count and the orders order_id's.
+           If the count were not sent by your server, you can use Javascript to find the length of the r.orders array.
+           This validator builds up a Java Array of String, then passes back to the test as an export.
+       </p>
+    <p>Note that to create Java arrays of String, or String[], you must call either the long version:
+        <pre class="brush: xml; gutter: false;">var ordersArray = java.lang.reflect.Array.newInstance(java.lang.String, r.count);</pre>
+    or the short version:
+        <pre class="brush: xml; gutter: false;">var ordersArray = kit.newStringArray(theCount);</pre>
+    </p>
+       <p>Then we run the delete test, which looks at the array of order IDs in the export getOrdersAfterCreate.ORDER_IDS.
+       This works because getOrdersAfterCreate is the name of the test, and each test stores its exported vars for
+       use by subsequent tests.</p>
+       <p>Note that size() is a function provided by Jexl.&nbsp;
+        It looks at the length of arrays, and the size of collections.&nbsp;
+        Here we use it to tell RestReplay how many times to loop, so that we perform one DELETE request for each ID in the list.
+       </p>
+
+    <p>Also, <b>this.LoopIndex</b> is a loop counter provided by RestReplay when looping.</p>
+
+    <p>Specifically, if getOrdersAfterCreate.ORDER_IDS is an array of string like ["abc123","abc456"],
+        <br />then in memory it looks like this:
+        <table class="matrix" >
+            <tr>
+                <th>0</th>
+                <td>abc123</td>
+
+            </tr>
+            <tr>
+                <th>1</th>
+                <td>abc456</td>
+            </tr>
+        </table>
+    </p>
+
+    <p>
+    Then size(getOrdersAfterCreate.ORDER_IDS)
+        is 2, and loop="${size(getOrdersAfterCreate.ORDER_IDS)}" turns into loop="2", so RestReplay will run deleteOrders 2 times
+        so that the following 2 URI's get hit:
+    <blockquote>
+        DELETE /api/orders/abc123
+        <br />DELETE /api/orders/abc456
+    </blockquote>
+    because the first time through the loop,
+    <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri></pre>
+    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[0]}</uri></pre>
+    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/abc123</uri></pre>
+    <br />
+    <br />Then the second time through,
+    <br /><pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[this.LoopIndex]}</uri></pre>
+    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/${getOrdersAfterCreate.ORDER_IDS[1]}</uri></pre>
+    <br />becomes <pre class="brush: xml; gutter: false;"><uri>/api/orders/abc456</uri></pre>
+
+    </p>
+
+
+    <h3><a name="RestReplay-3.a.2.XPath" id="RestReplay-3.a.2.XPath"></a>3.a.2 Using XPath to dig elements out of XML or JSON.</h3>
+      <p>The serviceResult.got() method is used to get data nodes from tree-structured data received from the server.
+      the key passed to <b>got()</b> is an XPath that will work on any XML request.  JSON requests are mapped to XML for
+      using XPath, and this works well.  You can also use a validator, which will run Javascript and give you JSON dotted syntax.</p>
+
+    <p>In this case, the XPath is <b>//data</b> which means <i>"find the value of the node called data, anywhere in the tree"</i>.</p>
+
+
+    <p>First, let's say we have a token service, that when called, returns some JSON like so, and all we
+        need to grab from the token is the value of the <b>data</b> element from that JSON:</p>
+    <script type="syntaxhighlighter" class="brush: js"><![CDATA[
+{"status":"success","data":"id=ffffffff540e662de4b01ef1c4c50faf;token-expires=112567"}
+     ]]></script>
+
+
+    <p>Now we call this service like so:</p>
+    <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+            <test ID="selftestToken">
+                <method>GET</method>
+                <uri>/tagonomy?mock=token</uri>
+            </test>
+         ]]></script>
+
+    <p>Subsequent tests can now make the token available to their own templates like so: </p>
+
+    <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+            <test ID="selftestUseTokenPOST">
+                <method>POST</method>
+                <uri>/tagonomy?mock=true</uri>
+                <filename>_self_test/selftest-token-post.json</filename>
+                <vars>
+                    <var ID="TOKEN">${selftestToken.got("//data")}</var>
+                </vars>
+            </test>
+ ]]></script>
+    <p>or can use the token in the URI like so:</p>
+    <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+    <test ID="selftestUseToken">
+        <method>GET</method>
+        <uri>/tagonomy?mock=true&amp;token=${selftestToken.got("//data")}</uri>
+    </test>
+      ]]></script>
+<p>in which case, the URI would expand to: <span style="display: inline-block; border: 1px solid black;">/tagonomy?mock=true&amp;token=id=ffffffff540e662de4b01ef1c4c50faf;token-expires=112567</span></p>
+    <h3><a name="RestReplay-3.a.3.XPath" id="RestReplay-3.a.3.XPath"></a>3.a.3 Using XPath part 2</h3>
+
+    <p>Next we'll show another way to export that same value, and some cleaner ways to use it.
+        These are all equivalent to the code above in <a href="#RestReplay-3.a.2.XPath">3.a.2, Using XPath</a></p>
+    <p>First, the selftestToken could be modified to export a var</p>
+
+    <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+            <test ID="selftestToken">
+                <method>GET</method>
+                <uri>/tagonomy?mock=token</uri>
+                <exports>
+                    <vars>
+                        <var ID="TOKEN">${this.got("//data")}</var>
+                    </vars>
+                </export>
+            </test>
+ ]]></script>
+
+
+    <p>After which you can use the token in the URI like so:</p>
+    <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+    <test ID="selftestUseToken">
+        <method>GET</method>
+        <uri>/tagonomy?mock=true&amp;token=${selftestToken.TOKEN}</uri>
+    </test>
+      ]]></script>
+
+    <p>or you can use the token in headers like so:</p>
+    <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+    <test ID="selftestUseToken">
+        <method>GET</method>
+        <uri>/tagonomy?mock=true</uri>
+        <headers>
+            <header name="x-authorization">${selftestToken.TOKEN}</header>
+        </headers>
+    </test>
+      ]]></script>
+      
+        
+
+      
     </div>
   </div>
   
@@ -2144,6 +2514,12 @@ stdout.println("LOG from javascript: "+result);
     var d1 = document.getElementById("TOCDEST1");
     d1.innerHTML = tm.innerHTML;
     var d2 = document.getElementById("TOCDEST2");
-    d2.innerHTML = tt.innerHTML;
+    d2.innerHTML = tt.innerHTML;  
+</script>
+  
+  <!--Run the JS highlighter, you need to include this JS on your page -->
+<script type="text/javascript">
+SyntaxHighlighter.defaults['class-name'] = 'mojonixon';
+     SyntaxHighlighter.all()
 </script>
 </body></html>

@@ -267,7 +267,68 @@
                 </configuration>
             </plugin>
 
+            <!-- http://maven.apache.org/plugins/maven-javadoc-plugin/usage.html
+                 sez:
+                    mvn javadoc:javadoc
+                    mvn javadoc:jar
+                    mvn javadoc:aggregate
+                    mvn javadoc:aggregate-jar
+                    mvn javadoc:test-javadoc
+                    mvn javadoc:test-jar
+                    mvn javadoc:test-aggregate
+                    mvn javadoc:test-aggregate-jar
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <!-- http://maven.apache.org/plugins/maven-javadoc-plugin/usage.html
+         sez: that reporting allows you to generate javadoc by running "mvn site".
+         I have found it to place the javadocs here:
+           /Users/vcrocla/src/RestReplay/target/site/apidocs/
+           /Users/vcrocla/src/RestReplay/target/site/testapidocs/
+    -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/javadoc2</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <!--  http://maven.apache.org/plugins/maven-project-info-reports-plugin/license-mojo.html
+            sez:
+               run this:
+                    mvn project-info-reports:license
+               and get this:
+                   file:///Users/vcrocla/src/RestReplay/target/site/dependencies.html
+               License dependencies, and code dependencies, in a nice report.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.8</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>license</report>
+                            <report>dependencies</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
 </project>
 

@@ -46,4 +46,8 @@ public class Kit {
         return System.err;
     }
 
+    public static String[] newStringArray(int count){
+        return (String[])(java.lang.reflect.Array.newInstance(String.class, count));
+    }
+
 }

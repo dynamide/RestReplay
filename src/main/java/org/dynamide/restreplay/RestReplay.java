@@ -277,10 +277,13 @@ public class RestReplay extends ConfigFile {
     throws Exception {
         String OK = "";
 
+        serviceResult.beginTrappingExports();
         EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
         String validationResultStr = validationResult != null ? validationResult.toString() : "";
         if (Tools.notBlank(expectedResponseParts.validator) && validationResult != null){
-            serviceResult.addAlert("<b>validator result:</b> <span class='validator-result'>"+validationResultStr+"</span>",
+            List<String> exports = serviceResult.endTrappingExports();
+            serviceResult.addAlert("<b>validator result:</b> <span class='validator-result'>"+validationResultStr+"</span>"
+                                    +"<div><b>exports:</b> <div class='validator-exports'>"+exports+"</div></div>",
                     "<b>validator:</b> "+expectedResponseParts.validator,
                     validationResult.worstLevel);
         }
@@ -352,7 +355,7 @@ public class RestReplay extends ConfigFile {
         System.out.println(val);
     }
 
-    protected EvalResult runValidatorScript(ServiceResult serviceResult,
+    protected EvalResult  runValidatorScript(ServiceResult serviceResult,
                                         PartsStruct expectedResponseParts,
                                         Eval evalStruct)
     throws IOException {

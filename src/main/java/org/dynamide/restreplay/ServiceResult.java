@@ -182,7 +182,16 @@ public class ServiceResult {
     //    exports.put(key, value);
     //}
     public void addExport(String key, Object value){
+        trappedExports.add(key);
         exports.put(key, value);
+    }
+
+    private List<String> trappedExports = new ArrayList<String>();
+    public void beginTrappingExports(){
+        trappedExports = new ArrayList<String>();
+    }
+    public List<String> endTrappingExports(){
+        return trappedExports;
     }
 
     public List<Alert> alerts = new ArrayList<Alert>();
@@ -469,7 +478,7 @@ public class ServiceResult {
         }
     }
 
-    /** This method may be called from a test case, using a syntax like ${testID3.resValue("persons_common", "//refName")}   */
+    /** This method may be called from a test case, using a syntax like ${testID3.got("persons_common", "//refName")}   */
     public String got(String xpath) throws Exception {
         //PayloadLogger.HttpTraffic traffic = PayloadLogger.readPayloads(this.result, this.boundary, this.contentLength);
         //PayloadLogger.Part partFromServer = traffic.getPart(partName);

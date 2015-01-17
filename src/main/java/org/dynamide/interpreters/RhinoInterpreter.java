@@ -45,7 +45,7 @@ public class RhinoInterpreter {
 
                 ScriptContext ctx = m_Interpreter.getContext();
                 ctx.setAttribute(ScriptEngine.FILENAME, resourceName, ScriptContext.ENGINE_SCOPE);
-
+                bindings.put("__FILE__", resourceName);
                 try {
                      result.result = m_Interpreter.eval(source);  //pull in functions, vars.
                 } finally {

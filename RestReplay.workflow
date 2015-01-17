@@ -25,6 +25,15 @@ Building:
       which should be copied to any deployed clients.
 
 =============================================================
+Push to public server
+=============================================================
+javadoc:
+	mvn javadoc:jar
+  scp to ~/sites/dynamide.com/RestReplay/javadoc/
+  jar xvf RestReplay-javadoc.jar
+
+
+=============================================================
 Deploy to Revel/LAS:
 =============================================================
    cd ~/src/RestReplay

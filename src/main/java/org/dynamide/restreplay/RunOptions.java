@@ -19,6 +19,7 @@ public class RunOptions {
     public boolean skipMutators = false;
     public boolean skipMutatorsOnFailure = true;
     public boolean dumpResourceManagerSummary = true;
+    public boolean reportResourceManagerSummary = true;
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
 
@@ -47,6 +48,7 @@ public class RunOptions {
                 " failTestOnErrors=" + failTestOnErrors + CR+
                 " evalReportLevel=" + evalReportLevel +CR+
                 " dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
+                " reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
                 " skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
                 " skipMutators=" + skipMutators + "\n\t\t}";
     }
@@ -63,6 +65,7 @@ public class RunOptions {
                 "failTestOnErrors=" + failTestOnErrors +C+BR+
                 "evalReportLevel=" + evalReportLevel +C+BR+
                 "dumpResourceManagerSummary=" + dumpResourceManagerSummary +C+BR+
+                "reportResourceManagerSummary=" + reportResourceManagerSummary +C+BR+
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
                 "}</div>";
@@ -79,6 +82,7 @@ public class RunOptions {
         String failTestOnWarnings = runOptionsNode.valueOf("failTestOnWarnings");
         String failTestOnErrors = runOptionsNode.valueOf("failTestOnErrors");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
+        String reportResourceManagerSummary = runOptionsNode.valueOf("reportResourceManagerSummary");
         String skipMutators = runOptionsNode.valueOf("skipMutators");
         String skipMutatorsOnFailure = runOptionsNode.valueOf("skipMutatorsOnFailure");
         String evalReportLevel = runOptionsNode.valueOf("evalReportLevel");
@@ -103,6 +107,9 @@ public class RunOptions {
         }
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             this.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
+        }
+        if (Tools.notBlank(reportResourceManagerSummary)) {
+            this.reportResourceManagerSummary = Tools.isTrue(reportResourceManagerSummary);
         }
         if (Tools.notBlank(evalReportLevel)) {
             this.evalReportLevel = EVAL_REPORT_LEVEL.valueOf(evalReportLevel);

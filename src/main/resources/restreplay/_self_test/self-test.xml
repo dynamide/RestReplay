@@ -3,15 +3,12 @@
     <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
 
 
-
     <testGroup ID="login" autoDeletePOSTS="false">
         <test ID="selftestToken">
-
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
     </testGroup>
-
 
 
     <testGroup ID="selftestGroup" autoDeletePOSTS="false">
@@ -22,7 +19,7 @@
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
-        <test ID="selftest1">
+        <test ID="selftestExpectedCodes">
             <expected>
                  <code range="3x"/>
                  <code range="1x"/>
@@ -93,20 +90,21 @@
             </vars>
             <exports>
                 <vars>
+                    <comment>this stuff is JEXL, Java Expression Language: org.apache.commons.jexl2, and it is basically java, but has the var keyword.</comment>
                     <var ID="GregorianDate"><![CDATA[${
                         if (kit != null) {
                             var ts = kit.gregorian.timestampUTC();
                             kit.out.println('');
                             kit.out.println('    ==> Running test script, in selftest.xml:selftestGroup:selftestScriptTest at '+ts);
                             kit.out.println('');
-                            return ''+ts;
+                            return 'zts:'+ts;
                         }
                         return "kit not defined in selftestScriptTest";
                     }]]></var>
                 </vars>
             </exports>
         </test>
-       <test ID="selftestUseValidator">
+        <test ID="selftestUseValidator">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -116,7 +114,24 @@
             <response>
                 <validator lang="javascript">_self_test/res/selftest.validator.js</validator>
             </response>
-        </test> 
+        </test>
+       <test ID="getOrders">
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/selftest-number-post.json</filename>
+           <vars>
+               <var ID="COUNT">4</var>
+           </vars>
+           <response>
+                <validator lang="javascript">_self_test/res/getOrders.validator.js</validator>
+            </response>
+        </test>
+
+        <test ID="deleteOrders" loop="${size(getOrders.ORDER_IDS)}">
+            <method>GET</method>
+            <uri>/tagonomy?mock=${getOrders.ORDER_IDS[this.LoopIndex]}</uri>
+        </test>
+
         <test ID="selftestUseValidatorExpectErrors">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
@@ -142,7 +157,7 @@
         <test ID="selftestUseVarMutator">
             <method>PUT</method>
             <expected>
-                <code range="202"/>
+                <code range="202" />
                 <comment>because emptyMutationResponseCode=202 is sent in uri.
                          Each non-empty mutation (child test) will return a 406, hardcoded on the server side of this test,
                          because typical use case is seeing if removing fields makes the service complain.</comment>
@@ -158,11 +173,15 @@
             </vars>
             <mutator type="VarMutator">
                 <expected>
-                    <code range="406"></code>
+                    <code range="406" />
                 </expected>
                 <vars ID="0">
                     <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
                     <var idbase="VarTestMessage">${this.testID} set in mutation ID=0.</var>
+                </vars>
+                <vars ID="1">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}</var>
+                    <var idbase="VarTestMessage">${this.testID} set in mutation ID=1.</var>
                 </vars>
             </mutator>
         </test>
@@ -260,7 +279,6 @@
     </testGroup>
 
     <testGroup ID="debugMutators2"  autoDeletePOSTS="false">
-
         <test ID="selftestUseTokenPUT">
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
@@ -277,8 +295,6 @@
             </mutator>
         </test>
     </testGroup>
-
-
 
     <testGroup ID="bugs"  autoDeletePOSTS="false">
         <test ID="selftestUseTokenPUTbugs">
@@ -332,7 +348,6 @@
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-mutator.json</filename>
         </test>
-
     </testGroup>
 
 </restReplay>

@@ -245,6 +245,9 @@ public class RestReplayReport {
 
 
     public String evalReportToString(RestReplay replay){
+        if (replay.getRunOptions().evalReportLevel.equals(RunOptions.EVAL_REPORT_LEVEL.NONE)){
+            return "<p>Eval Report is off. Set runOptions::evalReportLevel to SHORT or ALL to enable.</p>";
+        }
         StringBuffer b = new StringBuffer();
         b.append("<div class='evalReport'><h2 class='evalReportTitle'>Eval Report</h2>");
         for (EvalResult evalResult: replay.evalReport){
@@ -257,10 +260,6 @@ public class RestReplayReport {
                 case SHORT:
                     trimmedExpression = dotdotdot(trimmedExpression, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
                     trimmedResult = dotdotdot(trimmedResult, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
-                    break;
-                case NONE:
-                    trimmedResult = "";
-                    trimmedExpression = "";
                     break;
             }
 
@@ -503,8 +502,12 @@ public class RestReplayReport {
             sb.append("<h2>Run Options</h2>");
             sb.append("<div class='run-options'>"+master.getRunOptions().toHTML()+"</div>");
             sb.append("<br /><br /><hr />");
-            sb.append("<h2>ResourceManager Summary</h2>");
-            sb.append(master.getResourceManager().formatSummary());
+            if (master.getRunOptions().reportResourceManagerSummary){
+                sb.append("<h2>ResourceManager Summary</h2>");
+                sb.append(master.getResourceManager().formatSummary());
+            } else {
+                sb.append("<p>ResourceManager Summary off. To see summary, set reportResourceManagerSummary=\"true\" in master::runOptions or runOptions.xml.</p>");
+            }
             sb.append(HTML_PAGE_END);
             System.out.println("====\r\n==== Master Report Index: "+Tools.glue(masterFilenameDirectory,masterFilenameNameOnly)+"\r\n====");
             return FileTools.saveFile(masterFilenameDirectory, masterFilenameNameOnly, sb.toString(), true);

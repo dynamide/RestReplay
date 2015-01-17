@@ -178,6 +178,12 @@ td, th {
    padding: 2px;
    background-color: #E0FFFF;
 }
+.validator-exports {
+   display: inline-block;
+   border: 1px solid gray;
+   padding: 2px;
+   background-color: #99ddff;
+}
 .vars {
     background-color: #bbddff;
     font-size: 60%;
