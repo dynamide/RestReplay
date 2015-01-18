@@ -1915,8 +1915,10 @@ When overriding RunOptions in a master file, consider these two development scen
 
           <tr>
               <td>@skipParent</td>
-              <td>If true, then the mutator will skip running the test before it runs the mutations.
+              <td>If true, then the mutator will skip running the test before it runs the mutations.  The parent test will show
+                  up in the report, with a response code of 0, the label skipped=true, and will be missing headers and responses.
                   If false or absent, the mutator will run the test (as the parent) then run the mutations (as children).
+                  In the report, you can recognize mutations because they are indented, and have the label type: which shows the mutator type.
 
               </td>
               <td><br></td>
