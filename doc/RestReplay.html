@@ -1913,6 +1913,15 @@ When overriding RunOptions in a master file, consider these two development scen
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.uri" id="RestReplay-restReplay.testGroup.test.mutator"></a>/restReplay/testGroup/test/mutator</td>
           </tr>
 
+          <tr>
+              <td>@skipParent</td>
+              <td>If true, then the mutator will skip running the test before it runs the mutations.
+                  If false or absent, the mutator will run the test (as the parent) then run the mutations (as children).
+
+              </td>
+              <td><br></td>
+          </tr>
+
 <tr>
 <td>Discussion</td>
 <td>The &lt;<strong>mutator</strong>&gt; element loads a Mutator, defined by the <strong>type</strong> attribute.&nbsp;
