@@ -27,7 +27,9 @@ import org.json.XML;
 public class RestReplayReport {
     public static final String INCLUDES_DIR = "_includes";
 
-    protected static final String HTML_PAGE_END = "</body></html>";
+    protected static final String HTML_PAGE_END =
+        "<div style='margin: 6px; margin-top: 20px; background-color: white; border-radius: 5px; padding: 10px; border: 1px solid blue; text-align: center;'><span style='font-size: 70%;'>powered by</span> <a href='http://dynamide.org/RestReplay/'>RestReplay</a></div>"
+        +"</body></html>";
     protected static final String TOPLINKS = "<a class='TOPLINKS' href='javascript:openAll();'>Show All Payloads</a>"
             + "<a class='TOPLINKS' href='javascript:closeAll();'>Hide All Payloads</a>"
             + "<a class='TOPLINKS' href='javascript:openAllHeaders();'>Show All Headers</a>"
