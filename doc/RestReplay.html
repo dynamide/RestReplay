@@ -269,7 +269,7 @@
 <p>See the <a href="#RestReplay-2.ReferenceDocumentation">Reference Documentation</a> for syntax, structure, discussion, and examples of code.&nbsp; This section covers concepts that are common to many of the configurable and scriptable elements documented in the <a href="#RestReplay-2.ReferenceDocumentation">Reference Documentation</a>.</p>
 <h4><a name="1.c.1.Expressions"></a>1.c.1 Expressions</h4>
 <p>Expressions are defined using <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl syntax</a>. </p>
-<p>Expressions are always evaluated in a context. <em>(Actually, a series of nested contexts, similar to Javascript scoping.&nbsp; RestReplay automatically provides these contexts, for each testGroup, eachTest, and each evaluation.)&nbsp;</em> Some values and tools will always be <a href="#1c.1.ValuesInContexts">available in the context</a>, such as "kit", "tools", and "this".&nbsp; For running tests, all previously run tests are available, by ID, in the context.&nbsp; So any value sent to or received from a service, either from URLs, Headers, or payloads, can be retrieved using an expression.&nbsp; You can place values into the context with the <a href="#1.c.4.Vars">var</a> element.</p>
+<p>Expressions are always evaluated in a context. <em>(Actually, a series of nested contexts, similar to Javascript scoping.&nbsp; RestReplay automatically provides these contexts, for each testGroup, eachTest, and each evaluation.)&nbsp;</em> Some values and tools will always be <a href="#1.c.2.ValuesInContexts">available in the context</a>, such as "kit", "tools", and "this".&nbsp; For running tests, all previously run tests are available, by ID, in the context.&nbsp; So any value sent to or received from a service, either from URLs, Headers, or payloads, can be retrieved using an expression.&nbsp; You can place values into the context with the <a href="#1.c.4.Vars">var</a> element.</p>
 <p>An expression is evaluated just before it is used.&nbsp; (Subsequent evaluations use the latest values available from referenced data sources.) An expression in a test will not be evaluated until that test is run.&nbsp; Expressions stored elsewhere and referenced (such as Master vars, and headers) are also evaluated just as the test is run.&nbsp;&nbsp; Exported vars are run after the test is run, and retain their values for the rest of the run through the testGroup.</p>
 <p>Expressions are strings.&nbsp; They are surrounded by bash-like braces: ${ORDER_ID}&nbsp; looks up the value of the expression ORDER_ID.&nbsp; If ORDER_ID is defined in the "context" then its value is returned.&nbsp; Say ORDER_ID is set to a string: "abc123" , then the expression's value is like so: </p>
 <table class="matrix" border="1" cellpadding="2" cellspacing="0">
@@ -392,7 +392,7 @@ list of exports added per validator is shown in the detail report as an
 Alert 
                 from the validator.  The values of these exports can 
 then be seen in the variables row (exports are a different background 
-color--see Legend at bottom of page).<br>See the discussion under <a href="RestReplay-3.a.1.DELETE">3.a.1.DELETE</a> for an example of using addExport().</td></tr> 
+color--see Legend at bottom of page).<br>See the discussion under <a href="#RestReplay-3.a.1.DELETE">3.a.1.DELETE</a> for an example of using addExport().</td></tr>
                     <tr><th>this.testID</th>
 <td>  <br></td></tr> 
                     <tr><th>this.testGroupID</th>
