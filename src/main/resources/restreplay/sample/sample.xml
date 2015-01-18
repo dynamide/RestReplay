@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplay>
+    <testGroup ID="main" autoDeletePOSTS="false">
+        <test ID="taxee">
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <uri>${TAXEE}/v1/federal/2014</uri>
+        </test>
+        
+        <test ID="namey">
+            <comment>doco at http://namey.muffinlabs.com/</comment>
+            <expectedCodes>200</expectedCodes>
+            <method>GET</method>
+            <headers>
+            <header ID="Accept">*/*</header>
+            </headers>
+            <uri>http://namey.muffinlabs.com/name.json</uri>
+        </test>
+    </testGroup>
+</restReplay>

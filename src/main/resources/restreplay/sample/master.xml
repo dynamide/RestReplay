@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplayMaster>
+    <protoHostPort>http://localhost:8080</protoHostPort>
+    
+    <dump payloads="false" dumpServiceResult="minimal" />
+
+    <runOptions>
+        <connectionTimeout>6600</connectionTimeout>
+        <socketTimeout>4400</socketTimeout>
+        <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
+    </runOptions>
+
+    <vars>
+        <var ID="TAXEE">http://taxee.io/api</var>
+    </vars>
+
+
+    <run controlFile="sample/sample.xml" testGroup="main" />
+
+
+</restReplayMaster>
+
