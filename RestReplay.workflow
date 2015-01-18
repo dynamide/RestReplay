@@ -31,7 +31,6 @@ javadoc:
   scp to ~/sites/dynamide.com/RestReplay/javadoc/
   jar xvf RestReplay-javadoc.jar
 
-
 =============================================================
 Deploy to Revel/LAS:
 =============================================================
