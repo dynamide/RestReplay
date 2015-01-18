@@ -209,7 +209,7 @@
     <h2><a name="RestReplay-1.Introduction" id="RestReplay-1.Introduction"></a>1. RestReplay Introduction</h2>
 
       <p><span class="Apple-style-span">RestReplay is a utility to send REST requests to the services layer (including JSON, XML, and multipart XML requests), read responses, and compare<br>
-      the resulting payloads with templates.&nbsp; <br></span></p>
+        the resulting payloads with templates.&nbsp; At the end of a run, RestReplay produces a static, archiveable report, such as this </span><span class="Apple-style-span"><a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">self-test sample report</a>, which shows you a summary of how your service calls went, and shows drill-down to the transaction level so you can debug and communicate about integration issues.<br></span></p>
 <p><span class="Apple-style-span">RestReplay is designed for simple, file-based, <a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a> configuration, that is programmable by beginning programmers. (It also has APIs for advanced users who wish to drive the tests from Java, or extend test types by writing plugins.)&nbsp; Mostly you can find configuration examples of running tests, chaining tests, looping tests, and validating result IDs in our self-test that is included in the distribution jar.&nbsp; RestReplay is also designed to be configured many ways, for many kinds of projects.&nbsp; A good, safe bet is to follow the style in our self-test.&nbsp; See: <a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">self-test sample report</a> and <a href="https://github.com/dynamide/RestReplay">self-test source code</a>. All configuration parameters are covered below, in the order of the configuration XML files, after the discussion of the command line.<br></span></p>
 <p><span class="Apple-style-span">RestReplay lets you automate entire workflows over your REST layer.&nbsp; You can login, request resources and APIs, extract data from the response, such as resource IDs, and use these IDs in subsequent tests.&nbsp; For example, each of these would be a test within one testGroup called OrderFlow:&nbsp; <br></span></p>
 <ul>
@@ -331,6 +331,7 @@ for (var i=0; i&lt;r.count; i++){
                     <tr><th>serviceResult.result</th>
 <td>  The body of the response.  If it is JSON, you can turn it into a javascript object with:
   
+
 
 
 
@@ -1023,6 +1024,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <hr>    <b>But if protoHostPort were not defined in this test file, then the
     protoHostPort will be pulled in from the master file.</b>
 
@@ -1673,6 +1675,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <div class="code"> &lt;code range="100" /&gt;
  &lt;code range="1xx" /&gt;
  &lt;code range="2xx" /&gt;
@@ -1767,6 +1770,7 @@ When overriding RunOptions in a master file, consider these two development scen
               The uri contains any required queryString parameters:
 
               
+
 
 
 
@@ -1966,6 +1970,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <div class="code">&lt;test ID="dynamideUseMutator"&gt;
     &lt;method&gt;POST&lt;/method&gt;
     &lt;uri&gt;/tagonomy?mock=true&lt;/uri&gt;
@@ -1981,6 +1986,7 @@ When overriding RunOptions in a master file, consider these two development scen
   
   This example will cause an error, because you have specified the default twice (once with * and once with an empty text node) :
   
+
 
 
 
@@ -2258,6 +2264,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
 
+
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
               </div>
@@ -2271,6 +2278,7 @@ When overriding RunOptions in a master file, consider these two development scen
               In context, this looks like:
 
               
+
 
 
 
@@ -2476,6 +2484,7 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+
 
 
 
@@ -2774,6 +2783,7 @@ if (r && r.count){
 
 
 
+
 <pre class="brush: xml; gutter: false;">var ordersArray = kit.newStringArray(theCount);</pre>
     
        <p>Then we run the delete test, which looks at the array of order IDs in the export getOrdersAfterCreate.ORDER_IDS.
@@ -2789,6 +2799,7 @@ if (r && r.count){
     <p>Specifically, if getOrdersAfterCreate.ORDER_IDS is an array of string like ["abc123","abc456"],
         <br>then in memory it looks like this:
         
+
 
 
 
@@ -2846,6 +2857,7 @@ if (r && r.count){
     </blockquote>
     because the first time through the loop,
     
+
 
 
 
