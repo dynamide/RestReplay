@@ -638,6 +638,7 @@ public class RestReplay extends ConfigFile {
             String method = testNode.valueOf("method");
             String uri = testNode.valueOf("uri");
             String mutatorType = testNode.valueOf("mutator/@type");
+            boolean mutatorSkipParent = Tools.isTrue(testNode.valueOf("mutator/@skipParent"));
 
             //get default timeouts from master config file.
             serviceResult.connectionTimeout = getRunOptions().connectionTimeout;
@@ -724,6 +725,7 @@ public class RestReplay extends ConfigFile {
                         method,
                         contentRawFromMutator,
                         mutatorType,
+                        mutatorSkipParent,
                         testdir,
                         clonedMasterVarsWTest,
                         testElementIndex,
@@ -896,6 +898,7 @@ public class RestReplay extends ConfigFile {
                            String method,
                            String contentRawFromMutator,
                            String mutatorType,
+                           boolean mutatorSkipParent,
                            String testdir,
                            Map<String, String> clonedMasterVars,
                            int testElementIndex,
@@ -930,7 +933,6 @@ public class RestReplay extends ConfigFile {
             contentRaw = contentRawFromMutator;
             vars = clonedMasterVars;
         }
-        //TODO: confirm current behavior: why do I add vars AFTER the call?
         if (vars != null) {
             serviceResult.addVars(vars);
         }
@@ -938,20 +940,31 @@ public class RestReplay extends ConfigFile {
         String contentSubstituted = evalResult.getResultString();
         serviceResult.alerts.addAll(evalResult.alerts);
 
-        /** Use this function for NON-multipart messages, that is, regular POSTs. */
-        serviceResult = Transport.doPOST_PUT(
-                serviceResult,  //brings in existing list of Alerts
-                test.fullURL,
-                contentSubstituted,
-                contentRaw,
-                Transport.BOUNDARY,
-                method,
-                contentType,
-                test.authForTest,
-                test.testIDLabel,
-                fileName,
-                test.headerMap);
+        boolean callTransport = true;
+        if (Tools.notBlank(mutatorType) && (contentRawFromMutator == null)) {
+        //means we have a mutator, but we are not in a nested call already.
+            if (mutatorSkipParent) {
+                callTransport = false; //skip because mutator@skipParentrunParent is true, so mutators will run actual calls
+                serviceResult.overrideGotExpectedResult();  //still gotta have the parent, saying it gotExpected for the children to run.
+                serviceResult.parentSkipped = true;    //informational for the RestReplayReport line.
+            }
+        }
 
+        if (callTransport) {
+            /** Use this function for NON-multipart messages, that is, regular POSTs. */
+            serviceResult = Transport.doPOST_PUT(
+                    serviceResult,  //brings in existing list of Alerts
+                    test.fullURL,
+                    contentSubstituted,
+                    contentRaw,
+                    Transport.BOUNDARY,
+                    method,
+                    contentType,
+                    test.authForTest,
+                    test.testIDLabel,
+                    fileName,
+                    test.headerMap);
+        }
         test.results.add(serviceResult);
         serviceResultsMap.put(test.testID, serviceResult);
         serviceResultsMap.put("result", serviceResult);

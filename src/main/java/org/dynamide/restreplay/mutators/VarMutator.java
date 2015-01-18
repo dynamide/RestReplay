@@ -17,11 +17,13 @@ public class VarMutator extends ContentMutator implements IMutator {
     private int index = 0;
 
     private List<List<VarTemplate>> spaces = new ArrayList<List<VarTemplate>>();
+    private List<String>spaceIDs = new ArrayList<String>();
 
     public void setOptions(Node testNode){
         super.setOptions(testNode);
         List<Node> vars = testNode.selectNodes("mutator/vars");
         for (Node oneVarsNode: vars){
+            String spaceID = oneVarsNode.valueOf("@ID");
             List<Node> nodes = oneVarsNode.selectNodes("var");
             List<VarTemplate> varList = new ArrayList<VarTemplate>();
             for (Node varNode : nodes) {
@@ -30,6 +32,7 @@ public class VarMutator extends ContentMutator implements IMutator {
                 varList.add(new VarTemplate(idbase, template));
             }
             spaces.add(varList);
+            spaceIDs.add(spaceID);
         }
     }
 
@@ -48,11 +51,20 @@ public class VarMutator extends ContentMutator implements IMutator {
     }
 
     public String getMutationID(){
-        return "varGroup_"+(index-1);
+        return safeID();
+    }
+    private String safeID(){
+        int i = index-1;
+        int sz = spaceIDs.size();
+        if (sz > 0 && i < sz){
+            return spaceIDs.get(i);
+        }
+        System.out.println("funny i: "+i+" size: "+sz);
+        return ""+(index-1);
     }
 
     public String getID(){
-        return " ["+(index-1)+"] var"; //TODO. Make descriptive once you sort this out.
+        return safeID();
     }
 
     @Override

@@ -53,6 +53,7 @@ public class ServiceResult {
     public String mutationDetailBlockID = "";
     public boolean mutatorSkipped = false;
     public boolean mutatorSkippedByOpts = false;
+    public boolean parentSkipped = false; //set by RestReplay.doPOSTPUT when it encounters <mutator skipParent="true" for a test.
     public int loopIndex = -1;
     public int getLoopIndex(){
         return loopIndex;

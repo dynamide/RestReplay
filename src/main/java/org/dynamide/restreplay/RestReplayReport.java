@@ -686,7 +686,7 @@ public class RestReplayReport {
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a class='URL_A' href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
-                + formatResponseCodeBlock(s) + linesep
+                + formatResponseCodeBlock(s) +  linesep
                 + (Tools.notBlank(s.failureReason) ? s.failureReason + linesep : "")
 
                 //+ ((s.mutator != null) ? s.mutator.toString() : "") + linesep
@@ -724,6 +724,9 @@ public class RestReplayReport {
         return  s.responseCode
                 + SP + lbl(" gotExpected")+s.gotExpectedResult()
                 + SP + sExpected
+                + SP + (s.getParent()!=null?lbl("type")+smallblack(s.getParent().mutatorType):"")
+                + SP + (s.parentSkipped?lbl("skipped")+"true":"")
+                + SP + (s.loopIndex>-1?lbl("loop")+smallblack(""+s.loopIndex):"")
                 + SP + lbl(" time")+s.time + units("ms") ;
     }
 

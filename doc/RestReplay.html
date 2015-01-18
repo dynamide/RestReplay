@@ -292,6 +292,7 @@
   <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
   <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
 ]]></script>
+    <p>These expressions were used in <a href="#1.c.4.Vars">vars, explained here</a></p>
   <p>See also: <a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a> for an example of using a more complicated Jexl expression.</p>
     
 <h4><a name="1.c.2.ValuesInContexts"></a>1.c.2 Values in Contexts</h4>
@@ -426,7 +427,20 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="RestR
 <p>Here are the places vars can exist:</p>
 <p>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a><br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a></p>
 <p> See also: <a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a> for an example of using a more complicated Jexl expression as a var.</p>
-<h4><a name="1.c.5.Headers"></a>1.c.5 Headers</h4>
+<p>Here is the list of vars shown above in the discussion on <a href="#1.c.1.Expressions">1.c.1 Expressions</a>
+<script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
+<vars>
+  <var ID="DAYS">${24*60*60*1000}</var>
+  <var ID="BASE_DATE">${tools.now()}</var>
+  <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+  <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
+  <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+</vars>
+]]></script>
+</p>
+
+
+    <h4><a name="1.c.5.Headers"></a>1.c.5 Headers</h4>
 <p>See: <a href="#RestReplay-restReplay.testGroup.headers.header">/restReplay/testGroup/headers/header</a></p>
 <h4><a name="1.c.6.Expected.Codes"></a>1.c.6 Expected Codes</h4>
 <p>See <a href="#RestReplay-restReplay.testGroup.test.expected.code">/restReplay/testGroup/test/expected/code</a></p>
@@ -437,9 +451,23 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="RestR
 <p>&lt;test ID="deleteOrders" loop="${size(ordersListTest.ORDER_IDS)}"&gt;</p>
 <p>See a full example in <a href="#RestReplay-3.a.1.DELETE">3.a.1 DELETE</a></p>
   <p>You can also loop using a <a href="#RestReplay-restReplay.testGroup.test.mutator">VarMutator.</a></p>
-<h4><a name="1.c.9.AutoDelete"></a>1.c.9 AutoDelete</h4>
+
+
+
+
+
+
+    <h4><a name="1.c.9.AutoDelete"></a>1.c.9 AutoDelete</h4>
 <a href="#RestReplay-restReplay.testGroup">AutoDelete</a> is turned on with global parameters and testGroup parameters.<br><br>RestReplay keeps track of the<strong> Location</strong> header sent by services. This allows you to later delete that resource.&nbsp; Some services do not follow this pattern of returning a <strong>Location</strong> header after creating a resource with a POST, so RestReplay lets you define an expression for the DeleteURL.&nbsp; <br><br>If <a href="#RestReplay-restReplay.testGroup">AutoDelete</a>  is on for your testGroup, then if either of Location or DeleteURL are set, then at the end of a testGroup, then RestReplay will call DELETE on the Location or DeleteURL for every test that used POSTs.<br>
-<h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.d.1Runtime"></a>1.d.1 Runtime</h4>
+
+
+
+
+
+
+
+
+    <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.d.1Runtime"></a>1.d.1 Runtime</h4>
 
       <p>At runtime, RestReplay consults parameters passed in on the command line, or from maven surefire,
           or from java:exec which uses parameters found in the pom.xml project file under options for the <span style="font-style: italic; font-weight: bold;">exec-maven-plugin</span> plugin.</p>

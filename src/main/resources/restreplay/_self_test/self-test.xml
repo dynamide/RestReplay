@@ -31,11 +31,23 @@
                 <var ID="TOKEN_ID">${selftestToken.got("//status")}</var>
             </vars>
         </test>
-        <test ID="selftestUseMutator">
+        <test ID="useMutator">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/content-mutator-test.json</filename>
             <mutator type="ExcludeFields">
+                <expected>
+                    <code range="200">*</code>
+                    <code range="200-299">numOfDrafts</code>
+                    <code range="400-499,500-599">book_id, course_id</code>
+                </expected>
+            </mutator>
+        </test>
+        <test ID="useMutatorNoParent">
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <mutator type="ExcludeFields" skipParent="true">
                 <expected>
                     <code range="200">*</code>
                     <code range="200-299">numOfDrafts</code>
@@ -180,6 +192,31 @@
                     <var idbase="VarTestMessage">${this.testID} set in mutation ID=0.</var>
                 </vars>
                 <vars ID="1">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}</var>
+                    <var idbase="VarTestMessage">${this.testID} set in mutation ID=1.</var>
+                </vars>
+            </mutator>
+        </test>
+        <test ID="UseVarMutatorWNames">
+            <method>PUT</method>
+            <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=202</uri>
+            <filename>_self_test/var-mutator-test.json</filename>
+            <vars>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
+                <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+            </vars>
+            <mutator type="VarMutator" skipParent="true">
+                <expected>
+                    <code range="406" />
+                </expected>
+                <vars ID="Thing1">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
+                    <var idbase="VarTestMessage">${this.testID} set in mutation ID=0.</var>
+                </vars>
+                <vars ID="Thing2">
                     <var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}</var>
                     <var idbase="VarTestMessage">${this.testID} set in mutation ID=1.</var>
                 </vars>
