@@ -53,9 +53,10 @@
     color: brown;
     }
   </style>
+  <title>RestReplay</title>
+    <script src="js/jquery.1.11.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cycle2.min.js"></script> <!-- from http://jquery.malsup.com/cycle2/download/ -->
 
-
-    <title>RestReplay</title>
 </head>
 <body>
   <center>
@@ -63,31 +64,45 @@
 <tbody>
 <tr>
   <th class="rounded" colspan="4" rowspan="1" style="background-color: white;"><span style="font-size: 12pt;"><span class="logo">RestReplay</span> automates calling your REST Services Layer</span>
-  <center>
-      <table class="matrix square"  border="0" cellspacing="10" style="width: 60%; font-size: 10pt;">
-<tbody>
-<tr>
-<td class="brdr" colspan="2" rowspan="1" style="width: 100%; background-color: #cdde07;">Automate sequences and workflows</td>
-<td><br></td>
-<td class="brdr" style="background-color: #99ffff;">use-case testing</td>
-<td><br></td></tr>
-<tr>
-<td style="width:30%; "><br></td>
-<td class="brdr" colspan="2" style="width: 70%; background-color: #04cade;">drive code coverage</td>
-<td class="brdr" style="background-color: #99ff99;"><span style="font-weight: bold;">regressions</span></td>
-<td><br></td></tr>
-<tr>
-<td><br></td>
-<td class="brdr" colspan="2" style="width: 100%; background-color: #ffcc66;">drive integration tests</td>
-<td><br></td>
-<td class="brdr" style="background-color: #f8ef08;">dashboard: services health</td></tr>
-<tr>
-<td class="brdr" colspan="2" style="width: 100%; background-color: #fda803;">Communicate APIs and Integration Issues</td>
-<td><br></td>
-<td><br></td>
-<td class="brdr" style="background-color: #cdde07;">dashboard: service response histories</td></tr></tbody></table>
-  
-  </center>
+<div class="cycle-slideshow" data-cycle-slides="> div" style="text-align:center;">
+
+    <div id="whiteboard">
+        <center>
+            <table class="matrix square"  border="0" cellspacing="10" style="width: 60%; font-size: 10pt;">
+                <tbody>
+                <tr>
+                    <td class="brdr" colspan="2" rowspan="1" style="width: 100%; background-color: #cdde07;">Automate sequences and workflows</td>
+                    <td><br></td>
+                    <td class="brdr" style="background-color: #99ffff;">use-case testing</td>
+                    <td><br></td></tr>
+                <tr>
+                    <td style="width:30%; "><br></td>
+                    <td class="brdr" colspan="2" style="width: 70%; background-color: #04cade;">Drive code coverage</td>
+                    <td class="brdr" style="background-color: #99ff99;"><span style="font-weight: bold;">regressions</span></td>
+                    <td><br></td></tr>
+                <tr>
+                    <td><br></td>
+                    <td class="brdr" colspan="2" style="width: 100%; background-color: #ffcc66;">Drive integration tests</td>
+                    <td><br></td>
+                    <td class="brdr" style="background-color: #f8ef08;"><span style="font-size:70%;">dashboard:</span> services health</td></tr>
+                <tr>
+                    <td class="brdr" colspan="2" style="width: 100%; background-color: #fda803;">Communicate APIs and integration issues</td>
+                    <td><br></td>
+                    <td><br></td>
+                    <td class="brdr" style="background-color: #cdde07;"><span style="font-size:70%;">dashboard:</span> service response histories</td></tr></tbody></table>
+
+        </center>
+    </div>
+    <div id="controlfile" style="width: 100%">
+        <img width="600" height="240" style="margin-top: 15px; " src="img/self-test-control-file.png" />
+    </div>
+    <div id="report" style="width: 100%;" >
+        <img width="600" height="240" style="margin-top: 10px;  padding:5px;" src="img/self-test-report.png" />
+    </div>
+
+
+</div>
+
 </th></tr>
 <tr>
   <td class="rounded" style="background-color: white; padding: 10px;"><a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">Sample Report</a></td>
@@ -97,4 +112,15 @@
 <td class="rounded" style="background-color: white; padding: 10px;"><a href="http://dynamide.org/RestReplay/javadoc/">Javadoc</a></td>
 <td class="rounded" style="background-color: white; padding: 10px;"><a href="https://github.com/dynamide/RestReplay">Source Code at Github</a></td></tr></tbody></table>
   </center>
-</body></html>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#slideshowMainPhoto').cycle({
+        delay: 2400,
+        speed: 2600,
+        timeout: 1000,
+        fx: 'fade'
+    });
+  });
+</script>
+</html>

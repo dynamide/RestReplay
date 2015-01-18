@@ -127,6 +127,7 @@
                 <validator lang="javascript">_self_test/res/selftest.validator.js</validator>
             </response>
         </test>
+
        <test ID="getOrders">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
