@@ -27,9 +27,8 @@ import org.json.XML;
 public class RestReplayReport {
     public static final String INCLUDES_DIR = "_includes";
 
-    protected static final String HTML_PAGE_END =
-        "<div style='margin: 6px; margin-top: 20px; background-color: white; border-radius: 5px; padding: 10px; border: 1px solid blue; text-align: center;'><span style='font-size: 70%;'>powered by</span> <a href='http://dynamide.org/RestReplay/'>RestReplay</a></div>"
-        +"</body></html>";
+    public    static final String POWERED_BY = "<div style='margin: 6px; margin-top: 20px; background-color: white; border-radius: 5px; padding: 10px; border: 1px solid blue; text-align: center;'><span style='font-size: 70%;'>powered by</span> <a href='http://dynamide.org/RestReplay/'>RestReplay</a></div>";
+    protected static final String HTML_PAGE_END = POWERED_BY+"</body></html>";
     protected static final String TOPLINKS = "<a class='TOPLINKS' href='javascript:openAll();'>Show All Payloads</a>"
             + "<a class='TOPLINKS' href='javascript:closeAll();'>Hide All Payloads</a>"
             + "<a class='TOPLINKS' href='javascript:openAllHeaders();'>Show All Headers</a>"
@@ -95,9 +94,9 @@ public class RestReplayReport {
 
     private String runInfo = "";
 
-    public String getPage(String testdir, RestReplay restReplay) throws IOException {
+    public String getPage(String testdir, RestReplay restReplay, String testGroupID) throws IOException {
         return formatPageStart(testdir, restReplay.getResourceManager())
-                + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "</div>"
+                + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMaster()+"'>Back to Master</a>"+"</div>"
                 + header.toString()
                 + this.runInfo
                 + BR
@@ -431,13 +430,13 @@ public class RestReplayReport {
         return result;
     }
 
-    public File saveReport(String testdir, String reportsDir, String reportName, RestReplay restReplay) {
+    public File saveReport(String testdir, String reportsDir, String reportName, RestReplay restReplay, String testGroupID) {
         try {
             FilePath filePath = extractRelPath(reportName);
             String relPath = filePath.relPath;
             String detailDirectory = Tools.join(reportsDir, relPath);
 
-            File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(testdir, restReplay), true);
+            File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(testdir, restReplay, testGroupID), true);
             if (resultFile != null) {
                 String resultFileName = resultFile.getCanonicalPath();
                 //System.out.println("RestReplay summary report output:"
@@ -459,6 +458,29 @@ public class RestReplayReport {
     //    return Tools.glue(basename,"/","TEST-REPORTS");
     //}
 
+    public static class MasterReportNameTupple {
+        public String directory;
+        public String relname;
+    }
+    public static MasterReportNameTupple calculateMasterReportRelname( String reportsDir,
+                                                       String localMasterFilename,
+                                                       String envID){
+        File f = new File(localMasterFilename);
+        String relPath = Tools.getFilenamePath(f.getPath());
+        String relPathNameComponent = Tools.notBlank(relPath)
+                ? Tools.safeFilename(relPath)+'.'
+                : "";
+        String masterFilenameNameOnly = "index."
+                +(Tools.notBlank(envID)?envID+'.':"")
+                +relPathNameComponent
+                + f.getName() + ".html";
+        String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
+        MasterReportNameTupple tupple = new MasterReportNameTupple();
+        tupple.directory = masterFilenameDirectory;
+        tupple.relname = masterFilenameNameOnly;
+        return tupple;
+    }
+
     /**
      * @param localMasterFilename should be a local filename for the index of each restReplay master control file, e.g. objectexit.xml
      *                            so what gets written to disk will be something like index.objectexit.xml.html . The actual filename will be available from
@@ -472,16 +494,8 @@ public class RestReplayReport {
                                           String envID,
                                           Map<String,String> masterVars,
                                           Master master) {
-        File f = new File(localMasterFilename);
-        String relPath = Tools.getFilenamePath(f.getPath());
-        String relPathNameComponent = Tools.notBlank(relPath)
-                                      ? Tools.safeFilename(relPath)+'.'
-                                      : "";
-        String masterFilenameNameOnly = "index."
-                    +(Tools.notBlank(envID)?envID+'.':"")
-                    +relPathNameComponent
-                    + f.getName() + ".html";
-        String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
+
+        MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
 
         //System.out.println("RestReplay summary report output ***********>>>(saveIndexForMaster):"
         //                +"\n testdir:"+testdir
@@ -511,10 +525,10 @@ public class RestReplayReport {
                 sb.append("<p>ResourceManager Summary off. To see summary, set reportResourceManagerSummary=\"true\" in master::runOptions or runOptions.xml.</p>");
             }
             sb.append(HTML_PAGE_END);
-            System.out.println("====\r\n==== Master Report Index: "+Tools.glue(masterFilenameDirectory,masterFilenameNameOnly)+"\r\n====");
-            return FileTools.saveFile(masterFilenameDirectory, masterFilenameNameOnly, sb.toString(), true);
+            System.out.println("====\r\n==== Master Report Index: "+Tools.glue(tupple.directory, tupple.relname)+"\r\n====");
+            return FileTools.saveFile(tupple.directory, tupple.relname, sb.toString(), true);
         } catch (Exception e) {
-            System.out.println("ERROR saving RestReplay report index: in  testdir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" relPath:"+relPath+ " masterFilename: " + masterFilenameNameOnly + " list: " + reportsList + " error: " + e);
+            System.out.println("ERROR saving RestReplay report index: in  testdir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" directory:"+tupple.directory+ " masterFilename: " + tupple.relname + " list: " + reportsList + " error: " + e);
             return null;
         }
     }

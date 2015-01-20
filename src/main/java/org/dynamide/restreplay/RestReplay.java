@@ -53,6 +53,14 @@ public class RestReplay extends ConfigFile {
         this.masterFilename = val;
     }
 
+    private String relToMaster = "";
+    public String getRelToMaster(){
+        return relToMaster;
+    }
+    public void setRelToMaster(String val){
+        relToMaster = val;
+    }
+
     public Map<String, String> masterVars = new LinkedHashMap<String, String>();
     public Map<String, String> getMasterVars() {
         return masterVars;
@@ -568,14 +576,12 @@ public class RestReplay extends ConfigFile {
         this.evalReport = evalStruct.getEvalReport();
 
         //=== Now spit out the HTML report file ===
-        File m = new File(controlFileName);
-        String localName = m.getName();//don't instantiate, just use File to extract file name without directory.
-
-        //String reportName = localName+'-'+testGroupID+".html";
+        File m = new File(controlFileName);  //don't instantiate, just use File to extract file name without directory.
+        String relpath = m.getParentFile().toString();
+        this.relToMaster = calculateElipses(relpath)+this.relToMaster;
         String reportName = controlFileName + '-' + testGroupID + ".html";
-        //System.out.println("=======================>>> report name "+reportName);
 
-        File resultFile = report.saveReport(testdir, reportsDir, reportName, this);
+        File resultFile = report.saveReport(testdir, reportsDir, reportName, this, testGroupID);
         if (resultFile != null) {
             String toc = report.getTOC(relativePathFromReportsDir + reportName);
             reportsList.add(toc);
@@ -586,6 +592,15 @@ public class RestReplay extends ConfigFile {
         }
 
         return results;
+    }
+
+    public String calculateElipses(String relpath) {
+        String result = "";
+        int count = relpath.length() - relpath.replace("/", "").length();  //calc how many '/' chars there are.
+        for (int i = 0; i < count; i++) {
+            result += "../"; //one for each nested folder within test dir.
+        }
+        return "../"+result; // first directory is the name of the test dir, so master is above that.
     }
 
     private ServiceResult executeTestNode(

@@ -140,13 +140,14 @@ public class Master extends ConfigFile {
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         String controlFile, testGroup, test;
+        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
         List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
         for (Node runNode : runNodes) {
             controlFile = runNode.valueOf("@controlFile");
             testGroup = runNode.valueOf("@testGroup");
             test = runNode.valueOf("@test"); //may be empty
             Map<String, String> runVars = readVars(runNode);
-            list.add(runTest(masterFilename, controlFile, testGroup, test, runVars));
+            list.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname));
         }
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
@@ -159,7 +160,8 @@ public class Master extends ConfigFile {
                                                String test) throws Exception {
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
-        runTest(masterFilename, controlFile, testGroup, test, null);
+        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+        runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname);
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
     }
@@ -168,7 +170,8 @@ public class Master extends ConfigFile {
                                         String controlFile,
                                         String testGroup,
                                         String test,
-                                        Map<String, String> runVars)
+                                        Map<String, String> runVars,
+                                        String relToMaster)
     throws Exception {
         String envReportsDir = this.reportsDir;
         if (Tools.notBlank(this.getEnvID())) {
@@ -184,6 +187,7 @@ public class Master extends ConfigFile {
         replay.setDefaultAuthsMap(getDefaultAuthsMap());
         replay.setRunOptions(this.getRunOptions());
         replay.setMasterFilename(masterFilename);
+        replay.setRelToMaster(relToMaster);
 
         Map<String, String> masterVarsDup = new LinkedHashMap<String, String>();
         masterVarsDup.putAll(getVars());

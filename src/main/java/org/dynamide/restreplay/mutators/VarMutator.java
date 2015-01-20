@@ -59,7 +59,7 @@ public class VarMutator extends ContentMutator implements IMutator {
         if (sz > 0 && i < sz){
             return spaceIDs.get(i);
         }
-        System.out.println("funny i: "+i+" size: "+sz);
+        System.out.println("------> funny safeID, i: "+i+" size: "+sz+" spaceIDs:"+spaceIDs);
         return ""+(index-1);
     }
 
