@@ -96,7 +96,7 @@ public class RestReplayReport {
 
     public String getPage(String testdir, RestReplay restReplay, String testGroupID) throws IOException {
         return formatPageStart(testdir, restReplay.getResourceManager())
-                + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMaster()+"'>Back to Master</a>"+"</div>"
+                + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+lbl("test group")+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMaster()+"'>Back to Master</a>"+"</div>"
                 + header.toString()
                 + this.runInfo
                 + BR
