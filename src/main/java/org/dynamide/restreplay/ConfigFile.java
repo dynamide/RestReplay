@@ -136,13 +136,13 @@ public class ConfigFile {
         return authsMap;
     }
 
-    public static Map<String,String> readVars(Node nodeWVars){
-        Map<String,String> vars = new LinkedHashMap<String,String>();
+    public static Map<String,Object> readVars(Node nodeWVars){
+        Map<String,Object> vars = new LinkedHashMap<String,Object>();
         List<Node> varNodes = nodeWVars.selectNodes("vars/var");
         return readVars(varNodes, vars);
     }
 
-    private static Map<String,String> readVars(List<Node> varNodes, Map<String,String> vars){
+    private static Map<String,Object> readVars(List<Node> varNodes, Map<String,Object> vars){
         for (Node var: varNodes){
             String ID = var.valueOf("@ID");
             String value = var.getText();

@@ -23,7 +23,10 @@ public class SelfTestHttpHandler implements HttpHandler {
 
     public final static String JSON = "application/json";
 
+    private final static String JSON_COMPARE_RIGHT = "{\"a\": \"one\",\"b\": {\"c\": \"two\"}}";
+
     public void handle(HttpExchange t) throws IOException {
+        //System.out.println("self-test web server received URI: "+t.getRequestURI());
         URI uri = t.getRequestURI();
         Map<String, List<String>> paramsMap = splitQuery(t.getRequestURI().getRawQuery());
         String path = uri.getPath();
@@ -58,7 +61,7 @@ public class SelfTestHttpHandler implements HttpHandler {
                     }
                     String mutation = extractFirstParam(paramsMap, "mutation");
                     if (mutation != null && mutation.length() > 0) {
-                        if (mutation.equals("no_optionalField")){
+                        if (mutation.equals("no_optionalField")) {
                             writeResponse(t, 202, JSON, "{\"result\":\"ERROR\", \"method\":\"" + method + "\",\n \"mutation\":\"" + mutation + "\", \n\"req\": " + body + "}}}");
                         } else {
                             writeResponse(t, 406, JSON, "{\"result\":\"ERROR\", \"method\":\"" + method + "\",\n \"mutation\":\"" + mutation + "\", \n\"req\": " + body + "}}}");
@@ -66,7 +69,7 @@ public class SelfTestHttpHandler implements HttpHandler {
                     } else {
                         int code = 200;
                         String forceCode = extractFirstParam(paramsMap, "emptyMutationResponseCode");
-                        if (Tools.notBlank(forceCode)){
+                        if (Tools.notBlank(forceCode)) {
                             code = Integer.parseInt(forceCode);
                         }
 
@@ -74,9 +77,16 @@ public class SelfTestHttpHandler implements HttpHandler {
                         writeResponse(t, code, JSON, "{\"result\":\"OK\", \"method\":\"" + method + "\", \n\"req\": " + body + "}");
                     }
                 } else {
-                    writeResponse(t, JSON, "{\"result\":\"NO HANDLER for method "+method+"\"}");
+                    writeResponse(t, JSON, "{\"result\":\"NO HANDLER for method " + method + "\"}");
                 }
             }
+        } else if (path.equals("/jsonCompare1")){
+            String outputType = extractFirstParam(paramsMap, "mimeOut");
+            if (Tools.isBlank(outputType)){
+                outputType = JSON;
+            }
+            body = readRequestBody(t);
+            writeResponse(t, 200, outputType, body);
         } else {
             writeResponse(t, JSON, "{\"result\":\"NO HANDLER for path "+path+"\"}");
         }

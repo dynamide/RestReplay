@@ -386,7 +386,11 @@ DIV.mutation {
 .resource-not-found {
     color: red;
 }
+.SUMMARY {
+    font-size: 80%;
+}
 .SUMMARY_WRAP {
+    font-size: 80%;
     white-space: pre-wrap;       /* CSS 3 */
     white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
     white-space: -pre-wrap;      /* Opera 4-6 */
@@ -394,6 +398,9 @@ DIV.mutation {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
     margin-top: 15px;
     margin-bottom: 15px;
+}
+.summary-domcheck {
+font-size: 70%;
 }
 .evalReportTitle{
     font-size: 280%;
@@ -452,4 +459,29 @@ DIV.mutation {
 .evalReport-level1 {
     padding-left: 25px;
     background-color: #cceeff;
+}
+.part-summary {
+    white-space: pre;
+
+}
+
+.dom-match-table{
+    font-size: 80%;
+    margin: 2px;
+    border: 1px solid black;
+}
+.dom-match-table  td {
+    background-color: white;
+    font-size: 70%;
+    border: 1px solid gray;
+    text-align: center;
+}
+.dom-match-table th {
+    background-color:  #87cefa;
+    font-size: 50%;
+    border: 1px solid gray;
+}
+td.dom-not-matched {
+    background-color: yellow;
+    color: brown;
 }

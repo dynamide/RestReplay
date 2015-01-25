@@ -75,6 +75,10 @@ public class Range {
 
     private List<RangeTupple> ranges = new ArrayList<RangeTupple>();
 
+    public boolean isEmpty(){
+        return ranges.size()==0;
+    }
+
     public String toString(){
         StringBuffer b = new StringBuffer();
         int i = 0;

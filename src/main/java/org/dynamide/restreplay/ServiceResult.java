@@ -3,18 +3,16 @@ package org.dynamide.restreplay;
 import org.apache.commons.httpclient.Header;
 import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
-import org.dynamide.restreplay.mutators.ContentMutator;
 import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.util.Tools;
+import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
+
 import org.json.JSONObject;
 import org.json.XML;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ServiceResult {
     public ServiceResult(RunOptions options){
@@ -68,7 +66,19 @@ public class ServiceResult {
     public String requestPayloadFilename = "";
     public String requestPayload = "";  //just like requestPayloadRaw, but may have multipart boundary and headers.
     public String requestPayloadsRaw = "";
-    public String xmlResult = "";
+    private String xmlResult = "";
+    public String getXmlResult() {
+        if (Tools.isBlank(xmlResult)){
+            PRETTY_FORMAT format = contentTypeFromResponse();
+            if (Tools.notBlank(result) && format.equals(PRETTY_FORMAT.XML)) {
+                    return result;
+            }
+        }
+        return xmlResult;
+    }
+    //private void setXmlResult(String xmlResult) {
+    //    this.xmlResult = xmlResult;
+    //}
     public String prettyJSON = "";
     private String result = "";
     public String getResult() {
@@ -80,11 +90,23 @@ public class ServiceResult {
         PRETTY_FORMAT format = contentTypeFromResponse();
         if (Tools.notBlank(result) && format.equals(PRETTY_FORMAT.JSON)){
             try {
-                this.xmlResult = payloadJSONtoXML(result);
-
+                String foo = payloadJSONtoXML(result);
+                this.xmlResult = foo;
+            } catch (Exception e){
+                String stack = Tools.getStackTrace(e);
+                addError("trying to convert result as JSON to XML where result claimed to be format:" + format
+                                + ", result was:" + RestReplayReport.escape(result)
+                                +" STACK: "+stack,
+                                e);
+            }
+            try {
                 this.prettyJSON = prettyPrintJSON(result);
             } catch (Exception e){
-                addError("trying to format string: -->"+result+"&lt;--", e);
+                String stack = Tools.getStackTrace(e);
+                addError("trying to prettyPrintJSON(result) where result claimed to be format:" + format
+                        + ", result was:" + RestReplayReport.escape(result)
+                        +" STACK: "+stack,
+                        e);
             }
         }
     }
@@ -139,7 +161,23 @@ public class ServiceResult {
         //System.out.println("setting mimeType:"+mimeHeader);
     }
     public String failureReason = "";
+    public boolean expectedContentExpandedWasJson = false;
     public String expectedContentExpanded = "";
+    public String expectedContentExpandedAsXml = "";
+    public String expectedContentRaw = "";
+    public String expectedResponseFilenameUsed = "";
+    public String domcheck = "";
+    public List<Column> expectedTreewalkRangeColumns;
+    public Map<STATUS,Range> expectedTreewalkRangeMap = new HashMap<STATUS, Range>();
+    public String expectedTreewalkRangeMapToString(){
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<STATUS,Range> rangeEntry: expectedTreewalkRangeMap.entrySet()){
+            if (!rangeEntry.getValue().isEmpty()){
+                sb.append(rangeEntry.getKey()+":"+rangeEntry.getValue().toString()+",");
+            }
+        }
+        return sb.toString();
+    }
     public List<String> requestHeaders = new ArrayList<String>();  //for building report and dump
     public Map<String,String> headerMap = new LinkedHashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
     public Header[] responseHeaders = new Header[0];
@@ -164,11 +202,11 @@ public class ServiceResult {
         currentValidatorContextName = name;
     }
 
-    private Map<String,String> vars = new LinkedHashMap<String,String>();
-    public Map<String,String> getVars(){
+    private Map<String,Object> vars = new LinkedHashMap<String,Object>();
+    public Map<String,Object> getVars(){
         return vars;
     }
-    public void addVars(Map<String,String> newVars){
+    public void addVars(Map<String,Object> newVars){
         vars.putAll(newVars);
     }
 
@@ -234,6 +272,31 @@ public class ServiceResult {
         }
         return buf.toString();
     }
+
+    private String encode(String in){
+        return in.replaceAll("<", "&lt;");
+    }
+    public String partsSummaryHTML(boolean detailed){
+        StringBuffer buf = new StringBuffer();
+        if (!isDomWalkOK()){
+            if (detailed) buf.append("\r\nDOM CHECK FAILED:\r\n");
+            else buf.append("; DOM CHECK FAILED:");
+        }
+        for (Map.Entry<String,TreeWalkResults> entry : partSummaries.entrySet()) {
+            String key = entry.getKey();
+            TreeWalkResults value = entry.getValue();
+            if (Tools.notBlank(key)){buf.append(" label:"+encode(key)+": ");}
+            if (detailed){
+                buf.append("\r\n");
+                buf.append(encode(value.fullSummary()));
+            } else {
+                buf.append(encode(value.miniSummary()));
+            }
+
+        }
+        return buf.toString();
+    }
+
     public boolean codeInSuccessRange(int code){
         if (200<=code && code<400){
             return true;
@@ -256,10 +319,56 @@ public class ServiceResult {
         return showSUCCESS;
     }
 
-    public boolean isDomWalkOK(){
-        if (Tools.isEmpty(payloadStrictness)){
+    public static Map<STATUS,Range> createRangesForLevel(PAYLOAD_STRICTNESS strictness) {
+        Map<STATUS,Range> result;
+        /* createDOMSet(String ma,
+                        String mi,
+                        String ad,
+                        String de,
+                        String te,
+                        String ne);  */
+        switch (strictness){
+            case STRICT:
+                result = TreeWalkResults.createDOMSet("","0","0","0","0","0");
+                break;
+            case ADDOK:
+                result = TreeWalkResults.createDOMSet("","0","","0","0","");
+                break;
+            case TEXT:
+                result = TreeWalkResults.createDOMSet("","","","0","0","");
+                break;
+            case TREE:
+                result = TreeWalkResults.createDOMSet("","0","0","0","","");
+                break;
+            case TREE_TEXT:
+                result = TreeWalkResults.createDOMSet("","0","0","0","0","");
+                break;
+            case ZERO:
+            default:
+                result = TreeWalkResults.createDOMSet("","","","","","");
+        }
+        //TODO: cache these sets.
+        return result;
+    }
+
+    public boolean isDomWalkOK() {
+        if (this.expectedTreewalkRangeMap.size() > 0) {
+            if (Tools.notEmpty(payloadStrictness)){
+                failureReason = " : DOM match level cannot be both an attribute and an element ; ";
+                this.domcheck = failureReason;
+                return false;
+            }
+            return isDomWalkOKByRanges(expectedTreewalkRangeMap);
+        }
+        if (Tools.isEmpty(payloadStrictness)) {
             return true;
         }
+        PAYLOAD_STRICTNESS strictness = PAYLOAD_STRICTNESS.valueOf(payloadStrictness);
+        return isDomWalkOKByRanges(createRangesForLevel(strictness));
+    }
+
+
+    private boolean OLD_isDomWalkOK(){
         PAYLOAD_STRICTNESS strictness = PAYLOAD_STRICTNESS.valueOf(payloadStrictness);
         for (Map.Entry<String,TreeWalkResults> entry : partSummaries.entrySet()) {
             String key = entry.getKey();
@@ -269,49 +378,122 @@ public class ServiceResult {
                 return false;
             }
             switch (strictness){
-            case STRICT:
-                if (!value.isStrictMatch()) {
-                    failureReason = " : DOM NOT STRICT; ";
-                    return false;
-                }
-                break;
-            case ADDOK:
-                if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
-                    failureReason = " : DOM TEXT_DIFFERENT; ";
-                    return false;
-                }
-                if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.R_MISSING)>0){
-                    failureReason = " : DOM R_MISSING; ";
-                    return false;
-                }
-                break;
-            case TEXT:
-                if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
-                    failureReason = " : DOM TEXT_DIFFERENT; ";
-                    return false;
-                }
-                break;
-            case TREE:
-                if (!value.treesMatch()) {
-                    failureReason = " : DOM TREE MISMATCH; ";
-                    return false;
-                }
-                break;
-            case TREE_TEXT:
-                if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
-                    failureReason = " : DOM TEXT_DIFFERENT; ";
-                    return false;
-                }
-                if (!value.treesMatch()) {
-                    failureReason = " : DOM TREE MISMATCH; ";
-                    return false;
-                }
-                break;
-            case ZERO:
-                break;
+                case STRICT:
+                    if (!value.isStrictMatch()) {
+                        failureReason = " : DOM NOT STRICT; ";
+                        return false;
+                    }
+                    break;
+                case ADDOK:
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
+                        failureReason = " : DOM TEXT_DIFFERENT; ";
+                        return false;
+                    }
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.MISSING)>0){
+                        failureReason = " : DOM MISSING; ";
+                        return false;
+                    }
+                    break;
+                case TEXT:
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
+                        failureReason = " : DOM TEXT_DIFFERENT; ";
+                        return false;
+                    }
+                    break;
+                case TREE:
+                    if (!value.treesMatch()) {
+                        failureReason = " : DOM TREE MISMATCH; ";
+                        return false;
+                    }
+                    break;
+                case TREE_TEXT:
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
+                        failureReason = " : DOM TEXT_DIFFERENT; ";
+                        return false;
+                    }
+                    if (!value.treesMatch()) {
+                        failureReason = " : DOM TREE MISMATCH; ";
+                        return false;
+                    }
+                    break;
+                case ZERO:
+                    break;
             }
         }
         return true;
+    }
+
+    private boolean checkRange(TreeWalkResults value,
+                                      STATUS status,
+                                      List<Column> columns,
+                                      List<String> notices,
+                                      Map<STATUS,Range> theExpectedTreewalkRangeMap){
+        int c = value.countFor(status);
+        Range r = theExpectedTreewalkRangeMap.get(status);
+        Column col = new Column();
+        columns.add(col);
+        col.name = status.name();
+        col.num = ""+c;
+
+        if (r!=null && (!r.isEmpty())) {
+            col.exp = r.toString();
+            if (r.valueInRange(c)) {
+                return true;
+            } else {
+                col.highlight = "dom-not-matched";
+                failureReason = "DOM failed criteria: "+status.name()+" "+c+"/"+r.toString();
+                notices.add(status.name()+" "+c+"/"+r.toString());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static class Column {
+        String name;
+        String num;
+        String exp;
+        String highlight;
+    }
+
+    public boolean isDomWalkOKByRanges(Map<STATUS,Range> expectedRangeMap){
+        boolean result = true;
+        List<Column> columns = new ArrayList<Column>();
+        List<String> notices = new ArrayList<String>();
+        for (Map.Entry<String,TreeWalkResults> entry : partSummaries.entrySet()) {
+            TreeWalkResults value = entry.getValue();
+            if (!checkRange(value, STATUS.MATCHED, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.NESTED_ERROR, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.DOC_ERROR, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.TEXT_DIFFERENT, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.MISSING, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.ADDED, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+        }
+        this.expectedTreewalkRangeColumns = columns;
+        StringBuilder criteria = new StringBuilder();
+        if (result==false){
+            int i = 0;
+            for (String crit: notices) {
+                if (i>0) criteria.append(",");
+                i++;
+                criteria.append(crit);
+            }
+            failureReason = "DOM: "+criteria.toString();
+            this.domcheck = failureReason;
+        }
+        return result;
     }
 
     private boolean overrideExpectedResult = false;
@@ -380,6 +562,7 @@ public class ServiceResult {
     public void addRequestHeader(String name, String value){
         requestHeaders.add(name+':'+value);
     }
+
 
     //public static final String[] DUMP_OPTIONS = {"minimal", "detailed", "full"};
     public static enum DUMP_OPTIONS {minimal, detailed, full, auto};
@@ -487,8 +670,8 @@ public class ServiceResult {
         try {
             String source;
 
-            if (Tools.notBlank(this.xmlResult)) {
-                source = this.xmlResult;
+            if (Tools.notBlank(this.getXmlResult())) {
+                source = this.getXmlResult();
             } else {
                 source = this.result;
             }
@@ -573,6 +756,21 @@ public class ServiceResult {
         //System.out.println("PAYLOAD xml:"+xml);
         return xml;
     }
+
+    public static String payloadXMLtoJSON(String payload) {
+        try {
+            JSONObject json = XML.toJSONObject(payload);
+            if ( json.has("root") ) {
+                JSONObject root = json.getJSONObject("root");
+                return root.toString(4);
+            } else {
+                return json.toString(4);
+            }
+        } catch (Exception e){
+            return "ERROR converting to JSON: "+e;
+        }
+    }
+
 
     public enum PRETTY_FORMAT {XML, JSON, NONE}
 

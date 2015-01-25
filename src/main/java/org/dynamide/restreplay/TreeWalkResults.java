@@ -2,14 +2,16 @@ package org.dynamide.restreplay;
 
 import org.dynamide.util.Tools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: laramie
  * $LastChangedRevision:  $
  * $LastChangedDate:  $
+ * STATUS.MISSING means the Right tree did not have a node that the left tree had. (RIGHT_MISSING)
+ * STATUS.ADDED means the Right tree had a node that the left tree did not have.(RIGHT_ADDED)
+ * RestReplay comparse expected versus payload by walking the nodes (of JSON or XML) of the two trees of payloads.
+ * The Left tree is the expected, from the test.  The Right tree is the payload from the service.
  */
 public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
       public String toString(String LEAD){
@@ -21,13 +23,13 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
       }
 
     /** This cllass has two public Lists: you can construct your own to set the acceptable and unacceptable STATUS codes.
-     *   They are defaulted to R_ADDED being acceptable. */
+     *   They are defaulted to ADDED being acceptable. */
     public static class MatchSpec {
         public static final TreeWalkEntry.STATUS[]  defaultAcceptableStatiArray = {TreeWalkEntry.STATUS.INFO,
                                                                                          TreeWalkEntry.STATUS.MATCHED,
-                                                                                         TreeWalkEntry.STATUS.R_ADDED};
+                                                                                         TreeWalkEntry.STATUS.ADDED};
 
-        public static final TreeWalkEntry.STATUS[] defaultErrorStatiArray =           {TreeWalkEntry.STATUS.R_MISSING,
+        public static final TreeWalkEntry.STATUS[] defaultErrorStatiArray =           {TreeWalkEntry.STATUS.MISSING,
                                                                                           TreeWalkEntry.STATUS.NESTED_ERROR,
                                                                                           TreeWalkEntry.STATUS.TEXT_DIFFERENT,
                                                                                           TreeWalkEntry.STATUS.DOC_ERROR};
@@ -73,7 +75,10 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
         public String message = "";
         public String errmessage = "";
         public TreeWalkResults nested;
-        public static enum STATUS {INFO, MATCHED, R_MISSING, R_ADDED, DOC_ERROR, TEXT_DIFFERENT, NESTED_ERROR};
+        /* STATUS.MISSING means the Right tree did not have a node that the left tree had.
+         * STATUS.ADDED means the Right tree had a node that the left tree did not have.
+         */
+        public static enum STATUS {INFO, MATCHED, MISSING, ADDED, DOC_ERROR, TEXT_DIFFERENT, NESTED_ERROR};
         public STATUS status;
         public String toString(){
             return toString("\r\n");
@@ -152,8 +157,8 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     public boolean treesMatch(){
         for (TreeWalkEntry entry : this){
             if (entry.status == TreeWalkEntry.STATUS.DOC_ERROR
-                || entry.status == TreeWalkEntry.STATUS.R_MISSING
-                || entry.status == TreeWalkEntry.STATUS.R_ADDED  ){
+                || entry.status == TreeWalkEntry.STATUS.MISSING
+                || entry.status == TreeWalkEntry.STATUS.ADDED){
                 return false;
             }
         }
@@ -180,7 +185,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     }
 
     public String miniSummary(){
-        //MATCHED, INFO, R_MISSING, R_ADDED, TEXT_DIFFERENT};
+        //MATCHED, INFO, MISSING, ADDED, TEXT_DIFFERENT};
         StringBuffer buf = new StringBuffer();
         buf.append("{");
         boolean nextline = false;
@@ -196,8 +201,14 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
 
     public String fullSummary(){
         StringBuffer buf = new StringBuffer();
+        buf.append("STATUS: ").append(miniSummary());
         for (TreeWalkResults.TreeWalkEntry entry : this){
             buf.append(entry.toString()).append("\r\n");
+        }
+        String errMessages = getErrorMessages();
+        if (Tools.notBlank(errMessages)) {
+            buf.append("\r\n=====errs=====================\r\n");
+            buf.append(errMessages);
         }
         return buf.toString();
     }
@@ -205,4 +216,21 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
 
     public String leftID;
     public String rightID;
+
+    public static Map<TreeWalkEntry.STATUS,Range> createDOMSet(String ma,
+                                                               String mi,
+                                                               String ad,
+                                                               String de,
+                                                               String te,
+                                                               String ne){
+            Map<TreeWalkEntry.STATUS,Range> rangeMap = new HashMap<TreeWalkEntry.STATUS, Range>();
+            rangeMap.put(TreeWalkEntry.STATUS.MATCHED, new Range(ma));
+            rangeMap.put(TreeWalkEntry.STATUS.MISSING, new Range(mi));
+            rangeMap.put(TreeWalkEntry.STATUS.ADDED, new Range(ad));
+            rangeMap.put(TreeWalkEntry.STATUS.DOC_ERROR, new Range(de));
+            rangeMap.put(TreeWalkEntry.STATUS.TEXT_DIFFERENT, new Range(te));
+            rangeMap.put(TreeWalkEntry.STATUS.NESTED_ERROR, new Range(ne));
+            return rangeMap;
+    }
+
 }

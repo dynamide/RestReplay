@@ -175,7 +175,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
                 if (rightChild == null){
                     TreeWalkEntry entry = new TreeWalkEntry();
                     entry.lpath = leftChildPath;                  //this works, but is questionable: selectSingleNode(right, "//*[local-name() = \"objectexit_common\"]")
-                    entry.status = TreeWalkEntry.STATUS.R_MISSING;
+                    entry.status = TreeWalkEntry.STATUS.MISSING;
                     msgList.add(entry);
                     continue;
                 }
@@ -210,7 +210,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
 
                 TreeWalkEntry entry = new TreeWalkEntry();
                 entry.rpath = rightChildPath;
-                entry.status = TreeWalkEntry.STATUS.R_ADDED;
+                entry.status = TreeWalkEntry.STATUS.ADDED;
                 msgList.add(entry);
             }
         }
@@ -240,7 +240,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
         if (rightList == null || rightList.size() == 0 || rightList.size() < leftList.size()){
             TreeWalkEntry twe = new TreeWalkEntry();
             twe.lpath = leftChildPath;
-            twe.status = TreeWalkEntry.STATUS.R_MISSING;
+            twe.status = TreeWalkEntry.STATUS.MISSING;
             String rmsg = (rightList == null)
                     ? " Right: 0"
                     : " Right: "+rightList.size();
@@ -251,7 +251,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
         if (rightList.size() > leftList.size()){
             TreeWalkEntry twe = new TreeWalkEntry();
             twe.lpath = leftChildPath;
-            twe.status = TreeWalkEntry.STATUS.R_ADDED;
+            twe.status = TreeWalkEntry.STATUS.ADDED;
             twe.message = "Repeating field count not matched. Field: "+leftChildPath+" Left: "+leftList.size()+" Right: "+rightList.size();
             msgList.add(twe);
             //LC 20110429 return false;
@@ -290,7 +290,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
             if ( ! found){
                 TreeWalkEntry twe = new TreeWalkEntry();
                 twe.lpath = leftChildPath;
-                twe.status = TreeWalkEntry.STATUS.R_MISSING;
+                twe.status = TreeWalkEntry.STATUS.MISSING;
                 twe.message = "Repeating field not matched. Source: {"+dumpXML(leftEl)+"}";
                 msgList.add(twe);
                 return false;

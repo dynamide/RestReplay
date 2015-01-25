@@ -131,6 +131,8 @@ public class ResourceManager {
     }
 
     public String readResource(String context, String relResourcePath, String fullPath) throws IOException {
+        //System.out.println("===> resource: "+relResourcePath
+        //              +"\r\n     fullPath: "+fullPath);
         boolean markForCache = false;
         String cachedResource = cache.get(relResourcePath);
         //implement a cache that caches on the *second* access.

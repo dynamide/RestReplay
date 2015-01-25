@@ -1,0 +1,6 @@
+{"prop with spaces":"${DUE_DATE_MILLIS}",
+ "prop-with-hyphens":"${VarTestMessage}",
+ "propwcolon:":"${VarTestMessage}",
+ "prop:with:colons":"${VarTestMessage}",
+ "prop_with_underscores":"${VarTestMessage}",
+ }

@@ -58,11 +58,11 @@ public class Eval {
      *          This method continues processing each eval, which may include multiple WARN or ERROR
      *          alerts, so the caller should use Collection.addAll(EvalResult.alerts) or similar to grab all Alerts.
      */
-    public EvalResult eval(String context,
+    public EvalResult eval(String logname,
                                   String inputJexlExpression,
-                                  Map<String,String> vars) {
+                                  Map<String,Object> vars) {
         EvalResult result = new EvalResult();
-        result.context = context;
+        result.context = logname;
         result.expression = inputJexlExpression;
         Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
 
@@ -74,19 +74,19 @@ public class Eval {
                 jc.set(entry.getKey(), entry.getValue());
             }
             if (vars!=null){
-                for (Map.Entry<String,String> entry: vars.entrySet()) {
+                for (Map.Entry<String,Object> entry: vars.entrySet()) {
                     //loop over vars.  Don't overwrite, but add all the vars so that vars can themselves reference vars.
-                    String value = entry.getValue();
+                    Object value = entry.getValue();
                     String key = entry.getKey();
                     if (jc.get(key)==null){
                         jc.set(key, value);
                     }
                 }
-                for (Map.Entry<String,String> entry: vars.entrySet()) {
-                    String value = entry.getValue();
+                for (Map.Entry<String,Object> entry: vars.entrySet()) {
+                    Object value = entry.getValue();
                     String key = entry.getKey();
                     try {
-                        EvalResult innerResult = parse(context+", ID: <b>"+key+"</b>", value);
+                        EvalResult innerResult = parse(logname+", ID: <b>"+key+"</b>", ""+value);
                         innerResult.nestingLevel = 1;
                         value = innerResult.getResultString();
                         if (innerResult.alerts.size()>0){
@@ -96,13 +96,13 @@ public class Eval {
                         addToEvalReport(innerResult);
                     } catch (Exception e){
                         value = "ERROR_IN_EVAL: "+e;
-                        String ctx = context + " ID: <b>"+key+"</b> value:"+value;
-                        result.addAlert(value, ctx, LEVEL.WARN);
+                        String ctx = logname + " ID: <b>"+key+"</b> value:"+value;
+                        result.addAlert(""+value, ctx, LEVEL.WARN);
                     }
                     jc.set(key, value);
                 }
             }
-            EvalResult innerResult2 = parse(context, inputJexlExpression);
+            EvalResult innerResult2 = parse(logname, inputJexlExpression);
             if (innerResult2.alerts.size()>0){
                 result.alerts.addAll(innerResult2.alerts);
             }

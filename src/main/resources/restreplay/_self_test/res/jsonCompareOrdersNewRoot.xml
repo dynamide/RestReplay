@@ -1,0 +1,7 @@
+<orders>
+    <orderDetail>
+        <title>${TITLE}</title>
+        <orderNumber>123000</orderNumber>
+    </orderDetail>
+    <type>order</type>
+</orders>

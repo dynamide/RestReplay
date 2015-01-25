@@ -36,8 +36,8 @@ public class XmlCompareJdomTest {
                                                                       int textMismatches,
                                                                       boolean strictMatch,
                                                                       TreeWalkResults.MatchSpec matchSpec){
-        int addedr = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.R_ADDED);
-        int missingr = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.R_MISSING);
+        int addedr = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.ADDED);
+        int missingr = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.MISSING);
         int tdiff = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT);
         int badCount = results.getMismatchCount();
         boolean strict = results.isStrictMatch();
@@ -51,8 +51,8 @@ public class XmlCompareJdomTest {
         String exp_act = expected +"\r\n"+actual+"\r\n";
         boolean done = false;
         try {
-           assertEquals(addedr, addedRight, "assertTreeWalkResults:R_ADDED mismatch." + exp_act, results);
-            assertEquals(missingr, missingRight, "assertTreeWalkResults:R_MISSING mismatch." + exp_act, results);
+           assertEquals(addedr, addedRight, "assertTreeWalkResults:ADDED mismatch." + exp_act, results);
+            assertEquals(missingr, missingRight, "assertTreeWalkResults:MISSING mismatch." + exp_act, results);
             assertEquals(tdiff, textMismatches, "assertTreeWalkResults:TEXT_DIFFERENT mismatch." + exp_act, results);
             assertTrue((strict == strictMatch), "assertTreeWalkResults:strictMatch mismatch." + exp_act, results);
             assertTrue((treeOK), "assertTreeWalkResults:treesMatch("+matchSpec+") returned false."+exp_act, results);
@@ -94,6 +94,13 @@ public class XmlCompareJdomTest {
                                    // addedRight,missingRight,textMismatches,strictMatch,treesMatch
     }
 
+    @Test
+    public void testServerContainsExpectedTextValues(){
+        //TODO:   If I pass /a/b/c/"This is my expected value",/a/b/d/e/f/"This node too"
+        //TODO:     then these exact strings at these paths must exist in part from server.
+
+    }
+
 
     @Test
     public void testAddedR(){
@@ -115,7 +122,7 @@ public class XmlCompareJdomTest {
     public void testAddedL(){
         testBanner("testAddedL");
         TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
-        matchSpec.removeErrorFromSpec(TreeWalkResults.TreeWalkEntry.STATUS.R_MISSING);
+        matchSpec.removeErrorFromSpec(TreeWalkResults.TreeWalkEntry.STATUS.MISSING);
 
         TreeWalkResults results =
             XmlCompareJdom.compareParts(exHEAD + exEN_WCH + exNEWTREE + exDEP + exNEW + exFOOT,

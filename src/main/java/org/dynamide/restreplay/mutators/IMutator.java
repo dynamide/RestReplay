@@ -1,7 +1,9 @@
 package org.dynamide.restreplay.mutators;
 
 import org.dom4j.Node;
+import org.dynamide.restreplay.Eval;
 import org.dynamide.restreplay.ResourceManager;
+import org.dynamide.restreplay.ServiceResult;
 
 import java.io.IOException;
 import java.util.Map;
@@ -23,7 +25,7 @@ public interface IMutator {
     //
     /** IMutator descendent implementations should override this method.
      *  @return null when list is exhausted.*/
-    public String mutate(Map<String, String> clonedMasterVars);
+    public String mutate(Map<String, Object> clonedMasterVars, Eval evalStruct, ServiceResult serviceResult);
 
     /** IMutator descendent implementations should override this method. **/
     public String getMutationID();

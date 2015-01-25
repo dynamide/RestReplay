@@ -1,0 +1,54 @@
+<html>
+<body>
+<pre>
+These are the things you need to create a test case
+
+- the protocol-host-port for the host of the service, to be applied to all URI in the testGroup:
+    &lt;var ID="LASSERVER">http://las.stg-openclass.com&lt;/var>
+    &lt;protoHostPort>${LASSERVER}&lt;/protoHostPort>
+    
+- the endpoint of the service (with or without protoHostPort)
+    &lt;uri>/las-api/api/courses/${COURSE_ID}/assets/&lt;/uri>
+    
+- the payload for any POST/PUT
+    &lt;filename>revelassignments/create-assignment.json&lt;/filename>
+    
+- then save the sample JSON to this file, and add any variables in there:
+        "course_id": "${COURSE_ID}",
+        "due_date": ${DUE_DATE_MILLIS}, 
+        
+- variables that should be replaced for any requests:
+    &lt;var ID="BASE_DATE">${tools.now()}&lt;/var>
+    &lt;var ID="DUE_DATE_MILLIS">${BASE_DATE - 1*DAYS}&lt;/var>
+    &lt;var ID="COURSE_ID">548656c9e4b04b2beee43256&lt;/var>
+    
+- after that you add various expectations, such as
+    - response code
+    - response tree text matching level (for matching expected text values in JSON, for example)
+    - exported variables (for using simple XPath syntax to look for values in response
+    - validators, for more fancy programmatic validation in javascript
+    
+    
+You can see all this in action in one of the test cases:
+
+    <a href="http://10.163.26.34:8080/job/RestReplayLas/ws/restreplay/tests/revelassignments/revelassignments.xml">http://10.163.26.34:8080/job/RestReplayLas/ws/restreplay/tests/revelassignments/revelassignments.xml</a>
+    
+    look for the code in this test case:
+       testGroup ID="deleteAllAssignments"
+           test ID="createAssignment" 
+           
+    That test case references the request template file 
+        &lt;filename>revelassignments/create-assignment.json&lt;/filename>
+    All filenames are relative to testdir, 
+        <a href="http://10.163.26.34:8080/job/RestReplayLas/ws/restreplay/tests/">http://10.163.26.34:8080/job/RestReplayLas/ws/restreplay/tests/</a>
+    So you can find it here:
+        <a href="http://10.163.26.34:8080/job/RestReplayLas/ws/restreplay/tests/revelassignments/create-assignment.json">http://10.163.26.34:8080/job/RestReplayLas/ws/restreplay/tests/revelassignments/create-assignment.json</a>
+        
+That should give some idea of how to get started.
+There's lots more info here: 
+    <a href="http://dynamide.org/RestReplay/doc/RestReplay.html">http://dynamide.org/RestReplay/doc/RestReplay.html</a>
+       
+</pre>    
+</body>
+</html>
+    

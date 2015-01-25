@@ -1,7 +1,12 @@
 package org.dynamide.restreplay.mutators;
 
 import org.dom4j.Node;
+import org.dynamide.interpreters.EvalResult;
+import org.dynamide.restreplay.Eval;
+import org.dynamide.restreplay.ResourceManager;
+import org.dynamide.restreplay.ServiceResult;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +41,9 @@ public class VarMutator extends ContentMutator implements IMutator {
         }
     }
 
-    public String mutate(Map<String, String> clonedMasterVars){
+    private Map<String, Object> clonedMasterVars;
+
+    public String mutate(Map<String, Object> clonedMasterVars, Eval evalStruct, ServiceResult serviceResult){
         if (index+1>spaces.size()){
             return null;
         }
@@ -45,9 +52,10 @@ public class VarMutator extends ContentMutator implements IMutator {
         for (VarTemplate vt: localVarList) {
             clonedMasterVars.put(vt.ID, vt.template);
         }
+        this.clonedMasterVars = clonedMasterVars;
 
         index++;
-        return getContentRaw();
+        return getContentRaw(evalStruct, serviceResult);
     }
 
     public String getMutationID(){
@@ -70,6 +78,41 @@ public class VarMutator extends ContentMutator implements IMutator {
     @Override
     public int getIndex(){
         return index-1;
+    }
+
+    //==================== for VarMutator these must be different ================================================
+
+    private ResourceManager resourceManager = null;
+    private String contentRawFilename = "";
+    private String contentRawRelResourceName = "";
+
+    @Override
+    public void init(String relResourceName, String theFileName, ResourceManager resourceManager)
+    throws IOException {
+        this.contentRawFilename = theFileName;
+        this.contentRawRelResourceName = relResourceName;
+        this.resourceManager = resourceManager;
+    }
+
+    public String getContentRaw(Eval evalStruct, ServiceResult serviceResult){
+        try {
+            if (resourceManager != null) {
+                EvalResult filanameRelEvalResult  = evalStruct.eval("expand req. filenameRel:" + contentRawRelResourceName,
+                                                                          contentRawRelResourceName,
+                                                                          clonedMasterVars);
+                serviceResult.alerts.addAll(filanameRelEvalResult.alerts);
+                String requestPayloadFilenameRelExp = filanameRelEvalResult.getResultString();
+
+
+                return resourceManager.readResource("ContentMutator:constructor",
+                        requestPayloadFilenameRelExp,
+                        contentRawFilename);//new String(FileUtils.readFileToByteArray(new File(contentRawFilename)));
+            }
+        } catch (Exception e){
+            System.out.println("ERROR in getContentRaw()"+e);
+            return "";
+        }
+        return "";
     }
 
 }

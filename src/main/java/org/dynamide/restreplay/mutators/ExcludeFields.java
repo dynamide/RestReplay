@@ -1,6 +1,9 @@
 package org.dynamide.restreplay.mutators;
 
+import org.dynamide.restreplay.Eval;
 import org.dynamide.restreplay.ResourceManager;
+import org.dynamide.restreplay.RunOptions;
+import org.dynamide.restreplay.ServiceResult;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -25,7 +28,9 @@ public class ExcludeFields extends ContentMutator {
     private String current;
 
     /** @return null when list is exhausted.*/
-    public String mutate(Map<String, String> clonedMasterVars){
+    public String mutate(Map<String, Object> clonedMasterVars,
+                         Eval evalStruct,
+                         ServiceResult serviceResult){
         p++;
         if (p>=max){
             return null;
@@ -63,7 +68,8 @@ public class ExcludeFields extends ContentMutator {
         String relResourceName = "_self_test/content-mutator-test.json";
         String fn = "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json";
         ResourceManager standaloneResourceManager = ResourceManager.createRootResourceManager();
-
+        ServiceResult serviceResult = new ServiceResult(new RunOptions());
+        Eval evalStruct = new Eval();
         IMutator mutator
             = MutatorFactory.createMutator("ExcludeFields",
                                             relResourceName,
@@ -71,11 +77,11 @@ public class ExcludeFields extends ContentMutator {
                                             standaloneResourceManager,
                                             null);
 
-        Map<String, String> clonedMasterVars = new LinkedHashMap<String, String>();
-        String m = mutator.mutate(clonedMasterVars);
+        Map<String, Object> clonedMasterVars = new LinkedHashMap<String, Object>();
+        String m = mutator.mutate(clonedMasterVars, evalStruct, serviceResult);
         while(m!=null){
             System.out.println(m);
-            m = mutator.mutate(clonedMasterVars);
+            m = mutator.mutate(clonedMasterVars, evalStruct, serviceResult);
         }
         System.out.println("main done.  ResourceManager.formatSummaryPlain: "+standaloneResourceManager.formatSummaryPlain());
     }

@@ -17,9 +17,6 @@ import java.util.Map;
 import org.dynamide.interpreters.Alert;
 import org.dynamide.interpreters.Alert.LEVEL;
 
-import org.json.JSONObject;
-import org.json.XML;
-
 
 /**  Format a report based on RestReplay ServiceResult object from a test group.
  * @author  Laramie Crocker
@@ -60,8 +57,8 @@ public class RestReplayReport {
     protected static final String DETAIL_LINESEP = "</td></tr>\r\n<tr><td>";
     protected static final String DETAIL_END = "</td></tr></table>";
 
-    protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='6' class='TOC_HDR'>Summary</td></tr>"
-                                              +"<tr><th>testID</th><th>time(ms)</th><th>status</th><th>code</th><th>warn</th><th>error</th></td></tr>\r\n"
+    protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='7' class='TOC_HDR'>Summary</td></tr>"
+                                              +"<tr><th>testID</th><th>time(ms)</th><th>status</th><th>code</th><th>warn</th><th>error</th><th>DOM</th></tr>\r\n"
                                               +"<tr><td>\r\n";
     protected static final String TOC_LINESEP = "</td></tr>\r\n<tr class='%s'><td class='%s'>";
     protected static final String TOC_CELLSEP = "</td><td>";
@@ -83,7 +80,12 @@ public class RestReplayReport {
     }
 
     protected static String formatCollapse(String myDivID, String linkText) {
+        return formatCollapse(myDivID, linkText, "");
+    }
+
+    protected static String formatCollapse(String myDivID, String linkText, String subtitle) {
         return "<a href='javascript:;' onmousedown=\"toggleDiv('" + myDivID + "');\">" + linkText + "</a>"
+                +( Tools.notBlank(subtitle)?" <span class='smallblack'>"+subtitle+"</span>":"")
                 + BR
                 + "<div ID='" + myDivID + "' class='PAYLOAD' style='display:none'>";
     }
@@ -120,6 +122,7 @@ public class RestReplayReport {
             toc.detail = (serviceResult.isSUCCESS() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
             toc.warnings = serviceResult.alertsCount(LEVEL.WARN);
             toc.errors = serviceResult.alertsCount(LEVEL.ERROR);
+            toc.domcheck = serviceResult.domcheck;
             toc.responseCode = serviceResult.responseCode;
             toc.isMutation = serviceResult.isMutation;
             toc.idFromMutator = serviceResult.idFromMutator;
@@ -254,6 +257,7 @@ public class RestReplayReport {
         for (EvalResult evalResult: replay.evalReport){
             String trimmedExpression = evalResult.expression;
             String trimmedResult = evalResult.getResultString();
+            trimmedResult = escape(trimmedResult);
 
             switch (replay.getRunOptions().evalReportLevel) {
                 case ALL:
@@ -320,7 +324,9 @@ public class RestReplayReport {
                      .append(TOC_CELLSEP)
                      .append(tocWarn(toc.warnings))
                      .append(TOC_CELLSEP)
-                     .append(tocError(toc.errors));
+                     .append(tocError(toc.errors))
+                     .append(TOC_CELLSEP)
+                     .append("<span class='summary-domcheck'>"+toc.domcheck+"</span>");
         }
         tocBuffer.append(TOC_END);
         tocBuffer.append(BR);
@@ -398,6 +404,7 @@ public class RestReplayReport {
         public boolean isMutation = false;
         public String idFromMutator = "";
         public String children = "";
+        public String domcheck = "";
     }
 
     private List<TOC> tocList = new ArrayList<TOC>();
@@ -492,7 +499,7 @@ public class RestReplayReport {
                                           String localMasterFilename,
                                           List<String> reportsList,
                                           String envID,
-                                          Map<String,String> masterVars,
+                                          Map<String,Object> masterVars,
                                           Master master) {
 
         MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
@@ -533,10 +540,10 @@ public class RestReplayReport {
         }
     }
 
-    protected static String formatMasterVars(Map<String, String> masterVars) {
+    protected static String formatMasterVars(Map<String, Object> masterVars) {
         StringBuffer buffer = new StringBuffer();
 
-        for (Map.Entry<String, String> entry : masterVars.entrySet()) {
+        for (Map.Entry<String, Object> entry : masterVars.entrySet()) {
             buffer.append("\r\n<div class='varslist'>")
                   .append(entry.getKey()).append(": ").append(entry.getValue())
                   .append("</div>");
@@ -556,11 +563,24 @@ public class RestReplayReport {
     protected String formatPayloads(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
         ServiceResult.PRETTY_FORMAT respType = serviceResult.contentTypeFromResponse();
-        appendPayload(fb, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw)", "REQUESTRAW" + tocID);
-        appendPayload(fb, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID, false);
-        appendPayload(fb, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID);
-        appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, false);
-        appendPayload(fb, serviceResult.expectedContentExpanded, respType, "EXPECTED", "EXPECTED" + tocID);
+        appendPayload(fb, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw) ", "REQUESTRAW" + tocID, serviceResult.requestPayloadFilename);
+        appendPayload(fb, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID,"", false);
+        appendPayload(fb, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
+        appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
+        if (Tools.notBlank(serviceResult.getXmlResult())){
+            appendPayload(fb, serviceResult.getXmlResult(), ServiceResult.PRETTY_FORMAT.XML, "RESPONSE (as xml)", "RESPONSEXML" + tocID, "", false);
+        }
+
+        if (Tools.notBlank(serviceResult.expectedContentRaw)) {
+            appendPayload(fb, serviceResult.expectedContentRaw, respType, "EXPECTED (raw)", "EXPECTEDraw" + tocID, serviceResult.expectedResponseFilenameUsed);
+            appendPayload(fb, serviceResult.expectedContentExpanded, respType, "EXPECTED (expanded)", "EXPECTEDexpanded" + tocID, "");
+            appendPayload(fb, serviceResult.expectedContentExpandedAsXml, ServiceResult.PRETTY_FORMAT.XML, "EXPECTED  (as xml)", "EXPECTEDasxml" + tocID, "");
+            if (!serviceResult.expectedContentExpandedWasJson) {
+                appendPayload(fb, ServiceResult.payloadXMLtoJSON(serviceResult.expectedContentExpanded), ServiceResult.PRETTY_FORMAT.JSON, "EXPECTED (as JSON)", "EXPECTEDJSON" + tocID, "");
+            }
+        }
+        String partSummary = serviceResult.partsSummaryHTML(true);//true for detailed.
+        appendPayload(fb, partSummary, ServiceResult.PRETTY_FORMAT.NONE, "Treewalk Report", "TreewalkReport" + tocID, "");
         return fb.toString();
     }
     private String safeJSONToString(String in){
@@ -575,12 +595,12 @@ public class RestReplayReport {
         }
     }
 
-    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID) {
-        appendPayload(fb, payload, format, title, theDivID, true);
+    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, String subtitle) {
+        appendPayload(fb, payload, format, title, theDivID, subtitle, true);
     }
 
 
-    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, boolean usePRE) {
+    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, String subtitle, boolean usePRE) {
         if (Tools.notBlank(payload)) {
             //fb.append(BR+title+":"+BR);
             try {
@@ -601,7 +621,7 @@ public class RestReplayReport {
                         //System.out.println("PAYLOAD xml:"+xml);
                         //System.out.println("PAYLOAD raw:" + payload);
                         String pretty = prettyPrint(payload);
-                        fb.append(formatCollapse(theDivID, title));  //starts a div.
+                        fb.append(formatCollapse(theDivID, title, subtitle));  //starts a div.
                         fb.append(pre_start);
                         fb.append(escape(pretty));
                         fb.append(pre_end);
@@ -610,7 +630,7 @@ public class RestReplayReport {
                     case JSON:
                     case NONE:
                         //System.out.println("PAYLOAD raw:" + payload);
-                        fb.append(formatCollapse(theDivID, title));  //starts a div.
+                        fb.append(formatCollapse(theDivID, title, subtitle));  //starts a div.
                         fb.append(pre_start);
                         fb.append(escape(payload));
                         fb.append(pre_end);
@@ -620,15 +640,21 @@ public class RestReplayReport {
                         System.err.println("ERROR: Unhandled enum type in RestReplayReport.appendPayload(" + title + "): " + format.toString());
                 }
             } catch (Exception e) {
-                String error = "<font color='red'>ERROR_IN_APPEND_PAYLOAD: (" + e.getClass().getName() + ':' + e.getLocalizedMessage() + ")</font> " + payload;
-                fb.append(error);
-                fb.append(BR).append(BR);
-                fb.append("payload raw: " + payload);
+                //System.out.println(Tools.getStackTrace());
+                fb.append("<b>" + title + "</b>");
+                fb.append(BR);
+                fb.append("<div style='border:1px solid black; background-color: white;'><font color='red'>ERROR_IN_APPEND_PAYLOAD: ("
+                             + e.getClass().getName() + ':' + escape(e.getLocalizedMessage()) + ")</font> ");
+                fb.append(BR);
+                fb.append("payload raw: " + escape(payload));
+                fb.append(BR);
+                fb.append("payload:"+escape(payload));
+                fb.append("</div>");
             }
         }
     }
 
-    private String escape(String source) {
+    public static String escape(String source) {
         try {
             return Tools.searchAndReplace(source, "<", "&lt;");
         } catch (Exception e) {
@@ -690,8 +716,8 @@ public class RestReplayReport {
         String mutation = s.isMutation ? " mutation" : "";
         String start = "<table border='1' class='DETAIL_TABLE "+mutation+"'><tr><td>\r\n";
 
-        boolean detailedPartSummary = false;//includes expected parts bodies.
-        String partSummary = includePartSummary ? s.partsSummary(detailedPartSummary) : "";
+        boolean detailedPartSummary = false;//includes expected parts bodies.  These are shown in the PartSummary blocks under the detail, along with payloads.
+        String partSummary = includePartSummary ? s.partsSummaryHTML(detailedPartSummary) : "";
         String idNoMutatorID = (Tools.notEmpty(s.idFromMutator) && Tools.notEmpty(s.testID))
                                  ? s.testID.substring(0, (s.testID.length() - s.idFromMutator.length()) )
                                  : s.testID;
@@ -712,19 +738,74 @@ public class RestReplayReport {
                 + (Tools.notEmpty(s.responseMessage) ? lbl("msg") + s.responseMessage + linesep : "")
                 + (s.auth == null ? "" : lbl("auth") + s.auth + linesep)
                 + alertsToHtml(s.alerts) + linesep
-                + HDRBEGIN + lbl("req-headers(mime-only)") + requestHeadersToHtml(s.requestHeaders) + HDREND + linesep
-                + HDRBEGIN + lbl("req-headers(from-control-file)") + requestHeadersToHtml(s.headerMap) + HDREND + linesep
-                + HDRBEGIN + lbl("resp-headers") + s.responseHeadersDump + HDREND + linesep
+                +(s.parentSkipped
+                   ?    ""
+                   :
+                        HDRBEGIN + lbl("req-headers(mime-only)") + requestHeadersToHtml(s.requestHeaders) + HDREND + linesep
+                        + HDRBEGIN + lbl("req-headers(from-control-file)") + requestHeadersToHtml(s.headerMap) + HDREND + linesep
+                        + HDRBEGIN + lbl("resp-headers") + s.responseHeadersDump + HDREND + linesep
+                 )
                 + (Tools.notEmpty(s.deleteURL) ? lbl("deleteURL") + small(s.deleteURL) + linesep : "")
                 + (Tools.notEmpty(s.location) ? lbl("location") + small(s.location) + linesep : "")
                 + (Tools.notEmpty(s.getError()) ?  alertError(s.getError()) + linesep : "")
                 + (Tools.notEmpty(s.getErrorDetail()) ?  alertError(s.getErrorDetail()) + linesep : "")
                 + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s)+exportsToHtml(s) + linesep : "")
-                + ((includePartSummary && Tools.notBlank(partSummary)) ? lbl("part summary") + smallblack(partSummary) + linesep : "")
+                + ((includePartSummary && Tools.notBlank(partSummary))
+                ?   ((s.expectedTreewalkRangeColumns!=null)
+                        ?  formatExpectedTreewalkRangeColumns(s) + linesep
+                        :  lbl("part summary") + smallblack(partSummary) + linesep
+                    )
+                : ""
+                )
                 + (includePayloads && Tools.notBlank(s.requestPayload) ? LINE + lbl("requestPayload") + LINE + CRLF + s.requestPayload + LINE : "")
                 + (includePayloads && Tools.notBlank(s.getResult()) ? LINE + lbl("result") + LINE + CRLF + s.getResult() : "")
                 + end;
         return res;
+    }
+
+    private String formatExpectedTreewalkRangeColumns(ServiceResult s){
+        if (s == null || s.expectedTreewalkRangeColumns==null){
+            return "";
+        }
+        String strictness = "";
+        if (Tools.notBlank(s.payloadStrictness)){
+            strictness = " (<span style='font-size: 120%'>"+s.payloadStrictness+"<span>)";
+        }
+        StringBuilder sb = new StringBuilder();
+        String cls = "";
+        sb.append("<table class='dom-match-table'><tr>");
+        sb.append("<th>DOM Comparison</th>");
+        for (ServiceResult.Column col: s.expectedTreewalkRangeColumns){
+            sb.append("<th>");
+            sb.append(col.name);
+            sb.append("</th>");
+        }
+        sb.append("</tr><tr>");
+        sb.append("<th>actual</th>");
+        for (ServiceResult.Column col: s.expectedTreewalkRangeColumns){
+            cls = "";
+            if (Tools.notBlank(col.highlight)){
+                cls = " class='"+col.highlight+"' ";
+            }
+            sb.append("<td"+cls+">");
+            sb.append(col.num);
+            sb.append("</td>");
+        }
+        sb.append("</tr><tr>");
+        sb.append("<th>expected"+strictness+"</th>");
+        for (ServiceResult.Column col: s.expectedTreewalkRangeColumns){
+            cls = "";
+            if (Tools.notBlank(col.highlight)){
+                cls = " class='"+col.highlight+"' ";
+            }
+            sb.append("<td"+cls+">");
+            if (col.exp!=null){
+                sb.append(col.exp);
+            }
+            sb.append("</td>");
+        }
+        sb.append("</tr></table>");
+        return sb.toString();
     }
 
     private String formatResponseCodeBlock(ServiceResult s){
@@ -737,11 +818,15 @@ public class RestReplayReport {
             + small("  from "+s.gotExpectedResultBecause);
         }
 
+        if (s.parentSkipped){
+            return lbl("skipped")+"true"
+                    +SP + lbl("type")+smallblack(s.mutatorType)
+                    +SP + lbl("child results")+smallblack(""+s.getChildResults().size());
+        }
         return  s.responseCode
                 + SP + lbl(" gotExpected")+s.gotExpectedResult()
                 + SP + sExpected
                 + SP + (s.getParent()!=null?lbl("type")+smallblack(s.getParent().mutatorType):"")
-                + SP + (s.parentSkipped?lbl("skipped")+"true":"")
                 + SP + (s.loopIndex>-1?lbl("loop")+smallblack(""+s.loopIndex):"")
                 + SP + lbl(" time")+s.time + units("ms") ;
     }
@@ -792,7 +877,7 @@ public class RestReplayReport {
 
     private String varsToHtml(ServiceResult result){
         StringBuffer b = new StringBuffer();
-        for (Map.Entry<String,String> entry: result.getVars().entrySet()){
+        for (Map.Entry<String,Object> entry: result.getVars().entrySet()){
             b.append("<span class='vars'>")
              .append(entry.getKey())
              .append(": ")

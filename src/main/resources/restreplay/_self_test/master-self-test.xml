@@ -2,7 +2,7 @@
 <restReplayMaster>
     <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
 
-    <dump payloads="false" dumpServiceResult="minimal" />
+    <dump payloads="false" dumpServiceResult="auto" />
 
     <runOptions>
         <connectionTimeout>3000</connectionTimeout>

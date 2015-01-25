@@ -21,11 +21,11 @@ public class Master extends ConfigFile {
     }
     public static final String DEFAULT_MASTER_CONTROL = "master.xml";
 
-    public Map<String,String> vars = new LinkedHashMap<String,String>();
-    public Map<String, String> getVars() {
+    public Map<String,Object> vars = new LinkedHashMap<String,Object>();
+    public Map<String, Object> getVars() {
         return vars;
     }
-    public void setVars(Map<String, String> masterVars) {
+    public void setVars(Map<String, Object> masterVars) {
         this.vars = masterVars;
     }
 
@@ -146,7 +146,7 @@ public class Master extends ConfigFile {
             controlFile = runNode.valueOf("@controlFile");
             testGroup = runNode.valueOf("@testGroup");
             test = runNode.valueOf("@test"); //may be empty
-            Map<String, String> runVars = readVars(runNode);
+            Map<String, Object> runVars = readVars(runNode);
             list.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname));
         }
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
@@ -170,7 +170,7 @@ public class Master extends ConfigFile {
                                         String controlFile,
                                         String testGroup,
                                         String test,
-                                        Map<String, String> runVars,
+                                        Map<String, Object> runVars,
                                         String relToMaster)
     throws Exception {
         String envReportsDir = this.reportsDir;
@@ -189,7 +189,7 @@ public class Master extends ConfigFile {
         replay.setMasterFilename(masterFilename);
         replay.setRelToMaster(relToMaster);
 
-        Map<String, String> masterVarsDup = new LinkedHashMap<String, String>();
+        Map<String, Object> masterVarsDup = new LinkedHashMap<String, Object>();
         masterVarsDup.putAll(getVars());
         if (runVars!=null){
             masterVarsDup.putAll(runVars);

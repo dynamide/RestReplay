@@ -167,6 +167,21 @@
                 <filename>_self_test/res/empty-file.json</filename>
             </response>
         </test>
+        <test ID="jsonBadPropertyNames">
+            <method>PUT</method>
+            <expected>
+                <code range="202" />
+            </expected>
+            <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=202</uri>
+            <filename>_self_test/json-bad-propertynames.json</filename>
+            <vars>
+                <var ID="DUE_DATE_MILLIS">${tools.now()}</var>
+                <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+            </vars>
+            <response>
+                <expected level="TEXT" />
+            </response>
+        </test>
         <test ID="selftestUseVarMutator">
             <method>PUT</method>
             <expected>
@@ -223,6 +238,209 @@
                 </vars>
             </mutator>
         </test>
+
+        <test ID="testFilenameExpressions" skipParent="true">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <mutator type="VarMutator" skipParent="true">
+                <comment>This *sort of* works with skipParent=false, because EXPECTED_FILE is still
+                    in the shared context from the last go-round of AddedChanged,
+                    when the parent expected/filename gets eval'd,
+                    even though the parent doesn't set up that variable.
+                    For now, we're going to recommend using VarMutators ONLY with skipParents=true.
+                </comment>
+                <vars ID="Base">
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareL.xml</var>
+                </vars>
+                <vars ID="AddedChanged">
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                </vars>
+            </mutator>
+            <response>
+                <expected level="TEXT" />
+                <filename>${EXPECTED_FILE}</filename>
+            </response>
+        </test>
+
+        <test ID="testFilenameExpressions2">
+            <comment>In this one, the expression gets evaluated twice:
+                1) in EXPECTED_FILE,
+                2) in EXPECTED_FILENAME_EXPORTED.
+                This really just shows that exports and vars are both available to filename expressions.
+            </comment>
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <mutator type="VarMutator" skipParent="true">
+                <vars ID="Base">
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareL.xml</var>
+                </vars>
+                <vars ID="Changed">
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareChangedL.xml</var>
+                </vars>
+            </mutator>
+            <exports>
+                <vars>
+                    <var ID="EXPECTED_FILENAME_EXPORTED">${EXPECTED_FILE}</var>
+                </vars>
+            </exports>
+            <response>
+                <expected level="TEXT" />
+                <filename>${EXPECTED_FILENAME_EXPORTED}</filename>
+            </response>
+        </test>
+
+        <test ID="testJsonTreeCompare">
+            <comment>This test checks one API's response against three expected possibilities,
+              by looping three times, and supplying three different filenames, and using the same
+            validation strategy, but reading three different validation templates.</comment>
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <comment>we are just sending jsonTreeCompareL.xml as content because we have to send something.
+                     The service echos back the payload, and sets a mime header for the type specified
+                      by the query parmeter mimeOut.
+            </comment>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <mutator type="VarMutator" skipParent="true">
+                <vars ID="Base">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareL.xml</var>
+                </vars>
+                <vars ID="Added">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedL.xml</var>
+                </vars>
+                <vars ID="Changed">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareChangedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareChangedL.xml</var>
+                </vars>
+                <vars ID="AddedChanged">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                </vars>
+            </mutator>
+            <response>
+                <expected>
+                    <dom>
+                        <MATCHED range="3" />
+                        <TEXT_DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>${EXPECTED_FILE}</filename>
+            </response>
+        </test>
+
+        <test ID="testJsonTreeCompareSingleADDOKButTextChanged">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected level="ADDOK">
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+        <test ID="testJsonTreeCompareSingleADDOKRange">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected>
+                    <dom>
+                        <TEXT_DIFFERENT range="0-2"></TEXT_DIFFERENT>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+        <test ID="testJsonTreeCompareSingle">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected>
+                    <dom>
+                        <MATCHED range="1"></MATCHED>
+                        <MISSING range="0"></MISSING>
+                        <ADDED range="0"></ADDED>
+                        <DOC_ERROR range="0"></DOC_ERROR>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                        <NESTED_ERROR range="0"></NESTED_ERROR>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+        <test ID="testJsonTreeCompareSingleJustDifferences">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected>
+                    <dom>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+                <was>jsonTreeCompareChangedL</was>
+            </response>
+        </test>
+
+        <test ID="testJsonTreeCompareSingleJustDifferencesSpecifyBothIsError">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected level="ADDOK">
+                    <dom>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+
+        <test ID="testJsonCompareOrders">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/jsonCompareOrders.json</filename>
+            <vars>
+                <var ID="TITLE">Order for Smith - 123400</var>
+            </vars>
+            <response>
+                <expected level="ADDOK" />
+                <filename>_self_test/res/jsonCompareOrders.json</filename>
+            </response>
+        </test>
+        <test ID="testJsonCompareOrders_ExpectedIsXml">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/jsonCompareOrders.json</filename>
+            <vars>
+                <var ID="TITLE">Order for Smith - 123400</var>
+            </vars>
+            <response>
+                <expected level="ADDOK" />
+                <filename>_self_test/res/jsonCompareOrders.xml</filename>
+            </response>
+        </test>
+        <test ID="testJsonCompareOrders_ExpectedIsXmlNewRoot">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/jsonCompareOrders.json</filename>
+            <vars>
+                <var ID="TITLE">Order for Smith - 123400</var>
+            </vars>
+            <response>
+                <expected level="ADDOK" />
+                <filename>_self_test/res/jsonCompareOrdersNewRoot.xml</filename>
+            </response>
+        </test>
     </testGroup>
 
 
@@ -277,42 +495,20 @@
         </test>
     </testGroup>
 
-
-
-
-    <testGroup ID="debug"  autoDeletePOSTS="false">
-        <test ID="selftestUseVarMutator">
-            <method>PUT</method>
-            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;forceCode=300</uri>
-            <filename>_self_test/var-mutator-test.json</filename>
-            <vars>
-                <var ID="DAYS">${24*60*60*1000}</var>
-                <var ID="BASE_DATE">${tools.now()}</var>
-                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
-                <var ID="FOOBAR">${this.testID}</var>
-                <var ID="DueDate2">Due ${BASE_DATE} -basedate</var>
-                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
-            </vars>
-            <mutator type="VarMutator">
-                <expected>
-                    <code range="4xx">*</code>
+    <testGroup ID="debug" autoDeletePOSTS="false">
+        <test ID="testJsonTreeCompareSingleJustDifferences">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected >
+                    <treewalk>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                    </treewalk>
                 </expected>
-                <vars ID="0">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
-                    <var idbase="FOOBAR">${this.testID} set in 0.</var>
-                </vars>
-                <vars ID="1">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}</var>
-                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
-                </vars>
-                <vars ID="2">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}</var>
-                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
-                </vars>
-                <vars ID="3">
-                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
-                </vars>
-            </mutator>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+                <was>jsonTreeCompareL</was>
+            </response>
         </test>
     </testGroup>
 
