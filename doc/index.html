@@ -56,6 +56,24 @@
         color: brown;
     font-size: 80%;
     }
+    
+
+
+
+    /* display paused text on top of paused slideshow */
+    .cycle-paused:after {
+        content: 'Paused'; color: white; background: black; padding: 10px;
+        z-index: 500; position: absolute; top: 10px; right: 10px;
+        border-radius: 10px;
+        opacity: .5; filter: alpha(opacity=50);
+    }
+    
+    .autounderline A        {color: green; text-decoration: none; }
+    .autounderline A:active {color: green; text-decoration: underline; }
+    .autounderline A:hover  {color: #ECA511; text-decoration: underline; }
+
+
+
   </style>
   <title>RestReplay</title>
     <script src="js/jquery.1.11.min.js"></script>
@@ -63,6 +81,7 @@
 
 </head>
 <body>
+
   <center>
     <table class="matrix"  style="width: 80%; border-spacing: 10px;" border="0" cellspacing="10">
 <tbody>
@@ -71,9 +90,13 @@
    <div class="cycle-slideshow" 
         data-cycle-slides="> div" 
         data-cycle-timeout="8000" 
-        data-cycle-pause-on-hover="true"
+        data-cycle-pause-on-hover='true'
+        data-cycle-auto-height='calc'
         style="text-align:center; 
-        width: 90%;">
+        width: "90%;"
+        data-cycle-pager="#custom-pager"
+        data-cycle-pager-template="<a style='margin: 3px;' href=#>{{slideNum}}</a>"
+    >
     <div id="whiteboard">
         <center>
             <table class="matrix square"  border="0" cellspacing="10" style="width: 60%; font-size: 10pt;">
@@ -125,7 +148,8 @@
         <div class="caption">service-side code coverage by <a href="http://www.eclemma.org/jacoco/">JaCoCo</a></div>
    </div>
 
-   </div>
+</div>
+<div id="custom-pager" class="autounderline" style="text-align: right; margin: 0;"></div>
 
 </th></tr>
 <tr>
