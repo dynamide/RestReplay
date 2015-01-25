@@ -67,9 +67,12 @@
         border-radius: 10px;
         opacity: .5; filter: alpha(opacity=50);
     }
+    .cycle-pager-active {
+        color: red;
+    }
     
-    .autounderline A        {color: green; text-decoration: none; }
-    .autounderline A:active {color: green; text-decoration: underline; }
+    .autounderline A        {text-decoration: none; }
+    .autounderline A:active {text-decoration: underline; }
     .autounderline A:hover  {color: #ECA511; text-decoration: underline; }
 
 
@@ -95,7 +98,7 @@
         style="text-align:center; 
         width: "90%;"
         data-cycle-pager="#custom-pager"
-        data-cycle-pager-template="<a style='margin: 3px;' href=#>{{slideNum}}</a>"
+        data-cycle-pager-template="<a style='margin: 1px;  background-color: #CCFFFF;' href=#>{{slideNum}}</a>"
     >
     <div id="whiteboard">
         <center>
@@ -149,7 +152,7 @@
    </div>
 
 </div>
-<div id="custom-pager" class="autounderline" style="text-align: right; margin: 0;"></div>
+<div id="custom-pager" class="autounderline" style="text-align: right; margin: 0; font-size: 85%;"></div>
 
 </th></tr>
 <tr>
