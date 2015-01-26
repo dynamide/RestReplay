@@ -84,10 +84,11 @@ public class RestReplayReport {
     }
 
     protected static String formatCollapse(String myDivID, String linkText, String subtitle) {
-        return "<a href='javascript:;' onmousedown=\"toggleDiv('" + myDivID + "');\">" + linkText + "</a>"
-                +( Tools.notBlank(subtitle)?" <span class='smallblack'>"+subtitle+"</span>":"")
-                + BR
-                + "<div ID='" + myDivID + "' class='PAYLOAD' style='display:none'>";
+        return "<span class='payload-link'><a href='javascript:;' onmousedown=\"toggleDiv('" + myDivID + "');\">" + linkText + "</a>"
+                     +( Tools.notBlank(subtitle)?"<span class='smallblack'>&nbsp;&nbsp;"+subtitle+"</span>"
+                                                :"<span class='smallblack'>&nbsp;</span>")
+              +"</span>"
+              +"<div ID='" + myDivID + "' class='PAYLOAD' style='display:none'>";
     }
 
 
