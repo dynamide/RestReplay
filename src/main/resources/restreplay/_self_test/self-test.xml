@@ -4,7 +4,7 @@
 
 
     <testGroup ID="login" autoDeletePOSTS="false">
-        <test ID="selftestToken">
+        <test ID="token">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
@@ -15,11 +15,11 @@
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
-        <test ID="selftestToken">
+        <test ID="token">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
         </test>
-        <test ID="selftestExpectedCodes">
+        <test ID="expectedCodes">
             <expected>
                  <code range="3x"/>
                  <code range="1x"/>
@@ -28,7 +28,7 @@
             <method>GET</method>
             <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
             <vars>
-                <var ID="TOKEN_ID">${selftestToken.got("//status")}</var>
+                <var ID="TOKEN_ID">${token.got("//status")}</var>
             </vars>
         </test>
         <test ID="useMutator">
@@ -43,7 +43,7 @@
                 </expected>
             </mutator>
         </test>
-        <test ID="useMutatorNoParent">
+        <test ID="useMutatorSkipParent">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/content-mutator-test.json</filename>
@@ -55,23 +55,23 @@
                 </expected>
             </mutator>
         </test>
-        <test ID="selftestUseToken">
+        <test ID="useToken">
             <method>GET</method>
-            <uri>/tagonomy?mock=true&amp;name=selftestUseToken</uri>
+            <uri>/tagonomy?mock=true&amp;name=useToken</uri>
             <headers>
-                <header name="x-authorization">${selftestToken.got("//data")}</header>
-                <header name="x-method">${selftestToken.method}</header>
+                <header name="x-authorization">${token.got("//data")}</header>
+                <header name="x-method">${token.method}</header>
             </headers>
         </test>
-        <test ID="selftestUseTokenPOST">
+        <test ID="useTokenPOST">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-token-post.json</filename>
             <vars>
-                <var ID="TOKEN">${selftestToken.got("//data")}</var>
+                <var ID="TOKEN">${token.got("//data")}</var>
             </vars>
         </test>
-        <test ID="selftestUseTokenPUT">
+        <test ID="useTokenPUT">
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
             <filename>_self_test/content-mutator-test.json</filename>
@@ -81,7 +81,7 @@
                 </expected>
             </mutator>
         </test>
-        <test ID="selftestUseTokenDELETE">
+        <test ID="useTokenDELETE">
             <method>DELETE</method>
             <uri>/tagonomy?mock=true</uri>
         </test>
@@ -93,7 +93,7 @@
             <uri>/tagonomy?mock=501</uri>
             <filename>_self_test/content-mutator-test.json</filename>
         </test>
-        <test ID="selftestScriptTest">
+        <test ID="scriptTest">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-mutator.json</filename>
@@ -107,16 +107,16 @@
                         if (kit != null) {
                             var ts = kit.gregorian.timestampUTC();
                             kit.out.println('');
-                            kit.out.println('    ==> Running test script, in selftest.xml:selftestGroup:selftestScriptTest at '+ts);
+                            kit.out.println('    ==> Running test script, in selftest.xml:selftestGroup:scriptTest at '+ts);
                             kit.out.println('');
                             return 'zts:'+ts;
                         }
-                        return "kit not defined in selftestScriptTest";
+                        return "kit not defined in scriptTest";
                     }]]></var>
                 </vars>
             </exports>
         </test>
-        <test ID="selftestUseValidator">
+        <test ID="useValidator">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -145,7 +145,7 @@
             <uri>/tagonomy?mock=${getOrders.ORDER_IDS[this.LoopIndex]}</uri>
         </test>
 
-        <test ID="selftestUseValidatorExpectErrors">
+        <test ID="useValidatorExpectErrors">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -156,7 +156,7 @@
                 <validator lang="javascript">_self_test/res/selftest-with-validator-errors.validator.js</validator>
             </response>
         </test> 
-        <test ID="selftestEmptyExpectedResponseFile">
+        <test ID="emptyExpectedResponseFile">
             <method>POST</method>
             <uri>/tagonomy?mock=true</uri>
             <filename>_self_test/selftest-number-post.json</filename>
@@ -176,13 +176,13 @@
             <filename>_self_test/json-bad-propertynames.json</filename>
             <vars>
                 <var ID="DUE_DATE_MILLIS">${tools.now()}</var>
-                <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+                <var ID="VarTestMessage">Base message set here as default (useVarMutator).</var>
             </vars>
             <response>
                 <expected level="TEXT" />
             </response>
         </test>
-        <test ID="selftestUseVarMutator">
+        <test ID="useVarMutator">
             <method>PUT</method>
             <expected>
                 <code range="202" />
@@ -197,7 +197,7 @@
                 <var ID="BASE_DATE">${tools.now()}</var>
                 <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
                 <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
-                <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+                <var ID="VarTestMessage">Base message set here as default (useVarMutator).</var>
             </vars>
             <mutator type="VarMutator">
                 <expected>
@@ -213,7 +213,7 @@
                 </vars>
             </mutator>
         </test>
-        <test ID="UseVarMutatorWNames">
+        <test ID="useVarMutatorWNames">
             <method>PUT</method>
             <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=202</uri>
             <filename>_self_test/var-mutator-test.json</filename>
@@ -222,7 +222,7 @@
                 <var ID="BASE_DATE">${tools.now()}</var>
                 <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
                 <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
-                <var ID="VarTestMessage">Base message set here as default (selftestUseVarMutator).</var>
+                <var ID="VarTestMessage">Base message set here as default (useVarMutator).</var>
             </vars>
             <mutator type="VarMutator" skipParent="true">
                 <expected>
@@ -239,7 +239,7 @@
             </mutator>
         </test>
 
-        <test ID="testFilenameExpressions" skipParent="true">
+        <test ID="filenameExpressions" skipParent="true">
             <method>POST</method>
             <uri>/jsonCompare1?mimeOut=text/xml</uri>
             <filename>_self_test/res/jsonTreeCompareL.xml</filename>
@@ -263,7 +263,7 @@
             </response>
         </test>
 
-        <test ID="testFilenameExpressions2">
+        <test ID="filenameExpressionExports">
             <comment>In this one, the expression gets evaluated twice:
                 1) in EXPECTED_FILE,
                 2) in EXPECTED_FILENAME_EXPORTED.
@@ -291,7 +291,7 @@
             </response>
         </test>
 
-        <test ID="testJsonTreeCompare">
+        <test ID="jsonTreeCompare">
             <comment>This test checks one API's response against three expected possibilities,
               by looping three times, and supplying three different filenames, and using the same
             validation strategy, but reading three different validation templates.</comment>
@@ -300,6 +300,211 @@
             <comment>we are just sending jsonTreeCompareL.xml as content because we have to send something.
                      The service echos back the payload, and sets a mime header for the type specified
                       by the query parmeter mimeOut.
+            </comment>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <mutator type="VarMutator" skipParent="true">
+                <vars ID="Base">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareL.xml</var>
+                </vars>
+                <vars ID="Added">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedL.xml</var>
+                </vars>
+                <vars ID="Changed">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareChangedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareChangedL.xml</var>
+                </vars>
+                <vars ID="AddedChanged">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                </vars>
+            </mutator>
+            <response>
+                <expected>
+                    <dom>
+                        <MATCHED range="3" />
+                        <TEXT_DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>${EXPECTED_FILE}</filename>
+            </response>
+        </test>
+
+        <test ID="jsonTreeCompareTextChanged">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected level="ADDOK">
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+        <test ID="jsonTreeCompareRange">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected>
+                    <dom>
+                        <TEXT_DIFFERENT range="0-2"></TEXT_DIFFERENT>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+        <test ID="jsonTreeCompareCustom">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected>
+                    <dom>
+                        <MATCHED range="1"></MATCHED>
+                        <MISSING range="0"></MISSING>
+                        <ADDED range="0"></ADDED>
+                        <DOC_ERROR range="0"></DOC_ERROR>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                        <NESTED_ERROR range="0"></NESTED_ERROR>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+        <test ID="jsonTreeCompareJustDifferences">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected>
+                    <dom>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+                <was>jsonTreeCompareChangedL</was>
+            </response>
+        </test>
+
+        <test ID="ToSpecifyBothIsAnError">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <response>
+                <expected level="ADDOK">
+                    <dom>
+                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                    </dom>
+                </expected>
+                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
+            </response>
+        </test>
+
+
+        <test ID="jsonCompareOrders">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/jsonCompareOrders.json</filename>
+            <vars>
+                <var ID="TITLE">Order for Smith - 123400</var>
+            </vars>
+            <response>
+                <expected level="ADDOK" />
+                <filename>_self_test/res/jsonCompareOrders.json</filename>
+            </response>
+        </test>
+        <test ID="jsonCompareOrders_ExpectedIsXml">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/jsonCompareOrders.json</filename>
+            <vars>
+                <var ID="TITLE">Order for Smith - 123400</var>
+            </vars>
+            <response>
+                <expected level="ADDOK" />
+                <filename>_self_test/res/jsonCompareOrders.xml</filename>
+            </response>
+        </test>
+        <test ID="jsonCompareOrders_ExpectedIsXmlNewRoot">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/jsonCompareOrders.json</filename>
+            <vars>
+                <var ID="TITLE">Order for Smith - 123400</var>
+            </vars>
+            <response>
+                <expected level="ADDOK" />
+                <filename>_self_test/res/jsonCompareOrdersNewRoot.xml</filename>
+            </response>
+        </test>
+    </testGroup>
+
+
+    <testGroup ID="testMutatorExpectedCodes"  autoDeletePOSTS="false">
+        <test ID="varMutatorExpectedCodes">
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=401</uri>
+            <filename>_self_test/var-mutator-test.json</filename>
+            <expected>
+                <code range="401">*</code>
+            </expected>
+            <vars>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
+                <var ID="FOOBAR">${this.testID}</var>
+                <var ID="DueDate2">Due ${BASE_DATE} -basedate</var>
+                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
+                <var ID="VarTestMessage">Base message set here as default (varMutatorExpectedCodes).</var>
+            </vars>
+            <mutator type="VarMutator">
+                <expected>
+                    <code range="406">*</code>
+                </expected>
+                <vars ID="0">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID} set in 0.</var>
+                </vars>
+                <vars ID="1">
+                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}</var>
+                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
+                </vars>
+            </mutator>
+        </test>
+        <test ID="ExcludeFieldsMutatorExpectedCodes">
+            <method>PUT</method>
+            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
+            <filename>_self_test/selftest-mutator.json</filename>
+            <expected>
+                <code range="2x"/>
+            </expected>
+            <vars>
+                <var ID="TOKEN">FOOTOKEN</var>
+                <var ID="mutation">${this.mutation}</var>
+            </vars>
+            <mutator type="ExcludeFields">
+                <expected>
+                    <code range="202">no_optionalField</code>
+                    <code range="4x">*</code>
+                </expected>
+            </mutator>
+        </test>
+    </testGroup>
+
+    <testGroup ID="debug" autoDeletePOSTS="false">
+        <test ID="testJsonTreeCompare">
+            <comment>This test checks one API's response against three expected possibilities,
+                by looping three times, and supplying three different filenames, and using the same
+                validation strategy, but reading three different validation templates.</comment>
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <comment>we are just sending jsonTreeCompareL.xml as content because we have to send something.
+                The service echos back the payload, and sets a mime header for the type specified
+                by the query parmeter mimeOut.
             </comment>
             <filename>_self_test/res/jsonTreeCompareL.xml</filename>
             <mutator type="VarMutator" skipParent="true">
@@ -389,131 +594,10 @@
                 <was>jsonTreeCompareChangedL</was>
             </response>
         </test>
-
-        <test ID="testJsonTreeCompareSingleJustDifferencesSpecifyBothIsError">
-            <method>POST</method>
-            <uri>/jsonCompare1?mimeOut=text/xml</uri>
-            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
-            <response>
-                <expected level="ADDOK">
-                    <dom>
-                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
-                    </dom>
-                </expected>
-                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
-            </response>
-        </test>
-
-
-        <test ID="testJsonCompareOrders">
-            <method>POST</method>
-            <uri>/jsonCompare1</uri>
-            <filename>_self_test/jsonCompareOrders.json</filename>
-            <vars>
-                <var ID="TITLE">Order for Smith - 123400</var>
-            </vars>
-            <response>
-                <expected level="ADDOK" />
-                <filename>_self_test/res/jsonCompareOrders.json</filename>
-            </response>
-        </test>
-        <test ID="testJsonCompareOrders_ExpectedIsXml">
-            <method>POST</method>
-            <uri>/jsonCompare1</uri>
-            <filename>_self_test/jsonCompareOrders.json</filename>
-            <vars>
-                <var ID="TITLE">Order for Smith - 123400</var>
-            </vars>
-            <response>
-                <expected level="ADDOK" />
-                <filename>_self_test/res/jsonCompareOrders.xml</filename>
-            </response>
-        </test>
-        <test ID="testJsonCompareOrders_ExpectedIsXmlNewRoot">
-            <method>POST</method>
-            <uri>/jsonCompare1</uri>
-            <filename>_self_test/jsonCompareOrders.json</filename>
-            <vars>
-                <var ID="TITLE">Order for Smith - 123400</var>
-            </vars>
-            <response>
-                <expected level="ADDOK" />
-                <filename>_self_test/res/jsonCompareOrdersNewRoot.xml</filename>
-            </response>
-        </test>
-    </testGroup>
-
-
-    <testGroup ID="testMutatorExpectedCodes"  autoDeletePOSTS="false">
-        <test ID="varMutatorExpectedCodes">
-            <method>PUT</method>
-            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=401</uri>
-            <filename>_self_test/var-mutator-test.json</filename>
-            <expected>
-                <code range="401">*</code>
-            </expected>
-            <vars>
-                <var ID="DAYS">${24*60*60*1000}</var>
-                <var ID="BASE_DATE">${tools.now()}</var>
-                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
-                <var ID="FOOBAR">${this.testID}</var>
-                <var ID="DueDate2">Due ${BASE_DATE} -basedate</var>
-                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
-                <var ID="VarTestMessage">Base message set here as default (varMutatorExpectedCodes).</var>
-            </vars>
-            <mutator type="VarMutator">
-                <expected>
-                    <code range="406">*</code>
-                </expected>
-                <vars ID="0">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
-                    <var idbase="FOOBAR">${this.testID} set in 0.</var>
-                </vars>
-                <vars ID="1">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +2 * DAYS}</var>
-                    <var idbase="FOOBAR">${this.testID + ' mutator index: ' + this.mutator.getIndex() }</var>
-                </vars>
-            </mutator>
-        </test>
-        <test ID="ExcludeFieldsMutatorExpectedCodes">
-            <method>PUT</method>
-            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
-            <filename>_self_test/selftest-mutator.json</filename>
-            <expected>
-                <code range="2x"/>
-            </expected>
-            <vars>
-                <var ID="TOKEN">FOOTOKEN</var>
-                <var ID="mutation">${this.mutation}</var>
-            </vars>
-            <mutator type="ExcludeFields">
-                <expected>
-                    <code range="202">no_optionalField</code>
-                    <code range="4x">*</code>
-                </expected>
-            </mutator>
-        </test>
-    </testGroup>
-
-    <testGroup ID="debug" autoDeletePOSTS="false">
-        <test ID="testJsonTreeCompareSingleJustDifferences">
-            <method>POST</method>
-            <uri>/jsonCompare1?mimeOut=text/xml</uri>
-            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
-            <response>
-                <expected >
-                    <treewalk>
-                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
-                    </treewalk>
-                </expected>
-                <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
-                <was>jsonTreeCompareL</was>
-            </response>
-        </test>
     </testGroup>
 
     <testGroup ID="debugMutators2"  autoDeletePOSTS="false">
-        <test ID="selftestUseTokenPUT">
+        <test ID="useTokenPUT">
             <method>PUT</method>
             <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
             <filename>_self_test/selftest-mutator.json</filename>
@@ -531,7 +615,7 @@
     </testGroup>
 
     <testGroup ID="bugs"  autoDeletePOSTS="false">
-        <test ID="selftestUseTokenPUTbugs">
+        <test ID="useTokenPUTbugs">
             <!-- This case causes errors to happen in the mutated child tests, but reading the json response borks the
                  parent so it doesn't display correctly, and the children seem like top-level tests.
                  Trace this to the code that breaks on the error and trap the error correctly.
@@ -556,16 +640,16 @@
         </test>
         <test ID="selftestUseData"  autoDeletePOSTS="false">
             <method>GET</method>
-            <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(selftestUseTokenPUTbugs.result)}</uri>
+            <uri>/tagonomy?mock=token&amp;data=${tools.encodeURLString(useTokenPUTbugs.result)}</uri>
         </test>
 
-        <test ID="selftestUseToken">
+        <test ID="useToken">
             <!-- this one works above, but had this warning comment.  If you need to look into it, the case and the comment are here.-->
             <method>GET</method>
-            <uri>/tagonomy?mock=true&amp;name=selftestUseToken</uri>
+            <uri>/tagonomy?mock=true&amp;name=useToken</uri>
             <headers>
-                <header name="x-authorization">${selftestToken.got("//data")}</header>
-                <header name="x-method">${selftestToken.method}</header>
+                <header name="x-authorization">${token.got("//data")}</header>
+                <header name="x-method">${token.method}</header>
             </headers>
             <!--This causes a warning.  And it breaks auto delete with the erroneous url.
             Keeping this here for development of two error tests.

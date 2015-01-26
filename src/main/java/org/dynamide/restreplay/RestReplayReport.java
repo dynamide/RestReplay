@@ -85,10 +85,11 @@ public class RestReplayReport {
 
     protected static String formatCollapse(String myDivID, String linkText, String subtitle) {
         return "<span class='payload-link'><a href='javascript:;' onmousedown=\"toggleDiv('" + myDivID + "');\">" + linkText + "</a>"
-                     +( Tools.notBlank(subtitle)?"<span class='smallblack'>&nbsp;&nbsp;"+subtitle+"</span>"
-                                                :"<span class='smallblack'>&nbsp;</span>")
               +"</span>"
-              +"<div ID='" + myDivID + "' class='PAYLOAD' style='display:none'>";
+
+              +"<div ID='" + myDivID + "' class='PAYLOAD' style='display:none'>"
+              +( Tools.notBlank(subtitle)?"<div class='payload-subtitle' style='border: 1px solid black;'>"+subtitle+"</div>"
+                :"");
     }
 
 
@@ -98,7 +99,8 @@ public class RestReplayReport {
     private String runInfo = "";
 
     public String getPage(String testdir, RestReplay restReplay, String testGroupID) throws IOException {
-        return formatPageStart(testdir, restReplay.getResourceManager())
+        String pageTitle = "RestReplay testGroup: "+testGroupID;
+        return formatPageStart(testdir, restReplay.getResourceManager(), pageTitle)
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+lbl("test group")+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMaster()+"'>Back to Master</a>"+"</div>"
                 + header.toString()
                 + this.runInfo
@@ -410,13 +412,14 @@ public class RestReplayReport {
 
     private List<TOC> tocList = new ArrayList<TOC>();
 
-    public static String formatPageStart(String testdir, ResourceManager rm) throws IOException {
+    public static String formatPageStart(String testdir, ResourceManager rm,
+                                         String pageTitle) throws IOException {
 
         String script = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js", testdir + "/" + INCLUDES_DIR + "/reports-include.js");
         String style  = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", testdir + "/" + INCLUDES_DIR + "/reports-include.css");
         //String script = FileTools.readFile(testdir, INCLUDES_DIR + "/reports-include.js");
         //String style = FileTools.readFile(testdir, INCLUDES_DIR + "/reports-include.css");
-        return "<html><head><script type='text/javascript'>\r\n"
+        return "<html><head><title>"+pageTitle+"</title><script type='text/javascript'>\r\n"
                 + script
                 + "\r\n</script>\r\n<style>\r\n"
                 + style
@@ -513,7 +516,8 @@ public class RestReplayReport {
         //                +"\n masterFilenameNameOnly:"+masterFilenameNameOnly);
 
         try {
-            StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager()));
+            String pageTitle = "RestReplay "+localMasterFilename+(Tools.notBlank(envID)?" ("+envID+")":"");
+            StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager(), pageTitle));
             String dateStr = Tools.nowLocale();
             sb.append("<div class='REPORTTIME'><b>RestReplay</b> " + lbl(" run on") + " " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
             sb.append("<div class='masterVars'>")
@@ -581,7 +585,7 @@ public class RestReplayReport {
             }
         }
         String partSummary = serviceResult.partsSummaryHTML(true);//true for detailed.
-        appendPayload(fb, partSummary, ServiceResult.PRETTY_FORMAT.NONE, "Treewalk Report", "TreewalkReport" + tocID, "");
+        appendPayload(fb, partSummary, ServiceResult.PRETTY_FORMAT.NONE, "DOM Comparison", "DOMComparison" + tocID, "");
         return fb.toString();
     }
     private String safeJSONToString(String in){

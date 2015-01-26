@@ -91,6 +91,14 @@ td, th {
 .PAYLOAD {
     background-color: white;
     font-size: 85%;
+    padding: 5px;
+    border: 1px solid #BBB;
+}
+.payload-subtitle {
+       background-color: #E0FFFF;
+       font-size: 65%;
+       padding: 5px;
+       border: 1px solid #AAA;
 }
 
 .TOPLINKS {
