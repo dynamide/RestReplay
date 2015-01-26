@@ -3,81 +3,81 @@
 <head>
 <meta content="text/html; charset=windows-1252" http-equiv="content-type">
 <style>
-  body {
-  background-color: #87cefa;;
-  }
-  h1 {
+body {
+    background-color: #87cefa;;
+}
+h1 {
     font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
-      
-  }
-  .matrix {
-      border: 0px solid gray;
-      border-spacing: 3px;
-      padding: 20px;
-    border-collapse: separate;
-    empty-cells: hide;
-  }
-  .matrix th {
-      padding: 25px;
-      font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
-      text-align: center;
-    
-  }
-  .matrix td {
-      font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
-      margin: 5px;
-      padding: 4px;
-      
-      
-  }
-  .brdr {
-    border: 1px solid gray;
-    
-  }
-
-  .rounded {
-      border-radius: 5px;
-  }
-  .square {
-    border-radius: 1px;
-  }
-   
-  .rounded A {
-    font-weight: bold;
-  }
-  .rounded {
+}
+.matrix {
+  border: 0px solid gray;
+  border-spacing: 3px;
+  padding: 20px;
+border-collapse: separate;
+empty-cells: hide;
+}
+.matrix th {
+  padding: 25px;
+  font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
   text-align: center;
-  }
-    .logo {
-        font-size: 24pt;
+
+}
+.matrix td {
+  font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
+  margin: 5px;
+  padding: 4px;
+  
+  
+}
+.brdr {
+border: 1px solid gray;
+
+}
+
+.rounded {
+  border-radius: 5px;
+}
+.square {
+  border-radius: 1px;
+}
+
+.rounded A {
+  font-weight: bold;
+}
+.rounded {
+  text-align: center;
+}
+.logo {
+    font-size: 24pt;
+color: brown;
+}
+.caption{
     color: brown;
-    }
-    .caption{
-        color: brown;
     font-size: 80%;
-    }
+    margin-top: 4px;
+}
     
 
 
 
-    /* display paused text on top of paused slideshow */
-    .cycle-paused:after {
-        content: 'Paused'; color: white; background: black; padding: 10px;
-        z-index: 500; position: absolute; top: 10px; right: 10px;
-        border-radius: 10px;
-        opacity: .5; filter: alpha(opacity=50);
-    }
-    .cycle-pager-active {
-        color: red;
-    }
-    
-    .autounderline A        {text-decoration: none; }
-    .autounderline A:active {text-decoration: underline; }
-    .autounderline A:hover  {color: #ECA511; text-decoration: underline; }
+/* display paused text on top of paused slideshow */
+.cycle-paused:after {
+    content: 'Paused'; color: white; background: black; padding: 10px;
+    z-index: 500; position: absolute; top: 10px; right: 10px;
+    border-radius: 10px;
+    opacity: .5; filter: alpha(opacity=50);
+}
+.cycle-pager-active {
+    color: red;
+}
+
+.autounderline A        {text-decoration: none; }
+.autounderline A:active {text-decoration: underline; }
+.autounderline A:hover  {color: #ECA511; text-decoration: underline; }
 
 
 
-  </style>
+</style>
   <title>RestReplay</title>
     <script src="js/jquery.1.11.min.js"></script>
     <script type="text/javascript" src="js/jquery.cycle2.min.js"></script> <!-- from http://jquery.malsup.com/cycle2/download/ -->
@@ -130,25 +130,26 @@
         <br />
     </div>
     <div id="controlfile" style="width: 100%;">
-        <img style="width: 100%; height: auto ; margin: 15px; margin-bottom: 0; max-height: 270px; max-width: 594px;" src="img/self-test-control-file.png" />
         <div class="caption">easy configuration</div>
+        <img style="width: 100%; height: auto ; margin: 15px; margin-bottom: 0; max-height: 270px; max-width: 594px;" src="img/self-test-control-file.png" />
     </div>
 
     <div id="report" style="width: 100%; " >
-        <img style="width: 100%; height: auto ; max-height: 270px; max-width: 594px; margin: 10px;  margin-bottom: 0; padding:5px;" src="img/self-test-report.png" />
         <div class="caption">sample report</div>
+        <img style="width: 100%; height: auto ; max-height: 270px; max-width: 594px; margin: 10px;  margin-bottom: 0; padding:5px;" src="img/self-test-report.png" />
     </div>
 
 
     <div id="report-detail" style="width: 100%; " >
-        <img style="width: 100%; height: auto ; max-height: 270px; max-width: 594px;margin: 10px;  margin-bottom: 0; padding:5px;" src="img/self-test-report-detail.png" />
         <div class="caption">sample report detail</div>
+        <img style="width: 100%; height: auto ; max-height: 270px; max-width: 594px;margin: 10px;  margin-bottom: 0; padding:5px;" src="img/self-test-report-detail.png" />
     </div>
     <div id="code-coverage2" style="width: 100%; " >
+       <div class="caption">service-side code coverage by <a href="http://www.eclemma.org/jacoco/">JaCoCo</a></div>
        <img style="width: 100%; height: auto ; max-height: 220px; max-width: 594px;margin: 10px;  margin-bottom: 0; padding:5px;" src="img/code-coverage.png" />
        <br />
        <br />
-        <div class="caption">service-side code coverage by <a href="http://www.eclemma.org/jacoco/">JaCoCo</a></div>
+        
    </div>
 
 </div>
