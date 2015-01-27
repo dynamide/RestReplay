@@ -93,9 +93,19 @@ or a single test within a testGroup:
 
 
 =============================================================
+  Running the self test server
+=============================================================
+You can run within RestReplay with -selftest
+
+But you can also run the server yourself, just run main() in org.dynamide.restreplay.server.EmbeddedServer.
+
+
+
+=============================================================
 TODO:
 =============================================================
-
+Switch to apache http client version 4.
+   http://debuguide.blogspot.in/2013/01/quick-guide-for-migration-of-commons.html
 
 
 

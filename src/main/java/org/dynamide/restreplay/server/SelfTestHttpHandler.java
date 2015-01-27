@@ -1,13 +1,16 @@
 package org.dynamide.restreplay.server;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.apache.commons.httpclient.HttpException;
 import org.dynamide.util.Tools;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // Statically import all tools methods:
 //     addHeader, writeReponse, dump, splitQuery, readRequestBody, extractFirstParam
@@ -25,6 +28,13 @@ public class SelfTestHttpHandler implements HttpHandler {
 
     private final static String JSON_COMPARE_RIGHT = "{\"a\": \"one\",\"b\": {\"c\": \"two\"}}";
 
+    public static void printRequestHeaders(HttpExchange t){
+        Headers s = t.getRequestHeaders();
+        for (Map.Entry<String,List<String>> entry: s.entrySet()){
+            System.out.println("***selfserver*** header: " + entry.getKey() + ": " + entry.getValue().toString());
+        }
+    }
+
     public void handle(HttpExchange t) throws IOException {
         //System.out.println("self-test web server received URI: "+t.getRequestURI());
         URI uri = t.getRequestURI();
@@ -33,7 +43,9 @@ public class SelfTestHttpHandler implements HttpHandler {
         String method = t.getRequestMethod();
         String body;
 
-        //System.out.println("****************** handler path: "+path);
+        System.out.println("***selfserver*** path: "+path);
+        System.out.println("***selfserver*** query: "+t.getRequestURI().getRawQuery());
+        printRequestHeaders(t);
         String mock = extractFirstParam(paramsMap, "mock");
 
         if (path.equals("/dump")) {

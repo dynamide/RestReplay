@@ -826,8 +826,8 @@ public class RestReplay extends ConfigFile {
 
             Node expectedLevel = testNode.selectSingleNode("response/expected");
             if (expectedLevel != null) {
-                String level = expectedLevel.valueOf("@level");
-                serviceResult.payloadStrictness = level;
+                String domLevel = expectedLevel.valueOf("@dom");
+                serviceResult.payloadStrictness = domLevel;
 
                 Node dom = expectedLevel.selectSingleNode("dom");
                 if (dom !=null){
@@ -1284,6 +1284,16 @@ public class RestReplay extends ConfigFile {
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
 
+            boolean waitForStdin = false;
+            if (waitForStdin) {
+                //Go and start jvisualvm or jconsole now...  then type a character and hit Enter.
+                DataInputStream in = new DataInputStream(System.in);
+                System.out.println("Enter the a character:");
+                byte b = in.readByte();
+                char ch = (char) b;
+                System.out.println("Char : " + ch);
+            }
+
             String testdir = opt(line, "testdir");
             String reportsDir = opt(line, "reports");
             String testGroupID = opt(line, "testGroup");
@@ -1422,7 +1432,6 @@ public class RestReplay extends ConfigFile {
                 //No need to dump the reportsList because we were just running one test, and its report gets created and reported on command line OK.
                 // System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }
-
         } catch (ParseException exp) {
             System.err.println("Cmd-line parsing failed.  Reason: " + exp.getMessage());
             //System.err.println(usage());

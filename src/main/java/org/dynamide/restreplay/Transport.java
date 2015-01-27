@@ -1,11 +1,10 @@
 package org.dynamide.restreplay;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 
 import java.io.*;
@@ -80,17 +79,6 @@ public class Transport {
             }
 
             result.contentLength = getMethod.getResponseContentLength();
-            /*
-            String sval;
-            Header header = getMethod.getResponseHeader("Content-Length");
-            if (null == header) {
-                result.addError("Error in doGET: Content-Length NOT SENT");
-                result.contentLength = getMethod.getResponseContentLength();//"0";
-            } else {
-                sval = header.getValue();
-                result.contentLength = Long.parseLong(sval);
-            }
-*/
             extractLocation(getMethod, urlString, result);
             //result.status = getMethod.getStatusText();
             getMethod.releaseConnection();
@@ -162,57 +150,236 @@ public class Transport {
     public static final String MULTIPART_MIXED = "multipart/mixed";
     public static final String APPLICATION_XML = "application/xml";
 
-    /** Use this overload for multipart messages. */
-    /**
-    public static ServiceResult doPOST_PUTFromXML_Multipart(List<String> filesList,
-                                                            List<String> partsList,
-                                                            List<Map<String,String>> varsList,
-                                                            String protoHostPort,
-                                                            String uri,
-                                                            String method,
-                                                            Eval evalStruct,
-                                                            String authForTest,
-                                                            String fromTestID)
-                                                             throws Exception {
-        if (  filesList==null||filesList.size()==0
-            ||partsList==null||partsList.size()==0
-            ||(partsList.size() != filesList.size())){
-            throw new Exception("filesList and partsList must not be empty and must have the same number of items each.");
-        }
-        String content = DD + BOUNDARY;
-        Map<String, String> contentRaw = new LinkedHashMap<String, String>();
-        for (int i=0; i<partsList.size(); i++){
-            String fileName = filesList.get(i);
-            String commonPartName = partsList.get(i);
-            byte[] b = FileUtils.readFileToByteArray(new File(fileName));
-            String xmlString = new String(b);
-
-            xmlString = evalStruct.eval(xmlString, evalStruct.serviceResultsMap, varsList.get(i), evalStruct.jexl, evalStruct.jc);
-            contentRaw.put(commonPartName, xmlString);
-            content = content + CRLF + "label: "+commonPartName + CRLF
-                              + "Content-Type: application/xml" + CRLF
-                              + CRLF
-                              + xmlString + CRLF
-                              + DD + BOUNDARY;
-        }
-        content = content + DD;
-        String urlString = protoHostPort+uri;
-        return doPOST_PUT(urlString, content, contentRaw, BOUNDARY, method, MULTIPART_MIXED, authForTest, fromTestID); //method is POST or PUT.
-    }
-    */
-
-
-
-        //HACK for speed testing in doPOST_PUT.
-        //  Result: RestReplay takes 9ms to process one test
-        // right up to the point of actually firing an HTTP request.
-        // or ~ 120 records per second.
-        //result.CSID = "2";
-        //result.overrideGotExpectedResult();
-        //if (true) return result;
-        //END-HACK
-
+    /** This will replace doPOST_PUT_HttpURLConnection, with Apache HttpClient 3)
+     * It does not deal with boundary or multipart yet.
+     */
     public static ServiceResult doPOST_PUT(ServiceResult result,
+                                           String urlString,
+                                           String content,
+                                           String contentRaw,
+                                           String boundary,
+                                           String method,
+                                           String contentType,
+                                           String authForTest,
+                                           String fromTestID,
+                                           String requestPayloadFilename,
+                                           Map<String, String> headerMap)
+    {
+        result.method = method;
+        result.headerMap = headerMap;
+
+        HttpClient client = new HttpClient();
+        setTimeouts(client, result);
+        HttpMethod httpMethod;
+        PostMethod postMethod = null;
+        PutMethod putMethod = null;
+        if ("POST".equalsIgnoreCase(method)) {
+            postMethod = new PostMethod(urlString);
+            httpMethod = postMethod;
+        } else if ("PUT".equalsIgnoreCase(method))  {
+            putMethod = new PutMethod(urlString);
+            httpMethod = putMethod;
+        } else {
+            result.addError("Method not supported: "+method);
+            return result;
+        }
+
+        httpMethod.setRequestHeader  ("Accept", contentType);
+        result.addRequestHeader("Accept", contentType);
+        httpMethod.setRequestHeader  ("content-type", contentType);
+        result.addRequestHeader("content-type", contentType);
+
+        for (Map.Entry<String,String> entry: headerMap.entrySet()){
+            httpMethod.setRequestHeader(entry.getKey(), entry.getValue());
+        }
+        httpMethod.setRequestHeader("Authorization", "Basic " + authForTest);
+        httpMethod.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
+        httpMethod.setRequestHeader("X-RestReplay-version", "1.0.4");
+        if (postMethod!=null){
+            postMethod.setRequestBody(content);
+        } else if (putMethod!=null){
+            putMethod.setRequestBody(content);
+        }
+        try {
+            int iResponseCode = client.executeMethod(httpMethod);
+            System.out.println("Response status code: " + result);
+            String responseBody = httpMethod.getResponseBodyAsString();
+            if (postMethod!=null){
+                result.setResultWMime(responseBody, getResponseContentType(postMethod));
+            } else if (putMethod!=null){
+                result.setResultWMime(responseBody, getResponseContentType(putMethod));
+            }
+            result.responseMessage = httpMethod.getStatusText() + "::" + httpMethod.getStatusLine();
+            result.requestPayloadFilename = requestPayloadFilename;
+            result.requestPayload = content;
+            result.requestPayloadsRaw = contentRaw;
+            result.responseCode = iResponseCode;
+            dumpResponseHeaders(httpMethod.getResponseHeaders(), result);
+            extractLocation(httpMethod, "", result);
+        } catch (java.net.SocketTimeoutException e) {
+            result.addError("TIMEOUT. "+e.getLocalizedMessage());
+        } catch (Throwable t){
+            result.addError("Error in doPOST_PUT. url:"+urlString+" "+t.toString(), t);
+            System.out.println(t.getMessage() +" url: "+urlString+"  :: stack trace \r\n" + getStackTrace(t));
+        } finally {
+            httpMethod.releaseConnection();
+        }
+        return result;
+    }
+
+    private static void dumpResponseHeaders(Header[] headers, ServiceResult result){
+        StringBuffer sb = new StringBuffer();
+        for (Header oneheader: headers){
+            sb.append("<span class='header response'>").append(oneheader.toString()).append("</span>");
+        }
+        result.responseHeadersDump = sb.toString();
+    }
+
+    private static String getResponseContentType(HttpMethodBase method){
+        Header hdr = method.getResponseHeader("content-type");
+        if (null==hdr){
+            return "";
+        }
+        String contentType = hdr.getValue();
+        //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ response content type: "+contentType);
+        int idx = contentType.indexOf(';');
+        if (idx > -1){
+            return contentType.substring(0, idx);
+        } else {
+            return contentType;
+        }
+    }
+
+    private static String getResponseContentType(HttpURLConnection conn){
+        return conn.getContentType();
+    }
+
+    private static String readStreamToString(HttpMethodBase method, ServiceResult result) throws IOException {
+        String text = "ERROR in readStreamToString()";
+        BufferedReader rd = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream()));
+        try {
+            StringWriter sw = new StringWriter();
+            char[] buffer = new char[1024 * 4];
+            int n = 0;
+            while (-1 != (n = rd.read(buffer))) {
+                sw.write(buffer, 0, n);
+            }
+            text = sw.toString();
+            Header hdrs[] = method.getRequestHeaders("CONTENT-TYPE");
+            if (hdrs.length>0) {
+                result.boundary = PayloadLogger.parseBoundary(hdrs[0].getValue());
+            }
+        } finally {
+            rd.close();
+        }
+        return text;
+    }
+
+    private static void extractLocation(HttpMethod method, String urlString, ServiceResult result){
+        Header[] headers = method.getResponseHeaders("Location");
+        if (headers.length>0) {
+            String locationZero = headers[0].getValue();
+            if (locationZero != null){
+                result.location = locationZero;
+                result.deleteURL = locationZero;
+            }
+        }
+    }
+
+    private static String getStackTrace(Throwable t){
+        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream ps = new java.io.PrintStream(bos);
+        t.printStackTrace(ps);
+        String result = bos.toString();
+        try {
+            if(bos!=null)bos.reset();
+            else System.out.println("bos was null, not closing");
+        } catch (Exception e)  {System.out.println("ERROR: couldn't reset() bos in Tools "+e);}
+        return result;
+    }
+
+
+    public static void main(String[]args) throws Exception {
+        HttpClient client = new HttpClient();
+        GetMethod getMethod = new GetMethod("http://localhost:18080/tagonomy?mock=true&theToken=TOKEN");
+        getMethod.addRequestHeader("Accept", "application/json");
+        int statusCode1 = client.executeMethod(getMethod);
+        System.out.println(statusCode1);
+    }
+
+    //====================== TODOs ===================================================================
+
+    /*
+
+    private static void readStream(HttpURLConnection  conn, ServiceResult result, String mimeType) throws Throwable {
+        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        try {
+                String line;
+                StringBuffer sb = new StringBuffer();
+                while ((line = rd.readLine()) != null) {
+                    sb.append(line).append("\r\n");
+                }
+                String msg = sb.toString();
+                result.setResultWMime(msg, mimeType);
+                result.boundary = PayloadLogger.parseBoundary(conn.getHeaderField("CONTENT-TYPE"));
+        } finally {
+            rd.close();
+        }
+    }
+
+
+
+    private static void readErrorStream(HttpURLConnection  conn, ServiceResult result, String mimeType) throws Throwable {
+        InputStream stream = conn.getErrorStream();
+        if (stream == null){
+            stream = conn.getInputStream();
+        }
+        BufferedReader rd = new BufferedReader(new InputStreamReader(stream));
+        try {
+            String line;
+            StringBuffer sb = new StringBuffer();
+            while ((line = rd.readLine()) != null) {
+                sb.append(line).append("\r\n");
+            }
+            String msg = sb.toString();
+            result.setResultWMime(msg, mimeType);
+        } finally {
+            rd.close();
+        }
+    }
+
+
+    private static String extractLocation(List<String> locations, String urlString, ServiceResult result){
+        if (locations != null && locations.size()>0) {
+            String locationZero = locations.get(0);
+            if (locationZero != null){
+                result.location = locationZero;
+                result.deleteURL = locationZero;
+                return locationZero;
+            }
+        }
+        return "";
+    }
+
+
+
+    private static void dumpRequestHeaders(HttpURLConnection conn, ServiceResult result) {
+        //String foo = conn.getHeaderFields();
+    }
+
+    private static void dumpResponseHeaders(HttpURLConnection conn, ServiceResult result){
+        StringBuffer sb = new StringBuffer();
+        Map<String, List<String>> headers = conn.getHeaderFields();
+        for (Map.Entry<String, List<String>> oneheader: headers.entrySet()){
+            //System.out.println("HEADER: "+oneheader.toString());
+            sb.append("<span class='header response'>").append(oneheader.toString()).append("</span>");
+        }
+        result.responseHeadersDump = sb.toString();
+    }
+
+
+
+    public static ServiceResult doPOST_PUT_HttpURLConnection(ServiceResult result,
                                            String urlString,
                                            String content,
                                            String contentRaw,
@@ -258,7 +425,7 @@ public class Transport {
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
             wr.write(content);
             wr.flush();
-
+            wr.close();//20150126
             try {
                 result.requestPayloadFilename = requestPayloadFilename;
                 result.requestPayload = content;
@@ -291,52 +458,9 @@ public class Transport {
         return result;
     }
 
-    private static void dumpResponseHeaders(HttpURLConnection conn, ServiceResult result){
-        StringBuffer sb = new StringBuffer();
-        Map<String, List<String>> headers = conn.getHeaderFields();
-        for (Map.Entry<String, List<String>> oneheader: headers.entrySet()){
-            //System.out.println("HEADER: "+oneheader.toString());
-            sb.append("<span class='header response'>").append(oneheader.toString()).append("</span>");
-        }
-        result.responseHeadersDump = sb.toString();
-    }
-
-    private static void dumpResponseHeaders(Header[] headers, ServiceResult result){
-        //TODO: test this method with POST (apache).  I just put it here, and haven't validated that it even works, other than for GET. 20141102.
-        StringBuffer sb = new StringBuffer();
-        for (Header oneheader: headers){
-            //System.out.println("HEADER: "+oneheader.toString());
-            sb.append("<span class='header response'>").append(oneheader.toString()).append("</span>");
-        }
-        result.responseHeadersDump = sb.toString();
-    }
-
-    private static void dumpRequestHeaders(HttpURLConnection conn, ServiceResult result) {
-        //String foo = conn.getHeaderFields();
-    }
-
-    private static String getResponseContentType(HttpMethodBase method){
-        Header hdr = method.getResponseHeader("content-type");
-        if (null==hdr){
-            return "";
-        }
-        String contentType = hdr.getValue();
-        //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ response content type: "+contentType);
-        int idx = contentType.indexOf(';');
-        if (idx > -1){
-            return contentType.substring(0, idx);
-        } else {
-            return contentType;
-        }
-    }
-
-    private static String getResponseContentType(HttpURLConnection conn){
-        return conn.getContentType();
-    }
-
     public static ServiceResult doPOST_PUT_PostMethod(ServiceResult result, String urlString, String content, Map<String,String> contentRaw,
-                                           String boundary, String method, String contentType,
-                                           String authForTest, String fromTestID) throws Exception {
+                                                      String boundary, String method, String contentType,
+                                                      String authForTest, String fromTestID) throws Exception {
         result.method = method;
         //result.headerMap = headerMap;
         String deleteURL = "";
@@ -351,9 +475,9 @@ public class Transport {
 
             //todo: for now, simply set the Accept to mirror the content-type.  Later, add optional xml parameter in control file.
             postMethod.addRequestHeader("Accept", contentType);
-                result.addRequestHeader("Accept", contentType);
+            result.addRequestHeader("Accept", contentType);
             postMethod.addRequestHeader("content-type", contentType);
-                result.addRequestHeader("content-type", contentType);
+            result.addRequestHeader("content-type", contentType);
 
             postMethod.setRequestHeader("Authorization", "Basic " + authForTest);
             postMethod.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
@@ -383,110 +507,59 @@ public class Transport {
         }
         return result;
     }
+    */
 
-    private static String readStreamToString(HttpMethodBase method, ServiceResult result) throws IOException {
-        String text = "ERROR in readStreamToString()";
-        BufferedReader rd = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream()));
-        try {
-            StringWriter sw = new StringWriter();
-            char[] buffer = new char[1024 * 4];
-            int n = 0;
-            while (-1 != (n = rd.read(buffer))) {
-                sw.write(buffer, 0, n);
-            }
-            text = sw.toString();
-            Header hdrs[] = method.getRequestHeaders("CONTENT-TYPE");
-            if (hdrs.length>0) {
-                result.boundary = PayloadLogger.parseBoundary(hdrs[0].getValue());
-            }
-        } finally {
-            rd.close();
+
+
+    /** Use this overload for multipart messages. */
+    /*
+    public static ServiceResult doPOST_PUTFromXML_Multipart(List<String> filesList,
+                                                            List<String> partsList,
+                                                            List<Map<String, String>> varsList,
+                                                            String protoHostPort,
+                                                            String uri,
+                                                            String method,
+                                                            Eval evalStruct,
+                                                            String authForTest,
+                                                            String fromTestID)
+            throws Exception {
+        if (filesList == null || filesList.size() == 0
+                || partsList == null || partsList.size() == 0
+                || (partsList.size() != filesList.size())) {
+            throw new Exception("filesList and partsList must not be empty and must have the same number of items each.");
         }
-        return text;
-    }
+        String content = DD + BOUNDARY;
+        Map<String, String> contentRaw = new LinkedHashMap<String, String>();
+        for (int i = 0; i < partsList.size(); i++) {
+            String fileName = filesList.get(i);
+            String commonPartName = partsList.get(i);
+            byte[] b = FileUtils.readFileToByteArray(new File(fileName));
+            String xmlString = new String(b);
 
-    private static void extractLocation(HttpMethodBase method, String urlString, ServiceResult result){
-        Header[] headers = method.getResponseHeaders("Location");
-        if (headers.length>0) {
-            // System.out.println("Location headers[0]:  "+headers[0]+ " in "+urlString);
-            String locationZero = headers[0].getValue();
-            if (locationZero != null){
-                //String[] segments = locationZero.split("/");
-                //location = segments[segments.length - 1];
-                result.location = locationZero;
-                //System.out.println("location:"+result.location);
-                //result.deleteURL = Tools.glue(urlString, "/", locationZero);
-                result.deleteURL = locationZero;
-            }
+            xmlString = evalStruct.eval(xmlString, evalStruct.serviceResultsMap, varsList.get(i), evalStruct.jexl, evalStruct.jc);
+            contentRaw.put(commonPartName, xmlString);
+            content = content + CRLF + "label: " + commonPartName + CRLF
+                    + "Content-Type: application/xml" + CRLF
+                    + CRLF
+                    + xmlString + CRLF
+                    + DD + BOUNDARY;
         }
+        content = content + DD;
+        String urlString = protoHostPort + uri;
+        return doPOST_PUT(urlString, content, contentRaw, BOUNDARY, method, MULTIPART_MIXED, authForTest, fromTestID); //method is POST or PUT.
     }
-
-    private static String extractLocation(List<String> locations, String urlString, ServiceResult result){
-        if (locations != null && locations.size()>0) {
-            String locationZero = locations.get(0);
-            if (locationZero != null){
-                result.location = locationZero;
-                result.deleteURL = locationZero;
-                return locationZero;
-            }
-        }
-        return "";
-    }
-
-    private static void readStream(HttpURLConnection  conn, ServiceResult result, String mimeType) throws Throwable {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        try {
-                String line;
-                StringBuffer sb = new StringBuffer();
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line).append("\r\n");
-                }
-                String msg = sb.toString();
-                result.setResultWMime(msg, mimeType);
-                result.boundary = PayloadLogger.parseBoundary(conn.getHeaderField("CONTENT-TYPE"));
-        } finally {
-            rd.close();
-        }
-    }
-
-    private static void readErrorStream(HttpURLConnection  conn, ServiceResult result, String mimeType) throws Throwable {
-        InputStream stream = conn.getErrorStream();
-        if (stream == null){
-            stream = conn.getInputStream();
-        }
-        BufferedReader rd = new BufferedReader(new InputStreamReader(stream));
-        try {
-            String line;
-            StringBuffer sb = new StringBuffer();
-            while ((line = rd.readLine()) != null) {
-                sb.append(line).append("\r\n");
-            }
-            String msg = sb.toString();
-            result.setResultWMime(msg, mimeType);
-        } finally {
-            rd.close();
-        }
-    }
-
-    private static String getStackTrace(Throwable t){
-        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
-        java.io.PrintStream ps = new java.io.PrintStream(bos);
-        t.printStackTrace(ps);
-        String result = bos.toString();
-        try {
-            if(bos!=null)bos.reset();
-            else System.out.println("bos was null, not closing");
-        } catch (Exception e)  {System.out.println("ERROR: couldn't reset() bos in Tools "+e);}
-        return result;
-    }
+   */
 
 
-    public static void main(String[]args) throws Exception {
-        HttpClient client = new HttpClient();
-        GetMethod getMethod = new GetMethod("http://localhost:18080/tagonomy?mock=true&theToken=TOKEN");
-        getMethod.addRequestHeader("Accept", "application/json");
-        int statusCode1 = client.executeMethod(getMethod);
-        System.out.println(statusCode1);
-    }
+
+    //HACK for speed testing in doPOST_PUT.
+    //  Result: RestReplay takes 9ms to process one test
+    // right up to the point of actually firing an HTTP request.
+    // or ~ 120 records per second.
+    //result.CSID = "2";
+    //result.overrideGotExpectedResult();
+    //if (true) return result;
+    //END-HACK
+
 
 }

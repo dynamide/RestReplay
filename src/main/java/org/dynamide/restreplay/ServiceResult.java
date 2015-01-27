@@ -354,7 +354,7 @@ public class ServiceResult {
     public boolean isDomWalkOK() {
         if (this.expectedTreewalkRangeMap.size() > 0) {
             if (Tools.notEmpty(payloadStrictness)){
-                failureReason = " : DOM match level cannot be both an attribute and an element ; ";
+                failureReason = " 'expected/dom' cannot be both an attribute and an element";
                 this.domcheck = failureReason;
                 return false;
             }

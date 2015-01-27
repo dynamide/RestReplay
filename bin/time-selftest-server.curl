@@ -1,0 +1,3 @@
+echo assuming that you are in RestReplay base directory.
+
+curl -XPOST --data-binary @src/main/resources/restreplay/_self_test/res/jsonTreeCompareL.xml  -D - 'http://localhost:28080/jsonCompare1?mimeOut=text/xml' -w "@bin/curl-timing-format.txt"

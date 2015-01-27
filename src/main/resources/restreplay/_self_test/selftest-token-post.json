@@ -1,5 +1,5 @@
 {
-     "data": "${selftestToken.got("//data")}",
+     "data": "${TOKENDATA}",
      "token": "${TOKEN}"
 }
 

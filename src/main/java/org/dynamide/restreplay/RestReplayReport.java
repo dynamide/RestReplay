@@ -57,8 +57,8 @@ public class RestReplayReport {
     protected static final String DETAIL_LINESEP = "</td></tr>\r\n<tr><td>";
     protected static final String DETAIL_END = "</td></tr></table>";
 
-    protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='7' class='TOC_HDR'>Summary</td></tr>"
-                                              +"<tr><th>testID</th><th>time(ms)</th><th>status</th><th>code</th><th>warn</th><th>error</th><th>DOM</th></tr>\r\n"
+    protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='8' class='TOC_HDR'>Summary</td></tr>"
+                                              +"<tr><th>testID</th><th>method</th><th>code</th><th>time(ms)</th><th>status</th><th>warn</th><th>error</th><th>DOM</th></tr>\r\n"
                                               +"<tr><td>\r\n";
     protected static final String TOC_LINESEP = "</td></tr>\r\n<tr class='%s'><td class='%s'>";
     protected static final String TOC_CELLSEP = "</td><td>";
@@ -122,6 +122,7 @@ public class RestReplayReport {
             toc.tocID = i++;//tocID;
             toc.testID = serviceResult.testID;
             toc.time = serviceResult.time;
+            toc.method = serviceResult.method;
             toc.detail = (serviceResult.isSUCCESS() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
             toc.warnings = serviceResult.alertsCount(LEVEL.WARN);
             toc.errors = serviceResult.alertsCount(LEVEL.ERROR);
@@ -292,6 +293,19 @@ public class RestReplayReport {
         return b.toString();
     }
 
+    private String methodBox(String method){
+        if (method.equalsIgnoreCase("GET")) {
+            return "<span class='http-get'> GET</span>";
+        } else if (method.equalsIgnoreCase("POST")){
+            return "<span class='http-post'> POST</span>";
+        } else if (method.equalsIgnoreCase("PUT")){
+            return "<span class='http-put'> PUT</span>";
+        } else if (method.equalsIgnoreCase("DELETE")){
+            return "<span class='http-delete'>DELETE</span>";
+        }
+        return "<span class='http-method'>"+method+"</span>";
+    }
+
 
     public String getTOC(String reportName) {
 
@@ -319,12 +333,14 @@ public class RestReplayReport {
             tocBuffer.append("<a href='" + relativeReportName + "#"+ toc.testID /*"#TOC" +toc.tocID*/ + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
                      .append((toc.children))
                      .append(TOC_CELLSEP)
-                     .append(toc.time)
-                     .append(TOC_CELLSEP)
-                     .append(toc.detail)
-                     .append(TOC_CELLSEP)
-                     .append(toc.responseCode)
-                     .append(TOC_CELLSEP)
+                     .append(methodBox(toc.method))
+                    .append(TOC_CELLSEP)
+                    .append(toc.responseCode)
+                    .append(TOC_CELLSEP)
+                    .append(toc.time)
+                    .append(TOC_CELLSEP)
+                    .append(toc.detail)
+                    .append(TOC_CELLSEP)
                      .append(tocWarn(toc.warnings))
                      .append(TOC_CELLSEP)
                      .append(tocError(toc.errors))
@@ -400,6 +416,7 @@ public class RestReplayReport {
         public int tocID;
         public String testID;
         public String detail;
+        public String method;
         public int warnings = 0;
         public int errors = 0;
         public long time = 0;
