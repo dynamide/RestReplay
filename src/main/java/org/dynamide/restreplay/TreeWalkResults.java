@@ -31,8 +31,8 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
 
         public static final TreeWalkEntry.STATUS[] defaultErrorStatiArray =           {TreeWalkEntry.STATUS.MISSING,
                                                                                           TreeWalkEntry.STATUS.NESTED_ERROR,
-                                                                                          TreeWalkEntry.STATUS.TEXT_DIFFERENT,
-                                                                                          TreeWalkEntry.STATUS.DOC_ERROR};
+                                                                                          TreeWalkEntry.STATUS.DIFFERENT,
+                                                                                          TreeWalkEntry.STATUS.ERROR};
         public List<TreeWalkEntry.STATUS> errorStati;
 
         public static MatchSpec createDefault(){
@@ -78,7 +78,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
         /* STATUS.MISSING means the Right tree did not have a node that the left tree had.
          * STATUS.ADDED means the Right tree had a node that the left tree did not have.
          */
-        public static enum STATUS {INFO, MATCHED, MISSING, ADDED, DOC_ERROR, TEXT_DIFFERENT, NESTED_ERROR};
+        public static enum STATUS {INFO, MATCHED, MISSING, ADDED, ERROR, DIFFERENT, NESTED_ERROR};
         public STATUS status;
         public String toString(){
             return toString("\r\n");
@@ -104,7 +104,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
 
     public boolean hasDocErrors(){
         for (TreeWalkEntry entry : this){
-            if (entry.status == TreeWalkEntry.STATUS.DOC_ERROR){
+            if (entry.status == TreeWalkEntry.STATUS.ERROR){
                 return true;
             }
         }
@@ -132,7 +132,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
 
     public boolean isStrictMatch(){
         for (TreeWalkEntry entry : this){
-            if (entry.status == TreeWalkEntry.STATUS.DOC_ERROR){
+            if (entry.status == TreeWalkEntry.STATUS.ERROR){
                 return false;
             }
             if ( !(   entry.status == TreeWalkEntry.STATUS.MATCHED
@@ -145,7 +145,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     public int getMismatchCount(){
         int c = 0;
         for (TreeWalkEntry entry : this){
-            if ( entry.status == TreeWalkEntry.STATUS.DOC_ERROR
+            if ( entry.status == TreeWalkEntry.STATUS.ERROR
                 || entry.status != TreeWalkEntry.STATUS.MATCHED
                 || entry.status != TreeWalkEntry.STATUS.INFO){
                 c++;
@@ -156,7 +156,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     /** For our purposes, trees match if they have the same element tree structure - no checking is done for text node changes. */
     public boolean treesMatch(){
         for (TreeWalkEntry entry : this){
-            if (entry.status == TreeWalkEntry.STATUS.DOC_ERROR
+            if (entry.status == TreeWalkEntry.STATUS.ERROR
                 || entry.status == TreeWalkEntry.STATUS.MISSING
                 || entry.status == TreeWalkEntry.STATUS.ADDED){
                 return false;
@@ -185,7 +185,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     }
 
     public String miniSummary(){
-        //MATCHED, INFO, MISSING, ADDED, TEXT_DIFFERENT};
+        //MATCHED, INFO, MISSING, ADDED, DIFFERENT};
         StringBuffer buf = new StringBuffer();
         buf.append("{");
         boolean nextline = false;
@@ -227,8 +227,8 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
             rangeMap.put(TreeWalkEntry.STATUS.MATCHED, new Range(ma));
             rangeMap.put(TreeWalkEntry.STATUS.MISSING, new Range(mi));
             rangeMap.put(TreeWalkEntry.STATUS.ADDED, new Range(ad));
-            rangeMap.put(TreeWalkEntry.STATUS.DOC_ERROR, new Range(de));
-            rangeMap.put(TreeWalkEntry.STATUS.TEXT_DIFFERENT, new Range(te));
+            rangeMap.put(TreeWalkEntry.STATUS.ERROR, new Range(de));
+            rangeMap.put(TreeWalkEntry.STATUS.DIFFERENT, new Range(te));
             rangeMap.put(TreeWalkEntry.STATUS.NESTED_ERROR, new Range(ne));
             return rangeMap;
     }

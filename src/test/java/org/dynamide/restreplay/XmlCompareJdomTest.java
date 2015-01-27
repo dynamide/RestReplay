@@ -38,7 +38,7 @@ public class XmlCompareJdomTest {
                                                                       TreeWalkResults.MatchSpec matchSpec){
         int addedr = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.ADDED);
         int missingr = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.MISSING);
-        int tdiff = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT);
+        int tdiff = results.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT);
         int badCount = results.getMismatchCount();
         boolean strict = results.isStrictMatch();
         boolean treeOK = results.treesMatch(matchSpec);
@@ -53,7 +53,7 @@ public class XmlCompareJdomTest {
         try {
            assertEquals(addedr, addedRight, "assertTreeWalkResults:ADDED mismatch." + exp_act, results);
             assertEquals(missingr, missingRight, "assertTreeWalkResults:MISSING mismatch." + exp_act, results);
-            assertEquals(tdiff, textMismatches, "assertTreeWalkResults:TEXT_DIFFERENT mismatch." + exp_act, results);
+            assertEquals(tdiff, textMismatches, "assertTreeWalkResults:DIFFERENT mismatch." + exp_act, results);
             assertTrue((strict == strictMatch), "assertTreeWalkResults:strictMatch mismatch." + exp_act, results);
             assertTrue((treeOK), "assertTreeWalkResults:treesMatch("+matchSpec+") returned false."+exp_act, results);
             //System.out.println("SUCCESS: assertTreeWalkResults done.\r\n");
@@ -82,7 +82,7 @@ public class XmlCompareJdomTest {
     public void testTextContentDifferent(){
         testBanner("testTextContentDifferent");
         TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
-        matchSpec.removeErrorFromSpec(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT);
+        matchSpec.removeErrorFromSpec(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT);
         TreeWalkResults results =
             XmlCompareJdom.compareParts(expectedPartContent,
                     "expected",

@@ -835,8 +835,8 @@ public class RestReplay extends ConfigFile {
                     rangeMap.put(STATUS.MATCHED, new Range(dom.valueOf("MATCHED/@range")));
                     rangeMap.put(STATUS.MISSING, new Range(dom.valueOf("MISSING/@range")));
                     rangeMap.put(STATUS.ADDED, new Range(dom.valueOf("ADDED/@range")));
-                    rangeMap.put(STATUS.DOC_ERROR, new Range(dom.valueOf("DOC_ERROR/@range")));
-                    rangeMap.put(STATUS.TEXT_DIFFERENT, new Range(dom.valueOf("TEXT_DIFFERENT/@range")));
+                    rangeMap.put(STATUS.ERROR, new Range(dom.valueOf("ERROR/@range")));
+                    rangeMap.put(STATUS.DIFFERENT, new Range(dom.valueOf("DIFFERENT/@range")));
                     rangeMap.put(STATUS.NESTED_ERROR, new Range(dom.valueOf("NESTED_ERROR/@range")));
                     serviceResult.expectedTreewalkRangeMap = rangeMap;
                 }
@@ -1192,9 +1192,9 @@ public class RestReplay extends ConfigFile {
         if (filename.toUpperCase().endsWith(".JSON")) {
             return "application/json";
         } else if (filename.toUpperCase().endsWith(".XML")) {
-            return "application/xml";
+            return Transport.APPLICATION_XML;
         }
-        return "application/xml";
+        return Transport.APPLICATION_XML;
     }
 
     //======================== MAIN ===================================================================

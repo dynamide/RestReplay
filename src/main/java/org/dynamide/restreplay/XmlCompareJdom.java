@@ -47,13 +47,13 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
             list.add(infoentry);
             if (Tools.isEmpty(expectedContent)){
                 TreeWalkEntry entry = new TreeWalkEntry();
-                entry.status = TreeWalkEntry.STATUS.DOC_ERROR;
+                entry.status = TreeWalkEntry.STATUS.ERROR;
                 entry.errmessage = "L dom was empty.";
                 list.add(entry);
             } else if (Tools.isEmpty(actualPartContent)){
                 TreeWalkEntry entry = new TreeWalkEntry();
                 entry.errmessage = "R dom was empty.";
-                entry.status = TreeWalkEntry.STATUS.DOC_ERROR;
+                entry.status = TreeWalkEntry.STATUS.ERROR;
                 list.add(entry);
             } else {
                 Document expected = getDocumentFromContent(expectedContent);
@@ -64,7 +64,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
             String msg = "ERROR in RestReplay.compareParts(): "+t;
             System.out.println(msg);
             TreeWalkEntry entry = new TreeWalkEntry();
-                entry.status = TreeWalkEntry.STATUS.DOC_ERROR;
+                entry.status = TreeWalkEntry.STATUS.ERROR;
                 entry.errmessage = msg;
                 list.add(entry);
         }
@@ -192,7 +192,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
                     entry.status = TreeWalkEntry.STATUS.MATCHED;
                     msgList.add(entry);
                 } else {
-                    entry.status = TreeWalkEntry.STATUS.TEXT_DIFFERENT;
+                    entry.status = TreeWalkEntry.STATUS.DIFFERENT;
                     msgList.add(entry);
                 }
                 //============ DIVE !! =====================================================

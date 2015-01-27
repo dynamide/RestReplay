@@ -301,7 +301,7 @@ public class RestReplayReport {
         } else if (method.equalsIgnoreCase("PUT")){
             return "<span class='http-put'> PUT</span>";
         } else if (method.equalsIgnoreCase("DELETE")){
-            return "<span class='http-delete'>DELETE</span>";
+            return "<span class='http-delete'> DELE</span>";
         }
         return "<span class='http-method'>"+method+"</span>";
     }

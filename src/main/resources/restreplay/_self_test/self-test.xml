@@ -300,7 +300,7 @@
                 <expected>
                     <dom>
                         <MATCHED range="3" />
-                        <TEXT_DIFFERENT range="0" />
+                        <DIFFERENT range="0" />
                     </dom>
                 </expected>
                 <filename>${EXPECTED_FILE}</filename>
@@ -325,7 +325,7 @@
             <response>
                 <expected>
                     <dom>
-                        <TEXT_DIFFERENT range="0-2"></TEXT_DIFFERENT>
+                        <DIFFERENT range="0-2"></DIFFERENT>
                     </dom>
                 </expected>
                 <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
@@ -342,8 +342,8 @@
                         <MATCHED range="1"></MATCHED>
                         <MISSING range="0"></MISSING>
                         <ADDED range="0"></ADDED>
-                        <DOC_ERROR range="0"></DOC_ERROR>
-                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                        <ERROR range="0"></ERROR>
+                        <DIFFERENT range="2"></DIFFERENT>
                         <NESTED_ERROR range="0"></NESTED_ERROR>
                     </dom>
                 </expected>
@@ -358,7 +358,7 @@
             <response>
                 <expected>
                     <dom>
-                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                        <DIFFERENT range="2"></DIFFERENT>
                     </dom>
                 </expected>
                 <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
@@ -373,7 +373,7 @@
             <response>
                 <expected dom="ADDOK">
                     <dom>
-                        <TEXT_DIFFERENT range="2"></TEXT_DIFFERENT>
+                        <DIFFERENT range="2"></DIFFERENT>
                     </dom>
                 </expected>
                 <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>

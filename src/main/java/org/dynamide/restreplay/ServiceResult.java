@@ -354,7 +354,7 @@ public class ServiceResult {
     public boolean isDomWalkOK() {
         if (this.expectedTreewalkRangeMap.size() > 0) {
             if (Tools.notEmpty(payloadStrictness)){
-                failureReason = " 'expected/dom' cannot be both an attribute and an element";
+                failureReason = " Use dom= or expected/dom";
                 this.domcheck = failureReason;
                 return false;
             }
@@ -374,7 +374,7 @@ public class ServiceResult {
             String key = entry.getKey();
             TreeWalkResults value = entry.getValue();
             if (value.hasDocErrors()){
-                failureReason = " : DOM DOC_ERROR; ";
+                failureReason = " : DOM ERROR; ";
                 return false;
             }
             switch (strictness){
@@ -385,8 +385,8 @@ public class ServiceResult {
                     }
                     break;
                 case ADDOK:
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
-                        failureReason = " : DOM TEXT_DIFFERENT; ";
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT)>0) {
+                        failureReason = " : DOM DIFFERENT; ";
                         return false;
                     }
                     if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.MISSING)>0){
@@ -395,8 +395,8 @@ public class ServiceResult {
                     }
                     break;
                 case TEXT:
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
-                        failureReason = " : DOM TEXT_DIFFERENT; ";
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT)>0) {
+                        failureReason = " : DOM DIFFERENT; ";
                         return false;
                     }
                     break;
@@ -407,8 +407,8 @@ public class ServiceResult {
                     }
                     break;
                 case TREE_TEXT:
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.TEXT_DIFFERENT)>0) {
-                        failureReason = " : DOM TEXT_DIFFERENT; ";
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT)>0) {
+                        failureReason = " : DOM DIFFERENT; ";
                         return false;
                     }
                     if (!value.treesMatch()) {
@@ -460,24 +460,25 @@ public class ServiceResult {
         boolean result = true;
         List<Column> columns = new ArrayList<Column>();
         List<String> notices = new ArrayList<String>();
+        // THE ORDER of this method determines the ORDER of the DOM Comparison table widget in the report.
         for (Map.Entry<String,TreeWalkResults> entry : partSummaries.entrySet()) {
             TreeWalkResults value = entry.getValue();
             if (!checkRange(value, STATUS.MATCHED, columns, notices, expectedRangeMap)) {
                 result &= false;
             }
-            if (!checkRange(value, STATUS.NESTED_ERROR, columns, notices, expectedRangeMap)) {
-                result &= false;
-            }
-            if (!checkRange(value, STATUS.DOC_ERROR, columns, notices, expectedRangeMap)) {
-                result &= false;
-            }
-            if (!checkRange(value, STATUS.TEXT_DIFFERENT, columns, notices, expectedRangeMap)) {
+            if (!checkRange(value, STATUS.DIFFERENT, columns, notices, expectedRangeMap)) {
                 result &= false;
             }
             if (!checkRange(value, STATUS.MISSING, columns, notices, expectedRangeMap)) {
                 result &= false;
             }
             if (!checkRange(value, STATUS.ADDED, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.ERROR, columns, notices, expectedRangeMap)) {
+                result &= false;
+            }
+            if (!checkRange(value, STATUS.NESTED_ERROR, columns, notices, expectedRangeMap)) {
                 result &= false;
             }
         }
@@ -490,7 +491,7 @@ public class ServiceResult {
                 i++;
                 criteria.append(crit);
             }
-            failureReason = "DOM: "+criteria.toString();
+            failureReason = criteria.toString();
             this.domcheck = failureReason;
         }
         return result;
