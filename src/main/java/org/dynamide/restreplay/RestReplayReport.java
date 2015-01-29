@@ -9,10 +9,8 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import org.dynamide.interpreters.Alert;
 import org.dynamide.interpreters.Alert.LEVEL;
@@ -84,7 +82,7 @@ public class RestReplayReport {
     }
 
     protected static String formatCollapse(String myDivID, String linkText, String subtitle) {
-        return "<span class='payload-link'><a href='javascript:;' onmousedown=\"toggleDiv('" + myDivID + "');\">" + linkText + "</a>"
+        return "<span class='payload-link' ID='"+myDivID+"_link"+"'><a href='javascript:;' onmousedown=\"toggleDiv('" + myDivID + "');\">" + linkText + "</a>"
               +"</span>"
 
               +"<div ID='" + myDivID + "' class='PAYLOAD' style='display:none'>"
@@ -923,10 +921,18 @@ public class RestReplayReport {
     private String varsToHtml(ServiceResult result){
         StringBuffer b = new StringBuffer();
         for (Map.Entry<String,Object> entry: result.getVars().entrySet()){
+            String val;
+            Object obj = entry.getValue();
+            if (obj instanceof String[]){
+                val = Arrays.toString((String[])obj);
+            } else {
+                val = obj.toString();
+            }
+
             b.append("<span class='vars'>")
              .append(entry.getKey())
              .append(": ")
-             .append(entry.getValue())
+             .append(val)
              .append("<br />")
              .append("</span>");
         }

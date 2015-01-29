@@ -604,18 +604,28 @@
         </test>
     </testGroup>
 
-    <testGroup ID="debug">
-        <test ID="useLoopY" loop="${['10','18','219']}">
+    <testGroup ID="Loops">
+        <test ID="loopStringArraySimple" loop="${['10','18','21']}">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <vars>
+                <var ID="someArray">${["103","183","213"]}</var>
+                <var ID="LOOP">${loop}</var>
+            </vars>
+        </test>
+        <test ID="loopStringArray" loop="${['10','18','21']}">
             <method>POST</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
             <filename>_self_test/loop-dates.json</filename>
             <vars>
-                <var ID="loopvars">${["10","18","21"]}</var>
                 <var ID="DAYS">${24*60*60*1000}</var>
-                <var ID="LOOPINFO2">${"size: "+size(loop)+", loop[0]: "+loop[0]}</var>
-                <var ID="LOOPINFO2">${"size: "+size(loop)+", loop[this.LoopIndex]: "+loop[this.LoopIndex]}</var>
-                <var ID="BASE_DATE">${tools.now()}</var>
-                <var ID="DUE_DATE_MILLIS">${BASE_DATE + loopvars[this.LoopIndex]*DAYS}</var>
+                <var ID="someArray">${["103","183","213"]}</var>
+                <var ID="useSomeArray">${someArray[this.LoopIndex]*DAYS}</var>
+                <var ID="LOOPSIZE">${"size: "+size(loop)}</var>
+                <var ID="LOOP_THIS_INDEX">${"loop[this.LoopIndex]: "+loop[this.LoopIndex]}</var>
+                <var ID="LOOP_INDEX">${"loop[loop.index]: "+loop[loop.index]}</var>
+                <var ID="LOOP_VALUE">${loop.value}</var>
+                <var ID="DUE_DATE_MILLIS">${tools.now() + loop.value*DAYS}</var>
                 <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}</var>
                 <var ID="TITLE">Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}</var>
             </vars>
@@ -629,7 +639,31 @@
                 <filename>_self_test/res/loop-dates.json</filename>
             </response>
         </test>
-        <test ID="useLoopMap" loop="${{'a':'Due February 20','b':'Due January 28'}}">
+        <test ID="loopMap" loop="${{'a':'Due February 20','b':'Due January 28'}}">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <filename>_self_test/loop-dates.json</filename>
+            <vars>
+                <var ID="LOOP_MAP_INFO">${"size: "+size(loop)+", loop.key: "+loop.key+", loop.value:"+loop.value+", loop['"+loop.key+"']: "+loop[loop.key]}</var>
+                <var ID="DUE_DATE_MILLIS">${24*60*60*1000}</var>
+                <var ID="INSTRUCTOR_NOTE">${loop.key}</var>
+                <var ID="TITLE">${loop.value}</var>
+                <var ID="LOOP">${loop}</var>
+            </vars>
+            <response>
+                <expected>
+                    <dom>
+                        <REMOVED range="0" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>_self_test/res/loop-dates.json</filename>
+            </response>
+        </test>
+    </testGroup>
+
+    <testGroup ID="debug">
+        <test ID="loopMap" loop="${{'a':'Due February 20','b':'Due January 28'}}">
             <method>POST</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
             <filename>_self_test/loop-dates.json</filename>
@@ -650,11 +684,6 @@
             </response>
         </test>
     </testGroup>
-
-
-
-
-
 
     <testGroup ID="debugJsonTreeCompare" autoDeletePOSTS="false">
         <test ID="jsonTreeCompare">

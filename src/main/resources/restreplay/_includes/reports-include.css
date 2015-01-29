@@ -99,7 +99,7 @@ td, th {
     background-color: white;
     font-size: 85%;
     padding: 1px;
-    border: 4px solid #BBB;
+    border: 4px solid #ffc;
 }
 .payload-subtitle {
        background-color: #E0FFFF;
@@ -551,7 +551,8 @@ td.dom-not-matched {
 .payload-link {
     display: inline-block;
     margin: 0px;
+    margin-left: 2px;
     padding: 2px;
     border: 1px solid gray;
-    background-color: white;
+    background-color: #e0ffff;
 }

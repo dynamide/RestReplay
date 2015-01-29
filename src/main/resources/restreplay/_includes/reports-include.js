@@ -1,8 +1,22 @@
 function toggleDiv(divid){
     if(document.getElementById(divid).style.display == 'none'){
       document.getElementById(divid).style.display = 'block';
+      var linkStyle = document.getElementById(divid+'_link').style;
+      linkStyle.backgroundColor = '#ffc';  //highlight when expanded
+      linkStyle.border = '4px solid #ffc';
+      linkStyle.borderBottomWidth = '1px';
+      linkStyle.margin = '0px';
+      linkStyle.marginBottom = '0px';
+      linkStyle.marginTop = '5px';
+      linkStyle.marginLeft = '5px';
     }else{
       document.getElementById(divid).style.display = 'none';
+      var linkStyle = document.getElementById(divid+'_link').style;
+      linkStyle.backgroundColor = '#e0ffff';  //basic background for unexpanded
+      linkStyle.border = '1px solid gray';
+      linkStyle.margin = '0px';
+      linkStyle.marginBottom = '0px';
+      linkStyle.marginLeft = '2px';
     }
 }
 

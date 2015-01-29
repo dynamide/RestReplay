@@ -88,7 +88,11 @@ public class Eval {
                     try {
                         EvalResult innerResult = parse(logname+", ID: <b>"+key+"</b>", ""+value);
                         innerResult.nestingLevel = 1;
-                        value = innerResult.getResultString();
+                        if (innerResult.useResultAsObject) {
+                            value = innerResult.result;
+                        } else {
+                            value = innerResult.getResultString();
+                        }
                         if (innerResult.alerts.size()>0){
                             result.alerts.addAll(innerResult.alerts);
                         }
@@ -191,12 +195,16 @@ public class Eval {
 
                 } else {
                     singleResultObj = resultObj;
+                    if (resultObj instanceof String[]){
+                        resultStr = Arrays.toString((String[])resultObj);
+                    }
                 }
             }
             result.append(resultStr);
         }
         if (singleResultObj!=null){
             evalResult.result = singleResultObj;
+            evalResult.useResultAsObject = true;
         } else {
             evalResult.result = result.toString();
         }

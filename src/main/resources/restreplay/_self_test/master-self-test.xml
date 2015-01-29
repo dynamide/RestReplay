@@ -10,32 +10,26 @@
         <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
     </runOptions>
 
-        <run controlFile="_self_test/self-test.xml" testGroup="debug" />
-        <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
-<!--
-        <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
+    <run controlFile="_self_test/self-test.xml" testGroup="debug" />
+    <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
+    <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
+    <run controlFile="_self_test/self-test.xml" testGroup="VarsAndValidators" />
+    <run controlFile="_self_test/self-test.xml" testGroup="Loops" />
+    <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup">
+        <vars>
+            <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
+        </vars>
+    </run>
+    <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup2">
+        <vars>
+            <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
+        </vars>
+    </run>
+    <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
+    <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
 
-        <run controlFile="_self_test/self-test.xml" testGroup="VarsAndValidators" />
-
-        <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup">
-            <vars>
-                <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
-            </vars>
-        </run>
-
-        <run controlFile="_self_test/nested/level1/foo.xml" testGroup="fooGroup2">
-            <vars>
-                <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
-            </vars>
-        </run>
-
-        <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
-
-        <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
--->
     <!--
     <run controlFile="_self_test/self-test.xml" testGroup="debugScript" />
-
     -->
 </restReplayMaster>
 

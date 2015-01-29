@@ -12,6 +12,7 @@ public class EvalResult {
     public int nestingLevel = 0;
 
     public Object result = "";
+    public boolean useResultAsObject = false;
     public Alert.LEVEL worstLevel = Alert.LEVEL.OK;
     public String getResultString(){
         if (result!=null){

@@ -618,38 +618,39 @@ public class RestReplay extends ConfigFile {
                 String iterations = testNode.valueOf("@loop");
                 boolean doingIterations = false;
                 int iIterations = 1;
-                Map<String,Object> m = null;
+                Map<String,Object> loopMap = null;
+                Collection loopCollection = null;
+                String[] loopArray = null;
                 if (Tools.notBlank(iterations)){
+                    doingIterations = true;
                     try {
                         EvalResult evalResult = evalStruct.eval("calculate @loop", iterations, clonedMasterVars);
                         Object resultResult = evalResult.result;
+                        //serviceResult.alerts.addAll(evalResult.alerts);
                         if (resultResult instanceof String[] ){
                             iIterations = ((String[])resultResult).length;
-                            doingIterations = true;
                             evalStruct.jc.set("loop", resultResult);
+                            loopArray = (String[])resultResult;
                         } else if (resultResult instanceof Map) {
-                            m = (Map)resultResult;
-                            iIterations = m.size();
-                            doingIterations = true;
+                            loopMap = (Map)resultResult;
+                            iIterations = loopMap.size();
                             evalStruct.jc.set("loop", resultResult);
                         } else if (resultResult instanceof Collection) {
-                            Collection c = (Collection)resultResult;
-                            iIterations = c.size();
-                            doingIterations = true;
+                            loopCollection = (Collection)resultResult;
+                            iIterations = loopCollection.size();
                             evalStruct.jc.set("loop", resultResult);
                         } else {
                             iterations = evalResult.getResultString();
-                            //serviceResult.alerts.addAll(evalResult.alerts);
+
                             iIterations = Integer.parseInt(iterations);
-                            doingIterations = true;
                         }
                     } catch (Throwable t){
                         System.out.println("\n======NOT doing iterations because loop expression failed:"+iterations+"\n");
                     }
                 }
-                if (m!=null) {
+                if (false && loopMap!=null) {
                     int itnum = 0;
-                    for ( Map.Entry entry: m.entrySet()) {
+                    for ( Map.Entry entry: loopMap.entrySet()) {
                         evalStruct.jc.set("loop.key", entry.getKey());
                         evalStruct.jc.set("loop.value", entry.getValue());
                         evalStruct.jc.set("loop.index", itnum);
@@ -680,7 +681,31 @@ public class RestReplay extends ConfigFile {
                         itnum++;
                     }
                 } else {
+                    Map.Entry entry;
+                    Iterator<Map.Entry<String,Object>> mapIt = null;
+                    Set<Map.Entry<String,Object>> set = null;
+                    Iterator colIt = null;
+                    if (loopMap!=null) {
+                        set = loopMap.entrySet();
+                        mapIt = set.iterator();
+                    }
+                    if (loopCollection!=null){
+                        colIt = loopCollection.iterator();
+
+                    }
                     for (int itnum = 0; itnum < iIterations; itnum++) {
+                        if (mapIt!=null){
+                            entry = mapIt.next();
+                            evalStruct.jc.set("loop.key", entry.getKey());
+                            evalStruct.jc.set("loop.value", entry.getValue());
+                        }
+                        if (colIt!=null){
+                            Object loopObject =colIt.next();
+                            evalStruct.jc.set("loop.value", loopObject);
+                        }
+                        if (loopArray != null){
+                            evalStruct.jc.set("loop.value", loopArray[itnum]);
+                        }
                         serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
                         testElementIndex++;
                         ServiceResult serviceResult = new ServiceResult(getRunOptions());
