@@ -8,7 +8,7 @@ import java.util.*;
  * User: laramie
  * $LastChangedRevision:  $
  * $LastChangedDate:  $
- * STATUS.MISSING means the Right tree did not have a node that the left tree had. (RIGHT_MISSING)
+ * STATUS.REMOVED means the Right tree did not have a node that the left tree had. (RIGHT_MISSING)
  * STATUS.ADDED means the Right tree had a node that the left tree did not have.(RIGHT_ADDED)
  * RestReplay comparse expected versus payload by walking the nodes (of JSON or XML) of the two trees of payloads.
  * The Left tree is the expected, from the test.  The Right tree is the payload from the service.
@@ -29,11 +29,13 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
                                                                                          TreeWalkEntry.STATUS.MATCHED,
                                                                                          TreeWalkEntry.STATUS.ADDED};
 
-        public static final TreeWalkEntry.STATUS[] defaultErrorStatiArray =           {TreeWalkEntry.STATUS.MISSING,
+        public static final TreeWalkEntry.STATUS[] defaultErrorStatiArray =           {TreeWalkEntry.STATUS.REMOVED,
                                                                                           TreeWalkEntry.STATUS.NESTED_ERROR,
                                                                                           TreeWalkEntry.STATUS.DIFFERENT,
                                                                                           TreeWalkEntry.STATUS.ERROR};
         public List<TreeWalkEntry.STATUS> errorStati;
+
+        public boolean leftEmptyMatchesAllText = true;  //TODO: make reader in expected/dom set this with an option to add a match string, such as "*"
 
         public static MatchSpec createDefault(){
             MatchSpec result = new MatchSpec();
@@ -75,10 +77,10 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
         public String message = "";
         public String errmessage = "";
         public TreeWalkResults nested;
-        /* STATUS.MISSING means the Right tree did not have a node that the left tree had.
+        /* STATUS.REMOVED means the Right tree did not have a node that the left tree had.
          * STATUS.ADDED means the Right tree had a node that the left tree did not have.
          */
-        public static enum STATUS {INFO, MATCHED, MISSING, ADDED, ERROR, DIFFERENT, NESTED_ERROR};
+        public static enum STATUS {INFO, MATCHED, REMOVED, ADDED, ERROR, DIFFERENT, NESTED_ERROR};
         public STATUS status;
         public String toString(){
             return toString("\r\n");
@@ -157,7 +159,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     public boolean treesMatch(){
         for (TreeWalkEntry entry : this){
             if (entry.status == TreeWalkEntry.STATUS.ERROR
-                || entry.status == TreeWalkEntry.STATUS.MISSING
+                || entry.status == TreeWalkEntry.STATUS.REMOVED
                 || entry.status == TreeWalkEntry.STATUS.ADDED){
                 return false;
             }
@@ -185,7 +187,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     }
 
     public String miniSummary(){
-        //MATCHED, INFO, MISSING, ADDED, DIFFERENT};
+        //MATCHED, INFO, REMOVED, ADDED, DIFFERENT};
         StringBuffer buf = new StringBuffer();
         buf.append("{");
         boolean nextline = false;
@@ -225,7 +227,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
                                                                String ne){
             Map<TreeWalkEntry.STATUS,Range> rangeMap = new HashMap<TreeWalkEntry.STATUS, Range>();
             rangeMap.put(TreeWalkEntry.STATUS.MATCHED, new Range(ma));
-            rangeMap.put(TreeWalkEntry.STATUS.MISSING, new Range(mi));
+            rangeMap.put(TreeWalkEntry.STATUS.REMOVED, new Range(mi));
             rangeMap.put(TreeWalkEntry.STATUS.ADDED, new Range(ad));
             rangeMap.put(TreeWalkEntry.STATUS.ERROR, new Range(de));
             rangeMap.put(TreeWalkEntry.STATUS.DIFFERENT, new Range(te));

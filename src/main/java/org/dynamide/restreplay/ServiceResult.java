@@ -135,6 +135,9 @@ public class ServiceResult {
                 : msg;
         addAlert(error, testIDLabel, Alert.LEVEL.ERROR);
     }
+    public void addWarning(String msg){
+        addAlertWarning(msg, testIDLabel);
+    }
     public int socketTimeout = 30000;  //millis
     public int connectionTimeout = 30000;   //millis
     public String fromTestID = "";
@@ -161,6 +164,7 @@ public class ServiceResult {
         //System.out.println("setting mimeType:"+mimeHeader);
     }
     public String failureReason = "";
+    public boolean expectedFailure = false;
     public boolean expectedContentExpandedWasJson = false;
     public String expectedContentExpanded = "";
     public String expectedContentExpandedAsXml = "";
@@ -215,6 +219,7 @@ public class ServiceResult {
         return exports;
     }
     public void addExports(Map<String,Object> newexports){
+        trappedExports.addAll(newexports.keySet());
         exports.putAll(newexports);
     }
     //public void addExport(String key, String value){
@@ -389,8 +394,8 @@ public class ServiceResult {
                         failureReason = " : DOM DIFFERENT; ";
                         return false;
                     }
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.MISSING)>0){
-                        failureReason = " : DOM MISSING; ";
+                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.REMOVED)>0){
+                        failureReason = " : DOM REMOVED; ";
                         return false;
                     }
                     break;
@@ -469,7 +474,7 @@ public class ServiceResult {
             if (!checkRange(value, STATUS.DIFFERENT, columns, notices, expectedRangeMap)) {
                 result &= false;
             }
-            if (!checkRange(value, STATUS.MISSING, columns, notices, expectedRangeMap)) {
+            if (!checkRange(value, STATUS.REMOVED, columns, notices, expectedRangeMap)) {
                 result &= false;
             }
             if (!checkRange(value, STATUS.ADDED, columns, notices, expectedRangeMap)) {

@@ -175,7 +175,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
                 if (rightChild == null){
                     TreeWalkEntry entry = new TreeWalkEntry();
                     entry.lpath = leftChildPath;                  //this works, but is questionable: selectSingleNode(right, "//*[local-name() = \"objectexit_common\"]")
-                    entry.status = TreeWalkEntry.STATUS.MISSING;
+                    entry.status = TreeWalkEntry.STATUS.REMOVED;
                     msgList.add(entry);
                     continue;
                 }
@@ -188,7 +188,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
                 entry.lpath = leftChildPath;
                 entry.rpath = leftChildPath; //same
 
-                if (leftChildTextTrim.equals(rightChildTextTrim)){
+                if (Tools.isBlank(leftChildTextTrim) || leftChildTextTrim.equals(rightChildTextTrim)){
                     entry.status = TreeWalkEntry.STATUS.MATCHED;
                     msgList.add(entry);
                 } else {
@@ -240,7 +240,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
         if (rightList == null || rightList.size() == 0 || rightList.size() < leftList.size()){
             TreeWalkEntry twe = new TreeWalkEntry();
             twe.lpath = leftChildPath;
-            twe.status = TreeWalkEntry.STATUS.MISSING;
+            twe.status = TreeWalkEntry.STATUS.REMOVED;
             String rmsg = (rightList == null)
                     ? " Right: 0"
                     : " Right: "+rightList.size();
@@ -290,7 +290,7 @@ private static final String DEFAULT_SAX_DRIVER_CLASS = "org.apache.xerces.parser
             if ( ! found){
                 TreeWalkEntry twe = new TreeWalkEntry();
                 twe.lpath = leftChildPath;
-                twe.status = TreeWalkEntry.STATUS.MISSING;
+                twe.status = TreeWalkEntry.STATUS.REMOVED;
                 twe.message = "Repeating field not matched. Source: {"+dumpXML(leftEl)+"}";
                 msgList.add(twe);
                 return false;

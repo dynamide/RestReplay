@@ -29,11 +29,15 @@ public class SelfTestHttpHandler implements HttpHandler {
     private final static String JSON_COMPARE_RIGHT = "{\"a\": \"one\",\"b\": {\"c\": \"two\"}}";
 
     public static void printRequestHeaders(HttpExchange t){
-        Headers s = t.getRequestHeaders();
-        for (Map.Entry<String,List<String>> entry: s.entrySet()){
-            System.out.println("***selfserver*** header: " + entry.getKey() + ": " + entry.getValue().toString());
+        if (DEBUG) {
+            Headers s = t.getRequestHeaders();
+            for (Map.Entry<String, List<String>> entry : s.entrySet()) {
+                System.out.println("***selfserver*** header: " + entry.getKey() + ": " + entry.getValue().toString());
+            }
         }
     }
+
+    private static final boolean DEBUG = false;
 
     public void handle(HttpExchange t) throws IOException {
         //System.out.println("self-test web server received URI: "+t.getRequestURI());
@@ -43,8 +47,8 @@ public class SelfTestHttpHandler implements HttpHandler {
         String method = t.getRequestMethod();
         String body;
 
-        System.out.println("***selfserver*** path: "+path);
-        System.out.println("***selfserver*** query: "+t.getRequestURI().getRawQuery());
+        if (DEBUG) System.out.println("***selfserver*** path: "+path);
+        if (DEBUG) System.out.println("***selfserver*** query: "+t.getRequestURI().getRawQuery());
         printRequestHeaders(t);
         String mock = extractFirstParam(paramsMap, "mock");
 

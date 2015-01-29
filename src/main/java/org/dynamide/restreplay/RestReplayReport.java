@@ -123,7 +123,16 @@ public class RestReplayReport {
             toc.testID = serviceResult.testID;
             toc.time = serviceResult.time;
             toc.method = serviceResult.method;
-            toc.detail = (serviceResult.isSUCCESS() ? ok(formatMutatorSUCCESS(serviceResult)) : red("FAILURE"));
+            if (serviceResult.isSUCCESS()) {
+                toc.detail = ok(formatMutatorSUCCESS(serviceResult));
+            } else {
+                if (serviceResult.expectedFailure){
+                    toc.detail = brown("EXPECTED");
+                } else {
+                    toc.detail = red("FAILURE");
+                }
+
+            }
             toc.warnings = serviceResult.alertsCount(LEVEL.WARN);
             toc.errors = serviceResult.alertsCount(LEVEL.ERROR);
             toc.domcheck = serviceResult.domcheck;
@@ -696,6 +705,10 @@ public class RestReplayReport {
         return "<span class='ERROR'>" + label + "</span> ";
     }
 
+    protected String brown(String label) {
+        return "<span class='EXPECTED'>" + label + "</span> ";
+    }
+
     protected String tocWarn(int count) {
         if (count == 0){
             return "";
@@ -744,9 +757,19 @@ public class RestReplayReport {
                                  ? s.testID.substring(0, (s.testID.length() - s.idFromMutator.length()) )
                                  : s.testID;
         String SUCCESS = formatMutatorSUCCESS(s);
+        String statusLabel;
         boolean showSUCCESS = s.isSUCCESS();
+        if (showSUCCESS) {
+            statusLabel = lbl(SUCCESS);
+        } else {
+            if (s.expectedFailure){
+                statusLabel = "<span class='EXPECTED'>EXPECTED</span>";
+            } else {
+                statusLabel = "<span class='ERROR'>FAILURE</b></span>";
+            }
+        }
         String res = start
-                + (showSUCCESS ? lbl(SUCCESS) : "<font color='red'><b>FAILURE</b></font>")
+                + statusLabel
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
                 + s.method + SP + "<a class='URL_A' href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep

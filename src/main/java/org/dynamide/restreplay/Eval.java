@@ -64,7 +64,7 @@ public class Eval {
         EvalResult result = new EvalResult();
         result.context = logname;
         result.expression = inputJexlExpression;
-        Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
+        //Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
 
         try {
             jc.set("itemCSID", "${itemCSID}"); //noiseless passthru.
@@ -131,6 +131,8 @@ public class Eval {
         start = 0;
         int cursor = 0;
         String front = "";
+        Object singleResultObj = null;
+
         while (start < len) {
             start = in.indexOf("${", start);  //+1 for the $ sign.
             //end = in.indexOf("}", start);
@@ -185,10 +187,19 @@ public class Eval {
                 }
             } else {
                 resultStr = resultObj.toString();
+                if (resultObj.getClass().getName().equals("java.lang.String")) {
+
+                } else {
+                    singleResultObj = resultObj;
+                }
             }
             result.append(resultStr);
         }
-        evalResult.result = result.toString();
+        if (singleResultObj!=null){
+            evalResult.result = singleResultObj;
+        } else {
+            evalResult.result = result.toString();
+        }
         return evalResult;
     }
 

@@ -76,6 +76,7 @@ td, th {
 }
 
 .OK {
+    padding: 2px;
     font-size: 60%;
     color: green;
     font-weight: bold;
@@ -85,6 +86,12 @@ td, th {
     padding: 2px;
     font-size: 60%;
     color: red;
+    font-weight: bold;
+}
+.EXPECTED {
+    padding: 2px;
+    font-size: 60%;
+    color: olive;
     font-weight: bold;
 }
 
@@ -441,9 +448,11 @@ DIV.mutation {
     color: red;
 }
 .SUMMARY {
+    font-family: monospace;
     font-size: 80%;
 }
 .SUMMARY_WRAP {
+    font-family: monospace;
     font-size: 80%;
     white-space: pre-wrap;       /* CSS 3 */
     white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
@@ -532,7 +541,7 @@ DIV.mutation {
 }
 .dom-match-table th {
     background-color:  #87cefa;
-    font-size: 50%;
+    font-size: 65%;
     border: 1px solid gray;
 }
 td.dom-not-matched {

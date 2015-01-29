@@ -1,32 +1,16 @@
 {
-
-        "hide":{
-            "numOfDrafts": 2,
-            "asset_type": "writingassignment",
-
-            "grid_asset_id": "35199ba0-6c7d-11e4-8d8d-179090669834",
-            "chapter_id": "Chapter114_1",
-            "book_id": "Book114_1",
-            "grid_template_id": "87fff5f0-652d-11e4-8229-179090669834",
-            "assignment_id": "WS_ASSIGNMENT_ID",
-            "seq_nbr": 0,
-            "title": "Assignment115_5",
-            "originalityCheck": true,
-            "description": "Assignment115_5_DESC",
-            "updatable": false,
-            "due_date": 1415153417878,
-            "points": 3,
-            "locked": true,
-            "activities": [
+        "details":{
+            "numberOfItems": 2,
+            "items": [
                 {
-                    "title": "Ciccarelli_v15_AssignmentTemplate3_Draft1",
-                    "activityType": "DRAFT"
+                    "title": "The Size and Shape of Items",
+                    "itemType": "Novella"
                 },
                 {
-                    "title": "Ciccarelli_v15_AssignmentTemplate3_Draft2",
-                    "activityType": "DRAFT"
+                    "title": "The Clarity of Morning",
+                    "itemType": "Tome"
                 }
             ],
         },
-        "course_id": "540f4515e4b004e7d8f22fc8"
+        "order_id": "540f4515e4b004e7d8f22fc8"
     }

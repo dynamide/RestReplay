@@ -44,7 +44,7 @@ public class ExcludeFields extends ContentMutator {
     }
 
     public String getMutationID(){
-        return "no_"+current;
+        return current;
     }
 
     public String getID(){

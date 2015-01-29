@@ -42,6 +42,24 @@
                     <code range="400-499,500-599">book_id, course_id</code>
                 </expected>
             </mutator>
+            <response>
+                <expected>
+                    <dom>
+                        <REMOVED range="0" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>_self_test/res/content-mutator-base.json</filename>
+                <validator lang="javascript"><![CDATA[
+                    if (tools.notBlank(serviceResult.idFromMutator) ){
+                        if (tools.notBlank(serviceResult.got("//"+serviceResult.idFromMutator))){
+                            serviceResult.addError(" idFromMutator:"+serviceResult.idFromMutator);
+                        } else {
+                            "field was properly removed: "+serviceResult.idFromMutator;
+                        }
+                    }
+                ]]></validator>
+            </response>
         </test>
         <test ID="useMutatorSkipParent">
             <method>POST</method>
@@ -55,6 +73,39 @@
                 </expected>
             </mutator>
         </test>
+
+
+
+
+        <test ID="useLoop" loop="3" oldloop="${size(loopvars)}">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <filename>_self_test/loop-dates.json</filename>
+            <vars>
+                <var ID="loopvars">${["10","18","21"]}</var>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE + loopvars[this.LoopIndex]*DAYS}</var>
+                <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}</var>
+                <var ID="TITLE">Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}</var>
+            </vars>
+            <response>
+                <expected>
+                    <dom>
+                        <REMOVED range="0" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>_self_test/res/loop-dates.json</filename>
+            </response>
+        </test>
+
+
+
+
+
+
+
         <test ID="useToken">
             <method>GET</method>
             <uri>/tagonomy?mock=true&amp;name=useToken</uri>
@@ -125,7 +176,7 @@
                 <var ID="COUNT">3</var>
             </vars>
             <response>
-                <validator lang="javascript">_self_test/res/selftest.validator.js</validator>
+                <validator lang="javascript" filename="_self_test/res/selftest.validator.js" />
             </response>
         </test>
 
@@ -137,7 +188,7 @@
                <var ID="COUNT">4</var>
            </vars>
            <response>
-                <validator lang="javascript">_self_test/res/getOrders.validator.js</validator>
+                <validator lang="javascript" filename="_self_test/res/getOrders.validator.js" />
             </response>
         </test>
 
@@ -154,7 +205,10 @@
                 <var ID="COUNT">3</var>
             </vars>
             <response>
-                <validator lang="javascript">_self_test/res/selftest-with-validator-errors.validator.js</validator>
+                <expected>
+                    <failure />
+                </expected>
+                <validator lang="javascript" filename="_self_test/res/selftest-with-validator-errors.validator.js" />
             </response>
         </test> 
         <test ID="emptyExpectedResponseFile">
@@ -295,6 +349,12 @@
                     <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
                     <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
                 </vars>
+                <expected>
+                    <dom>
+                        <MATCHED range="3" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
             </mutator>
             <response>
                 <expected>
@@ -313,6 +373,7 @@
             <filename>_self_test/res/jsonTreeCompareL.xml</filename>
             <response>
                 <expected dom="ADDOK">
+                    <failure />
                 </expected>
                 <filename>_self_test/res/jsonTreeCompareChangedL.xml</filename>
             </response>
@@ -340,7 +401,7 @@
                 <expected>
                     <dom>
                         <MATCHED range="1"></MATCHED>
-                        <MISSING range="0"></MISSING>
+                        <REMOVED range="0"></REMOVED>
                         <ADDED range="0"></ADDED>
                         <ERROR range="0"></ERROR>
                         <DIFFERENT range="2"></DIFFERENT>
@@ -372,6 +433,7 @@
             <filename>_self_test/res/jsonTreeCompareL.xml</filename>
             <response>
                 <expected dom="ADDOK">
+                    <failure />
                     <dom>
                         <DIFFERENT range="2"></DIFFERENT>
                     </dom>
@@ -471,31 +533,176 @@
         </test>
     </testGroup>
 
-    <testGroup ID="debug" autoDeletePOSTS="false">
-        <test ID="useVarMutatorWNames">
-            <method>PUT</method>
-            <uri>http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&amp;mutation=${this.mutation}&amp;emptyMutationResponseCode=202</uri>
-            <filename>_self_test/var-mutator-test.json</filename>
+    <testGroup ID="VarsAndValidators">
+        <test ID="exportVarsFromJexl">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <exports>
+                <vars>
+                    <var ID="OFFSET"><![CDATA[${
+                          arr = kit.newStringArray(3);
+                          arr[0]="10";
+                          arr[1]="18";
+                          arr[2]="21";
+                          return arr;
+                    }]]></var>
+                </vars>
+                <vars>
+                    <var ID="OFFSET_LITERAL"><![CDATA[${
+                          arr = ['20', '33', '128'];
+                          return arr;
+                    }]]></var>
+                    <var ID="OFFSET_LITERAL_SINGLE">${['21','34','129']}</var>
+                </vars>
+            </exports>
+        </test>
+        <test ID="useVarValidator">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
             <vars>
-                <var ID="DAYS">${24*60*60*1000}</var>
-                <var ID="BASE_DATE">${tools.now()}</var>
-                <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
-                <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
-                <var ID="VarTestMessage">Base message set here as default (useVarMutator).</var>
+                <var ID="ARRAYS_USED_0">OFFSET: ${exportVarsFromJexl.OFFSET[0]}, ${exportVarsFromJexl.OFFSET[1]}, ${exportVarsFromJexl.OFFSET[2]}</var>
+                <var ID="ARRAYS_USED_1">OFFSET_LITERAL: ${exportVarsFromJexl.OFFSET_LITERAL[0]}, ${exportVarsFromJexl.OFFSET_LITERAL[1]}, ${exportVarsFromJexl.OFFSET_LITERAL[2]}</var>
+                <var ID="ARRAYS_USED_2">OFFSET_LITERAL_SINGLE: ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[0]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[1]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[2]}</var>
+                <var ID="theOFFSET0">${exportVarsFromJexl.OFFSET[0]}</var>
             </vars>
-            <mutator type="VarMutator" skipParent="true">
+            <response>
                 <expected>
-                    <code range="406" />
+                    <failure />
                 </expected>
-                <vars ID="Thing1">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +1 * DAYS}</var>
-                    <var idbase="VarTestMessage">${this.testID} set in mutation ID=0.</var>
+                <validator lang="javascript"><![CDATA[
+                   if (exportVarsFromJexl.get('OFFSET')[1] != '9'){
+                      serviceResult.addError("OFFSET[1] was not 9, was: "+exportVarsFromJexl.get('OFFSET')[1]);
+                   }
+                   if (theOFFSET0 != '9'){
+                      serviceResult.addWarning("theOFFSET0 was not 9, was: "+theOFFSET0);
+                   }
+                ]]></validator>
+            </response>
+        </test>
+        <test ID="useVarValidatorNoErrors">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <vars>
+                <var ID="ARRAYS_USED_0">OFFSET: ${exportVarsFromJexl.OFFSET[0]}, ${exportVarsFromJexl.OFFSET[1]}, ${exportVarsFromJexl.OFFSET[2]}</var>
+                <var ID="ARRAYS_USED_1">OFFSET_LITERAL: ${exportVarsFromJexl.OFFSET_LITERAL[0]}, ${exportVarsFromJexl.OFFSET_LITERAL[1]}, ${exportVarsFromJexl.OFFSET_LITERAL[2]}</var>
+                <var ID="ARRAYS_USED_2">OFFSET_LITERAL_SINGLE: ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[0]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[1]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[2]}</var>
+                <var ID="theOFFSET0">${exportVarsFromJexl.OFFSET[0]}</var>
+            </vars>
+            <response>
+                <validator lang="javascript"><![CDATA[
+                   if (exportVarsFromJexl.get('OFFSET')[1] != '18'){
+                      serviceResult.addError("OFFSET[1] was not 18, was: "+exportVarsFromJexl.get('OFFSET')[1]);
+                   }
+                   if (theOFFSET0 != '10'){
+                      serviceResult.addWarning("theOFFSET0 was not 10, was: "+theOFFSET0);
+                   }
+                ]]></validator>
+            </response>
+        </test>
+    </testGroup>
+
+    <testGroup ID="debug">
+        <test ID="useLoopY" loop="${['10','18','219']}">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <filename>_self_test/loop-dates.json</filename>
+            <vars>
+                <var ID="loopvars">${["10","18","21"]}</var>
+                <var ID="DAYS">${24*60*60*1000}</var>
+                <var ID="LOOPINFO2">${"size: "+size(loop)+", loop[0]: "+loop[0]}</var>
+                <var ID="LOOPINFO2">${"size: "+size(loop)+", loop[this.LoopIndex]: "+loop[this.LoopIndex]}</var>
+                <var ID="BASE_DATE">${tools.now()}</var>
+                <var ID="DUE_DATE_MILLIS">${BASE_DATE + loopvars[this.LoopIndex]*DAYS}</var>
+                <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}</var>
+                <var ID="TITLE">Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}</var>
+            </vars>
+            <response>
+                <expected>
+                    <dom>
+                        <REMOVED range="0" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>_self_test/res/loop-dates.json</filename>
+            </response>
+        </test>
+        <test ID="useLoopMap" loop="${{'a':'Due February 20','b':'Due January 28'}}">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <filename>_self_test/loop-dates.json</filename>
+            <vars>
+                <var ID="LOOP_MAP_INFO">${"size: "+size(loop)+", loop.key: "+loop.key+", loop.value:"+loop.value+", loop['"+loop.key+"']: "+loop[loop.key]}</var>
+                <var ID="DUE_DATE_MILLIS">${24*60*60*1000}</var>
+                <var ID="INSTRUCTOR_NOTE">${loop.key}</var>
+                <var ID="TITLE">${loop.value}</var>
+            </vars>
+            <response>
+                <expected>
+                    <dom>
+                        <REMOVED range="0" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                <filename>_self_test/res/loop-dates.json</filename>
+            </response>
+        </test>
+    </testGroup>
+
+
+
+
+
+
+    <testGroup ID="debugJsonTreeCompare" autoDeletePOSTS="false">
+        <test ID="jsonTreeCompare">
+            <comment>This test checks one API's response against three expected possibilities,
+                by looping three times, and supplying three different filenames, and using the same
+                validation strategy, but reading three different validation templates.</comment>
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=text/xml</uri>
+            <comment>we are just sending jsonTreeCompareL.xml as content because we have to send something.
+                The service echos back the payload, and sets a mime header for the type specified
+                by the query parmeter mimeOut.
+            </comment>
+            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
+            <mutator type="VarMutator" skipParent="false">
+                <vars ID="Base">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareL.xml</var>
                 </vars>
-                <vars ID="Thing2">
-                    <var idbase="DUE_DATE_MILLIS">${BASE_DATE +3 * DAYS}</var>
-                    <var idbase="VarTestMessage">${this.testID} set in mutation ID=1.</var>
+                <vars ID="Added">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedL.xml</var>
                 </vars>
+                <vars ID="Changed">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareChangedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareChangedL.xml</var>
+                </vars>
+                <vars ID="AddedChanged">
+                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
+                </vars>
+                <expected>
+                    <dom>
+                        <MATCHED range="3" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
             </mutator>
+            <response>
+                <!--<expected>
+                    <dom>
+                        <MATCHED range="3" />
+                        <DIFFERENT range="0" />
+                    </dom>
+                </expected>
+                -->
+                <filename>${EXPECTED_FILE}</filename>
+
+            </response>
         </test>
     </testGroup>
 

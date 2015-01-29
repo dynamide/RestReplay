@@ -1,0 +1,5 @@
+{
+  "title": "${TITLE}",
+  "due_date": ${DUE_DATE_MILLIS},
+  "instructor_note": "${INSTRUCTOR_NOTE}"
+}

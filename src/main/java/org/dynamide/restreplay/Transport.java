@@ -160,7 +160,7 @@ public class Transport {
 
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
-        HttpMethod httpMethod;
+        HttpMethodBase httpMethod;
         PostMethod postMethod = null;
         PutMethod putMethod = null;
         if ("POST".equalsIgnoreCase(method)) {
@@ -192,13 +192,8 @@ public class Transport {
         }
         try {
             int iResponseCode = client.executeMethod(httpMethod);
-            System.out.println("Response status code: " + result);
             String responseBody = httpMethod.getResponseBodyAsString();
-            if (postMethod!=null){
-                result.setResultWMime(responseBody, getResponseContentType(postMethod));
-            } else if (putMethod!=null){
-                result.setResultWMime(responseBody, getResponseContentType(putMethod));
-            }
+            result.setResultWMime(responseBody, getResponseContentType(httpMethod));
             result.responseMessage = httpMethod.getStatusText();
             result.requestPayloadFilename = requestPayloadFilename;
             result.requestPayload = content;
