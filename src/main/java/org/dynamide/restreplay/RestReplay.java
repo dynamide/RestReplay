@@ -762,10 +762,18 @@ public class RestReplay extends ConfigFile {
     }
 
     public String calculateElipses(String relpath) {
+        System.out.println("======================================relpath=====>>> "+relpath);
         String result = "";
         int count = relpath.length() - relpath.replace("/", "").length();  //calc how many '/' chars there are.
+        System.out.println("======================================count=====>>> "+count);
+
         for (int i = 0; i < count; i++) {
             result += "../"; //one for each nested folder within test dir.
+        }
+        System.out.println("======================================result=====>>> "+result);
+        System.out.println("======================================env=====>>> "+this.getEnvID());
+        if (Tools.notBlank(this.getEnvID())){
+            return "../../"+result;
         }
         return "../"+result; // first directory is the name of the test dir, so master is above that.
     }
