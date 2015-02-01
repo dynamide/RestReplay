@@ -64,14 +64,14 @@ public class Eval {
         EvalResult result = new EvalResult();
         result.context = logname;
         result.expression = inputJexlExpression;
-        //Map<String, ServiceResult> serviceResultsMap = this.serviceResultsMap;
-
         try {
             jc.set("itemCSID", "${itemCSID}"); //noiseless passthru.
             jc.set("tools", TOOLS);
             jc.set("kit", KIT);
-            for (Map.Entry<String,ServiceResult> entry: serviceResultsMap.entrySet()) {
-                jc.set(entry.getKey(), entry.getValue());
+            if (serviceResultsMap!=null) {
+                for (Map.Entry <String,ServiceResult> entry:serviceResultsMap.entrySet()){
+                    jc.set(entry.getKey(), entry.getValue());
+                }
             }
             if (vars!=null){
                 for (Map.Entry<String,Object> entry: vars.entrySet()) {
@@ -114,7 +114,7 @@ public class Eval {
             addToEvalReport(result);
         } catch (Throwable t) {
             String errmsg = "ERROR: could not eval jexl expression. " + t;
-            System.err.println(errmsg+" Expression: "+inputJexlExpression);
+            System.err.println(errmsg+" Expression: "+inputJexlExpression+"\n"+Tools.getStackTrace(t, 10));
             result.addAlert(errmsg, inputJexlExpression, LEVEL.ERROR);
             result.result = "";
             addToEvalReport(result);
@@ -136,16 +136,16 @@ public class Eval {
         int cursor = 0;
         String front = "";
         Object singleResultObj = null;
+        boolean doingStringConcat = false;
 
         while (start < len) {
             start = in.indexOf("${", start);  //+1 for the $ sign.
-            //end = in.indexOf("}", start);
-            end = findMatchingCloseBrace(in, start+2);
             if (start < 0) {
                 String tail = in.substring(cursor);
                 result.append(tail);
                 break;
             }
+            end = findMatchingCloseBrace(in, start+2);
             if (end < 0) {
                 evalResult.addAlert("Unbalanced ${} braces",
                         "context:"+ context + ", expr:" + in,
@@ -159,6 +159,9 @@ public class Eval {
             }
             front = in.substring(cursor, start);
             result.append(front);
+            if (Tools.notBlank(front)){
+                doingStringConcat = true;
+            }
             cursor = end;                   //bump past close brace
             var = in.substring(start + 2, end-1);  //+2 bump past open brace ${ and then "end" is indexed just before the close brace }
             start = cursor;
@@ -203,8 +206,12 @@ public class Eval {
             result.append(resultStr);
         }
         if (singleResultObj!=null){
-            evalResult.result = singleResultObj;
-            evalResult.useResultAsObject = true;
+            if (doingStringConcat){
+                evalResult.result = result.toString();
+            } else {
+                evalResult.result = singleResultObj;
+                evalResult.useResultAsObject = true;
+            }
         } else {
             evalResult.result = result.toString();
         }
@@ -266,6 +273,19 @@ public class Eval {
         System.out.println("test("+in+','+start+"): "+findMatchingCloseBrace(in, start));
     }
 
+    private static EvalResult testEval(String expression, Map<String,Object> vars) {
+        Eval ev = new Eval();
+        ev.resetContext();
+        return ev.eval("test",
+                expression,
+                vars);
+    }
+
+
+    public static class MyVar {
+        public String id;
+        public Date startdate;
+    }
 
     public static void main(String[] args){
         test("abc", 0);
@@ -284,6 +304,14 @@ public class Eval {
         test("{{abc}{ghi}}", 1);
         test("{a\\{bc}", 1);
         test("{a\\{bc}}", 1);
+
+        Map<String,Object> vars = new HashMap<String, Object>();
+        MyVar myvar = new MyVar();
+            myvar.id = "testmyvar1";
+            myvar.startdate = new Date();
+        vars.put("myvar", myvar);
+        EvalResult result = testEval("${3+2} date: ${kit.now()} myvar: ${myvar}", vars);
+        System.out.println("evalresult: "+result);
     }
 
 

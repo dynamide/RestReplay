@@ -660,29 +660,48 @@
                 <filename>_self_test/res/loop-dates.json</filename>
             </response>
         </test>
-    </testGroup>
-
-    <testGroup ID="debug">
-        <test ID="loopMap" loop="${{'a':'Due February 20','b':'Due January 28'}}">
-            <method>POST</method>
+        <test ID="LoopArrayOfMap" loop="${[{'a':'aVal', 'b':'bVal'},{'c':'cVal', 'd':'dVal'}]}">
+            <method>GET</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
-            <filename>_self_test/loop-dates.json</filename>
             <vars>
-                <var ID="LOOP_MAP_INFO">${"size: "+size(loop)+", loop.key: "+loop.key+", loop.value:"+loop.value+", loop['"+loop.key+"']: "+loop[loop.key]}</var>
-                <var ID="DUE_DATE_MILLIS">${24*60*60*1000}</var>
-                <var ID="INSTRUCTOR_NOTE">${loop.key}</var>
+                <var ID="VALUE_a">${loop.value.a}</var>
+                <var ID="VALUE_c">${loop.value.c}</var>
+                <var ID="VALUE">${loop.value}</var>
+                <var ID="LOOP">${loop}</var>
+            </vars>
+        </test>
+        <test ID="LoopArrayOfMap2">
+            <loop>
+                ${[{'a':'aVal', 'b':'bVal'},
+                   {'c':'cVal', 'd':'dVal'}
+                  ]}
+            </loop>
+            <method>GET</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <vars>
+                <var ID="VALUE_a">${loop.value.a}</var>
+                <var ID="VALUE_c">${loop.value.c}</var>
+                <var ID="VALUE">${loop.value}</var>
+                <var ID="LOOP">${loop}</var>
+            </vars>
+        </test>
+
+        <test ID="BadLoopExpression" loop="${this+is+a+syntax:error}">
+            <method>GET</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <vars>
                 <var ID="TITLE">${loop.value}</var>
             </vars>
             <response>
                 <expected>
-                    <dom>
-                        <REMOVED range="0" />
-                        <DIFFERENT range="0" />
-                    </dom>
+                    <failure />
                 </expected>
-                <filename>_self_test/res/loop-dates.json</filename>
             </response>
         </test>
+    </testGroup>
+
+    <testGroup ID="debug">
+
     </testGroup>
 
     <testGroup ID="debugJsonTreeCompare" autoDeletePOSTS="false">

@@ -518,6 +518,9 @@ public class ServiceResult {
         if (overrideExpectedResult){
             return true;
         }
+        if (Tools.notBlank(failureReason)){
+            return false;
+        }
         //if (Tools.notEmpty(failureReason)){
         //    return false;
         //}
