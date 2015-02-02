@@ -64,7 +64,8 @@ public class RestReplayTest {
         ResultSummary summary = resultSummaryForGroup(list, HTML);
         org.testng.Reporter.log(summary.table);
         ResultSummary textSummary = resultSummaryForGroup(list, TEXT);
-        System.out.println("SUMMARY: "+textSummary.table);
+        System.out.println("SKIPPING SUMMARY. ");
+        //System.out.println("SUMMARY: "+textSummary.table);
         Assert.assertEquals(summary.oks, summary.total, "Expected all " + summary.total + " RestReplay tests to pass.  See Output from test '" + testname + "'. " + summary.errorTests);
     }
 

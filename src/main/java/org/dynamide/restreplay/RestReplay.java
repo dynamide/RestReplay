@@ -616,6 +616,8 @@ public class RestReplay extends ConfigFile {
             }
             int testElementIndex = -1;
             for (Node testNode : tests) {
+
+
                 String iterations = testNode.valueOf("@loop");  //try as an attribute
                 if (Tools.isBlank(iterations)){
                     iterations = testNode.valueOf("loop"); //try as an element (supports multi-line expressions).
@@ -664,8 +666,9 @@ public class RestReplay extends ConfigFile {
                         if (evalResult!=null)evalResult.alerts.addAll(evalResult.alerts);
                         serviceResult.testID = testNode.valueOf("@ID");
                         serviceResult.testIDLabel = Tools.notEmpty(serviceResult.testID) ? (testGroupID + '.' + serviceResult.testID) : (testGroupID + '.' + testElementIndex);
-                        serviceResult.addError("ERROR calculating loop", t);
-                        serviceResult.failureReason = t.getMessage();
+                        String msg = "ERROR calculating loop";
+                        serviceResult.addError(msg, t);
+                        serviceResult.failureReason = msg+t.getMessage();
                         List<Node> failures = testNode.selectNodes("response/expected/failure"); //TODO: get in sync with expected/failure handling elsewhere.
                         if (failures.size()>0){
                             serviceResult.expectedFailure = true;

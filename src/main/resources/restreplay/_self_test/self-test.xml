@@ -672,17 +672,15 @@
         </test>
         <test ID="LoopArrayOfMap2">
             <loop>
-                ${[{'a':'aVal', 'b':'bVal'},
-                   {'c':'cVal', 'd':'dVal'}
+                ${[{'USER':'Moe Gibbons', 'ORDER':'AM444890'},
+                   {'USER':'Clive Orvis', 'ORDER':'AC897654'}
                   ]}
             </loop>
             <method>GET</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
             <vars>
-                <var ID="VALUE_a">${loop.value.a}</var>
-                <var ID="VALUE_c">${loop.value.c}</var>
-                <var ID="VALUE">${loop.value}</var>
-                <var ID="LOOP">${loop}</var>
+                <var ID="ORDER">${loop.value.ORDER}</var>
+                <var ID="USER">${loop.value.USER}</var>
             </vars>
         </test>
 
