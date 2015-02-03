@@ -56,6 +56,18 @@ public class ServiceResult {
     public int getLoopIndex(){
         return loopIndex;
     }
+    public String getLoopQualifier(Eval evalStruct){
+        String loopQualifier = "";
+        if (loopIndex>-1){
+            String loopKey = (String) evalStruct.jc.get("loop.key");
+            if (Tools.notBlank(loopKey)){
+                loopQualifier = "_"+loopKey;
+            } else {
+                loopQualifier = "_"+loopIndex;
+            }
+        }
+        return loopQualifier;
+    }
     public String fullURL = "";
     public String deleteURL = "";
     public String AMONG = "A"; //informational: for inspection after the test.

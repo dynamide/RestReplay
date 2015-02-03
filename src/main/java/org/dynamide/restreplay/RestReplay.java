@@ -470,6 +470,42 @@ public class RestReplay extends ConfigFile {
         return evalStruct.eval(context, source, vars);
     }
 
+    public static class Loop {
+        public Loop(int i, String k, Object o){
+            key = k;
+            value = o;
+            index = i;
+        }
+
+        public Loop(Eval evalStruct){
+            Object res = evalStruct.jc.get("loop.index");
+            if (null == res ){
+                return;
+            }
+            index = (Integer.parseInt(res.toString()));
+
+            value = evalStruct.jc.get("loop.value");
+
+            res = evalStruct.jc.get("loop.key");
+            if (null == res){
+                return;
+            }
+            key = res.toString();
+
+
+        }
+        public String toString(){
+            return "{"
+                    +"\"index\":"+index
+                    +",\"key\":"+key
+                    +(value==null ? "null" : ",\"value\":\""+value.toString()+"\"")
+                    +"}";
+        }
+        public int index = -1;
+        public Object value = null;
+        public String key = "";
+    }
+
     private EvalResult evalJavascript(Eval evalStruct, String resourceName, String source, ServiceResult serviceResult) {
         RhinoInterpreter interpreter = new RhinoInterpreter();
         interpreter.setVariable("result", serviceResult);
@@ -477,6 +513,8 @@ public class RestReplay extends ConfigFile {
         interpreter.setVariable("serviceResultsMap", serviceResultsMap);
         interpreter.setVariable("kit", KIT);
         interpreter.setVariable("tools", TOOLS);
+        Loop loop = new Loop(evalStruct);
+        interpreter.setVariable("loop", loop);
         //System.out.println("evalJavascript TO: "+serviceResult.testIDLabel);
         //System.out.println("evalJavascript exports: "+serviceResult.getExports());
         for (Map.Entry<String,Object> entry: serviceResult.getVars().entrySet()){
@@ -616,104 +654,15 @@ public class RestReplay extends ConfigFile {
             }
             int testElementIndex = -1;
             for (Node testNode : tests) {
-
-
-                String iterations = testNode.valueOf("@loop");  //try as an attribute
-                if (Tools.isBlank(iterations)){
-                    iterations = testNode.valueOf("loop"); //try as an element (supports multi-line expressions).
+                LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
+                if (loopHelper.error){
+                    continue OUTER;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
                 }
-                boolean doingIterations = false;
-                int iIterations = 1;
-                Map<String,Object> loopMap = null;
-                Collection loopCollection = null;
-                String[] loopArray = null;
-                Object[] loopObjArray = null;
-
-                if (Tools.notBlank(iterations)){
-                    doingIterations = true;
-                    EvalResult evalResult = null;
-                    try {
-                        evalResult = evalStruct.eval("calculate @loop", iterations, clonedMasterVars);
-                        if (   evalResult.worstLevel.equals(LEVEL.WARN)
-                            || evalResult.worstLevel.equals(LEVEL.ERROR)){
-                            throw new Exception(" expression: "+iterations);
-                        }
-                        Object resultResult = evalResult.result;
-                        //serviceResult.alerts.addAll(evalResult.alerts);
-                        if (resultResult instanceof String[] ){
-                            iIterations = ((String[])resultResult).length;
-                            evalStruct.jc.set("loop", resultResult);
-                            loopArray = (String[])resultResult;
-                        } else if (resultResult !=null && resultResult.getClass().isArray()) {
-                            loopObjArray = (Object[])resultResult;
-                            iIterations = ((Object[])resultResult).length;
-                            evalStruct.jc.set("loop", resultResult);
-                        } else if (resultResult instanceof Map) {
-                            loopMap = (Map)resultResult;
-                            iIterations = loopMap.size();
-                            evalStruct.jc.set("loop", resultResult);
-                        } else if (resultResult instanceof Collection) {
-                            loopCollection = (Collection)resultResult;
-                            iIterations = loopCollection.size();
-                            evalStruct.jc.set("loop", resultResult);
-                        } else {
-                            iterations = evalResult.getResultString();
-                            iIterations = Integer.parseInt(iterations);
-                        }
-                    } catch (Throwable t){
-                        System.out.println("\n======NOT doing iterations because loop expression failed:"+iterations+"\n");
-                        ServiceResult serviceResult = new ServiceResult(getRunOptions());
-                        if (evalResult!=null)evalResult.alerts.addAll(evalResult.alerts);
-                        serviceResult.testID = testNode.valueOf("@ID");
-                        serviceResult.testIDLabel = Tools.notEmpty(serviceResult.testID) ? (testGroupID + '.' + serviceResult.testID) : (testGroupID + '.' + testElementIndex);
-                        String msg = "ERROR calculating loop";
-                        serviceResult.addError(msg, t);
-                        serviceResult.failureReason = msg+t.getMessage();
-                        List<Node> failures = testNode.selectNodes("response/expected/failure"); //TODO: get in sync with expected/failure handling elsewhere.
-                        if (failures.size()>0){
-                            serviceResult.expectedFailure = true;
-                        }
-                        report.addTestResult(serviceResult);
-                        results.add(serviceResult);
-                        continue OUTER;
-                    }
-                }
-
-                Map.Entry entry;
-                Iterator<Map.Entry<String,Object>> mapIt = null;
-                Set<Map.Entry<String,Object>> set = null;
-                Iterator colIt = null;
-                if (loopMap!=null) {
-                    set = loopMap.entrySet();
-                    mapIt = set.iterator();
-                }
-                if (loopCollection!=null){
-                    colIt = loopCollection.iterator();
-
-                }
-                for (int itnum = 0; itnum < iIterations; itnum++) {
-                    if (mapIt!=null){
-                        entry = mapIt.next();
-                        evalStruct.jc.set("loop.key", entry.getKey());
-                        evalStruct.jc.set("loop.value", entry.getValue());
-                    }
-                    if (colIt!=null){
-                        Object loopObject =colIt.next();
-                        evalStruct.jc.set("loop.value", loopObject);
-                    }
-                    if (loopArray != null){
-                        evalStruct.jc.set("loop.value", loopArray[itnum]);
-                    }
-                    if (loopObjArray != null){
-                        evalStruct.jc.set("loop.value", loopObjArray[itnum]);
-                    }
+                for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
+                    ServiceResult serviceResult = new ServiceResult(getRunOptions());
+                    loopHelper.setGlobalVariablesForLooping(serviceResult, evalStruct, itnum);
                     serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
                     testElementIndex++;
-                    ServiceResult serviceResult = new ServiceResult(getRunOptions());
-                    if (doingIterations) {
-                        serviceResult.loopIndex = itnum;
-                        evalStruct.jc.set("loop.index", itnum);
-                    }
                     serviceResultsMap.put("this", serviceResult);
                     executeTestNode(serviceResult,
                             null,
@@ -760,6 +709,7 @@ public class RestReplay extends ConfigFile {
 
         return results;
     }
+
 
     public String calculateElipses(String relpath) {
         String result = "";
@@ -812,10 +762,11 @@ public class RestReplay extends ConfigFile {
             if (mutatorScopeVars!=null){
                 clonedMasterVarsWTest.putAll(mutatorScopeVars);
             }
-            int loopIndex =  serviceResult.getLoopIndex();
+
             String testID = testNode.valueOf("@ID")
                                + (Tools.notBlank(idFromMutator) ? "_" + idFromMutator : "")
-                               + (loopIndex > -1 ? "_"+loopIndex : "");
+                               + serviceResult.getLoopQualifier(evalStruct);
+
             lastTestID = testID;
             String testIDLabel = Tools.notEmpty(testID) ? (testGroupID + '.' + testID) : (testGroupID + '.' + testElementIndex)
                     + "mut:" + idFromMutator + ";";

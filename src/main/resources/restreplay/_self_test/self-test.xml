@@ -662,7 +662,7 @@
         </test>
         <test ID="LoopArrayOfMap" loop="${[{'a':'aVal', 'b':'bVal'},{'c':'cVal', 'd':'dVal'}]}">
             <method>GET</method>
-            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <uri>/jsonCompare1?mimeOut=application/json&amp;loop=${this.LoopIndex}</uri>
             <vars>
                 <var ID="VALUE_a">${loop.value.a}</var>
                 <var ID="VALUE_c">${loop.value.c}</var>
@@ -677,13 +677,82 @@
                   ]}
             </loop>
             <method>GET</method>
-            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <uri>/jsonCompare1?mimeOut=application/json&amp;LoopIndex=${this.LoopIndex}&amp;loop.index=${loop.index}</uri>
             <vars>
                 <var ID="ORDER">${loop.value.ORDER}</var>
                 <var ID="USER">${loop.value.USER}</var>
             </vars>
         </test>
-
+        <test ID="loopValidatorNoLoop">
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <response>
+                <validator lang="javascript"><![CDATA[
+                    if (loop){
+                        var ret = {'index': loop.index, 'value': loop.value};
+                        " loop: "+loop+" ret.index: "+ret.index;
+                    } else {
+                        "loop var not available";
+                    }
+                ]]></validator>
+            </response>
+        </test>
+        <test ID="loopValidator" loop="2">
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <response>
+                <validator lang="javascript"><![CDATA[
+                    if (loop){
+                        var ret = {'index': loop.index, 'value': loop.value};
+                        " loop: "+loop+" ret.index: "+ret.index;
+                    } else {
+                        "loop var not available";
+                    }
+                ]]></validator>
+            </response>
+        </test>
+        <test ID="loopValidatorWMap">
+            <loop>
+                ${{'USER':'Moe Gibbons', 'ORDER':'AM444890'}}
+            </loop>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <response>
+                <validator lang="javascript"><![CDATA[
+                        if (loop){
+                            var ret = {'index': loop.index, 'value': loop.value};
+                            serviceResult.addExport("CurrentItem",loop.key+"::"+loop.value);
+                            " loop: "+loop+", ret.index: "+ret.index;
+                        } else {
+                            "loop var not available";
+                        }
+                    ]]></validator>
+            </response>
+        </test>
+        <test ID="loopValidatorWArrayOfMap">
+            <loop>
+                ${[{'USER':'Moe Gibbons', 'ORDER':'AM444890'},
+                {'USER':'Clive Orvis', 'ORDER':'AC897654'}
+                ]}
+            </loop>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/content-mutator-test.json</filename>
+            <response>
+                <validator lang="javascript"><![CDATA[
+                        if (loop){
+                            var ret = {'index': loop.index, 'value': loop.value};
+                            serviceResult.addExport("Order",""+ loop.value.get("USER")+" ordered: "+ loop.value.get("ORDER"));
+                            " loop: "+loop+", ret.index: "+ret.index;
+                        } else {
+                            "loop var not available";
+                        }
+                    ]]></validator>
+            </response>
+        </test>
         <test ID="BadLoopExpression" loop="${this+is+a+syntax:error}">
             <method>GET</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
@@ -698,79 +767,12 @@
         </test>
     </testGroup>
 
+
     <testGroup ID="debug">
-
     </testGroup>
 
-    <testGroup ID="debugJsonTreeCompare" autoDeletePOSTS="false">
-        <test ID="jsonTreeCompare">
-            <comment>This test checks one API's response against three expected possibilities,
-                by looping three times, and supplying three different filenames, and using the same
-                validation strategy, but reading three different validation templates.</comment>
-            <method>POST</method>
-            <uri>/jsonCompare1?mimeOut=text/xml</uri>
-            <comment>we are just sending jsonTreeCompareL.xml as content because we have to send something.
-                The service echos back the payload, and sets a mime header for the type specified
-                by the query parmeter mimeOut.
-            </comment>
-            <filename>_self_test/res/jsonTreeCompareL.xml</filename>
-            <mutator type="VarMutator" skipParent="false">
-                <vars ID="Base">
-                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareL.xml</var>
-                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareL.xml</var>
-                </vars>
-                <vars ID="Added">
-                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedL.xml</var>
-                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedL.xml</var>
-                </vars>
-                <vars ID="Changed">
-                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareChangedL.xml</var>
-                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareChangedL.xml</var>
-                </vars>
-                <vars ID="AddedChanged">
-                    <var idbase="REQUEST_FILE" >_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
-                    <var idbase="EXPECTED_FILE">_self_test/res/jsonTreeCompareAddedChangedL.xml</var>
-                </vars>
-                <expected>
-                    <dom>
-                        <MATCHED range="3" />
-                        <DIFFERENT range="0" />
-                    </dom>
-                </expected>
-            </mutator>
-            <response>
-                <!--<expected>
-                    <dom>
-                        <MATCHED range="3" />
-                        <DIFFERENT range="0" />
-                    </dom>
-                </expected>
-                -->
-                <filename>${EXPECTED_FILE}</filename>
 
-            </response>
-        </test>
-    </testGroup>
-
-    <testGroup ID="debugMutators2"  autoDeletePOSTS="false">
-        <test ID="useTokenPUT">
-            <method>PUT</method>
-            <uri>/tagonomy?mock=true&amp;mutation=${this.mutation}</uri>
-            <filename>_self_test/selftest-mutator.json</filename>
-            <vars>
-                <var ID="TOKEN">FOOTOKEN</var>
-                <var ID="mutation">${this.mutation}</var>
-            </vars>
-            <mutator type="ExcludeFields">
-                <expected>
-                    <code range="5xx">mutation</code>
-                    <code range="2x">*</code>
-                </expected>
-            </mutator>
-        </test>
-    </testGroup>
-
-    <testGroup ID="bugs"  autoDeletePOSTS="false">
+    <testGroup ID="BUGS_TODO"  autoDeletePOSTS="false">
         <test ID="useTokenPUTbugs">
             <!-- This case causes errors to happen in the mutated child tests, but reading the json response borks the
                  parent so it doesn't display correctly, and the children seem like top-level tests.
