@@ -470,6 +470,9 @@ public class RestReplay extends ConfigFile {
         return evalStruct.eval(context, source, vars);
     }
 
+    /** script-facing class known in context as "loop" so that the values for key, value and index may be
+     * retrieved with loop.key, loop.value, and loop.index, for each iteration of the test.
+     */
     public static class Loop {
         public Loop(int i, String k, Object o){
             key = k;
@@ -1177,7 +1180,7 @@ public class RestReplay extends ConfigFile {
                                     mutator,
                                     test.testNode,//Node
                                     test.testgroup,//Node
-                                    test.protoHostPort,//String    TODO!!
+                                    test.protoHostPort,//String
                                     clonedMasterVars,//Map<String,String>
                                     mutatorScopeVars,//Map<String,String>
                                     testElementIndex,//int

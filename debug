@@ -7,6 +7,6 @@ java -jar target/RestReplay-1.0.4-standalone.jar \
    -control _self_test/self-test.xml \
    -testGroup debug  \
    -testdir ./src/main/resources/restreplay \
-   -selftest
-
+   -selftest \
+   -reports /Users/vcrocla/src/RestReplay/rest-replay-reports
 popd

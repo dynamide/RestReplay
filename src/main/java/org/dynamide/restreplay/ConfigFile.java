@@ -36,9 +36,6 @@ public class ConfigFile {
        testdir = value;
     }
 
-    //TODO: make sure that the report gets all the alerts
-    //TODO: check breaking scenarios and RunOptions.
-    //TODO: config from master control file.
     private RunOptions runOptions;
     public RunOptions getRunOptions(){
         return runOptions;

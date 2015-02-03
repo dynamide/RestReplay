@@ -2,6 +2,8 @@ package org.dynamide.util;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -73,6 +75,15 @@ public class Tools {
             return false;
         }
         return true;
+    }
+
+    /** Creates a TreeMap with a case-insenstive collator using the US Locale.
+     */
+    public static Map createSortedCaseInsensitiveMap(){
+        java.text.Collator usCollator = java.text.Collator.getInstance(java.util.Locale.US);
+        usCollator.setStrength(java.text.Collator.PRIMARY);
+        Map m = new TreeMap(usCollator);
+        return m;
     }
 
     /** Handles null strings as false.  */
@@ -219,8 +230,7 @@ public class Tools {
         }
         StringBuffer sb = new StringBuffer();
         int i = 0;
-        // TODO: BUG - \n is not the separator on all systems. Have to use the system line separator.
-        String[] foo = result.split("\n");
+        String[] foo = result.split(System.lineSeparator());
         sb.append("<pre>\r\n");
         for (String line: foo){
             i++;
@@ -231,6 +241,7 @@ public class Tools {
             }
             sb.append(line).append("\r\n");
         }
+        sb.append("</pre>\r\n");
         return sb.toString();
     }
 
@@ -273,5 +284,13 @@ public class Tools {
         return URLDecoder.decodeURLString(URLString);
     }
 
+    public static void testStatic(){
+        System.out.println(getStackTrace());
+        System.out.println(getStackTrace(new Exception("Created exception."), 2));
+    }
 
+    public static void main(String[]args)
+    throws Exception {
+        testStatic();
+    }
 }

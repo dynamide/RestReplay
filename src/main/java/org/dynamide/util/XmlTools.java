@@ -18,12 +18,6 @@ import org.dom4j.io.XMLWriter;
 
 public class XmlTools {
 
-
-    // @TODO Refactoring opportunity: the utility methods below
-    // could potentially be moved into the 'common' module,
-    // and made static and public.
-    //     -- DONE.   Moved here.  Laramie20110519
-
     // Output format for XML pretty printing.
     public final static OutputFormat PRETTY_PRINT_OUTPUT_FORMAT =  defaultPrettyPrintOutputFormat();
 

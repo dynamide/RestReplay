@@ -67,6 +67,7 @@ public class Transport {
             //the full lines (HTTP 1.1 OK, rather than just OK) is: getMethod.getStatusLine();
             Header[] headers = getMethod.getResponseHeaders();
             dumpResponseHeaders(headers, result);
+            result.setResponseHeaders(headers);
             result.responseHeaders = Arrays.copyOf(headers, headers.length);
             Header hdr = getMethod.getResponseHeader("CONTENT-TYPE");
             if (hdr != null) {

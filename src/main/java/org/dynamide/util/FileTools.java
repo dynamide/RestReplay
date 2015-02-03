@@ -80,13 +80,11 @@ public class FileTools {
 					writer.write(buffer, 0, n);
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				try {
 					is.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -202,8 +200,7 @@ public class FileTools {
         return result;
     }
 
-    // FIXME: Java 7 now offers an integral method for this purpose,
-    // java.nio.file.Files.createTempDirectory()
+    /** If you have Java 7, you can simply call java.nio.file.Files.createTempDirectory() */
     public static File createTmpDir(String filePrefix){
         String tmpDir = System.getProperty(JAVA_TEMP_DIR_PROPERTY);
 		File result = new File(tmpDir, filePrefix + UUID.randomUUID().toString());

@@ -73,10 +73,6 @@
                 </expected>
             </mutator>
         </test>
-
-
-
-
         <test ID="useLoop" loop="3" oldloop="${size(loopvars)}">
             <method>POST</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
@@ -99,13 +95,6 @@
                 <filename>_self_test/res/loop-dates.json</filename>
             </response>
         </test>
-
-
-
-
-
-
-
         <test ID="useToken">
             <method>GET</method>
             <uri>/tagonomy?mock=true&amp;name=useToken</uri>
@@ -479,6 +468,18 @@
                 <filename>_self_test/res/jsonCompareOrdersNewRoot.xml</filename>
             </response>
         </test>
+        <test ID="headersFromGet">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="Content-length">${this.get('Content-length')}</var>
+                    <var ID="CONTENT-LENGTH">${this.get('CONTENT-LENGTH')}</var>
+                    <var ID="Accept">${this.get('Accept')}</var>
+                    <var ID="ACCEPT">${this.get('ACCEPT')}</var>
+                </vars>
+            </exports>
+        </test>
     </testGroup>
 
 
@@ -767,8 +768,45 @@
         </test>
     </testGroup>
 
+    <testGroup ID="deleteURLs">
+        <test ID="useURL">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="protocol">${result.url.protocol}</var>
+                    <var ID="authority">${result.url.authority}</var>
+                    <var ID="path">${result.url.path}</var>
+                    <var ID="protoHostPort">${result.protoHostPort}</var>
+                </vars>
+            </exports>
+        </test>
+        <test ID="useURLCreateDeleteURL">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <deleteURL>${result.url.protocol}://${result.url.authority}${result.url.path}?${result.url.query}</deleteURL>
+        </test>
+        <test ID="use_fullURL">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <deleteURL>${result.fullURL}</deleteURL>
+        </test>
+    </testGroup>
 
-    <testGroup ID="debug">
+
+    <testGroup ID="debug" autoDeletePOSTS="true">
+        <test ID="goodDeleteURL">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <deleteURL>${result.fullURL}</deleteURL>
+        </test>
+        <!--
+        <test ID="badDeleteURL">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <deleteURL>BadURL://${result.fullURL}</deleteURL>
+        </test>
+        -->
     </testGroup>
 
 

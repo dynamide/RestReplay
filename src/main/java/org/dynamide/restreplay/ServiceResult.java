@@ -1,6 +1,8 @@
 package org.dynamide.restreplay;
 
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderElement;
+import org.apache.commons.httpclient.NameValuePair;
 import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
 import org.dynamide.restreplay.mutators.IMutator;
@@ -195,8 +197,22 @@ public class ServiceResult {
         return sb.toString();
     }
     public List<String> requestHeaders = new ArrayList<String>();  //for building report and dump
+    public Map<String, String> requestHeadersMap = Tools.createSortedCaseInsensitiveMap();//new HashMap<String,String>();
     public Map<String,String> headerMap = new LinkedHashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
+
+    public Map<String,String> responseHeaderMap = Tools.createSortedCaseInsensitiveMap();//new HashMap<String, String>();
     public Header[] responseHeaders = new Header[0];
+    public void setResponseHeaders(Header[] headers){
+        responseHeaderMap.clear();
+        responseHeaders = Arrays.copyOf(headers, headers.length);
+        for (Header header: headers){
+            String value = header.getValue();
+            String name= header.getName();
+            responseHeaderMap.put(name, value);
+        }
+    }
+
+
     public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Range> ranges = new ArrayList<Range>();
     public final static Range DEFAULT_SUCCESS_RANGE = new Range("2x");
@@ -336,7 +352,14 @@ public class ServiceResult {
         return showSUCCESS;
     }
 
+    private static Map<PAYLOAD_STRICTNESS, Map<STATUS,Range>> rangeCache = new HashMap<PAYLOAD_STRICTNESS, Map<STATUS,Range>>();
+
     public static Map<STATUS,Range> createRangesForLevel(PAYLOAD_STRICTNESS strictness) {
+        Map<STATUS,Range> hit = rangeCache.get(strictness);
+        if (null!=hit){
+            return hit;
+        }
+
         Map<STATUS,Range> result;
         /* createDOMSet(String ma,
                         String mi,
@@ -364,7 +387,7 @@ public class ServiceResult {
             default:
                 result = TreeWalkResults.createDOMSet("","","","","","");
         }
-        //TODO: cache these sets.
+        rangeCache.put(strictness, result);
         return result;
     }
 
@@ -581,6 +604,7 @@ public class ServiceResult {
     }
 
     public void addRequestHeader(String name, String value){
+        requestHeadersMap.put(name, value);
         requestHeaders.add(name+':'+value);
     }
 
@@ -699,7 +723,7 @@ public class ServiceResult {
             if (Tools.isBlank(source)) {
                 return "";
             }
-            org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, xpath, null);  //todo: passing null for namespace may not work.
+            org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, xpath, null);
             String sr = element != null ? element.getText() : "";
             return sr;
         } catch (Throwable t){
@@ -716,12 +740,10 @@ public class ServiceResult {
         if (source == null){
             return "ERROR:null:requestPayloadsRaw";
         }
-        org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, xpath, null);   //e.g. "//shortIdentifier");  //todo: passing null for namespace may not work.
+        org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, xpath, null);   //e.g. "//shortIdentifier");
         String sr = element != null ? element.getText() : "";
         return sr;
     }
-
-    //TODO: add a way to get at headers in Headers[] either in a separate method or in get().
 
     /* Responding to these string names makes these accessible by Jexl.
     We could also just add getters to any class field, for example, as is done for mutator/getMutator.
@@ -759,6 +781,14 @@ public class ServiceResult {
         }
         if (exports.containsKey(what)){
             return exports.get(what);
+        }
+        String respVal = responseHeaderMap.get(what);
+        if (respVal!=null){
+            return respVal;
+        }
+        String val = requestHeadersMap.get(what);
+        if (val!=null){
+            return val;
         }
         return "";
     }
