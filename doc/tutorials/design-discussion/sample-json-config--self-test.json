@@ -1,0 +1,1171 @@
+{"restReplay": {
+    "protoHostPort": "http://localhost:${SELFTEST_PORT}",
+    "testGroup": [
+        {
+            "test": {
+                "ID": "token",
+                "method": "GET",
+                "uri": "/tagonomy?mock=token"
+            },
+            "autoDeletePOSTS": false,
+            "ID": "login"
+        },
+        {
+            "vars": {"var": {
+                "content": "http://localhost:${SELFTEST_PORT}",
+                "ID": "SELFTEST_SERVER"
+            }},
+            "test": [
+                {
+                    "ID": "token",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                },
+                {
+                    "vars": {"var": {
+                        "content": "${token.got(\"//status\")}",
+                        "ID": "TOKEN_ID"
+                    }},
+                    "expected": {"code": [
+                        {"range": "3x"},
+                        {"range": "1x"},
+                        {"range": "2x"}
+                    ]},
+                    "ID": "expectedCodes",
+                    "method": "GET",
+                    "uri": "${SELFTEST_SERVER}/tagonomy?mock=true&foo=${TOKEN_ID}"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {
+                            "DIFFERENT": {"range": 0},
+                            "REMOVED": {"range": 0}
+                        }},
+                        "validator": {
+                            "content": "\r\n                    if (tools.notBlank(serviceResult.idFromMutator) ){\r\n                        if (tools.notBlank(serviceResult.got(\"//\"+serviceResult.idFromMutator))){\r\n                            serviceResult.addError(\" idFromMutator:\"+serviceResult.idFromMutator);\r\n                        } else {\r\n                            \"field was properly removed: \"+serviceResult.idFromMutator;\r\n                        }\r\n                    }\r\n                ",
+                            "lang": "javascript"
+                        },
+                        "filename": "_self_test/res/content-mutator-base.json"
+                    },
+                    "ID": "useMutator",
+                    "mutator": {
+                        "expected": {"code": [
+                            {
+                                "content": "*",
+                                "range": 200
+                            },
+                            {
+                                "content": "numOfDrafts",
+                                "range": "200-299"
+                            },
+                            {
+                                "content": "book_id, course_id",
+                                "range": "400-499,500-599"
+                            }
+                        ]},
+                        "type": "ExcludeFields"
+                    },
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "ID": "useMutatorSkipParent",
+                    "mutator": {
+                        "expected": {"code": [
+                            {
+                                "content": "*",
+                                "range": 200
+                            },
+                            {
+                                "content": "numOfDrafts",
+                                "range": "200-299"
+                            },
+                            {
+                                "content": "book_id, course_id",
+                                "range": "400-499,500-599"
+                            }
+                        ]},
+                        "skipParent": true,
+                        "type": "ExcludeFields"
+                    },
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {
+                            "DIFFERENT": {"range": 0},
+                            "REMOVED": {"range": 0}
+                        }},
+                        "filename": "_self_test/res/loop-dates.json"
+                    },
+                    "vars": {"var": [
+                        {
+                            "content": "${[\"10\",\"18\",\"21\"]}",
+                            "ID": "loopvars"
+                        },
+                        {
+                            "content": "${24*60*60*1000}",
+                            "ID": "DAYS"
+                        },
+                        {
+                            "content": "${tools.now()}",
+                            "ID": "BASE_DATE"
+                        },
+                        {
+                            "content": "${BASE_DATE + loopvars[this.LoopIndex]*DAYS}",
+                            "ID": "DUE_DATE_MILLIS"
+                        },
+                        {
+                            "content": "Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}",
+                            "ID": "INSTRUCTOR_NOTE"
+                        },
+                        {
+                            "content": "Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}",
+                            "ID": "TITLE"
+                        }
+                    ]},
+                    "oldloop": "${size(loopvars)}",
+                    "loop": 3,
+                    "ID": "useLoop",
+                    "filename": "_self_test/loop-dates.json",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=application/json"
+                },
+                {
+                    "headers": {"header": [
+                        {
+                            "content": "${token.got(\"//data\")}",
+                            "name": "x-authorization"
+                        },
+                        {
+                            "content": "${token.method}",
+                            "name": "x-method"
+                        }
+                    ]},
+                    "ID": "useToken",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=true&name=useToken"
+                },
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "${token.got(\"//data\")}",
+                            "ID": "TOKEN"
+                        },
+                        {
+                            "content": "${token.got(\"//data\")}",
+                            "ID": "TOKENDATA"
+                        }
+                    ]},
+                    "ID": "useTokenPOST",
+                    "filename": "_self_test/selftest-token-post.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "ID": "useTokenPUT",
+                    "mutator": {
+                        "expected": {"code": {
+                            "content": "*",
+                            "range": "4xx"
+                        }},
+                        "type": "ExcludeFields"
+                    },
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "PUT",
+                    "uri": "/tagonomy?mock=true&mutation=${this.mutation}"
+                },
+                {
+                    "ID": "useTokenDELETE",
+                    "method": "DELETE",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "expected": {"code": {"range": 501}},
+                    "ID": "selftest501",
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "PUT",
+                    "uri": "/tagonomy?mock=501"
+                },
+                {
+                    "vars": {"var": {
+                        "content": "FOOTOKEN",
+                        "ID": "TOKEN"
+                    }},
+                    "exports": {"vars": {
+                        "var": {
+                            "content": "${\r\n                        if (kit != null) {\r\n                            var ts = kit.gregorian.timestampUTC();\r\n                            kit.out.println('');\r\n                            kit.out.println('    ==> Running test script, in selftest.xml:selftestGroup:scriptTest at '+ts);\r\n                            kit.out.println('');\r\n                            return 'zts:'+ts;\r\n                        }\r\n                        return \"kit not defined in scriptTest\";\r\n                    }",
+                            "ID": "GregorianDate"
+                        },
+                        "comment": "this stuff is JEXL, Java Expression Language: org.apache.commons.jexl2, and it is basically java, but has the var keyword."
+                    }},
+                    "ID": "scriptTest",
+                    "filename": "_self_test/selftest-mutator.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"validator": {
+                        "filename": "_self_test/res/selftest.validator.js",
+                        "lang": "javascript"
+                    }},
+                    "vars": {"var": {
+                        "content": 3,
+                        "ID": "COUNT"
+                    }},
+                    "ID": "useValidator",
+                    "filename": "_self_test/selftest-number-post.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"validator": {
+                        "filename": "_self_test/res/getOrders.validator.js",
+                        "lang": "javascript"
+                    }},
+                    "vars": {"var": {
+                        "content": 4,
+                        "ID": "COUNT"
+                    }},
+                    "ID": "getOrders",
+                    "filename": "_self_test/selftest-number-post.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "loop": "${size(getOrders.ORDER_IDS)}",
+                    "ID": "deleteOrders",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=${getOrders.ORDER_IDS[this.LoopIndex]}"
+                },
+                {
+                    "response": {
+                        "expected": {"failure": ""},
+                        "validator": {
+                            "filename": "_self_test/res/selftest-with-validator-errors.validator.js",
+                            "lang": "javascript"
+                        }
+                    },
+                    "vars": {"var": {
+                        "content": 3,
+                        "ID": "COUNT"
+                    }},
+                    "ID": "useValidatorExpectErrors",
+                    "filename": "_self_test/selftest-number-post.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"filename": "_self_test/res/empty-file.json"},
+                    "vars": {"var": {
+                        "content": 3,
+                        "ID": "COUNT"
+                    }},
+                    "ID": "emptyExpectedResponseFile",
+                    "filename": "_self_test/selftest-number-post.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"expected": {"dom": "TEXT"}},
+                    "vars": {"var": [
+                        {
+                            "content": "${tools.now()}",
+                            "ID": "DUE_DATE_MILLIS"
+                        },
+                        {
+                            "content": "Base message set here as default (useVarMutator).",
+                            "ID": "VarTestMessage"
+                        }
+                    ]},
+                    "expected": {"code": {"range": 202}},
+                    "ID": "jsonBadPropertyNames",
+                    "filename": "_self_test/json-bad-propertynames.json",
+                    "method": "PUT",
+                    "uri": "http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&mutation=${this.mutation}&emptyMutationResponseCode=202"
+                },
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "${24*60*60*1000}",
+                            "ID": "DAYS"
+                        },
+                        {
+                            "content": "${tools.now()}",
+                            "ID": "BASE_DATE"
+                        },
+                        {
+                            "content": "${BASE_DATE +0 * DAYS}",
+                            "ID": "DUE_DATE_MILLIS"
+                        },
+                        {
+                            "content": "Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}",
+                            "ID": "DueDate"
+                        },
+                        {
+                            "content": "Base message set here as default (useVarMutator).",
+                            "ID": "VarTestMessage"
+                        }
+                    ]},
+                    "expected": {
+                        "code": {"range": 202},
+                        "comment": "because emptyMutationResponseCode=202 is sent in uri.\r\n                         Each non-empty mutation (child test) will return a 406, hardcoded on the server side of this test,\r\n                         because typical use case is seeing if removing fields makes the service complain."
+                    },
+                    "ID": "useVarMutator",
+                    "mutator": {
+                        "vars": [
+                            {
+                                "var": [
+                                    {
+                                        "content": "${BASE_DATE +1 * DAYS}",
+                                        "idbase": "DUE_DATE_MILLIS"
+                                    },
+                                    {
+                                        "content": "${this.testID} set in mutation ID=0.",
+                                        "idbase": "VarTestMessage"
+                                    }
+                                ],
+                                "ID": 0
+                            },
+                            {
+                                "var": [
+                                    {
+                                        "content": "${BASE_DATE +3 * DAYS}",
+                                        "idbase": "DUE_DATE_MILLIS"
+                                    },
+                                    {
+                                        "content": "${this.testID} set in mutation ID=1.",
+                                        "idbase": "VarTestMessage"
+                                    }
+                                ],
+                                "ID": 1
+                            }
+                        ],
+                        "expected": {"code": {"range": 406}},
+                        "type": "VarMutator"
+                    },
+                    "filename": "_self_test/var-mutator-test.json",
+                    "method": "PUT",
+                    "uri": "http://localhost:${SELFTEST_PORT}/tagonomy?mock=true&mutation=${this.mutation}&emptyMutationResponseCode=202"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": "TEXT"},
+                        "filename": "${EXPECTED_FILE}"
+                    },
+                    "skipParent": true,
+                    "ID": "filenameExpressions",
+                    "mutator": {
+                        "vars": [
+                            {
+                                "var": {
+                                    "content": "_self_test/res/jsonTreeCompareL.xml",
+                                    "idbase": "EXPECTED_FILE"
+                                },
+                                "ID": "Base"
+                            },
+                            {
+                                "var": {
+                                    "content": "_self_test/res/jsonTreeCompareAddedChangedL.xml",
+                                    "idbase": "EXPECTED_FILE"
+                                },
+                                "ID": "AddedChanged"
+                            }
+                        ],
+                        "skipParent": true,
+                        "comment": "This *sort of* works with skipParent=false, because EXPECTED_FILE is still\r\n                    in the shared context from the last go-round of AddedChanged,\r\n                    when the parent expected/filename gets eval'd,\r\n                    even though the parent doesn't set up that variable.\r\n                    For now, we're going to recommend using VarMutators ONLY with skipParents=true.",
+                        "type": "VarMutator"
+                    },
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": "TEXT"},
+                        "filename": "${EXPECTED_FILENAME_EXPORTED}"
+                    },
+                    "exports": {"vars": {"var": {
+                        "content": "${EXPECTED_FILE}",
+                        "ID": "EXPECTED_FILENAME_EXPORTED"
+                    }}},
+                    "ID": "filenameExpressionExports",
+                    "mutator": {
+                        "vars": [
+                            {
+                                "var": {
+                                    "content": "_self_test/res/jsonTreeCompareL.xml",
+                                    "idbase": "EXPECTED_FILE"
+                                },
+                                "ID": "Base"
+                            },
+                            {
+                                "var": {
+                                    "content": "_self_test/res/jsonTreeCompareChangedL.xml",
+                                    "idbase": "EXPECTED_FILE"
+                                },
+                                "ID": "Changed"
+                            }
+                        ],
+                        "skipParent": true,
+                        "type": "VarMutator"
+                    },
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "comment": "In this one, the expression gets evaluated twice:\r\n                1) in EXPECTED_FILE,\r\n                2) in EXPECTED_FILENAME_EXPORTED.\r\n                This really just shows that exports and vars are both available to filename expressions.",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {
+                            "MATCHED": {"range": 3},
+                            "DIFFERENT": {"range": 0}
+                        }},
+                        "filename": "${EXPECTED_FILE}"
+                    },
+                    "ID": "jsonTreeCompare",
+                    "mutator": {
+                        "vars": [
+                            {
+                                "var": [
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareL.xml",
+                                        "idbase": "REQUEST_FILE"
+                                    },
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareL.xml",
+                                        "idbase": "EXPECTED_FILE"
+                                    }
+                                ],
+                                "ID": "Base"
+                            },
+                            {
+                                "var": [
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareAddedL.xml",
+                                        "idbase": "REQUEST_FILE"
+                                    },
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareAddedL.xml",
+                                        "idbase": "EXPECTED_FILE"
+                                    }
+                                ],
+                                "ID": "Added"
+                            },
+                            {
+                                "var": [
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareChangedL.xml",
+                                        "idbase": "REQUEST_FILE"
+                                    },
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareChangedL.xml",
+                                        "idbase": "EXPECTED_FILE"
+                                    }
+                                ],
+                                "ID": "Changed"
+                            },
+                            {
+                                "var": [
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareAddedChangedL.xml",
+                                        "idbase": "REQUEST_FILE"
+                                    },
+                                    {
+                                        "content": "_self_test/res/jsonTreeCompareAddedChangedL.xml",
+                                        "idbase": "EXPECTED_FILE"
+                                    }
+                                ],
+                                "ID": "AddedChanged"
+                            }
+                        ],
+                        "expected": {"dom": {
+                            "MATCHED": {"range": 3},
+                            "DIFFERENT": {"range": 0}
+                        }},
+                        "skipParent": true,
+                        "type": "VarMutator"
+                    },
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "comment": [
+                        "This test checks one API's response against three expected possibilities,\r\n              by looping three times, and supplying three different filenames, and using the same\r\n            validation strategy, but reading three different validation templates.",
+                        "we are just sending jsonTreeCompareL.xml as content because we have to send something.\r\n                     The service echos back the payload, and sets a mime header for the type specified\r\n                      by the query parmeter mimeOut."
+                    ],
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {
+                            "failure": "",
+                            "dom": "ADDOK"
+                        },
+                        "filename": "_self_test/res/jsonTreeCompareChangedL.xml"
+                    },
+                    "ID": "jsonTreeCompareTextChanged",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {"DIFFERENT": {"range": "0-2"}}},
+                        "filename": "_self_test/res/jsonTreeCompareChangedL.xml"
+                    },
+                    "ID": "jsonTreeCompareRange",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {
+                            "MATCHED": {"range": 1},
+                            "DIFFERENT": {"range": 2},
+                            "ERROR": {"range": 0},
+                            "REMOVED": {"range": 0},
+                            "ADDED": {"range": 0},
+                            "NESTED_ERROR": {"range": 0}
+                        }},
+                        "filename": "_self_test/res/jsonTreeCompareChangedL.xml"
+                    },
+                    "ID": "jsonTreeCompareCustom",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {"DIFFERENT": {"range": 2}}},
+                        "filename": "_self_test/res/jsonTreeCompareChangedL.xml",
+                        "was": "jsonTreeCompareChangedL"
+                    },
+                    "ID": "jsonTreeCompareJustDifferences",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {
+                            "failure": "",
+                            "dom": [
+                                "ADDOK",
+                                {"DIFFERENT": {"range": 2}}
+                            ]
+                        },
+                        "filename": "_self_test/res/jsonTreeCompareChangedL.xml"
+                    },
+                    "ID": "ToSpecifyBothIsAnError",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": "ADDOK"},
+                        "filename": "_self_test/res/jsonCompareOrders.json"
+                    },
+                    "vars": {"var": {
+                        "content": "Order for Smith - 123400",
+                        "ID": "TITLE"
+                    }},
+                    "ID": "jsonCompareOrders",
+                    "filename": "_self_test/jsonCompareOrders.json",
+                    "method": "POST",
+                    "uri": "/jsonCompare1"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": "ADDOK"},
+                        "filename": "_self_test/res/jsonCompareOrders.xml"
+                    },
+                    "vars": {"var": {
+                        "content": "Order for Smith - 123400",
+                        "ID": "TITLE"
+                    }},
+                    "ID": "jsonCompareOrders_ExpectedIsXml",
+                    "filename": "_self_test/jsonCompareOrders.json",
+                    "method": "POST",
+                    "uri": "/jsonCompare1"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": "ADDOK"},
+                        "filename": "_self_test/res/jsonCompareOrdersNewRoot.xml"
+                    },
+                    "vars": {"var": {
+                        "content": "Order for Smith - 123400",
+                        "ID": "TITLE"
+                    }},
+                    "ID": "jsonCompareOrders_ExpectedIsXmlNewRoot",
+                    "filename": "_self_test/jsonCompareOrders.json",
+                    "method": "POST",
+                    "uri": "/jsonCompare1"
+                },
+                {
+                    "exports": {"vars": {"var": [
+                        {
+                            "content": "${this.get('Content-length')}",
+                            "ID": "Content-length"
+                        },
+                        {
+                            "content": "${this.get('CONTENT-LENGTH')}",
+                            "ID": "CONTENT-LENGTH"
+                        },
+                        {
+                            "content": "${this.get('Accept')}",
+                            "ID": "Accept"
+                        },
+                        {
+                            "content": "${this.get('ACCEPT')}",
+                            "ID": "ACCEPT"
+                        }
+                    ]}},
+                    "ID": "headersFromGet",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                }
+            ],
+            "autoDeletePOSTS": false,
+            "ID": "selftestGroup"
+        },
+        {
+            "test": [
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "${24*60*60*1000}",
+                            "ID": "DAYS"
+                        },
+                        {
+                            "content": "${tools.now()}",
+                            "ID": "BASE_DATE"
+                        },
+                        {
+                            "content": "${BASE_DATE +0 * DAYS}",
+                            "ID": "DUE_DATE_MILLIS"
+                        },
+                        {
+                            "content": "${this.testID}",
+                            "ID": "FOOBAR"
+                        },
+                        {
+                            "content": "Due ${BASE_DATE} -basedate",
+                            "ID": "DueDate2"
+                        },
+                        {
+                            "content": "Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}",
+                            "ID": "DueDate"
+                        },
+                        {
+                            "content": "Base message set here as default (varMutatorExpectedCodes).",
+                            "ID": "VarTestMessage"
+                        }
+                    ]},
+                    "expected": {"code": {
+                        "content": "*",
+                        "range": 401
+                    }},
+                    "ID": "varMutatorExpectedCodes",
+                    "mutator": {
+                        "vars": [
+                            {
+                                "var": [
+                                    {
+                                        "content": "${BASE_DATE +1 * DAYS}",
+                                        "idbase": "DUE_DATE_MILLIS"
+                                    },
+                                    {
+                                        "content": "${this.testID} set in 0.",
+                                        "idbase": "FOOBAR"
+                                    }
+                                ],
+                                "ID": 0
+                            },
+                            {
+                                "var": [
+                                    {
+                                        "content": "${BASE_DATE +2 * DAYS}",
+                                        "idbase": "DUE_DATE_MILLIS"
+                                    },
+                                    {
+                                        "content": "${this.testID + ' mutator index: ' + this.mutator.getIndex() }",
+                                        "idbase": "FOOBAR"
+                                    }
+                                ],
+                                "ID": 1
+                            }
+                        ],
+                        "expected": {"code": {
+                            "content": "*",
+                            "range": 406
+                        }},
+                        "type": "VarMutator"
+                    },
+                    "filename": "_self_test/var-mutator-test.json",
+                    "method": "PUT",
+                    "uri": "/tagonomy?mock=true&mutation=${this.mutation}&emptyMutationResponseCode=401"
+                },
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "FOOTOKEN",
+                            "ID": "TOKEN"
+                        },
+                        {
+                            "content": "${this.mutation}",
+                            "ID": "mutation"
+                        }
+                    ]},
+                    "expected": {"code": {"range": "2x"}},
+                    "ID": "ExcludeFieldsMutatorExpectedCodes",
+                    "mutator": {
+                        "expected": {"code": [
+                            {
+                                "content": "no_optionalField",
+                                "range": 202
+                            },
+                            {
+                                "content": "*",
+                                "range": "4x"
+                            }
+                        ]},
+                        "type": "ExcludeFields"
+                    },
+                    "filename": "_self_test/selftest-mutator.json",
+                    "method": "PUT",
+                    "uri": "/tagonomy?mock=true&mutation=${this.mutation}"
+                }
+            ],
+            "autoDeletePOSTS": false,
+            "ID": "testMutatorExpectedCodes"
+        },
+        {
+            "test": [
+                {
+                    "exports": {"vars": [
+                        {"var": {
+                            "content": "${\r\n                          arr = kit.newStringArray(3);\r\n                          arr[0]=\"10\";\r\n                          arr[1]=\"18\";\r\n                          arr[2]=\"21\";\r\n                          return arr;\r\n                    }",
+                            "ID": "OFFSET"
+                        }},
+                        {"var": [
+                            {
+                                "content": "${\r\n                          arr = ['20', '33', '128'];\r\n                          return arr;\r\n                    }",
+                                "ID": "OFFSET_LITERAL"
+                            },
+                            {
+                                "content": "${['21','34','129']}",
+                                "ID": "OFFSET_LITERAL_SINGLE"
+                            }
+                        ]}
+                    ]},
+                    "ID": "exportVarsFromJexl",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {
+                        "expected": {"failure": ""},
+                        "validator": {
+                            "content": "\r\n                   if (exportVarsFromJexl.get('OFFSET')[1] != '9'){\r\n                      serviceResult.addError(\"OFFSET[1] was not 9, was: \"+exportVarsFromJexl.get('OFFSET')[1]);\r\n                   }\r\n                   if (theOFFSET0 != '9'){\r\n                      serviceResult.addWarning(\"theOFFSET0 was not 9, was: \"+theOFFSET0);\r\n                   }\r\n                ",
+                            "lang": "javascript"
+                        }
+                    },
+                    "vars": {"var": [
+                        {
+                            "content": "OFFSET: ${exportVarsFromJexl.OFFSET[0]}, ${exportVarsFromJexl.OFFSET[1]}, ${exportVarsFromJexl.OFFSET[2]}",
+                            "ID": "ARRAYS_USED_0"
+                        },
+                        {
+                            "content": "OFFSET_LITERAL: ${exportVarsFromJexl.OFFSET_LITERAL[0]}, ${exportVarsFromJexl.OFFSET_LITERAL[1]}, ${exportVarsFromJexl.OFFSET_LITERAL[2]}",
+                            "ID": "ARRAYS_USED_1"
+                        },
+                        {
+                            "content": "OFFSET_LITERAL_SINGLE: ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[0]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[1]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[2]}",
+                            "ID": "ARRAYS_USED_2"
+                        },
+                        {
+                            "content": "${exportVarsFromJexl.OFFSET[0]}",
+                            "ID": "theOFFSET0"
+                        }
+                    ]},
+                    "ID": "useVarValidator",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                },
+                {
+                    "response": {"validator": {
+                        "content": "\r\n                   if (exportVarsFromJexl.get('OFFSET')[1] != '18'){\r\n                      serviceResult.addError(\"OFFSET[1] was not 18, was: \"+exportVarsFromJexl.get('OFFSET')[1]);\r\n                   }\r\n                   if (theOFFSET0 != '10'){\r\n                      serviceResult.addWarning(\"theOFFSET0 was not 10, was: \"+theOFFSET0);\r\n                   }\r\n                ",
+                        "lang": "javascript"
+                    }},
+                    "vars": {"var": [
+                        {
+                            "content": "OFFSET: ${exportVarsFromJexl.OFFSET[0]}, ${exportVarsFromJexl.OFFSET[1]}, ${exportVarsFromJexl.OFFSET[2]}",
+                            "ID": "ARRAYS_USED_0"
+                        },
+                        {
+                            "content": "OFFSET_LITERAL: ${exportVarsFromJexl.OFFSET_LITERAL[0]}, ${exportVarsFromJexl.OFFSET_LITERAL[1]}, ${exportVarsFromJexl.OFFSET_LITERAL[2]}",
+                            "ID": "ARRAYS_USED_1"
+                        },
+                        {
+                            "content": "OFFSET_LITERAL_SINGLE: ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[0]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[1]}, ${exportVarsFromJexl.OFFSET_LITERAL_SINGLE[2]}",
+                            "ID": "ARRAYS_USED_2"
+                        },
+                        {
+                            "content": "${exportVarsFromJexl.OFFSET[0]}",
+                            "ID": "theOFFSET0"
+                        }
+                    ]},
+                    "ID": "useVarValidatorNoErrors",
+                    "filename": "_self_test/res/jsonTreeCompareL.xml",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=text/xml"
+                }
+            ],
+            "ID": "VarsAndValidators"
+        },
+        {
+            "test": [
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "${[\"103\",\"183\",\"213\"]}",
+                            "ID": "someArray"
+                        },
+                        {
+                            "content": "${loop}",
+                            "ID": "LOOP"
+                        }
+                    ]},
+                    "loop": "${['10','18','21']}",
+                    "ID": "loopStringArraySimple",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {
+                            "DIFFERENT": {"range": 0},
+                            "REMOVED": {"range": 0}
+                        }},
+                        "filename": "_self_test/res/loop-dates.json"
+                    },
+                    "vars": {"var": [
+                        {
+                            "content": "${24*60*60*1000}",
+                            "ID": "DAYS"
+                        },
+                        {
+                            "content": "${[\"103\",\"183\",\"213\"]}",
+                            "ID": "someArray"
+                        },
+                        {
+                            "content": "${someArray[this.LoopIndex]*DAYS}",
+                            "ID": "useSomeArray"
+                        },
+                        {
+                            "content": "${\"size: \"+size(loop)}",
+                            "ID": "LOOPSIZE"
+                        },
+                        {
+                            "content": "${\"loop[this.LoopIndex]: \"+loop[this.LoopIndex]}",
+                            "ID": "LOOP_THIS_INDEX"
+                        },
+                        {
+                            "content": "${\"loop[loop.index]: \"+loop[loop.index]}",
+                            "ID": "LOOP_INDEX"
+                        },
+                        {
+                            "content": "${loop.value}",
+                            "ID": "LOOP_VALUE"
+                        },
+                        {
+                            "content": "${tools.now() + loop.value*DAYS}",
+                            "ID": "DUE_DATE_MILLIS"
+                        },
+                        {
+                            "content": "Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}",
+                            "ID": "INSTRUCTOR_NOTE"
+                        },
+                        {
+                            "content": "Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}",
+                            "ID": "TITLE"
+                        }
+                    ]},
+                    "loop": "${['10','18','21']}",
+                    "ID": "loopStringArray",
+                    "filename": "_self_test/loop-dates.json",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=application/json"
+                },
+                {
+                    "response": {
+                        "expected": {"dom": {
+                            "DIFFERENT": {"range": 0},
+                            "REMOVED": {"range": 0}
+                        }},
+                        "filename": "_self_test/res/loop-dates.json"
+                    },
+                    "vars": {"var": [
+                        {
+                            "content": "${\"size: \"+size(loop)+\", loop.key: \"+loop.key+\", loop.value:\"+loop.value+\", loop['\"+loop.key+\"']: \"+loop[loop.key]}",
+                            "ID": "LOOP_MAP_INFO"
+                        },
+                        {
+                            "content": "${24*60*60*1000}",
+                            "ID": "DUE_DATE_MILLIS"
+                        },
+                        {
+                            "content": "${loop.key}",
+                            "ID": "INSTRUCTOR_NOTE"
+                        },
+                        {
+                            "content": "${loop.value}",
+                            "ID": "TITLE"
+                        },
+                        {
+                            "content": "${loop}",
+                            "ID": "LOOP"
+                        }
+                    ]},
+                    "loop": "${{'a':'Due February 20','b':'Due January 28'}}",
+                    "ID": "loopMap",
+                    "filename": "_self_test/loop-dates.json",
+                    "method": "POST",
+                    "uri": "/jsonCompare1?mimeOut=application/json"
+                },
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "${loop.value.a}",
+                            "ID": "VALUE_a"
+                        },
+                        {
+                            "content": "${loop.value.c}",
+                            "ID": "VALUE_c"
+                        },
+                        {
+                            "content": "${loop.value}",
+                            "ID": "VALUE"
+                        },
+                        {
+                            "content": "${loop}",
+                            "ID": "LOOP"
+                        }
+                    ]},
+                    "loop": "${[{'a':'aVal', 'b':'bVal'},{'c':'cVal', 'd':'dVal'}]}",
+                    "ID": "LoopArrayOfMap",
+                    "method": "GET",
+                    "uri": "/jsonCompare1?mimeOut=application/json&loop=${this.LoopIndex}"
+                },
+                {
+                    "vars": {"var": [
+                        {
+                            "content": "${loop.value.ORDER}",
+                            "ID": "ORDER"
+                        },
+                        {
+                            "content": "${loop.value.USER}",
+                            "ID": "USER"
+                        }
+                    ]},
+                    "loop": "${[{'USER':'Moe Gibbons', 'ORDER':'AM444890'},\r\n                   {'USER':'Clive Orvis', 'ORDER':'AC897654'}\r\n                  ]}",
+                    "ID": "LoopArrayOfMap2",
+                    "method": "GET",
+                    "uri": "/jsonCompare1?mimeOut=application/json&LoopIndex=${this.LoopIndex}&loop.index=${loop.index}"
+                },
+                {
+                    "response": {"validator": {
+                        "content": "\r\n                    if (loop){\r\n                        var ret = {'index': loop.index, 'value': loop.value};\r\n                        \" loop: \"+loop+\" ret.index: \"+ret.index;\r\n                    } else {\r\n                        \"loop var not available\";\r\n                    }\r\n                ",
+                        "lang": "javascript"
+                    }},
+                    "ID": "loopValidatorNoLoop",
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"validator": {
+                        "content": "\r\n                    if (loop){\r\n                        var ret = {'index': loop.index, 'value': loop.value};\r\n                        \" loop: \"+loop+\" ret.index: \"+ret.index;\r\n                    } else {\r\n                        \"loop var not available\";\r\n                    }\r\n                ",
+                        "lang": "javascript"
+                    }},
+                    "loop": 2,
+                    "ID": "loopValidator",
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"validator": {
+                        "content": "\r\n                        if (loop){\r\n                            var ret = {'index': loop.index, 'value': loop.value};\r\n                            serviceResult.addExport(\"CurrentItem\",loop.key+\"::\"+loop.value);\r\n                            \" loop: \"+loop+\", ret.index: \"+ret.index;\r\n                        } else {\r\n                            \"loop var not available\";\r\n                        }\r\n                    ",
+                        "lang": "javascript"
+                    }},
+                    "loop": "${{'USER':'Moe Gibbons', 'ORDER':'AM444890'}}",
+                    "ID": "loopValidatorWMap",
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"validator": {
+                        "content": "\r\n                        if (loop){\r\n                            var ret = {'index': loop.index, 'value': loop.value};\r\n                            serviceResult.addExport(\"Order\",\"\"+ loop.value.get(\"USER\")+\" ordered: \"+ loop.value.get(\"ORDER\"));\r\n                            \" loop: \"+loop+\", ret.index: \"+ret.index;\r\n                        } else {\r\n                            \"loop var not available\";\r\n                        }\r\n                    ",
+                        "lang": "javascript"
+                    }},
+                    "loop": "${[{'USER':'Moe Gibbons', 'ORDER':'AM444890'},\r\n                {'USER':'Clive Orvis', 'ORDER':'AC897654'}\r\n                ]}",
+                    "ID": "loopValidatorWArrayOfMap",
+                    "filename": "_self_test/content-mutator-test.json",
+                    "method": "POST",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "response": {"expected": {"failure": ""}},
+                    "vars": {"var": {
+                        "content": "${loop.value}",
+                        "ID": "TITLE"
+                    }},
+                    "loop": "${this+is+a+syntax:error}",
+                    "ID": "BadLoopExpression",
+                    "method": "GET",
+                    "uri": "/jsonCompare1?mimeOut=application/json"
+                }
+            ],
+            "ID": "Loops"
+        },
+        {
+            "test": [
+                {
+                    "exports": {"vars": {"var": [
+                        {
+                            "content": "${result.url.protocol}",
+                            "ID": "protocol"
+                        },
+                        {
+                            "content": "${result.url.authority}",
+                            "ID": "authority"
+                        },
+                        {
+                            "content": "${result.url.path}",
+                            "ID": "path"
+                        },
+                        {
+                            "content": "${result.protoHostPort}",
+                            "ID": "protoHostPort"
+                        }
+                    ]}},
+                    "ID": "useURL",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                },
+                {
+                    "deleteURL": "${result.url.protocol}://${result.url.authority}${result.url.path}?${result.url.query}",
+                    "ID": "useURLCreateDeleteURL",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                },
+                {
+                    "deleteURL": "${result.fullURL}",
+                    "ID": "use_fullURL",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                }
+            ],
+            "ID": "deleteURLs"
+        },
+        {
+            "test": [
+                {
+                    "deleteURL": "${result.fullURL}",
+                    "ID": "goodDeleteURL",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                },
+                {
+                    "response": {"expected": {"failure": ""}},
+                    "deleteURL": "BadURL://${result.fullURL}",
+                    "ID": "badDeleteURL",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token"
+                }
+            ],
+            "autoDeletePOSTS": true,
+            "ID": "debug"
+        },
+        {
+            "test": [
+                {
+                    "exports": {"vars": {"var": [
+                        {
+                            "content": "${tools.encodeURLString(\"and these are my data 1 2 3 + % * left-brace:\\u007B right-brace:\\u007D \")}",
+                            "ID": "plainString"
+                        },
+                        {
+                            "content": "${tools.encodeURLString(this.got(\"//data\"))}",
+                            "ID": "encodedData2"
+                        },
+                        {
+                            "content": "${this.got(\"//data\")}",
+                            "ID": "data"
+                        },
+                        {
+                            "content": "This case (result/this) is borked: ${result.got(\"//data\")}",
+                            "ID": "result"
+                        },
+                        {
+                            "content": "${var d = this.got(\"//data\"); if (d.length()>0) {return true;} else {return false;}}",
+                            "ID": "returnTest"
+                        }
+                    ]}},
+                    "ID": "useTokenPUTbugs",
+                    "mutator": {
+                        "expected": {"code": {
+                            "content": "*",
+                            "range": "4xx"
+                        }},
+                        "type": "ExcludeFields"
+                    },
+                    "filename": "_self_test/selftest-mutator.json",
+                    "method": "PUT",
+                    "uri": "/tagonomy?mock=true"
+                },
+                {
+                    "autoDeletePOSTS": false,
+                    "ID": "selftestUseData",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=token&data=${tools.encodeURLString(useTokenPUTbugs.result)}"
+                },
+                {
+                    "headers": {"header": [
+                        {
+                            "content": "${token.got(\"//data\")}",
+                            "name": "x-authorization"
+                        },
+                        {
+                            "content": "${token.method}",
+                            "name": "x-method"
+                        }
+                    ]},
+                    "ID": "useToken",
+                    "method": "GET",
+                    "uri": "/tagonomy?mock=true&name=useToken"
+                }
+            ],
+            "autoDeletePOSTS": false,
+            "ID": "BUGS_TODO"
+        },
+        {
+            "test": {
+                "ID": "selftestReturnTest",
+                "filename": "_self_test/selftest-mutator.json",
+                "method": "POST",
+                "uri": "/tagonomy?mock=true"
+            },
+            "ID": "debugScript"
+        }
+    ]
+}}

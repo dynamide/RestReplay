@@ -746,8 +746,9 @@ public class RestReplayReport {
     }
 
     public String detail(ServiceResult s, boolean includePayloads, boolean includePartSummary,String linesep, String end, int tocID) {
-        String mutation = s.isMutation ? " mutation" : "";
-        String start = "<table border='1' class='DETAIL_TABLE "+mutation+"'><tr><td>\r\n";
+        String mutationClass = s.isMutation ? " mutation" : "";
+        String autodeleteClass = s.isAutoDelete ? " autodelete" : "";
+        String start = "<table border='1' class='DETAIL_TABLE "+mutationClass+autodeleteClass+"'><tr><td>\r\n";
 
         boolean detailedPartSummary = false;//includes expected parts bodies.  These are shown in the PartSummary blocks under the detail, along with payloads.
         String partSummary = includePartSummary ? s.partsSummaryHTML(detailedPartSummary) : "";

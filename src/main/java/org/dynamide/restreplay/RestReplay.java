@@ -121,7 +121,7 @@ public class RestReplay extends ConfigFile {
      * specified autoDeletePOSTS==false, which means you are managing the cleanup yourself.
      *
      * @param serviceResultsMap a Map of ServiceResult objects, which will contain ServiceResult.deleteURL.
-     * @return a List<String> of debug info about which URLs could not be deleted.
+     * @return a List<ServiceResult> including error result for which URLs could not be deleted.
      */
     public static List<ServiceResult> autoDelete(Map<String, ServiceResult> serviceResultsMap, String logName) {
         List<ServiceResult> results = new ArrayList<ServiceResult>();
@@ -129,6 +129,8 @@ public class RestReplay extends ConfigFile {
             try {
                 if (Tools.notEmpty(pr.deleteURL)) {
                     ServiceResult deleteResult = new ServiceResult(pr.getRunOptions());
+                    deleteResult.isAutoDelete = true;
+                    deleteResult.testID = pr.testID+"_autodelete";
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
                     System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
@@ -137,7 +139,9 @@ public class RestReplay extends ConfigFile {
                     results.add(deleteResult);
                 } else {
                     ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
+                    errorResult.isAutoDelete = true;
                     errorResult.fullURL = pr.fullURL;
+                    errorResult.testID = pr.testID+"_autodelete";
                     errorResult.testGroupID = pr.testGroupID;
                     errorResult.fromTestID = pr.fromTestID;
                     errorResult.overrideGotExpectedResult();
@@ -148,7 +152,10 @@ public class RestReplay extends ConfigFile {
                 String s = (pr != null) ? "ERROR while cleaning up ServiceResult map: " + pr + " for " + pr.deleteURL + " :: " + t
                         : "ERROR while cleaning up ServiceResult map (null ServiceResult): " + t;
                 System.err.println(s);
+                String theTestID = (pr != null) ? pr.testID : "test_ID_unknown";
                 ServiceResult errorResult = new ServiceResult(null);
+                errorResult.testID = theTestID+"_autodelete";
+                errorResult.isAutoDelete = true;
                 errorResult.fullURL = pr.fullURL;
                 errorResult.testGroupID = pr.testGroupID;
                 errorResult.fromTestID = pr.fromTestID;
@@ -688,7 +695,11 @@ public class RestReplay extends ConfigFile {
             }
             serviceResultsMap.remove("result");
             if (Tools.isTrue(autoDeletePOSTS) && param_autoDeletePOSTS) {
-                autoDelete(serviceResultsMap, "default");
+                List<ServiceResult> deleteResults = autoDelete(serviceResultsMap, "default");
+                for (ServiceResult r: deleteResults){
+                    serviceResultsMap.put(r.testID+"_delete", r);
+                    report.addTestResult(r);
+                }
             }
         }
 

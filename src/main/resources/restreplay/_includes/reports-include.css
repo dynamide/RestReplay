@@ -352,6 +352,9 @@ tr.mutationTR {
 .mutation td {
   background-color: white;
 }
+.autodelete td {
+  background-color: #F6F0E8;
+}
 .mutationsubscript{
   color: rgb(17,126,33);
   foo: #dc5c05;

@@ -800,13 +800,16 @@
             <uri>/tagonomy?mock=token</uri>
             <deleteURL>${result.fullURL}</deleteURL>
         </test>
-        <!--
         <test ID="badDeleteURL">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
             <deleteURL>BadURL://${result.fullURL}</deleteURL>
+            <response>
+                <expected>
+                    <failure />
+                </expected>
+            </response>
         </test>
-        -->
     </testGroup>
 
 

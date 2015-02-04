@@ -15,6 +15,8 @@ import org.dom4j.io.HTMLWriter;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.json.JSONObject;
+import org.json.XML;
 
 public class XmlTools {
 
@@ -280,4 +282,49 @@ public class XmlTools {
         }
         return prettyHTML;
     }
+
+    public static String payloadJSONtoXML(String payload) {
+        return payloadJSONtoXML(payload, "root");
+    }
+    public static String payloadJSONtoXML(String payload, String rootName) {
+        JSONObject json = new JSONObject(payload);
+        String xml = "<"+rootName+">"+ XML.toString(json)+"</"+rootName+">";
+        return xml;
+    }
+
+    public static String payloadXMLtoJSON_RestReplay(String payload) {
+        return payloadXMLtoJSON(payload, "root");
+    }
+    public static String payloadXMLtoJSON(String payload) {
+        return payloadXMLtoJSON(payload, "");
+    }
+
+    /** For example, use removeRoot="root", which will look for an XML root element named "root",
+     *               or pass "" to get everything, including the root node itself.*/
+    public static String payloadXMLtoJSON(String payload, String removeRoot) {
+        try {
+            JSONObject json = XML.toJSONObject(payload);
+            if ( Tools.notBlank(removeRoot) && json.has(removeRoot) ) {
+                JSONObject root = json.getJSONObject(removeRoot);
+                return root.toString(4);
+            } else {
+                return json.toString(4);
+            }
+        } catch (Exception e){
+            return "ERROR converting to JSON: "+e;
+        }
+    }
+
+    public static void main(String [] args){
+        if (args.length > 0 && Tools.notBlank(args[0])) {
+            if (args.length >1 && args[0].equalsIgnoreCase("-xml")) {
+                String content = FileTools.readFile("", args[1]);
+                System.out.println(payloadJSONtoXML(content));
+            } else if (args.length >1 && args[0].equalsIgnoreCase("-json")) {
+                String content = FileTools.readFile("", args[1]);
+                System.out.println(payloadXMLtoJSON(content));
+            }
+        }
+    }
+
 }

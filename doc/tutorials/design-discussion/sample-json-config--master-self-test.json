@@ -1,0 +1,64 @@
+{
+    "restReplayMaster": {
+        "dump": {
+            "payloads": false,
+            "dumpServiceResult": "auto"
+        },
+        "run": [
+            {
+                "controlFile": "_self_test/self-test.xml",
+                "testGroup": "debug"
+            },
+            {
+                "controlFile": "_self_test/self-test.xml",
+                "testGroup": "selftestGroup"
+            },
+            {
+                "controlFile": "_self_test/self-test.xml",
+                "testGroup": "testMutatorExpectedCodes"
+            },
+            {
+                "controlFile": "_self_test/self-test.xml",
+                "testGroup": "VarsAndValidators"
+            },
+            {
+                "controlFile": "_self_test/self-test.xml",
+                "testGroup": "Loops"
+            },
+            {
+                "vars": {
+                    "var": {
+                        "content": "http://localhost:${SELFTEST_PORT}",
+                        "ID": "SELFTEST_SERVER"
+                    }
+                },
+                "controlFile": "_self_test/nested/level1/foo.xml",
+                "testGroup": "fooGroup"
+            },
+            {
+                "vars": {
+                    "var": {
+                        "content": "http://localhost:${SELFTEST_PORT}",
+                        "ID": "SELFTEST_SERVER"
+                    }
+                },
+                "controlFile": "_self_test/nested/level1/foo.xml",
+                "testGroup": "fooGroup2"
+            },
+            {
+                "controlFile": "_self_test/nested/level1/level2/bar.xml",
+                "testGroup": "barGroup"
+            },
+            {
+                "controlFile": "_self_test/nested/level1-sibling/sibling.xml",
+                "testGroup": "aSiblingGroup"
+            }
+        ],
+        "protoHostPort": "http://localhost:${SELFTEST_PORT}",
+        "runOptions": {
+            "connectionTimeout": 3000,
+            "socketTimeout": 5000,
+            "errorsBecomeEmptyStrings": true
+        }
+    }
+}
