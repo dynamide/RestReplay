@@ -133,9 +133,9 @@ public class RestReplay extends ConfigFile {
                     deleteResult.testID = pr.testID+"_autodelete";
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
-                    System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
+                    //System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
                     deleteResult = Transport.doDELETE(deleteResult, pr.deleteURL, pr.auth, pr.testID, "[autodelete:" + logName + "]", pr.headerMap);
-                    System.out.println("DONE AUTODELETE: ==>" + pr.deleteURL + "<== : " + deleteResult);
+                    //System.out.println("DONE AUTODELETE: ==>" + pr.deleteURL + "<== : " + deleteResult);
                     results.add(deleteResult);
                 } else {
                     ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
@@ -481,10 +481,11 @@ public class RestReplay extends ConfigFile {
      * retrieved with loop.key, loop.value, and loop.index, for each iteration of the test.
      */
     public static class Loop {
-        public Loop(int i, String k, Object o){
+        public Loop(int i, String k, Object v, Object o){
             key = k;
-            value = o;
+            value = v;
             index = i;
+            object = o;
         }
 
         public Loop(Eval evalStruct){
@@ -495,24 +496,26 @@ public class RestReplay extends ConfigFile {
             index = (Integer.parseInt(res.toString()));
 
             value = evalStruct.jc.get("loop.value");
+            this.object = evalStruct.jc.get("loop.object");
+            System.out.println("==================loop.object=["+index+"]========>>>> "+this.object);
 
             res = evalStruct.jc.get("loop.key");
             if (null == res){
                 return;
             }
             key = res.toString();
-
-
         }
         public String toString(){
             return "{"
                     +"\"index\":"+index
                     +",\"key\":"+key
                     +(value==null ? "null" : ",\"value\":\""+value.toString()+"\"")
+                    +(object==null ? "null" : ",\"object\":\""+object.toString()+"\"")
                     +"}";
         }
         public int index = -1;
         public Object value = null;
+        public Object object = null;
         public String key = "";
     }
 
@@ -613,12 +616,12 @@ public class RestReplay extends ConfigFile {
         report.addTestGroup(testGroupID, controlFileName);   //controlFileName is just the short name, without the full path.
         String restReplayHeader = "========================================================================"
                 + "\r\nRestReplay running:"
+                + "\r\n   testGroup: " + testGroupID
                 + "\r\n   controlFile: " + controlFileName
                 + "\r\n   Master: " + masterFilenameInfo
-                + "\r\n   reports directory: " + reportsDir
                 + "\r\n   env: " + relativePathFromReportsDir
+                + "\r\n   reports directory: " + reportsDir
                 + "\r\n   protoHostPort: " + protoHostPort + "    " + protoHostPortFrom
-                + "\r\n   testGroup: " + testGroupID
                 + (Tools.notEmpty(oneTestID) ? "\r\n   oneTestID: " + oneTestID : "")
                 + "\r\n   auths map: " + authsMapINFO
                 + "\r\n   masterVars: " + dumpMasterVars(masterVars)
@@ -664,6 +667,7 @@ public class RestReplay extends ConfigFile {
             }
             int testElementIndex = -1;
             for (Node testNode : tests) {
+                evalStruct.setCurrentTestIDLabel(testGroupID+'.'+testNode.valueOf("@ID")+" <span class='LABEL'>(preflight)</span>");
                 LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
                 if (loopHelper.error){
                     continue OUTER;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.

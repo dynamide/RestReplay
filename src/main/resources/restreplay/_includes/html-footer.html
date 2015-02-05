@@ -1,8 +1,32 @@
 <br />
 <br />
+<span class="LABEL">[<a href="#">top</a>]</span>
+<br />
 <hr />
+<a name="Legend"></a>
 <h2>Legend</h2>
 <div class="legend">
+    <table class="TOC_TABLE" border="1">
+        <tr>
+            <td colspan="8" class="TOC_HDR">Summary</td>
+        </tr>
+        <tr>
+            <td>
+                <span class="OK">SUCCESS</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="EXPECTED">EXPECTED</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="ERROR">FAILURE</span>
+            </td>
+        </tr>
+    </table>
+    <p></p>
     <div class="varslist" style="background-color: white;">
         <div class="vars">This is a variable</div>
         <div class="exports">This is an export</div>
@@ -10,9 +34,30 @@
     <div class="toc-error">This is an error</div>
     <br />
     <div class="toc-warn">This is a warning</div>
-    <div class="evalReportExpression">Expression</div>
-    <div class="payloads"><div class="DETAIL_TABLE autodelete">&#10034; &mdash; AutodeletedTestResult</div></div>
 
-    <div class="evalReportValue">Expression Value</div>
+    <div class="payloads"><div class="DETAIL_TABLE autodelete">&#10034; &mdash; AutodeletedTestResult</div></div>
+<div class="evalReport">
+
+    <div class="evalReportTestIDLabel">Eval Report for one testID <span class='LABEL'>(preflight)</span></div>
+    <p>preflight is for expressions like loop="${['a','b']}" which get evaluated before the test gets created,
+        so you'll see the same testID is shown with a new header in the eval report after the preflight section.</p>
+    <div class="evalReportTestIDLabel">Eval Report for one testID</div>
+
+    <div class="evalReportRow  evalReport-level0">
+        <span class="evalReportContext">title and id of level 0 items such as vars</span>
+        <span class="evalReportExpression">expression</span>
+        <span class="evalReportValue">value</span>
+    </div>
+
+    <div class="evalReportRow  evalReport-level1">
+        <span class="evalReportContext">title and id of items that are eval'd in a nested context</span>
+        <span class="evalReportExpression">expression</span>
+        <span class="evalReportValue">value</span>
+    </div>
+
 </div>
+
+
+</div>
+
 

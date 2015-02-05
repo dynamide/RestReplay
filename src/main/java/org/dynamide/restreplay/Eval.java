@@ -19,9 +19,27 @@ public class Eval {
     public List<EvalResult> getEvalReport() {
         return evalReport;
     }
+
+    private int insertParentLoggerIntoIdx = 0;
+
+    private int lastLevel = 0;
+
     protected void addToEvalReport(EvalResult result){
-        evalReport.add(result);
+        boolean doInsertion = false;
+        if (lastLevel>0 && result.nestingLevel==0){
+            doInsertion=true;
+        } else if (result.nestingLevel > 0 && lastLevel==0){ //someone is starting a dive.
+            insertParentLoggerIntoIdx = evalReport.size();
+            doInsertion=false;
+        }
+        lastLevel = result.nestingLevel;
+        if (doInsertion && insertParentLoggerIntoIdx>-1){
+            evalReport.add(insertParentLoggerIntoIdx, result);
+        } else {
+            evalReport.add(result);
+        }
     }
+
     private String currentTestIDLabel = "";
     public void setCurrentTestIDLabel(String val){
         currentTestIDLabel =  val;
@@ -86,7 +104,7 @@ public class Eval {
                     Object value = entry.getValue();
                     String key = entry.getKey();
                     try {
-                        EvalResult innerResult = parse(logname+", ID: <b>"+key+"</b>", ""+value);
+                        EvalResult innerResult = parse("ID: <b>"+key+"</b>", ""+value);
                         innerResult.nestingLevel = 1;
                         if (innerResult.useResultAsObject) {
                             value = innerResult.result;

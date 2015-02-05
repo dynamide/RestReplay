@@ -28,7 +28,8 @@ public class RestReplayReport {
             + "<a class='TOPLINKS' href='javascript:openAllHeaders();'>Show All Headers</a>"
             + "<a class='TOPLINKS' href='javascript:closeAllHeaders();'>Hide All Headers</a>"
             + "<a class='TOPLINKS' href='javascript:openAllMutations();'>Show All Mutations</a>"
-            + "<a class='TOPLINKS' href='javascript:closeAllMutations();'>Hide All Mutations</a>";
+            + "<a class='TOPLINKS' href='javascript:closeAllMutations();'>Hide All Mutations</a>"
+            + "<a class='TOPLINKS' href='#Legend'>Legend</a>";
 
     protected static final String HTML_TEST_START = "<div class='TESTCASE'>";
     protected static final String HTML_TEST_END = "</div>";

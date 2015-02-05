@@ -424,7 +424,9 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 
 
 <p>You may specify that a test should loop. You supply either the <b>loop=""</b> attribute, or the <b>&lt;loop></b> element,
-    with an expression that returns a number, an array, a collection, or a map.  The loop value is a Jexl expression, or an integer.
+    with an expression that returns a number, an array, a Collection, or a Map
+    (see <a href="http://dynamide.org/RestReplay/rest-replay-reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
+    The loop value is a Jexl expression, or an integer.
     For example:
     <ul>
         <li>10</li>
@@ -447,7 +449,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
         <tbody>
         <tr><th>loop</th>
             <td> A loop object that has index, key, and value properties.  You may specify
-                an array of String, or an array of Object.  You may specify a map, or a collection.
+                an array of String, an array of Object, a Collection, or a Map. (see <a href="http://dynamide.org/RestReplay/rest-replay-reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
                 If the loop expression evaluates to one of these, the variables below apply.
             </td>
         </tr>
@@ -473,6 +475,10 @@ For maps:
 For arrays:
    loop.value == loop[loop.index]
                     </pre>
+            </td>
+        </tr>
+        <tr><th>loop.object</th>
+            <td>Set if the loop expression returns an object.  Will probably be a Map, Array, or Collection.
             </td>
         </tr>
         </tbody></table>

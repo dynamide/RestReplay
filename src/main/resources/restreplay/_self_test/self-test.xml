@@ -626,6 +626,7 @@
                 <var ID="LOOP_THIS_INDEX">${"loop[this.LoopIndex]: "+loop[this.LoopIndex]}</var>
                 <var ID="LOOP_INDEX">${"loop[loop.index]: "+loop[loop.index]}</var>
                 <var ID="LOOP_VALUE">${loop.value}</var>
+                <var ID="LOOP_OBJECT">${loop.object}</var>
                 <var ID="DUE_DATE_MILLIS">${tools.now() + loop.value*DAYS}</var>
                 <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}</var>
                 <var ID="TITLE">Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}</var>
@@ -692,7 +693,7 @@
                 <validator lang="javascript"><![CDATA[
                     if (loop){
                         var ret = {'index': loop.index, 'value': loop.value};
-                        " loop: "+loop+" ret.index: "+ret.index;
+                        " loop: "+loop+" ret.index: "+ret.index+" loop.object:"+loop.object;
                     } else {
                         "loop var not available";
                     }
@@ -707,7 +708,7 @@
                 <validator lang="javascript"><![CDATA[
                     if (loop){
                         var ret = {'index': loop.index, 'value': loop.value};
-                        " loop: "+loop+" ret.index: "+ret.index;
+                        " loop: "+loop+" ret.index: "+ret.index+" loop.object:"+loop.object;
                     } else {
                         "loop var not available";
                     }
@@ -726,7 +727,7 @@
                         if (loop){
                             var ret = {'index': loop.index, 'value': loop.value};
                             serviceResult.addExport("CurrentItem",loop.key+"::"+loop.value);
-                            " loop: "+loop+", ret.index: "+ret.index;
+                            " loop: "+loop+", ret.index: "+ret.index+" loop.object:"+loop.object;
                         } else {
                             "loop var not available";
                         }
@@ -747,7 +748,7 @@
                         if (loop){
                             var ret = {'index': loop.index, 'value': loop.value};
                             serviceResult.addExport("Order",""+ loop.value.get("USER")+" ordered: "+ loop.value.get("ORDER"));
-                            " loop: "+loop+", ret.index: "+ret.index;
+                            " loop: "+loop+", ret.index: "+ret.index+" loop.object:"+loop.object;
                         } else {
                             "loop var not available";
                         }
@@ -791,10 +792,6 @@
             <uri>/tagonomy?mock=token</uri>
             <deleteURL>${result.fullURL}</deleteURL>
         </test>
-    </testGroup>
-
-
-    <testGroup ID="debug" autoDeletePOSTS="true">
         <test ID="goodDeleteURL">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
@@ -813,6 +810,18 @@
                     <failure />
                 </expected>
             </response>
+        </test>
+    </testGroup>
+
+
+    <testGroup ID="debug" autoDeletePOSTS="true">
+        <test ID="loopStringArraySimple" loop="${['10','18','21']}">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <vars>
+                <var ID="someArray">${["103","183","213"]}</var>
+                <var ID="LOOP">${loop}</var>
+            </vars>
         </test>
     </testGroup>
 
