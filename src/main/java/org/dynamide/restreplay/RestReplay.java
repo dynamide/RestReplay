@@ -129,7 +129,7 @@ public class RestReplay extends ConfigFile {
             try {
                 if (Tools.notEmpty(pr.deleteURL)) {
                     ServiceResult deleteResult = new ServiceResult(pr.getRunOptions());
-                    deleteResult.isAutoDelete = true;
+                    deleteResult.isAutodelete = true;
                     deleteResult.testID = pr.testID+"_autodelete";
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
@@ -139,7 +139,7 @@ public class RestReplay extends ConfigFile {
                     results.add(deleteResult);
                 } else {
                     ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
-                    errorResult.isAutoDelete = true;
+                    errorResult.isAutodelete = true;
                     errorResult.fullURL = pr.fullURL;
                     errorResult.testID = pr.testID+"_autodelete";
                     errorResult.testGroupID = pr.testGroupID;
@@ -149,13 +149,13 @@ public class RestReplay extends ConfigFile {
                     System.out.println("DONE AUTODELETE (errorResult): ==>" + pr.deleteURL + "<== : " + errorResult);
                 }
             } catch (Throwable t) {
-                String s = (pr != null) ? "ERROR while cleaning up ServiceResult map: " + pr + " for " + pr.deleteURL + " :: " + t
-                        : "ERROR while cleaning up ServiceResult map (null ServiceResult): " + t;
+                String s = (pr != null) ? "ERROR while attempting to autodelete a ServiceResult: " + pr + ",   using URL:  \"" + pr.deleteURL + "\",  Exception: " + t
+                        : "ERROR while attempting to autodelete a ServiceResult (with a null ServiceResult): " + t;
                 System.err.println(s);
                 String theTestID = (pr != null) ? pr.testID : "test_ID_unknown";
                 ServiceResult errorResult = new ServiceResult(null);
                 errorResult.testID = theTestID+"_autodelete";
-                errorResult.isAutoDelete = true;
+                errorResult.isAutodelete = true;
                 errorResult.fullURL = pr.fullURL;
                 errorResult.testGroupID = pr.testGroupID;
                 errorResult.fromTestID = pr.fromTestID;

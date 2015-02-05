@@ -9,7 +9,6 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert;
@@ -121,6 +120,7 @@ public class RestReplayReport {
             toc.testID = serviceResult.testID;
             toc.time = serviceResult.time;
             toc.method = serviceResult.method;
+            toc.isAutodelete = serviceResult.isAutodelete;
             if (serviceResult.isSUCCESS()) {
                 toc.detail = ok(formatMutatorSUCCESS(serviceResult));
             } else {
@@ -205,6 +205,8 @@ public class RestReplayReport {
         return block;
     }
 
+    private boolean seenAutodelete = false;
+
     private String reportsListToString(){
         StringBuffer buffer = new StringBuffer();
         ServiceResult leftoverServiceResult = null;
@@ -245,6 +247,12 @@ public class RestReplayReport {
                 buffer.append("</div>");
                 buffer.append("</div>");
             } else {
+                if (sr.isAutodelete){
+                    if (!seenAutodelete) {
+                        seenAutodelete = true;
+                        buffer.append("<div class='autodelete-header'><b>Autodeleted</b></div>");
+                    }
+                }
                 appendServiceResult(sr, buffer);
             }
         }
@@ -334,25 +342,27 @@ public class RestReplayReport {
             String cssClassTR = toc.isMutation ? "mutationTR" : "";
             String cssClassTD = toc.isMutation ? "mutationTD" : "";
             String sep = String.format(TOC_LINESEP, cssClassTR, cssClassTD);
+            String autodeleteBullet = toc.isAutodelete ? " &#10034; " : "";  // or just &bull;
             if (count>0){tocBuffer.append(sep);}
             count++;
             //tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
-            tocBuffer.append("<a href='" + relativeReportName + "#"+ toc.testID /*"#TOC" +toc.tocID*/ + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
+            tocBuffer.append(autodeleteBullet)
+                     .append("<a href='" + relativeReportName + "#"+ toc.testID /*"#TOC" +toc.tocID*/ + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
                      .append((toc.children))
                      .append(TOC_CELLSEP)
                      .append(methodBox(toc.method))
-                    .append(TOC_CELLSEP)
-                    .append(toc.responseCode)
-                    .append(TOC_CELLSEP)
-                    .append(toc.time)
-                    .append(TOC_CELLSEP)
-                    .append(toc.detail)
-                    .append(TOC_CELLSEP)
+                     .append(TOC_CELLSEP)
+                     .append(toc.responseCode)
+                     .append(TOC_CELLSEP)
+                     .append(toc.time)
+                     .append(TOC_CELLSEP)
+                     .append(toc.detail)
+                     .append(TOC_CELLSEP)
                      .append(tocWarn(toc.warnings))
                      .append(TOC_CELLSEP)
                      .append(tocError(toc.errors))
                      .append(TOC_CELLSEP)
-                     .append("<span class='summary-domcheck'>"+toc.domcheck+"</span>");
+                     .append("<span class='summary-domcheck'>" + toc.domcheck + "</span>");
         }
         tocBuffer.append(TOC_END);
         tocBuffer.append(BR);
@@ -430,6 +440,7 @@ public class RestReplayReport {
         public int responseCode = 0;
         public boolean isMutation = false;
         public String idFromMutator = "";
+        public boolean isAutodelete = false;
         public String children = "";
         public String domcheck = "";
     }
@@ -747,7 +758,7 @@ public class RestReplayReport {
 
     public String detail(ServiceResult s, boolean includePayloads, boolean includePartSummary,String linesep, String end, int tocID) {
         String mutationClass = s.isMutation ? " mutation" : "";
-        String autodeleteClass = s.isAutoDelete ? " autodelete" : "";
+        String autodeleteClass = s.isAutodelete ? " autodelete" : "";
         String start = "<table border='1' class='DETAIL_TABLE "+mutationClass+autodeleteClass+"'><tr><td>\r\n";
 
         boolean detailedPartSummary = false;//includes expected parts bodies.  These are shown in the PartSummary blocks under the detail, along with payloads.
@@ -767,7 +778,8 @@ public class RestReplayReport {
                 statusLabel = "<span class='ERROR'>FAILURE</b></span>";
             }
         }
-        String res = start
+        String res =
+                start
                 + statusLabel
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + linesep
@@ -793,7 +805,8 @@ public class RestReplayReport {
                 + (Tools.notEmpty(s.location) ? lbl("location") + small(s.location) + linesep : "")
                 + (Tools.notEmpty(s.getError()) ?  alertError(s.getError()) + linesep : "")
                 + (Tools.notEmpty(s.getErrorDetail()) ?  alertError(s.getErrorDetail()) + linesep : "")
-                + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s)+exportsToHtml(s) + linesep : "")
+                + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s) + linesep : "")
+                + ((s.getExports().size()>0) ? lbl("exports")+exportsToHtml(s) + linesep : "")
                 + ((includePartSummary && Tools.notBlank(partSummary))
                 ?   ((s.expectedTreewalkRangeColumns!=null)
                         ?  formatExpectedTreewalkRangeColumns(s) + linesep

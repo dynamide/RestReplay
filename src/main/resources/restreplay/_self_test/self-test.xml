@@ -605,7 +605,7 @@
         </test>
     </testGroup>
 
-    <testGroup ID="Loops">
+    <testGroup ID="Loops" autoDeletePOSTS="true">
         <test ID="loopStringArraySimple" loop="${['10','18','21']}">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
@@ -798,6 +798,10 @@
         <test ID="goodDeleteURL">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
+            <headers>
+                <header name="x-authorization">MOJO</header>
+                <header name="x-my-variable">NIXON</header>
+            </headers>
             <deleteURL>${result.fullURL}</deleteURL>
         </test>
         <test ID="badDeleteURL">

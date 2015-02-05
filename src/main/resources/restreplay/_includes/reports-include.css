@@ -30,6 +30,18 @@ td, th {
     font-size: 10pt !important;
 }
 
+.autodelete-header {
+    background-color: white;
+        color: black;
+        text-decoration: none;
+        font-family: Tahoma;
+        font-size: 70%;
+        border-width: 1px;
+        border-color: black;
+        border-style: solid;
+        padding: 8px;
+        margin-bottom: 20px;
+}
 
 .REPORTTIME {
     background-color: white;
@@ -330,10 +342,12 @@ td, th {
 }
 
 .DETAIL_HDR {
-    font-size: 110%;
+font-family: Tahoma;
+    font-size: 70%;
     font-weight: bold;
     background-color: white;
-    padding: 10px;
+    padding: 8px;
+    border: 1px solid black;
 }
 
 TABLE.mutation {
@@ -352,6 +366,10 @@ tr.mutationTR {
 .mutation td {
   background-color: white;
 }
+.autodelete {
+  background-color: #F6F0E8;
+}
+
 .autodelete td {
   background-color: #F6F0E8;
 }
@@ -558,4 +576,10 @@ td.dom-not-matched {
     padding: 2px;
     border: 1px solid gray;
     background-color: #e0ffff;
+}
+.legend {
+    border: 1px solid black;
+    padding: 20px;
+    max-width: 600px;
+    background-color: white;
 }
