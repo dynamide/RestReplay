@@ -158,6 +158,41 @@ function showMutator(sender, id){
         var el = els[0];
         el.style.display = 'block';
      }
+}
 
+function showBlock(selector){
+    var els = document.querySelectorAll(selector);
+    for (i = 0; i < els.length; ++i) {
+      els[i].style.display = 'block';
+    }
+}
+
+function hideBlock(selector){
+    var els = document.querySelectorAll(selector);
+    for (i = 0; i < els.length; ++i) {
+      els[i].style.display = 'none';
+    }
+}
+
+function showEvalReportDetails(){
+    showBlock("#LIVE_SECTION .evalReport-level1");
+}
+
+function hideEvalReportDetails(){
+    hideBlock("#LIVE_SECTION .evalReport-level1");
+}
+
+function showFloatingMenu(){
+    var el = document.querySelector("#FloatingMenu");
+    if (el){
+        el.style.display = 'block';
+    }
+}
+
+function hideFloatingMenu(){
+    var el = document.querySelector("#FloatingMenu");
+    if (el){
+        el.style.display = 'none';
+    }
 }
 

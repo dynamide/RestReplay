@@ -1,10 +1,9 @@
 package org.dynamide.restreplay;
 
 import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HeaderElement;
-import org.apache.commons.httpclient.NameValuePair;
 import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
+import org.dynamide.interpreters.Eval;
 import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.util.Tools;
 import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
@@ -641,7 +640,7 @@ public class ServiceResult {
         int errors =   alertsCount(Alert.LEVEL.ERROR);
         String res =  "{"
                 + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )
-                + failureReason
+                + (Tools.notBlank(failureReason) ? "; failureReason: {"+failureReason+"}":"")
                 +"; "+method
                 +"; "+responseCode
                 + ( (ranges.size()>0) ? "; expected:"+ranges : "" )
@@ -659,7 +658,7 @@ public class ServiceResult {
                 + ( Tools.notEmpty(error) ? "; ERROR_IN_DETAIL:"+error : "" )
                 + "; gotExpected:"+gotExpectedResult()
                 //+";result:"+result+";"
-                + ( partsSummary(true))
+                + ( "; parts-summary: {"+partsSummary(true)+"}")
                 +"}"
                 + ( includePayloads  ? dumpPayloads() : "" )
                 ;
@@ -677,7 +676,7 @@ public class ServiceResult {
         if (ranges.size()>0){ expected = "; expected:"+ranges; }
         return "{"
                 + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )
-                + failureReason
+                + (Tools.notBlank(failureReason) ? ", reason: {"+ failureReason+"}" : "")
                 + ( Tools.notEmpty(testID) ? "; "+testID : "" )
                 +"; "+method
                 +"; "+responseCode
@@ -689,7 +688,7 @@ public class ServiceResult {
                 +"; time:"+time+"ms"
                 //for auth, see detail()   +"; auth: "+auth
                 + ( Tools.notEmpty(error) ? "; ERROR_IN_PART:"+error : "" )
-                + (verbosePartsSummary ? partsSummary(true) : partsSummary(false) )
+                + "; parts-summary: {"+(verbosePartsSummary ? partsSummary(true) : partsSummary(false) )+"}"
                 +"}";
     }
     public String dump(ServiceResult.DUMP_OPTIONS opt, boolean hasError){

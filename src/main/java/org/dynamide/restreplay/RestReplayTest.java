@@ -15,7 +15,7 @@ import java.util.List;
 public class RestReplayTest {
 
     public static final String RESTREPLAY_REL_DIR_TO_MODULE = "/src/main/resources/restreplay";
-    public static final String REPORTS_DIRNAME = "rest-replay-reports";
+    public static final String REPORTS_DIRNAME = "reports";
     public static final String RESTREPLAY_REL_DIR_REPORTS_TO_MODULE= "/"+REPORTS_DIRNAME;
 
     public static RestReplay createRestReplayForMaven() throws Exception {
@@ -51,22 +51,24 @@ public class RestReplayTest {
     public static void logTest(ServiceResult sresult, String testname){
         ResultSummary summary = resultSummary(sresult, HTML);
         org.testng.Reporter.log(summary.table);
-        Assert.assertEquals(summary.oks, summary.total, "Expected all "+summary.total+ " RestReplay tests to pass.  See Output from test '"+testname+"'. "+summary.errorTests);
+        System.out.println(""+summary.oks+'/'+summary.total+" PASSED.  See Output from test '"+testname+"'. Error tests: "+summary.errorTests);
     }
 
     public static void logTest(List<ServiceResult> list, String testname){
         ResultSummary summary = resultSummary(list, HTML);
         org.testng.Reporter.log(summary.table);
-        Assert.assertEquals(summary.oks, summary.total, "Expected all "+summary.total+ " RestReplay tests to pass.  See Output from test '"+testname+"'. "+summary.errorTests);
+        System.out.println(""+summary.oks+'/'+summary.total+" PASSED.  See Output from test '"+testname+"'. Error tests: "+summary.errorTests);
     }
 
     public static void logTestForGroup(List<List<ServiceResult>> list, String testname){
         ResultSummary summary = resultSummaryForGroup(list, HTML);
         org.testng.Reporter.log(summary.table);
         ResultSummary textSummary = resultSummaryForGroup(list, TEXT);
-        System.out.println("SKIPPING SUMMARY. ");
+        //System.out.println("\n\n\n\n\n\nSkipping SUMMARY.");
+        //System.out.println("\n\n\n\n\n\n============== SUMMARY==============");
         //System.out.println("SUMMARY: "+textSummary.table);
-        Assert.assertEquals(summary.oks, summary.total, "Expected all " + summary.total + " RestReplay tests to pass.  See Output from test '" + testname + "'. " + summary.errorTests);
+        //System.out.println("==============END SUMMARY===============");
+        //System.out.println("TESTS COMPLETE.  "+summary.oks+'/'+summary.total+" PASSED.  See Output from test '" + testname + "'. Error tests: " + summary.errorTests);
     }
 
 

@@ -2,6 +2,7 @@ package org.dynamide.restreplay;
 
 import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
+import org.dynamide.interpreters.Eval;
 import org.dynamide.interpreters.EvalResult;
 import org.dynamide.util.Tools;
 
@@ -115,6 +116,7 @@ public class LoopHelper {
                 serviceResult.testIDLabel = Tools.notEmpty(serviceResult.testID)
                         ? (testGroupID + '.' + serviceResult.testID)
                         : (testGroupID + '.' + testElementIndex);
+                serviceResult.testGroupID = testGroupID;
                 String msg = "ERROR calculating loop";
                 serviceResult.addError(msg, t);
                 serviceResult.failureReason = msg+t.getMessage();

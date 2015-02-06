@@ -210,9 +210,9 @@
 
       <p><span class="Apple-style-span">RestReplay is a utility to send REST requests to the services layer (including JSON, XML, and multipart XML requests), read responses, and compare<br>
         the resulting payloads with templates.&nbsp; <br></span></p>
-<p><span class="Apple-style-span">At the end of a run, RestReplay produces a report, such as this </span><span class="Apple-style-span"><a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">self-test sample report</a>, which shows you a summary and detail of all the calls to your services layer.&nbsp; The reports have both a high-level view for administration and monitoring, and a low-level view useful for debugging issues or communicating results to developers or QA.<br></span></p>
+<p><span class="Apple-style-span">At the end of a run, RestReplay produces a report, such as this </span><span class="Apple-style-span"><a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">self-test sample report</a>, which shows you a summary and detail of all the calls to your services layer.&nbsp; The reports have both a high-level view for administration and monitoring, and a low-level view useful for debugging issues or communicating results to developers or QA.<br></span></p>
 <p><span class="Apple-style-span">RestReplay was designed to fit into Continuous Integration tools such as Maven and Jenkins.&nbsp; You can run RestReplay continuously, for service layer monitoring.&nbsp; Developers can run RestReplay during a developer build, and Build Administrators can run RestReplay on commit, tag, or push events, to ensure a build produces a services layer that survives integration testing.<br></span></p>
-<p><span class="Apple-style-span">RestReplay is designed for simple, file-based, <a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a> configuration, that is programmable by beginning programmers.<em> (It also has APIs for advanced users who wish to drive the tests from Java, or extend test types by writing plugins.)</em>&nbsp; For most users, however, look through our </span><span class="Apple-style-span"><span class="Apple-style-span"><a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">self-test source code</a> </span>for full examples of running tests, chaining tests, looping tests, and validating result IDs.&nbsp; RestReplay is also designed to be configured many ways, for many kinds of projects.&nbsp; A good, safe bet is to follow the style in our self-test.&nbsp; See: <a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">self-test sample report</a> and <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">self-test source code</a>. <br></span></p>
+<p><span class="Apple-style-span">RestReplay is designed for simple, file-based, <a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a> configuration, that is programmable by beginning programmers.<em> (It also has APIs for advanced users who wish to drive the tests from Java, or extend test types by writing plugins.)</em>&nbsp; For most users, however, look through our </span><span class="Apple-style-span"><span class="Apple-style-span"><a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">self-test source code</a> </span>for full examples of running tests, chaining tests, looping tests, and validating result IDs.&nbsp; RestReplay is also designed to be configured many ways, for many kinds of projects.&nbsp; A good, safe bet is to follow the style in our self-test.&nbsp; See: <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">self-test sample report</a> and <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">self-test source code</a>. <br></span></p>
 <p><span class="Apple-style-span">All configuration parameters are covered below, in the order of the configuration XML files, after the discussion of the command line.&nbsp; You can use the handy links in the Quick Reference cards on this page to jump to the different elements to read syntax and examples.<br></span></p>
 <p><span class="Apple-style-span">RestReplay lets you automate entire workflows over your REST layer.&nbsp; You can automate tests to login, request resources and APIs, extract data from the response, such as resource IDs, and use these IDs in subsequent tests.&nbsp; For example, each of these would be a test within one testGroup called OrderFlow:&nbsp; <br></span></p>
 <ul>
@@ -225,7 +225,7 @@
 <li><span class="Apple-style-span">DELETE the order, <br></span></li>
 <li><span class="Apple-style-span">GET the order to make sure it is gone.&nbsp; <br></span></li></ul></ul>
 <p><span class="Apple-style-span">RestReplay executes the tests in this order you specify, and lets you pass variables in and out of each test.&nbsp; Each test can also have a small bit of code to count json arrays, dig in with jsonp or XPath, etc.&nbsp; </span><span class="Apple-style-span"><span class="Apple-style-span">These are documented below.</span></span></p>
-<p><span class="Apple-style-span"><span class="Apple-style-span"></span>Most things are done for you by the framework, so you just specify the URL, the type of request, and create files for any POST or upload content, and hit Go!&nbsp; RestReplay runs your request, and&nbsp;</span><span class="Apple-style-span"><span class="Apple-style-span"> <a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">reports </a></span>on the result.&nbsp; Many times, success in testing and monitoring is just knowing that a particular sequence of HTTP transactions succeeded.&nbsp;&nbsp; For these kinds of testing, there is no programming.&nbsp; You'll merely replace values with variables that you define, such as ${ORDER_ID}, as you wire the tests together.&nbsp; <br></span></p>
+<p><span class="Apple-style-span"><span class="Apple-style-span"></span>Most things are done for you by the framework, so you just specify the URL, the type of request, and create files for any POST or upload content, and hit Go!&nbsp; RestReplay runs your request, and&nbsp;</span><span class="Apple-style-span"><span class="Apple-style-span"> <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">reports </a></span>on the result.&nbsp; Many times, success in testing and monitoring is just knowing that a particular sequence of HTTP transactions succeeded.&nbsp;&nbsp; For these kinds of testing, there is no programming.&nbsp; You'll merely replace values with variables that you define, such as ${ORDER_ID}, as you wire the tests together.&nbsp; <br></span></p>
 <p><span class="Apple-style-span">Using the examples in our <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">self-test</a>, the documentation below, the <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl Documentation</a>, and our <a href="http://dynamide.org/RestReplay/javadoc/">Javadoc</a>, you can also program RestReplay to do more complicated workflows. <br></span></p>
 
       <h3><a name="RestReplay-1.a.Features" id="RestReplay-1.a.Features"></a>1.a. Features</h3>
@@ -253,7 +253,7 @@
 <li>Javascript(Rhino) and Jexl2 for scripting and expression evaluation.</li>
 
         <li>Simple reporting of results on console and in surefire reports.</li>
-<li>Full reporting of results in html <span class="Apple-style-span"><a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">report</a></span> output directory.</li>
+<li>Full reporting of results in html <span class="Apple-style-span"><a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">report</a></span> output directory.</li>
 
         <li>Java programmatic interface for driving the tests and testGroups, and for finer control of reporting and cleanup.</li>
       </ul>
@@ -262,7 +262,7 @@
 <p>RestReplay is run from the command line (or ant, maven, or Jenkins).&nbsp; It reads your configuration files, and along with startup parameters, determines which testGroups and which tests to run.&nbsp; Along the way, it initializes and evaluates any variables you have set up, such as hosts, ports, resource IDs, logins, and so on.&nbsp; </p>
 <p>It runs the tests in the order you define, synchronously.&nbsp; As each test is run, it exports variables which become available to subsequent tests.&nbsp; Also after each test, the response is evaluated for schema correctness, and any Validator you have defined can run using Jexl or Javascript code. Read more about the runtime workflow at <a href="#RestReplay-1.d.1Runtime">1.d.1 Runtime</a>.</p>
 <p>So you can think of it following stories, or use cases, or workflows, exercising your services layer.&nbsp; </p>
-<p>After the tests have run, RestReplay compiles a directory of stand-alone reports that drill down from your high level view (the Master) to the detail view (the individual testGroup/test reports).&nbsp; Tweaking the RunOptions gives you control over the output on the command line, and also in the HTML report.&nbsp; These reports do not depend on anything else, and can be archived, since they show stats, results, documentation of your APIs, and contain all the input and output payloads.&nbsp; <span class="Apple-style-span">See: <a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">self-test sample report</a> </span></p>
+<p>After the tests have run, RestReplay compiles a directory of stand-alone reports that drill down from your high level view (the Master) to the detail view (the individual testGroup/test reports).&nbsp; Tweaking the RunOptions gives you control over the output on the command line, and also in the HTML report.&nbsp; These reports do not depend on anything else, and can be archived, since they show stats, results, documentation of your APIs, and contain all the input and output payloads.&nbsp; <span class="Apple-style-span">See: <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">self-test sample report</a> </span></p>
 <p>After the tests have run, you can check the code coverage of your services layer with external tools such as <a href="http://www.eclemma.org/">EclEmma / JaCoCo</a>, and also use other queries to check the state of your datastores.&nbsp; </p>
 <p>RestReplay tests your services, but it also drives them exactly as a user or bot would, so think of the next steps in your integration testing.</p>
 <h3><a name="RestReplay-1.c.Concepts"></a>1.c Concepts</h3>
@@ -425,7 +425,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 
 <p>You may specify that a test should loop. You supply either the <b>loop=""</b> attribute, or the <b>&lt;loop></b> element,
     with an expression that returns a number, an array, a Collection, or a Map
-    (see <a href="http://dynamide.org/RestReplay/rest-replay-reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
+    (see <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
     The loop value is a Jexl expression, or an integer.
     For example:
     <ul>
@@ -449,7 +449,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
         <tbody>
         <tr><th>loop</th>
             <td> A loop object that has index, key, and value properties.  You may specify
-                an array of String, an array of Object, a Collection, or a Map. (see <a href="http://dynamide.org/RestReplay/rest-replay-reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
+                an array of String, an array of Object, a Collection, or a Map. (see <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
                 If the loop expression evaluates to one of these, the variables below apply.
             </td>
         </tr>
@@ -483,8 +483,8 @@ For arrays:
         </tr>
         </tbody></table>
 
-    See the many test cases in the <a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">self-test</a> that use looping and vars.
-    Specifically, see this testGroup: <a href="http://dynamide.org/RestReplay/rest-replay-reports/_self_test/self-test.xml-Loops.html">Loops</a>, which uses looping and vars.
+    See the many test cases in the <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">self-test</a> that use looping and vars.
+    Specifically, see this testGroup: <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loops</a>, which uses looping and vars.
 
 
 
@@ -613,7 +613,7 @@ For arrays:
       <p>If all <strong>testGroup</strong>s and all tests succeed, then RestReplay tells maven surefire that the suite succeeded. Otherwise, maven surefire is told that the suite failed. In this case, you may examine the console, or look at the maven surefire report, which will contain a tabular summary of all testGroups and tests. You may have to click "show all results" in the maven surefire report.</p>
 
       <p>RestReplay also creates a stand-alone report. Look at the command line output where RestReplay will report the location of this HTML report, e.g. something of this form:</p>
-      <div class="code">    Master Report Index: ./tests/rest-replay-reports/index.local.las-master.xml.html </div>
+      <div class="code">    Master Report Index: ./tests/reports/index.local.las-master.xml.html </div>
       
       <p>This reports directory starts with an index file named after any <b>master</b> file you have run, which links to individual <b>control</b> file results.</p>
 
@@ -659,7 +659,7 @@ For arrays:
 
       <p>You can run RestReplay on the command-line, or from the command-line of maven surefire.</p>
 <p>To run from the command line, using a jar distribution, then this example would run the environment <b>local</b> using the directory <b>/.tests</b>
-            for control files and will put reports in <b>/.tests/rest-replay-reports</b>.  From that directory, it will find the master
+            for control files and will put reports in <b>/.tests/reports</b>.  From that directory, it will find the master
             control file, <b>master.xml</b> .</p>
         <div class="code">
        java -jar lib/RestReplay-1.0.4-standalone.jar \
@@ -712,7 +712,7 @@ For arrays:
 <td>reports</td>
 <td>-reports /mnt/reports</td>
 
-<td>Specify output reports dir, default is "rest-replay-reports" relative to testdir</td></tr>
+<td>Specify output reports dir, default is "reports" relative to testdir</td></tr>
 <tr>
 <td>testGroup</td>
 <td>-testGroup main</td>
@@ -785,7 +785,7 @@ stand-alone within the control file.</td>
       </div>
       
 <p><br></p>
-<p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/rest-replay-reports)</p>
+<p>In this run, we are sending reports to a different directory (./myreports) than the default (tests/reports)</p>
       
       <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -testdir ./tests \<br> -master master.xml \<br> -reports ./myreports
       </div>
@@ -1363,7 +1363,7 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>restReplay</td>
 
-            <td>Root element of an RestReplay <b>control</b> file.</td>
+            <td>Root element of a RestReplay <b>control</b> file.</td>
           </tr>
 
           <tr>
@@ -2303,82 +2303,6 @@ When overriding RunOptions in a master file, consider these two development scen
             <td>
               var may be dereferenced in an expression in the request payload.like this:
 
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <div class="code">
     &lt;depositor&gt;${depositor}&lt;/depositor&gt;
@@ -2391,84 +2315,6 @@ When overriding RunOptions in a master file, consider these two development scen
     &lt;var ID="depositor"&gt;${oePersonGET.got("persons_common","//refName")}&lt;/var&gt;
               </div><br>
               In context, this looks like:
-
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="code">
     &lt;test ID="oeObject"&gt;
         &lt;method&gt;POST&lt;/method&gt;
@@ -2500,7 +2346,8 @@ When overriding RunOptions in a master file, consider these two development scen
             <td>child elements</td>
             <td>expected<br>
             parts<br>
-            part</td>
+            part<br>
+            validator</td>
           </tr>
 
           <tr>
@@ -2592,62 +2439,13 @@ stdout.println("LOG from javascript: "+result);
           </tr>
 
           <tr>
-            <td>@level</td>
+            <td>@dom</td>
 
             <td>
               Single element for evaluating the response from the server. Specify the type of comparisons for validation with<br>
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2677,6 +2475,26 @@ stdout.println("LOG from javascript: "+result);
     &lt;expected level="TEXT" /&gt;
               </div>
             </td>
+          </tr>
+
+          <tr>
+              <td>dom</td>
+              <td>child element which contains specific criteria for passing a dom validation. </td>
+          </tr>
+
+          <tr>
+              <td>Example:</td>
+
+              <td>
+                  <div class="code">...
+  &lt;expected>
+      &lt;dom>
+          &lt;MATCHED range="3" />
+          &lt;DIFFERENT range="0" />
+      &lt;/dom>
+  &lt;/expected>
+                  </div>
+              </td>
           </tr>
 
           <tr>
@@ -3122,11 +2940,11 @@ if (r && r.count){
   <h3><a name="RestReplay-3.a.x.MoreExamples"></a>3.a.x More Examples</h3>
 <p>The best source for examples are the ones that run every time we build or install RestReplay: our _self-test.  
    This ships with every RestReplay.jar, and can be unpacked from there, or can be seen on our <a href="https://github.com/dynamide/RestReplay/tree/master/src/main/resources/restreplay/_self_test">_self-test GitHub page</a>. </p>
-<p>You can see the reports produced by our _self-test here: <a href="http://dynamide.org/RestReplay/rest-replay-reports/index._self_test.master-self-test.xml.html">Sample Reports</a>.</p>
+<p>You can see the reports produced by our _self-test here: <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.xml.html">Sample Reports</a>.</p>
 <p>Especially, you can see all our tests here:
                                                                <br><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/self-test.xml">self-test.xml</a>
                                                                <br><a href="https://github.com/dynamide/RestReplay/blob/master/src/main/resources/restreplay/_self_test/master-self-test.xml">master-self-test.xml</a>
-                                                               <br>You can run these tests with a command line like this, which will dump reports into the current directory in a directory called ./rest-replay-reports 
+                                                               <br>You can run these tests with a command line like this, which will dump reports into the current directory in a directory called ./reports 
                                                                <br>  
                                                                </p><div class="code">   java -jar ./RestReplay-1.0.4-standalone.jar -selftest -testdir ./</div>
                                                                <br>

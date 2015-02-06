@@ -21,15 +21,19 @@ import org.dynamide.interpreters.Alert.LEVEL;
 public class RestReplayReport {
     public static final String INCLUDES_DIR = "_includes";
 
+    protected static final String TOPLINKS_FILE = "_includes/toplinks.html";
+    protected static final String EVAL_REPORT_LINKS_FILE = "_includes/eval-report-links.html";
+
     public    static final String POWERED_BY = "<div style='margin: 6px; margin-top: 20px; background-color: white; border-radius: 5px; padding: 10px; border: 1px solid blue; text-align: center;'><span style='font-size: 70%;'>powered by</span> <a href='http://dynamide.org/RestReplay/'>RestReplay</a></div>";
     protected static final String HTML_PAGE_END = POWERED_BY+"</body></html>";
-    protected static final String TOPLINKS = "<a class='TOPLINKS' href='javascript:openAll();'>Show All Payloads</a>"
-            + "<a class='TOPLINKS' href='javascript:closeAll();'>Hide All Payloads</a>"
-            + "<a class='TOPLINKS' href='javascript:openAllHeaders();'>Show All Headers</a>"
-            + "<a class='TOPLINKS' href='javascript:closeAllHeaders();'>Hide All Headers</a>"
-            + "<a class='TOPLINKS' href='javascript:openAllMutations();'>Show All Mutations</a>"
-            + "<a class='TOPLINKS' href='javascript:closeAllMutations();'>Hide All Mutations</a>"
-            + "<a class='TOPLINKS' href='#Legend'>Legend</a>";
+
+    /* The LIVE_SECTION is a div that can be passed to the javascript functions which collapse and show things.
+     *  Outside of the LIVE_SECTION, javascript functions will not select, so things in the Legend don't collapse just
+     *  because the user collapsed all Headers, say.
+     */
+    protected static final String LIVE_SECTION_BEGIN = "<div id='LIVE_SECTION'>";
+    protected static final String LIVE_SECTION_END = "</div>";
+
 
     protected static final String HTML_TEST_START = "<div class='TESTCASE'>";
     protected static final String HTML_TEST_END = "</div>";
@@ -51,11 +55,13 @@ public class RestReplayReport {
     protected static final String BR = "<br />\r\n";
     protected static final String HR = "<br /><hr />\r\n";
 
-    protected static final String DETAIL_HDR = "<h2 class='DETAIL_HDR'>Test Details</h2>";
+    protected static final String DETAIL_HDR = "<a name='TestDetail'></a><h2 class='DETAIL_HDR'>Test Details</h2>";
     protected static final String DETAIL_LINESEP = "</td></tr>\r\n<tr><td>";
     protected static final String DETAIL_END = "</td></tr></table>";
 
-    protected static final String TOC_START = "<table border='1' class='TOC_TABLE'><tr><td colspan='8' class='TOC_HDR'>Summary</td></tr>"
+    protected static final String EVAL_REPORT_HDR = "<a name='EvalReport'></a><h2 class='DETAIL_HDR'>Eval Report</h2>";
+
+    protected static final String TOC_START = "<a name='SummaryTOC'></a><table border='1' class='TOC_TABLE'><tr><td colspan='8' class='TOC_HDR'>Summary</td></tr>"
                                               +"<tr><th>testID</th><th>method</th><th>code</th><th>time(ms)</th><th>status</th><th>warn</th><th>error</th><th>DOM</th></tr>\r\n"
                                               +"<tr><td>\r\n";
     protected static final String TOC_LINESEP = "</td></tr>\r\n<tr class='%s'><td class='%s'>";
@@ -90,8 +96,6 @@ public class RestReplayReport {
                 :"");
     }
 
-
-    //private StringBuffer buffer = new StringBuffer();
     private List<ServiceResult> reportsList = new ArrayList<ServiceResult>();
 
     private String runInfo = "";
@@ -101,16 +105,30 @@ public class RestReplayReport {
         return formatPageStart(testdir, restReplay.getResourceManager(), pageTitle)
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+lbl("test group")+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMaster()+"'>Back to Master</a>"+"</div>"
                 + header.toString()
+                + LIVE_SECTION_BEGIN
                 + this.runInfo
                 + BR
                 + reportsListToTOC()
                 + BR
                 + DETAIL_HDR
+                + getInclude(restReplay, TOPLINKS_FILE)
                 + reportsListToString()
                 + HR
                 + evalReportToString(restReplay)
+                + LIVE_SECTION_END
                 +restReplay.getResourceManager().readResource("RestReplayReport.getPage.readFooter", "_includes/html-footer.html", "_includes/html-footer.html")
                 + HTML_PAGE_END;
+    }
+
+    private String getInclude(RestReplay replay, String resourceName){
+        try {
+            String res = replay.getResourceManager().readResource("RestReplayReport.getInclude", resourceName, resourceName);
+            return res;
+        } catch (IOException ioe){
+            System.out.println("ERROR reading resource("+resourceName+"): "+ioe);
+            return "ERROR reading "+resourceName;
+        }
+
     }
 
     private String reportsListToTOC(){
@@ -273,9 +291,11 @@ public class RestReplayReport {
             return "<p>Eval Report is off. Set runOptions::evalReportLevel to SHORT or ALL to enable.</p>";
         }
         StringBuffer b = new StringBuffer();
-        b.append("<div class='evalReport'><h2 class='evalReportTitle'>Eval Report</h2>");
+        b.append(EVAL_REPORT_HDR);
+        b.append(getInclude(replay, EVAL_REPORT_LINKS_FILE));
+        b.append("<div class='evalReport'>");
         for (EvalResult evalResult: replay.evalReport){
-            String trimmedExpression = evalResult.expression;
+            String trimmedExpression = escape(evalResult.expression);
             String trimmedResult = evalResult.getResultString();
             trimmedResult = escape(trimmedResult);
 
@@ -299,7 +319,7 @@ public class RestReplayReport {
                  .append("<span class='evalReportContext'>")
                  .append(evalResult.context)
                  .append("</span><span class='evalReportExpression'>")
-                 .append(trimmedExpression)
+                 .append(escape(trimmedExpression))
                  .append("</span><span class='evalReportValue'>")
                  .append(trimmedResult)
                  .append("</span></div>");
@@ -370,7 +390,7 @@ public class RestReplayReport {
         if (Tools.notBlank(reportName)) {
         } else {
             // We are generating a single report file, so all links are relative to this file, and we should have the TOPLINKS which allow things like showAllPayloads..
-            tocBuffer.append(BR).append(TOPLINKS).append(BR);
+            //20150205-moved.   tocBuffer.append(BR).append(TOPLINKS).append(BR);
         }
         return tocBuffer.toString();
     }
@@ -520,7 +540,11 @@ public class RestReplayReport {
         String masterFilenameNameOnly = "index."
                 +(Tools.notBlank(envID)?envID+'.':"")
                 +relPathNameComponent
-                + f.getName() + ".html";
+                + f.getName();
+        if (masterFilenameNameOnly.endsWith(".xml")){
+            masterFilenameNameOnly = masterFilenameNameOnly.substring(0, masterFilenameNameOnly.length()-4);
+        }
+        masterFilenameNameOnly += ".html";
         String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
         MasterReportNameTupple tupple = new MasterReportNameTupple();
         tupple.directory = masterFilenameDirectory;
@@ -573,7 +597,7 @@ public class RestReplayReport {
                 sb.append("<p>ResourceManager Summary off. To see summary, set reportResourceManagerSummary=\"true\" in master::runOptions or runOptions.xml.</p>");
             }
             sb.append(HTML_PAGE_END);
-            System.out.println("====\r\n==== Master Report Index: "+Tools.glue(tupple.directory, tupple.relname)+"\r\n====");
+            System.out.println("====|\r\n====|  Master Report Index:       "+Tools.glue(tupple.directory, tupple.relname)+"\r\n====|\n\n");
             return FileTools.saveFile(tupple.directory, tupple.relname, sb.toString(), true);
         } catch (Exception e) {
             System.out.println("ERROR saving RestReplay report index: in  testdir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" directory:"+tupple.directory+ " masterFilename: " + tupple.relname + " list: " + reportsList + " error: " + e);
@@ -793,14 +817,14 @@ public class RestReplayReport {
                 //+ ( Tools.notEmpty(s.testGroupID) ? "testGroupID:"+s.testGroupID+linesep : "" )
                 //THIS WORKS, BUT IS VERBOSE: + ( Tools.notEmpty(s.fromTestID) ? "fromTestID:"+s.fromTestID+linesep : "" )
                 + (Tools.notEmpty(s.responseMessage) ? lbl("msg") + s.responseMessage + linesep : "")
-                + (s.auth == null ? "" : lbl("auth") + s.auth + linesep)
+                + (Tools.notBlank(s.auth) ? lbl("auth") + s.auth + linesep:"")
                 + alertsToHtml(s.alerts) + linesep
                 +(s.parentSkipped
                    ?    ""
                    :
-                        HDRBEGIN + lbl("req-headers(mime-only)") + requestHeadersToHtml(s.requestHeaders) + HDREND + linesep
-                        + HDRBEGIN + lbl("req-headers(from-control-file)") + requestHeadersToHtml(s.headerMap) + HDREND + linesep
-                        + HDRBEGIN + lbl("resp-headers") + s.responseHeadersDump + HDREND + linesep
+                        (s.requestHeaders.size()>0?HDRBEGIN + lbl("req-headers(mime-only)") + requestHeadersToHtml(s.requestHeaders) + HDREND + linesep:"")
+                        + (s.headerMap.size()>0?HDRBEGIN + lbl("req-headers(from-control-file)") + requestHeadersToHtml(s.headerMap) + HDREND + linesep:"")
+                        + (Tools.notBlank(s.responseHeadersDump)?  HDRBEGIN + lbl("resp-headers") + s.responseHeadersDump + HDREND + linesep:"")
                  )
                 + (Tools.notEmpty(s.deleteURL) ? lbl("deleteURL") + small(s.deleteURL) + linesep : "")
                 + (Tools.notEmpty(s.location) ? lbl("location") + small(s.location) + linesep : "")

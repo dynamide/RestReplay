@@ -1,6 +1,6 @@
 package org.dynamide.restreplay.mutators;
 
-import org.dynamide.restreplay.Eval;
+import org.dynamide.interpreters.Eval;
 import org.dynamide.restreplay.ResourceManager;
 import org.dynamide.restreplay.RunOptions;
 import org.dynamide.restreplay.ServiceResult;

@@ -1,11 +1,13 @@
-package org.dynamide.restreplay;
+package org.dynamide.interpreters;
 
 import org.apache.commons.jexl2.*;
 
 import java.util.*;
 
-import org.dynamide.interpreters.EvalResult;
 import org.dynamide.interpreters.Alert.LEVEL;
+import org.dynamide.restreplay.Kit;
+import org.dynamide.restreplay.RunOptions;
+import org.dynamide.restreplay.ServiceResult;
 import org.dynamide.util.Tools;
 
 public class Eval {
@@ -24,7 +26,16 @@ public class Eval {
 
     private int lastLevel = 0;
 
-    protected void addToEvalReport(EvalResult result){
+    public boolean popLastEvalReportItemIfUnused(EvalResult result){
+        int pos = evalReport.lastIndexOf(result);
+        if (pos>-1 && (pos+1)==evalReport.size()){
+            evalReport.remove(pos);
+            return true;
+        }
+        return false;
+    }
+
+    public void addToEvalReport(EvalResult result){
         boolean doInsertion = false;
         if (lastLevel>0 && result.nestingLevel==0){
             doInsertion=true;
@@ -40,14 +51,26 @@ public class Eval {
         }
     }
 
-    private String currentTestIDLabel = "";
-    public void setCurrentTestIDLabel(String val){
-        currentTestIDLabel =  val;
+    //private String currentTestIDLabel = "";
+
+    /** The current test label is the title of a block of evals in the Eval Report for this session.
+     *  When checking variables such as <code>&lt;test loop="${expression}" ...</code>, RestReplay
+     *  calls setCurrentTestIDLabel(testID) which gets logged in the report as <b>testID (preflight)</b>
+     *  If no evals occur in the evaluation of the expression, then RestReplay can remove the header
+     *  line by calling popLastEvalReportItemIfUnused(token) where token is the value returned by
+     *  this call.
+     *
+     *    @returns a token which can be used to call popLastEvalReportItemIfUnused(token).
+     *    Do not use the token for any calls or values.
+     */
+    public EvalResult setCurrentTestIDLabel(String val){
+        //currentTestIDLabel =  val;
 
         EvalResult label = new EvalResult();
         label.isDummy = true;
         label.testIDLabel = val;
         addToEvalReport(label);
+        return label;
     }
 
     public void resetContext(){

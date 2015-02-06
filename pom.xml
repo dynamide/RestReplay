@@ -208,6 +208,8 @@
                         <argument>${basedir}/src/main/resources/restreplay</argument>
                         <argument>-master</argument>
                         <argument>master.xml</argument>
+                        <argument>-reports</argument>
+                        <argument>${basedir}/reports</argument>
                     </arguments>
                     <systemProperties>
                     </systemProperties>

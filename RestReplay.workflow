@@ -61,7 +61,7 @@ Running with tests in some other project-based directory:
     mvn -o exec:java -Denv=local -Dtestdir=/Users/vcrocla/src/RestReplay.pearson.testdir -Denv=dev
 
 so the testdir is a directory that has your test master control files,
-and where rest-replay-reports directory will appear.
+and where the reports directory will appear, unless you specify with -reports /my/full/path/to/reports .
 
 
 
@@ -89,7 +89,7 @@ or a single test within a testGroup:
         -testGroup login \
         -test dynamideToken \
         -testdir ./src/main/resources/restreplay \
-        -reports ./rest-replay-reports
+        -reports ./reports
 
 
 =============================================================

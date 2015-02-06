@@ -1,7 +1,7 @@
 package org.dynamide.restreplay.mutators;
 
 import org.dom4j.Node;
-import org.dynamide.restreplay.Eval;
+import org.dynamide.interpreters.Eval;
 import org.dynamide.restreplay.ResourceManager;
 import org.dynamide.restreplay.ServiceResult;
 

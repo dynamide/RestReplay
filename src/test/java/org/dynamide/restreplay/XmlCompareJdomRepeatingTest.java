@@ -24,14 +24,17 @@ public class XmlCompareJdomRepeatingTest {
     }
 
     private void testBanner(String msg){
-        String BANNER ="-------------------------------------------------------";
-        String R = "\r\n";
-        System.out.println(BANNER
-                                     + R +" TEST CLASS: "+this.getClass().getName()
-                                     + R +" TEST NAME: "+msg
-                                     + R +" TEST DATA DIR: "+getDirectory()
-                                     + R
-                                     +BANNER);
+        boolean wantAnnoyingBanner = false;//umm, turn it on if you want the banner, e.g. because surefire is being too quiet.
+        if (wantAnnoyingBanner) {
+            String BANNER = "-------------------------------------------------------";
+            String R = "\r\n";
+            System.out.println(BANNER
+                    + R + " TEST CLASS: " + this.getClass().getName()
+                    + R + " TEST NAME: " + msg
+                    + R + " TEST DATA DIR: " + getDirectory()
+                    + R
+                    + BANNER);
+        }
     }
 
     @Test
@@ -56,7 +59,7 @@ public class XmlCompareJdomRepeatingTest {
                     matchSpec);
         XmlCompareJdomTest.assertTreeWalkResults(results, 1, 0, 0, false, matchSpec);
                                    // addedRight,missingRight,textMismatches,strictMatch,treesMatch
-        System.out.println("testLeftAndRightSame done.  ResourceManager.formatSummaryPlain: "+resourceManager.formatSummaryPlain());
+        //System.out.println("testLeftAndRightSame done.  ResourceManager.formatSummaryPlain: "+resourceManager.formatSummaryPlain());
     }
 
     @Test
@@ -82,7 +85,7 @@ public class XmlCompareJdomRepeatingTest {
                     matchSpec);
         XmlCompareJdomTest.assertTreeWalkResults(results, 0, 0, 0, true, matchSpec);
                                    // addedRight,missingRight,textMismatches,strictMatch,treesMatch
-        System.out.println("testLeftAndRightSameNoStartElement done.  ResourceManager summary: \r\n"+resourceManager.formatSummaryPlain());
+        //System.out.println("testLeftAndRightSameNoStartElement done.  ResourceManager summary: \r\n"+resourceManager.formatSummaryPlain());
     }
 
 

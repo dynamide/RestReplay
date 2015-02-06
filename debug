@@ -8,5 +8,5 @@ java -jar target/RestReplay-1.0.4-standalone.jar \
    -testGroup debug  \
    -testdir ./src/main/resources/restreplay \
    -selftest \
-   -reports /Users/vcrocla/src/RestReplay/rest-replay-reports
+   -reports /Users/vcrocla/src/RestReplay/reports
 popd

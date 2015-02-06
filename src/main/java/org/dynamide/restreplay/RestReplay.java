@@ -2,8 +2,7 @@ package org.dynamide.restreplay;
 
 import org.apache.commons.cli.*;
 
-import org.dynamide.interpreters.EvalResult;
-import org.dynamide.interpreters.RhinoInterpreter;
+import org.dynamide.interpreters.*;
 import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.restreplay.mutators.MutatorFactory;
 import org.dynamide.restreplay.server.EmbeddedServer;
@@ -14,9 +13,7 @@ import org.dom4j.*;
 import java.io.*;
 import java.util.*;
 
-import org.dynamide.interpreters.Alert;
 import org.dynamide.interpreters.Alert.LEVEL;
-import org.dynamide.interpreters.AlertError;
 
 /**
  * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
@@ -120,22 +117,24 @@ public class RestReplay extends ConfigFile {
      * Use this method to clean up resources created on the server that returned CSIDs, if you have
      * specified autoDeletePOSTS==false, which means you are managing the cleanup yourself.
      *
-     * @param serviceResultsMap a Map of ServiceResult objects, which will contain ServiceResult.deleteURL.
+     * @param theServiceResultsMap a Map of ServiceResult objects, which will contain ServiceResult.deleteURL.
      * @return a List<ServiceResult> including error result for which URLs could not be deleted.
      */
-    public static List<ServiceResult> autoDelete(Map<String, ServiceResult> serviceResultsMap, String logName) {
+    public List<ServiceResult> autoDelete(Map<String, ServiceResult> theServiceResultsMap, String logName) {
         List<ServiceResult> results = new ArrayList<ServiceResult>();
-        for (ServiceResult pr : serviceResultsMap.values()) {
+        for (ServiceResult pr : theServiceResultsMap.values()) {
             try {
                 if (Tools.notEmpty(pr.deleteURL)) {
                     ServiceResult deleteResult = new ServiceResult(pr.getRunOptions());
                     deleteResult.isAutodelete = true;
                     deleteResult.testID = pr.testID+"_autodelete";
+                    deleteResult.testGroupID = pr.testGroupID;
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
                     //System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
                     deleteResult = Transport.doDELETE(deleteResult, pr.deleteURL, pr.auth, pr.testID, "[autodelete:" + logName + "]", pr.headerMap);
                     //System.out.println("DONE AUTODELETE: ==>" + pr.deleteURL + "<== : " + deleteResult);
+                    writeRowToConsoleWDump(deleteResult, true, deleteResult.testID);
                     results.add(deleteResult);
                 } else {
                     ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
@@ -146,7 +145,8 @@ public class RestReplay extends ConfigFile {
                     errorResult.fromTestID = pr.fromTestID;
                     errorResult.overrideGotExpectedResult();
                     results.add(errorResult);
-                    System.out.println("DONE AUTODELETE (errorResult): ==>" + pr.deleteURL + "<== : " + errorResult);
+                    writeRowToConsoleWDump(errorResult, true, errorResult.testID);
+                    //System.out.println("DONE AUTODELETE (errorResult): ==>" + pr.deleteURL + "<== : " + errorResult);
                 }
             } catch (Throwable t) {
                 String s = (pr != null) ? "ERROR while attempting to autodelete a ServiceResult: " + pr + ",   using URL:  \"" + pr.deleteURL + "\",  Exception: " + t
@@ -159,9 +159,11 @@ public class RestReplay extends ConfigFile {
                 errorResult.fullURL = pr.fullURL;
                 errorResult.testGroupID = pr.testGroupID;
                 errorResult.fromTestID = pr.fromTestID;
+                errorResult.testGroupID = pr.testGroupID;
                 errorResult.addError(s, t);
                 results.add(errorResult);
-                System.out.println("DONE AUTODELETE (Throwable): ==>" + pr.deleteURL + "<== : " + errorResult + " t:" + t);
+                writeRowToConsoleWDump(errorResult, true, errorResult.testID);
+                //System.out.println("DONE AUTODELETE (Throwable): ==>" + pr.deleteURL + "<== : " + errorResult + " t:" + t);
             }
         }
         return results;
@@ -497,7 +499,6 @@ public class RestReplay extends ConfigFile {
 
             value = evalStruct.jc.get("loop.value");
             this.object = evalStruct.jc.get("loop.object");
-            System.out.println("==================loop.object=["+index+"]========>>>> "+this.object);
 
             res = evalStruct.jc.get("loop.key");
             if (null == res){
@@ -667,8 +668,9 @@ public class RestReplay extends ConfigFile {
             }
             int testElementIndex = -1;
             for (Node testNode : tests) {
-                evalStruct.setCurrentTestIDLabel(testGroupID+'.'+testNode.valueOf("@ID")+" <span class='LABEL'>(preflight)</span>");
+                EvalResult token = evalStruct.setCurrentTestIDLabel(testGroupID+'.'+testNode.valueOf("@ID")+" <span class='LABEL'>(preflight)</span>");
                 LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
+                evalStruct.popLastEvalReportItemIfUnused(token);
                 if (loopHelper.error){
                     continue OUTER;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
                 }
@@ -1273,7 +1275,7 @@ public class RestReplay extends ConfigFile {
                 try {
                     getRunOptions().errorsBecomeEmptyStrings = false;
                     //System.out.println("---->eval export: "+expr);
-                    EvalResult evalResult = evalStruct.eval("export vars", ""+expr, clonedMasterVarsWTest);
+                    EvalResult evalResult = evalStruct.eval("export vars: <b>"+exportID+"</b>", ""+expr, clonedMasterVarsWTest);
                     //System.out.println("      ---->"+evalResult.getResultString()+"<--"+evalResult.alerts+serviceResult.xmlResult);
                     //exportsEvald.put(exportID, evalResult.getResultString());
                     exportsEvald.put(exportID, evalResult.result);

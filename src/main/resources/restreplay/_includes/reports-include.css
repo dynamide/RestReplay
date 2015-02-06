@@ -4,6 +4,11 @@ body {
     font-size: 12pt;
     padding: 1%;
 }
+.MENULINKS_FONT {
+    font-size: 8pt;
+}
+
+/* =============== Below this there should be no absolute font-sizes ================ */
 
 
 caption {
@@ -57,10 +62,12 @@ td, th {
 }
 
 .TESTGROUP {
-    background-color: lightblue;
+    background-color: white;
     color: black;
     text-decoration: none;
     font-family: Tahoma;
+    border: 1px solid black;
+    padding: 5px;
 }
 
 .RUNINFO {
@@ -71,6 +78,8 @@ td, th {
     font-size: 80%;
     white-space: pre;
     padding: 5px;
+    border: 1px solid black;
+    border-top: none;
 }
 
 .SMALL {
@@ -490,6 +499,46 @@ DIV.mutation {
     font-size: 280%;
     font-weight: bold;
 }
+.righty {
+    text-align: right;
+    display: inline-block;
+    width: 34%;
+    float: right;
+}
+.lefty {
+    text-align: left;
+    display: inline-block;
+    width: 60%;
+}
+.fixed{
+    position:fixed;
+    top:4px;
+    right:4px;
+}
+.MENULINKS {
+    background-color: white;
+    border: 1px solid black;
+    padding: 4px;
+    margin: 4px;
+}
+.MENULINKS a {
+    margin: 4px;
+    display: inline-block;
+    border: 1px solid gray;
+    padding: 2px;
+    background-color: #ffc;;
+    -moz-box-shadow: -1px -1px 2px 1px #AAA;
+    -webkit-box-shadow: -1px -1px 2px 1px #AAA;
+    box-shadow: -1px -1px 1px 1px #AAA;
+}
+.menuItem{
+    height: 1.5em;
+}
+.shadow {
+     -moz-box-shadow: -1px -1px 2px 1px #AAA;
+     -webkit-box-shadow: -1px -1px 2px 1px #AAA;
+     box-shadow: -1px -1px 1px 1px #AAA;
+}
 .evalReport {
     width: 90%;
     margin: 2px;
@@ -543,10 +592,10 @@ DIV.mutation {
 .evalReport-level1 {
     padding-left: 25px;
     background-color: #cceeff;
+    display: none;
 }
 .part-summary {
     white-space: pre;
-
 }
 
 .dom-match-table{

@@ -6,8 +6,8 @@ import org.testng.annotations.Test;
 public class XmlCompareJdomTest {
 
     private void testBanner(String msg){
-        String BANNER ="-------------------------------------------------------";
-        System.out.println(BANNER+"\r\n"+this.getClass().getName()+"\r\n"+msg+"\r\n"+BANNER);
+        //String BANNER ="-------------------------------------------------------";
+        //System.out.println(BANNER+"\r\n"+this.getClass().getName()+"\r\n"+msg+"\r\n"+BANNER);
     }
     public static void printTreeWalkResults(TreeWalkResults list){
         for (TreeWalkResults.TreeWalkEntry entry : list){
