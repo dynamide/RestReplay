@@ -1,0 +1,13 @@
+pushd ~/src/RestReplay
+
+zip -r reports.zip reports
+
+echo ssh-ing with $RESTREPLAY_SSH
+scp reports.zip $RESTREPLAY_SSH:~/sites/dynamide.com/RestReplay/
+
+ssh laramiessh@dynamide.org 'cd ~/sites/dynamide.com/RestReplay; unzip -f -o reports.zip'
+
+ssh $RESTREPLAY_SSH  'cd ~/git/RestReplayGithub; git pull; cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay; ls -lat ~/sites/dynamide.com/RestReplay/doc/;'
+
+rm ./reports.zip
+
