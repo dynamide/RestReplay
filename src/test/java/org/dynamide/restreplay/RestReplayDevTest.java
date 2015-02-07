@@ -11,15 +11,12 @@ import java.util.List;
            mvn -e test -DrestReplayMaster=dev-master.xml -DforkMode=never -Dtest=RestReplayDevTest
  *
  * User: laramie
- * $LastChangedRevision:  $
- * $LastChangedDate:  $
  */
 public class RestReplayDevTest extends RestReplayTest {
 
     public static final String DEFAULT_DEV_MASTER_CONTROL = "dev-master.xml";
 
 
-    //@Test
     public void runMaster() throws Exception {
         String masterFile = System.getProperty("master");
         if (Tools.notEmpty(masterFile)){

@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /** General utility methods.
- *   @author Laramie Crocker
+ *   Laramie Crocker
  * v.1.4
  */
 public class Tools {
