@@ -10,6 +10,13 @@ import org.dynamide.restreplay.RunOptions;
 import org.dynamide.restreplay.ServiceResult;
 import org.dynamide.util.Tools;
 
+/** Eval evaluates strings containing Jexl2 expressions bound within braces:
+  <code>${expression1} some text ${expression2}</code>
+  If you pass a single expression, with its braces, the result will be the result object from the Jexl engine,
+  for example eval'ing <code>${['a','b']}</code> will return a Java array of String.
+   If you pass several expressions, the result object's toString() results will be concatenated along with other plain text
+   in the input String.
+ */
 public class Eval {
     public Map<String, ServiceResult> serviceResultsMap;
     public JexlEngine jexl = new JexlEngine();   // Used for expression language expansion from uri field.

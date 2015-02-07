@@ -26,7 +26,7 @@ popd
 
 scp ./javadoc.zip $RESTREPLAY_SSH:~/sites/dynamide.com/RestReplay/javadoc
 
-ssh $RESTREPLAY_SSH  'cd ~/sites/dynamide.com/RestReplay/javadoc; unzip -f -o javadoc.zip; rm javadoc.zip'
+ssh $RESTREPLAY_SSH  'cd ~/sites/dynamide.com/RestReplay/javadoc; unzip -o javadoc.zip; '
 
 rm ./javadoc.zip
 
