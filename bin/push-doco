@@ -1,2 +1,34 @@
+pushd ~/src/RestReplay
+
+################ sample report #########################################
+
+zip -r reports.zip reports
+
 echo ssh-ing with $RESTREPLAY_SSH
+scp reports.zip $RESTREPLAY_SSH:~/sites/dynamide.com/RestReplay/
+
+ssh $RESTREPLAY_SSH  'cd ~/sites/dynamide.com/RestReplay; unzip -f -o reports.zip'
+
+rm ./reports.zip
+
+
+################ html    ################################################
+
 ssh $RESTREPLAY_SSH  'cd ~/git/RestReplayGithub; git pull; cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay; ls -lat ~/sites/dynamide.com/RestReplay/doc/;'
+
+################ javadoc ################################################
+
+rm javadoc.zip
+
+pushd target/site/apidocs
+zip -r ../../../javadoc.zip *
+popd
+
+scp ./javadoc.zip $RESTREPLAY_SSH:~/sites/dynamide.com/RestReplay/javadoc
+
+ssh $RESTREPLAY_SSH  'cd ~/sites/dynamide.com/RestReplay/javadoc; unzip -f -o javadoc.zip; rm javadoc.zip'
+
+rm ./javadoc.zip
+
+
+
