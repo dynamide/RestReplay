@@ -3,11 +3,13 @@ package org.dynamide.restreplay;
 import org.dynamide.util.DateUtils;
 import org.dynamide.util.GregorianCalendarDateTimeUtils;
 import org.dynamide.util.Tools;
+import org.dynamide.util.FileTools;
 import org.dynamide.util.XmlTools;
 
 import java.io.PrintStream;
 
 public class Kit {
+    private static FileTools FILE_TOOLS = new FileTools();
     private static Tools TOOLS = new Tools();
     private static XmlTools XMLTOOLS = new XmlTools();
     private static GregorianCalendarDateTimeUtils GREGORIAN = new GregorianCalendarDateTimeUtils();
@@ -15,6 +17,10 @@ public class Kit {
 
     public static Tools getTools() {
         return TOOLS;
+    }
+
+    public static FileTools getFileTools() {
+        return FILE_TOOLS;
     }
 
     public static XmlTools getXmlTools() {

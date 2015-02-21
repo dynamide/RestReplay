@@ -206,6 +206,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/ws/las.ws/las/restreplay/RestReplayLas.iml" filepath="$USER_HOME$/ws/las.ws/las/restreplay/RestReplayLas.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.dynamide.RestReplay.iml" filepath="$PROJECT_DIR$/org.dynamide.RestReplay.iml" />
     </modules>
   </component>

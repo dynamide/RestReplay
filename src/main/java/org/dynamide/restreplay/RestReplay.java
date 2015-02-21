@@ -1312,21 +1312,29 @@ public class RestReplay extends ConfigFile {
 
     //======================== MAIN ===================================================================
 
+    /*  From javadoc for Options.addOption():
+            opt - Short single-character name of the option.
+            longOpt - Long multi-character name of the option.
+            hasArg - flag signally if an argument is required after this option
+            description - Self-documenting description
+     */
+
     private static Options createOptions() {
         Options options = new Options();
-        options.addOption("help", false, "RestReplay Help");
-        options.addOption("selftest", false, "RestReplay selftest");
-        options.addOption("pause", false, "RestReplay pause before selftest");
-        options.addOption("port", true, "RestReplay selftest port");
-        options.addOption("testdir", true, "default/testdir");
-        options.addOption("reports", true, "default/reports");
-        options.addOption("testGroup", true, "default/testGroup");
-        options.addOption("test", true, "default/test");
-        options.addOption("env", true, "dev");
-        options.addOption("autoDeletePOSTS", true, "true");
-        options.addOption("dumpResults", true, "true");
-        options.addOption("control", true, "control.xml");
-        options.addOption("master", true, "master.xml");
+        options.addOption(     "help", false, "RestReplay Help");
+        options.addOption("h", false, "RestReplay Help");
+        options.addOption(     "selftest", false, "RestReplay selftest");
+        options.addOption(     "pause", false, "RestReplay pause before selftest");
+        options.addOption(     "port", true, "RestReplay selftest port");
+        options.addOption("d", "testdir", true, "default/testdir");
+        options.addOption("r", "reports", true, "default/reports");
+        options.addOption("g", "testGroup", true, "default/testGroup");
+        options.addOption("t", "test", true, "default/test");
+        options.addOption("e", "env", true, "e.g. dev");
+        options.addOption(     "autoDeletePOSTS", true, "true deletes POSTs after each testgroup");
+        options.addOption(     "dumpResults", true, "dumpResults to stdout");
+        options.addOption("c", "control", true, "control filename");
+        options.addOption("m", "master", true, "master filename");
 
         return options;
     }
@@ -1335,13 +1343,13 @@ public class RestReplay extends ConfigFile {
     public static String usage() {
         String result = "org.dynamide.restreplay.RestReplay {args}\r\n"
                 + " args: \r\n"
-                + "  -testdir <dir> \r\n"
-                + "  -reports <dir> \r\n"
-                + "  -master <filename> \r\n"
-                + "  -control <filename> \r\n"
-                + "  -testGroup <ID> \r\n"
-                + "  -test <ID> \r\n"
-                + "  -env <ID> \r\n"
+                + "  -d|-testdir <dir> \r\n"
+                + "  -r|-reports <dir> \r\n"
+                + "  -m|-master <filename> \r\n"
+                + "  -c|-control <filename> \r\n"
+                + "  -g|-testGroup <ID> \r\n"
+                + "  -t|-test <ID> \r\n"
+                + "  -e|-env <ID> \r\n"
                 + "  -dumpResults true|false \r\n"
                 + "  -autoDeletePOSTS true|false \r\n"
                 + "  -selftest \r\n"
@@ -1410,7 +1418,7 @@ public class RestReplay extends ConfigFile {
             String restReplayMaster = opt(line, "master");
             String selfTestPort = opt(line, "port");
             String pause = opt(line, "pause");
-            if (line.hasOption("help")){
+            if (line.hasOption('h') || line.hasOption("help")){
                //System.out.println(usage());
                printHelp(options);
                System.exit(0);

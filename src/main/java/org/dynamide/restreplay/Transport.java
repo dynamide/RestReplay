@@ -8,7 +8,6 @@ import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.Map;
 

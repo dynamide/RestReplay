@@ -23,6 +23,10 @@ Building:
     Remember that this creates the release jar, such as target/RestReplay-1.0.4-standalone.jar
       which should be copied to any deployed clients.
 
+    DEPLOY on Retina LAPPY WITH: 
+         restreplay -u
+     (this is a script installed in ~/bin/restreplay )
+
 =============================================================
 Push to public server
 =============================================================
@@ -107,6 +111,10 @@ TODO:
 Switch to apache http client version 4.
    http://debuguide.blogspot.in/2013/01/quick-guide-for-migration-of-commons.html
 
+   Postman Interceptor
+   https://www.getpostman.com/docs/capture
+   import/export: 
+   
 
 
 =============================================================
