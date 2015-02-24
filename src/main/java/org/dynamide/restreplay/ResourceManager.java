@@ -75,6 +75,17 @@ public class ResourceManager {
         return new ResourceManager();
     }
 
+    private ConfigFile provider;
+    public void setTestContextProvider(ConfigFile provider){
+        this.provider = provider;
+    }
+    protected String getContextProviderContext(){
+        if (this.provider != null){
+            return provider.getCurrentTestIDLabel();
+        }
+        return "";
+    }
+
 
     //I tested, and the correct form for this is *without* the slash before a relative resourcename on the classpath.
     //InputStream res2 = RestReplay.class.getClassLoader().getResourceAsStream("/restreplay/"+masterFilename);
@@ -146,7 +157,7 @@ public class ResourceManager {
 
         org.dom4j.Document document;
         Resource resource = new Resource();
-        resource.context = context;
+        resource.context = context+" ["+this.getContextProviderContext()+"]";
         //resource.base = testdir;
         resource.relPath = relResourcePath;
         resourceHistory.add(resource);

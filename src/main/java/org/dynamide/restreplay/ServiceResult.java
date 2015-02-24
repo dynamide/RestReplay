@@ -213,7 +213,7 @@ public class ServiceResult {
     }
 
 
-    public String responseHeadersDump = "";//This is filled in by Transport, because there are two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
+    public String responseHeadersDump = "";//This is filled in by Transport, because there used to be two types: HttpUrlConnection and the Apache style, so objects are not generic.  This stashes the string result from Transport.
     public List<Range> ranges = new ArrayList<Range>();
     public final static Range DEFAULT_SUCCESS_RANGE = new Range("2x");
     /** if xml sets no expected/code nodes, then DEFAULT_SUCCESS_RANGE is used. */

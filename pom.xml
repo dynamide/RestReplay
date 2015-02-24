@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dynamide</groupId>
     <artifactId>RestReplay</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <name>RestReplay</name>
     <packaging>jar</packaging>
 
@@ -215,7 +215,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.dynamide.restreplay.RestReplay</mainClass>
+                    <mainClass>org.dynamide.restreplay.Main</mainClass>
                     <arguments>
                         <argument>-testdir</argument>
                         <argument>${basedir}/src/main/resources/restreplay</argument>
@@ -256,7 +256,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.dynamide.restreplay.RestReplay</mainClass>
+                            <mainClass>org.dynamide.restreplay.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -1,8 +1,10 @@
+export JAVA_OPTS='-Xms1024m -Xmx1024m'
+
 pushd ~/src/RestReplay
 
 mvn -o -DskipTests=true install
 
-java -jar target/RestReplay-1.0.4-standalone.jar \
+java $JAVA_OPTS -jar target/RestReplay-1.0.5-standalone.jar \
    -master _self_test/master-self-test.xml \
    -control _self_test/self-test.xml \
    -testGroup debug  \

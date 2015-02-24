@@ -22,6 +22,7 @@ public class ConfigFile {
     }
     protected void setResourceManager(ResourceManager manager){
         resourceManager = manager;
+        resourceManager.setTestContextProvider(this);
     }
 
     protected String reportsDir = "";
@@ -80,6 +81,14 @@ public class ConfigFile {
         } else {
             this.relativePathFromReportsDir = "";
         }
+    }
+
+    private String currentTestIDLabel = "";
+    public String getCurrentTestIDLabel() {
+        return currentTestIDLabel;
+    }
+    public void setCurrentTestIDLabel(String currentTestIDLabel) {
+        this.currentTestIDLabel = currentTestIDLabel;
     }
 
     private List<String> reportsList;
