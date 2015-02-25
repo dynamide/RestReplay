@@ -8,7 +8,9 @@ import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.util.Tools;
 import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.json.XML;
 
 import java.net.MalformedURLException;
@@ -790,16 +792,66 @@ public class ServiceResult {
         return "";
     }
 
-    public static String prettyPrintJSON(String payload) {
-        JSONObject json = new JSONObject(payload);
-        String xml = "<root>" + XML.toString(json) + "</root>";
-        return json.toString(4);
+    public static String prettyPrintJSON(String payload){
+        String conversions = "";
+        try {
+            Object json = new JSONTokener(payload).nextValue();
+            if (json instanceof JSONObject) {
+                conversions = "JSONObject";
+                JSONObject jsonobject = new JSONObject(payload);
+                return jsonobject.toString(4);
+            } else if (json instanceof JSONArray) {
+                conversions = "JSONArray";
+                JSONArray jsonarray = new JSONArray(payload);
+                return jsonarray.toString(4);
+            }
+            System.out.println("WARNING: json was neither a JSONObject or a JSONArray");
+            return payload;
+        } catch (Exception e){
+            System.out.println("WARNING: error attempting to call prettyPrintJSON(\""
+                            +payload.substring(0, 25)
+                            +"\");    Conversions attempted: "+conversions
+            );
+            return payload;
+        }
+    }
+
+    public static JSONSuper jsonToJSONMaybe(String payload){
+        Object json = new JSONTokener(payload).nextValue();
+        if (json instanceof JSONObject) {
+            JSONObject jsonobject = new JSONObject(payload);
+            JSONSuper holder = new JSONSuper();
+            holder.jsonObject = jsonobject;
+            holder.type = JSONSuper.TYPE.OBJECT;
+            return holder;
+        } else if (json instanceof JSONArray) {
+            JSONArray jsonarray = new JSONArray(payload);
+            JSONSuper holder = new JSONSuper();
+            holder.jsonArray = jsonarray;
+            holder.type = JSONSuper.TYPE.ARRAY;
+            return holder;
+        }
+        return null;
+    }
+
+    public static class JSONSuper {
+        JSONObject jsonObject;
+        JSONArray jsonArray;
+        public enum TYPE {OBJECT, ARRAY}
+        public TYPE type;
+    }
+
+    public static String jsonMaybeToString(JSONSuper maybe){
+        if (maybe.type.compareTo(JSONSuper.TYPE.ARRAY) == 0){
+            return "<root>"+XML.toString(maybe.jsonArray)+"</root>";
+        } else {
+            return "<root>"+XML.toString(maybe.jsonObject)+"</root>";
+        }
     }
 
     public static String payloadJSONtoXML(String payload) {
-        JSONObject json = new JSONObject(payload);
-        String xml = "<root>"+XML.toString(json)+"</root>";
-        //System.out.println("JSON: "+json.toString(4));
+        JSONSuper maybe = jsonToJSONMaybe(payload);
+        String xml = jsonMaybeToString(maybe);
         //System.out.println("PAYLOAD raw:" + payload);
         //System.out.println("PAYLOAD xml:"+xml);
         return xml;
