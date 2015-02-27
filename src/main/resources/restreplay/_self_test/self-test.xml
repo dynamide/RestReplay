@@ -7,6 +7,49 @@
         <test ID="token">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="exportedToken">${result.got("//data")}</var>
+                    <var ID="status">${this.got("//status")}</var>
+                </vars>
+            </exports>
+        </test>
+    </testGroup>
+
+    <testGroup ID="useImports" autoDeletePOSTS="false">
+        <imports>
+            <import ID="myImportedTokenTest" control="_self_test/self-test.xml" testGroup="login" test="token" />
+        </imports>
+        <headers>
+            <header ID="x-mojo-auth">${myImportedTokenTest.exportedToken}</header>
+        </headers>
+
+        <test ID="importer">
+            <method>GET</method>
+            <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;TOKEN_ID=${TOKEN_ID}</uri>
+            <vars>
+                <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
+            </vars>
+        </test>
+    </testGroup>
+
+    <testGroup ID="badImports" autoDeletePOSTS="false">
+        <imports>
+            <import ID="myImportedTokenTestGOOD" control="_self_test/self-test.xml" testGroup="login" test="token" />
+            <import ID="myImportedTokenTestBAD1" control="_self_test/self-test.xml" testGroup="login" test="tokenWRONG" />
+            <import ID="myImportedTokenTestBAD2" control="_self_test/self-test.xml" testGroup="loginWRONG" test="token" />
+            <import ID="myImportedTokenTestBAD3" control="_self_test/self-test.xmlWRONG" testGroup="login" test="token" />
+        </imports>
+        <headers>
+            <header ID="x-mojo-auth">${myImportedTokenTest.exportedToken}</header>
+        </headers>
+
+        <test ID="importer">
+            <method>GET</method>
+            <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
+            <vars>
+                <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
+            </vars>
         </test>
     </testGroup>
 

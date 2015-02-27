@@ -43,6 +43,7 @@ public class ServiceResult {
     protected void setParent(ServiceResult sr){
         parent = sr;
     }
+    public String controlFileName = "";
     public String testID = "test-id-not-set";
     public String testGroupID = "";
     public String testIDLabel = ""; //a place to stash the internal name used by the serviceresult, but shown for info here only.
@@ -793,65 +794,51 @@ public class ServiceResult {
     }
 
     public static String prettyPrintJSON(String payload){
-        String conversions = "";
-        try {
-            Object json = new JSONTokener(payload).nextValue();
-            if (json instanceof JSONObject) {
-                conversions = "JSONObject";
-                JSONObject jsonobject = new JSONObject(payload);
-                return jsonobject.toString(4);
-            } else if (json instanceof JSONArray) {
-                conversions = "JSONArray";
-                JSONArray jsonarray = new JSONArray(payload);
-                return jsonarray.toString(4);
-            }
-            System.out.println("WARNING: json was neither a JSONObject or a JSONArray");
-            return payload;
-        } catch (Exception e){
-            System.out.println("WARNING: error attempting to call prettyPrintJSON(\""
-                            +payload.substring(0, 25)
-                            +"\");    Conversions attempted: "+conversions
-            );
-            return payload;
+        JSONSuper maybe = new JSONSuper(payload);
+        switch (maybe.type){
+            case OBJECT:
+                return maybe.jsonObject.toString(4);
+            case ARRAY:
+                return maybe.jsonArray.toString(4);
+            default:
+                System.out.println("WARNING: json was neither a JSONObject or a JSONArray");
+                return payload;
         }
-    }
-
-    public static JSONSuper jsonToJSONMaybe(String payload){
-        Object json = new JSONTokener(payload).nextValue();
-        if (json instanceof JSONObject) {
-            JSONObject jsonobject = new JSONObject(payload);
-            JSONSuper holder = new JSONSuper();
-            holder.jsonObject = jsonobject;
-            holder.type = JSONSuper.TYPE.OBJECT;
-            return holder;
-        } else if (json instanceof JSONArray) {
-            JSONArray jsonarray = new JSONArray(payload);
-            JSONSuper holder = new JSONSuper();
-            holder.jsonArray = jsonarray;
-            holder.type = JSONSuper.TYPE.ARRAY;
-            return holder;
-        }
-        return null;
     }
 
     public static class JSONSuper {
-        JSONObject jsonObject;
-        JSONArray jsonArray;
-        public enum TYPE {OBJECT, ARRAY}
+        public JSONObject jsonObject;
+        public JSONArray jsonArray;
+        public String payload;
+        public enum TYPE {OBJECT, ARRAY, STRING}
         public TYPE type;
-    }
-
-    public static String jsonMaybeToString(JSONSuper maybe){
-        if (maybe.type.compareTo(JSONSuper.TYPE.ARRAY) == 0){
-            return "<root>"+XML.toString(maybe.jsonArray)+"</root>";
-        } else {
-            return "<root>"+XML.toString(maybe.jsonObject)+"</root>";
+        public String toString(){
+            if (this.type.compareTo(JSONSuper.TYPE.ARRAY) == 0){
+                return "<root>"+XML.toString(this.jsonArray)+"</root>";
+            } else if (this.type.compareTo(JSONSuper.TYPE.OBJECT) == 0) {
+                return "<root>"+XML.toString(this.jsonObject)+"</root>";
+            }  else {
+                return payload;
+            }
+        }
+        public JSONSuper(String payload){
+            this.payload = payload;
+            Object json = new JSONTokener(payload).nextValue();
+            if (json instanceof JSONObject) {
+                JSONObject jsonobject = new JSONObject(payload);
+                this.jsonObject = jsonobject;
+                this.type = JSONSuper.TYPE.OBJECT;
+            } else if (json instanceof JSONArray) {
+                JSONArray jsonarray = new JSONArray(payload);
+                this.jsonArray = jsonarray;
+                this.type = JSONSuper.TYPE.ARRAY;
+            }
         }
     }
 
     public static String payloadJSONtoXML(String payload) {
-        JSONSuper maybe = jsonToJSONMaybe(payload);
-        String xml = jsonMaybeToString(maybe);
+        JSONSuper maybe = new JSONSuper(payload);
+        String xml = maybe.toString();
         //System.out.println("PAYLOAD raw:" + payload);
         //System.out.println("PAYLOAD xml:"+xml);
         return xml;

@@ -6,6 +6,7 @@ import org.dynamide.util.Tools;
 
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,6 +104,14 @@ public class Main {
     }
 
 
+    private static void pause(String msg) throws IOException {
+        DataInputStream in = new DataInputStream(System.in);
+        System.out.println(msg);
+        byte b = in.readByte();
+        char ch = (char) b;
+        System.out.println("Char : " + ch);
+    }
+
     public static void main(String[] args) throws Exception {
         Options options = createOptions();
         EmbeddedServer selfTestServer = null;
@@ -130,16 +139,11 @@ public class Main {
                 System.exit(0);
             }
             if (line.hasOption("pause")){
-                //Go and start jvisualvm or jconsole now...  then type a character and hit Enter.
-                DataInputStream in = new DataInputStream(System.in);
-                System.out.println("Start debugging tool, then press Enter to resume.");
-                byte b = in.readByte();
-                char ch = (char) b;
-                System.out.println("Char : " + ch);
+                pause("Start debugging tool, then press Enter to resume.");
             }
 
             if (line.hasOption("selftest")){
-                restReplayMaster = "_self_test/master-self-test.xml";
+                //restReplayMaster = "_self_test/master-self-test.xml";
                 if (Tools.isBlank(selfTestPort)){
                     selfTestPort = ""+EmbeddedServer.DEFAULT_PORT;
                 }
@@ -233,13 +237,6 @@ public class Main {
                 } else {
                     //******** RUN MASTER
                     master.runMaster(restReplayMaster, false); //false, because we already just read the options, and override a few.
-                    if (line.hasOption("noexit")){
-                        DataInputStream in = new DataInputStream(System.in);
-                        System.out.println("RestReplay is now waiting to be profiled. Hit enter when ready to continue.");
-                        byte b = in.readByte();
-                        char ch = (char) b;
-                        System.out.println("resuming.");
-                    }
                 }
             } else {
                 //****************** RUNNING CONTROL, NO MASTER ******************************
@@ -250,6 +247,11 @@ public class Main {
                     dump.payloads = bDumpResults;
                 }
                 restReplay.setDump(dump);
+                if (Tools.notBlank(selfTestPort)){
+                    restReplay.getMasterVars().put("SELFTEST_PORT", selfTestPort);
+                }
+                //restReplay.setEnvID(envID);
+
                 List<String> reportsList = new ArrayList<String>();
                 restReplay.runRestReplayFile(
                         testdirResolved,
@@ -262,16 +264,13 @@ public class Main {
                         null,
                         reportsList,
                         reportsDir,
-                        ""/*no master, so no env*/,
+                        ""/*no master, so no env in path. */,
                         "");
                 //No need to dump the reportsList because we were just running one test, and its report gets created and reported on command line OK.
-                // System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
+                //System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
             }
             if (line.hasOption("noexit")){
-                DataInputStream in = new DataInputStream(System.in);
-                System.out.println("RestReplay is now waiting to be profiled. Hit enter when ready to continue.");
-                byte b = in.readByte();
-                char ch = (char) b;
+                pause("RestReplay is now waiting to be profiled. Hit enter when ready to continue.");
             }
         } catch (ParseException exp) {
             System.err.println("Cmd-line parsing failed.  Reason: " + exp.getMessage());

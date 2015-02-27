@@ -10,7 +10,18 @@
         <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
     </runOptions>
 
+    <vars>
+        <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
+    </vars>
+
+    <run controlFile="_self_test/nested/level1/foo.xml"/>
+    <!--
+    <run controlFile="_self_test/self-test.xml" testGroup="login" />
+    <run controlFile="_self_test/self-test.xml" testGroup="badImports" />
+    <run controlFile="_self_test/self-test.xml" testGroup="useImports" />
     <run controlFile="_self_test/self-test.xml" testGroup="debug" />
+    -->
+    <!--
     <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
     <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
     <run controlFile="_self_test/self-test.xml" testGroup="VarsAndValidators" />
@@ -27,6 +38,6 @@
     </run>
     <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
     <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
-
+-->
 </restReplayMaster>
 

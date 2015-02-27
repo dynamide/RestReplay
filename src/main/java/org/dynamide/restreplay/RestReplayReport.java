@@ -9,6 +9,7 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert;
@@ -98,15 +99,15 @@ public class RestReplayReport {
 
     private List<ServiceResult> reportsList = new ArrayList<ServiceResult>();
 
-    private String runInfo = "";
+    private List<String> runInfo = new ArrayList<String>();
 
     public String getPage(String testdir, RestReplay restReplay, String testGroupID) throws IOException {
         String pageTitle = "RestReplay testGroup: "+testGroupID;
         return formatPageStart(testdir, restReplay.getResourceManager(), pageTitle)
-                + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+lbl("test group")+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMaster()+"'>Back to Master</a>"+"</div>"
+                + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+lbl("test group")+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMasterURL()+"'>Back to Master</a>"+"</div>"
                 + header.toString()
                 + LIVE_SECTION_BEGIN
-                + this.runInfo
+                + this.getRunInfoHTML()
                 + BR
                 + reportsListToTOC()
                 + BR
@@ -396,8 +397,32 @@ public class RestReplayReport {
     }
 
     public void addRunInfo(String text) {
-        this.runInfo = RUNINFO_START + text + RUNINFO_END;
-        //addText(this.runInfo);
+        this.runInfo.add(text);
+    }
+
+    public String getRunInfo(){
+        StringBuilder b = new StringBuilder();
+        for (String s: runInfo){
+            b.append(s);
+        }
+        return b.toString();
+    }
+    public String getRunInfoHTML(){
+        StringBuilder b = new StringBuilder();
+        b.append(RUNINFO_START);
+        for (String text: runInfo){
+            b.append(text);
+        }
+        b.append(RUNINFO_END);
+        return b.toString();
+    }
+
+    public void clearRunInfo(){
+        this.runInfo.clear();
+        header.groupID = "";
+        header.controlFile = "";
+        header.failureMessage = "";
+        header.failure = false;
     }
 
     /**
@@ -408,6 +433,8 @@ public class RestReplayReport {
    // }
 
     private class Header {
+        public boolean failure = false;
+        public String failureMessage = "";
         public String groupID;
         public String controlFile;
         public String reportNameLink;
@@ -418,6 +445,9 @@ public class RestReplayReport {
                                  ? groupID
                                  : "<a href='"+reportNameLink+"'>"+groupID+"</a>";
             sb.append(lbl("Test Group")).append(groupIDLink).append(SP).append(lbl("Control File")).append(controlFile);
+            if (failure) {
+                sb.append("<div class='group-failure'>"+failureMessage+"</div>");//it is white-space: pre, so \r\n will be OK.
+            }
             sb.append(GROUP_END);
             return sb.toString();
         }
@@ -427,6 +457,11 @@ public class RestReplayReport {
     public void addTestGroup(String groupID, String controlFile) {
         header.groupID = groupID;
         header.controlFile = controlFile;
+    }
+
+    public void addFailure(String msg){
+        header.failureMessage = msg;
+        header.failure = true;
     }
 
     private int divID = 0;
@@ -605,7 +640,46 @@ public class RestReplayReport {
         }
     }
 
+    /**
+     * @param localMasterFilename should be a local filename for the index of each restReplay master control file, e.g. objectexit.xml
+     *                            so what gets written to disk will be something like index.objectexit.xml.html . The actual filename will be available from
+     *                            the returned File object if successful.
+     * @return File if successful, else returns null.
+     */
+    public static File saveIndexNoMaster( ResourceManager rm,
+                                          String testdir,
+                                          String reportsDir,
+                                          String localMasterFilename,
+                                          List<String> reportsList) {
+
+        MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, "");
+        try {
+            String dateStr = Tools.nowLocale();
+            String pageTitle = "RestReplay "+localMasterFilename;
+            StringBuffer sb = new StringBuffer();
+            sb.append(formatPageStart(testdir, rm, pageTitle))
+              .append("<html><head><title>"+pageTitle+"</title></head><body>")
+              .append("<div class='REPORTTIME'><b>RestReplay</b> " + lbl(" run on") + " " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>")
+              .append("<div class='masterVars'><span class='LABEL'>environment:</span><br />")
+              .append(" <p class='SMALLBLACK'>Report was generated with no <b>-master</b>, so <b>-env</b> is not used.</p>")
+              .append("</div>");
+            for (String oneToc : reportsList) {
+                sb.append(oneToc);
+                sb.append("<hr />");
+            }
+            sb.append(HTML_PAGE_END);
+            System.out.println("====|\r\n====|  Master Report Index:       "+Tools.glue(tupple.directory, tupple.relname)+"\r\n====|\n\n");
+            return FileTools.saveFile(tupple.directory, tupple.relname, sb.toString(), true);
+        } catch (Exception e) {
+            System.out.println("ERROR saving RestReplay report index: in  testdir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" directory:"+tupple.directory+ " masterFilename: " + tupple.relname + " list: " + reportsList + " error: " + e);
+            System.out.println(Tools.getStackTrace(e));
+            return null;
+        }
+    }
     protected static String formatMasterVars(Map<String, Object> masterVars) {
+        if (masterVars==null){
+            return "";
+        }
         StringBuffer buffer = new StringBuffer();
 
         for (Map.Entry<String, Object> entry : masterVars.entrySet()) {

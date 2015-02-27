@@ -38,19 +38,19 @@ public class RunOptions {
 
     @Override
     public String toString() {
-        String CR = ",\n\t\t";
-        return "{" +
-                "connectionTimeout=" + connectionTimeout + CR +
-                " socketTimeout=" + socketTimeout + CR+
-                " errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings + CR+
-                " acceptAlertLevel=" + acceptAlertLevel + CR+
-                " failTestOnWarnings=" + failTestOnWarnings + CR+
-                " failTestOnErrors=" + failTestOnErrors + CR+
-                " evalReportLevel=" + evalReportLevel +CR+
-                " dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
-                " reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
-                " skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
-                " skipMutators=" + skipMutators + "\n\t\t}";
+        String CR = ",\r\n   ";
+        return "{" + CR +
+                "    connectionTimeout=" + connectionTimeout + CR +
+                "    socketTimeout=" + socketTimeout + CR+
+                "    errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings + CR+
+                "    acceptAlertLevel=" + acceptAlertLevel + CR+
+                "    failTestOnWarnings=" + failTestOnWarnings + CR+
+                "    failTestOnErrors=" + failTestOnErrors + CR+
+                "    evalReportLevel=" + evalReportLevel +CR+
+                "    dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
+                "    reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
+                "    skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
+                "    skipMutators=" + skipMutators + "\r\n   }";
     }
 
     public String toHTML() {

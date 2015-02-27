@@ -309,6 +309,15 @@ td, th {
     color: red;
 }
 
+.group-failure {
+    color: red;
+    border: 1px solid black;
+    align: right;
+    padding: 2px;
+    margin: 4px;
+    white-space: pre;
+}
+
 .toc-error {
     padding: 2px;
     font-size: 60%;

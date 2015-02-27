@@ -2,18 +2,24 @@
 <restReplay>
     <protoHostPort>${SELFTEST_SERVER}</protoHostPort>
     <testGroup ID="fooGroup" autoDeletePOSTS="false">
+        <vars>
+            <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
+        </vars>
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
-            <uri>/tagonomy?mock=token</uri>
+            <uri>/tagonomy?mock=token&amp;group=fooGroup</uri>
         </test>
     </testGroup>
 
     <testGroup ID="fooGroup2" autoDeletePOSTS="false">
+        <vars>
+            <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
+        </vars>
         <test ID="dynamideToken">
             <expectedCodes>200</expectedCodes>
             <method>GET</method>
-            <uri>/tagonomy?mock=token</uri>
+            <uri>/tagonomy?mock=token&amp;group=fooGroup2</uri>
         </test>
     </testGroup>
 </restReplay>

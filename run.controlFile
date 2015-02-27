@@ -1,0 +1,15 @@
+## This file is useful to test the case when you are passing a control file, but no master.
+## For additional testing, we are passing in -env, which is supposed to be ignored.
+
+export JAVA_OPTS='-Xms1024m -Xmx1024m'
+
+pushd ~/src/RestReplay
+
+mvn -o -DskipTests=true install
+java $JAVA_OPTS -jar target/RestReplay-1.0.5-standalone.jar \
+   -control _self_test/nested/level1/foo.xml \
+   -testdir ./src/main/resources/restreplay \
+   -selftest \
+   -env QA \
+   -reports /Users/vcrocla/src/RestReplay/reports
+popd

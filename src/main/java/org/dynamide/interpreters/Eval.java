@@ -19,6 +19,7 @@ import org.dynamide.util.Tools;
  */
 public class Eval {
     public Map<String, ServiceResult> serviceResultsMap;
+    public Map<String, ServiceResult> importsNamespace;
     public JexlEngine jexl = new JexlEngine();   // Used for expression language expansion from uri field.
     public JexlContext jc;
     public static Tools TOOLS = new Tools();
@@ -121,6 +122,13 @@ public class Eval {
                     jc.set(entry.getKey(), entry.getValue());
                 }
             }
+
+            if (importsNamespace!=null) {
+                for (Map.Entry <String,ServiceResult> entry:importsNamespace.entrySet()){
+                    jc.set(entry.getKey(), entry.getValue());
+                }
+            }
+
             if (vars!=null){
                 for (Map.Entry<String,Object> entry: vars.entrySet()) {
                     //loop over vars.  Don't overwrite, but add all the vars so that vars can themselves reference vars.

@@ -5,10 +5,7 @@ import org.dom4j.Node;
 import org.dynamide.util.Tools;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Master extends ConfigFile {
 
@@ -20,6 +17,11 @@ public class Master extends ConfigFile {
         readDefaultRunOptions();//prerequisites: ResourceManager has been set.
     }
     public static final String DEFAULT_MASTER_CONTROL = "master.xml";
+
+    private Map<String, ServiceResult> masterNamespace = new LinkedHashMap<String, ServiceResult>();
+    public Map<String, ServiceResult> getMasterNamespace(){
+        return masterNamespace;
+    }
 
     public Map<String,Object> vars = new LinkedHashMap<String,Object>();
     public Map<String, Object> getVars() {
@@ -161,7 +163,7 @@ public class Master extends ConfigFile {
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
-        runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname);
+        list.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname));
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
         return list;
     }
@@ -195,6 +197,7 @@ public class Master extends ConfigFile {
             masterVarsDup.putAll(runVars);
         }
         replay.setMasterVars(masterVarsDup);
+        replay.setMasterNamespace(this.masterNamespace);
         replay.setReportsList(getReportsList());  //they go directly in.  In future, if you want to aggregate by control file, fix it here.
         // Add all the reports from the inner replay, to our master replay's reportsList, to generate the index.html file.
 
