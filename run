@@ -1,0 +1,12 @@
+export JAVA_OPTS='-Xms1024m -Xmx1024m'
+
+pushd ~/src/RestReplay
+
+mvn -o -DskipTests=true install
+
+java $JAVA_OPTS -jar target/RestReplay-1.0.5-standalone.jar \
+   -master _self_test/master-self-test.xml \
+   -testdir ./src/main/resources/restreplay \
+   -selftest \
+   -reports /Users/vcrocla/src/RestReplay/reports
+popd
