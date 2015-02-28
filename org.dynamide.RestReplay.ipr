@@ -217,6 +217,17 @@
     <mapping directory="" vcs="Git" />
   </component>
   <component name="libraryTable">
+    <library name="Maven: asm:asm:3.3.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/asm/asm/3.3.1/asm-3.3.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/asm/asm/3.3.1/asm-3.3.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/asm/asm/3.3.1/asm-3.3.1-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: com.beust:jcommander:1.27">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.27/jcommander-1.27.jar!/" />
@@ -226,6 +237,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.27/jcommander-1.27-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.jayway.jsonpath:json-path:1.2.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/jayway/jsonpath/json-path/1.2.0/json-path-1.2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/jayway/jsonpath/json-path/1.2.0/json-path-1.2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/jayway/jsonpath/json-path/1.2.0/json-path-1.2.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: commons-cli:commons-cli:20040117.000000">
@@ -325,6 +347,28 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.17/log4j-1.2.17-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: net.minidev:asm:1.0.2">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/net/minidev/asm/1.0.2/asm-1.0.2.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/net/minidev/asm/1.0.2/asm-1.0.2-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/net/minidev/asm/1.0.2/asm-1.0.2-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: net.minidev:json-smart:2.1.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/net/minidev/json-smart/2.1.0/json-smart-2.1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/net/minidev/json-smart/2.1.0/json-smart-2.1.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/net/minidev/json-smart/2.1.0/json-smart-2.1.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.apache.commons:commons-jexl:2.1.1">

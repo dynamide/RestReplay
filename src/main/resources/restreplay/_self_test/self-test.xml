@@ -16,44 +16,6 @@
         </test>
     </testGroup>
 
-    <testGroup ID="useImports" autoDeletePOSTS="false">
-        <imports>
-            <import ID="myImportedTokenTest" control="_self_test/self-test.xml" testGroup="login" test="token" />
-        </imports>
-        <headers>
-            <header ID="x-mojo-auth">${myImportedTokenTest.exportedToken}</header>
-        </headers>
-
-        <test ID="importer">
-            <method>GET</method>
-            <uri>/tagonomy?mock=true&amp;TOKEN_ID=${TOKEN_ID}</uri>
-            <vars>
-                <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
-            </vars>
-        </test>
-    </testGroup>
-
-    <testGroup ID="badImports" autoDeletePOSTS="false">
-        <imports>
-            <import ID="myImportedTokenTestGOOD" control="_self_test/self-test.xml" testGroup="login" test="token" />
-            <import ID="myImportedTokenTestBAD1" control="_self_test/self-test.xml" testGroup="login" test="tokenWRONG" />
-            <import ID="myImportedTokenTestBAD2" control="_self_test/self-test.xml" testGroup="loginWRONG" test="token" />
-            <import ID="myImportedTokenTestBAD3" control="_self_test/self-test.xmlWRONG" testGroup="login" test="token" />
-        </imports>
-        <headers>
-            <header ID="x-mojo-auth">${myImportedTokenTest.exportedToken}</header>
-        </headers>
-
-        <test ID="importer">
-            <method>GET</method>
-            <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
-            <vars>
-                <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
-            </vars>
-        </test>
-    </testGroup>
-
-
     <testGroup ID="selftestGroup" autoDeletePOSTS="false">
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
@@ -67,6 +29,40 @@
         <test ID="token">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="data">${this.got("$..data")}</var>
+                </vars>
+            </exports>
+        </test>
+        <test ID="tokenWithXPath">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="datax">${this.got("//data")}</var>
+                </vars>
+            </exports>
+        </test>
+        <test ID="gotJson">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="JsonPathTest">${this.gotJson("$..data")}</var>
+                </vars>
+            </exports>
+        </test>
+        <test ID="gotJson_Warnings">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <exports>
+                <vars>
+                    <var ID="JsonPathTestJsonPath">${this.got("$..data")}</var>
+                    <var ID="JsonPathTestXPath">${this.got("//data")}</var>
+                    <var ID="JsonPathTestEmpty">${this.got("")}</var>
+                </vars>
+            </exports>
         </test>
         <test ID="expectedCodes">
             <expected>
@@ -871,15 +867,44 @@
     </testGroup>
 
 
-    <testGroup ID="debug" autoDeletePOSTS="true">
-        <test ID="loopStringArraySimple" loop="${['10','18','21']}">
+    <testGroup ID="useImports" autoDeletePOSTS="false">
+        <imports>
+            <import ID="myImportedTokenTest" control="_self_test/self-test.xml" testGroup="login" test="token" />
+        </imports>
+        <headers>
+            <header ID="x-mojo-auth">${myImportedTokenTest.exportedToken}</header>
+        </headers>
+
+        <test ID="importer">
             <method>GET</method>
-            <uri>/tagonomy?mock=token</uri>
+            <uri>/tagonomy?mock=true&amp;TOKEN_ID=${TOKEN_ID}</uri>
             <vars>
-                <var ID="someArray">${["103","183","213"]}</var>
-                <var ID="LOOP">${loop}</var>
+                <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
             </vars>
         </test>
+    </testGroup>
+
+    <testGroup ID="badImports" autoDeletePOSTS="false">
+        <imports>
+            <import ID="myImportedTokenTestGOOD" control="_self_test/self-test.xml" testGroup="login" test="token" />
+            <import ID="myImportedTokenTestBAD1" control="_self_test/self-test.xml" testGroup="login" test="tokenWRONG" />
+            <import ID="myImportedTokenTestBAD2" control="_self_test/self-test.xml" testGroup="loginWRONG" test="token" />
+            <import ID="myImportedTokenTestBAD3" control="_self_test/self-test.xmlWRONG" testGroup="login" test="token" />
+        </imports>
+        <headers>
+            <header ID="x-mojo-auth">${myImportedTokenTest.exportedToken}</header>
+        </headers>
+
+        <test ID="importer">
+            <method>GET</method>
+            <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;foo=${TOKEN_ID}</uri>
+            <vars>
+                <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
+            </vars>
+        </test>
+    </testGroup>
+
+    <testGroup ID="debug" autoDeletePOSTS="true">
     </testGroup>
 
 

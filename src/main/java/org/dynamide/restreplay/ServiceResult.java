@@ -1,5 +1,6 @@
 package org.dynamide.restreplay;
 
+import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.httpclient.Header;
 import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
@@ -112,8 +113,8 @@ public class ServiceResult {
                 String stack = Tools.getStackTrace(e);
                 String resultString = RestReplayReport.escape(result);
                 resultString = resultString.substring(0, Math.min(resultString.length(), RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT));
-                addError("trying to prettyPrintJSON(result) where result claimed to be format:" + format
-                                + ", result : <br />   &laquo;" + resultString +"....&raquo; <br />",
+                addError("trying to prettyPrintJSON(RESPONSE) which claimed to be format:" + format
+                                + ", RESPONSE : <br />   &laquo;" + resultString +"....&raquo; <br />",
                         e);
             }
             try {
@@ -123,8 +124,8 @@ public class ServiceResult {
                 String stack = Tools.getStackTrace(e);
                 String resultString = RestReplayReport.escape(result);
                 resultString = resultString.substring(0, Math.min(resultString.length(), RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT));
-                addError("Error trying to convert result as JSON to XML where result claimed to be format:" + format
-                                + ", result : <br />   &laquo;" + resultString +"....&raquo; <br />",
+                addError("Error trying to convert RESPONSE as JSON to XML, where RESPONSE claimed to be format:" + format
+                                + ", RESPONSE : <br />   &laquo;" + resultString +"....&raquo; <br />",
                                 e);
             }
         }
@@ -719,14 +720,25 @@ public class ServiceResult {
         }
     }
 
-    /** This method may be called from a test case, using a syntax like ${testID3.got("persons_common", "//refName")}   */
-    public String got(String xpath) throws Exception {
+    /** This method may be called from a test case, using a syntax like ${testID3.got("persons_common", "//refName")}
+     *  @param pathExpression If this.result is JSON, as determined by contentTypeFromResponse(), then JsonPath is assumed,
+     *                        otherwise XPath is assumed. */
+    public Object got(String pathExpression) throws Exception {
+        if (Tools.isBlank(pathExpression)) {
+            addAlertWarning("pathExpression was empty in " + this.testIDLabel);
+            return "";
+        }
         //PayloadLogger.HttpTraffic traffic = PayloadLogger.readPayloads(this.result, this.boundary, this.contentLength);
         //PayloadLogger.Part partFromServer = traffic.getPart(partName);
         //String source = partFromServer.getContent();
         try {
-            String source;
+            if (pathExpression.startsWith("$")
+                    && Tools.notBlank(result)
+                    && contentTypeFromResponse().equals(PRETTY_FORMAT.JSON)) {
+                return gotJson(pathExpression);  //pathExpression is jsonPath
+            }
 
+            String source;
             if (Tools.notBlank(this.getXmlResult())) {
                 source = this.getXmlResult();
             } else {
@@ -735,15 +747,49 @@ public class ServiceResult {
             if (Tools.isBlank(source)) {
                 return "";
             }
-            org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, xpath, null);
+            org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, pathExpression, null);
             String sr = element != null ? element.getText() : "";
             return sr;
         } catch (Throwable t){
             addAlert("ERROR reading response value: " + t,
-                    "xpath:"+xpath,
+                    "xpath:"+pathExpression,                    //pathExpression is xpath
                     Alert.LEVEL.ERROR);
             return "";
         }
+    }
+    
+//todo......
+    public Object gotXPath(String pathExpression) throws Exception {
+        if (Tools.isBlank(pathExpression)) {
+            addAlertWarning("pathExpression was empty in " + this.testIDLabel);
+            return "";
+        }
+        //PayloadLogger.HttpTraffic traffic = PayloadLogger.readPayloads(this.result, this.boundary, this.contentLength);
+        //PayloadLogger.Part partFromServer = traffic.getPart(partName);
+        //String source = partFromServer.getContent();
+        try {
+            String source;
+            if (Tools.notBlank(this.getXmlResult())) {
+                source = this.getXmlResult();
+            } else {
+                source = this.result;
+            }
+            if (Tools.isBlank(source)) {
+                return "";
+            }
+            org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, pathExpression, null);
+            String sr = element != null ? element.getText() : "";
+            return sr;
+        } catch (Throwable t){
+            addAlert("ERROR reading response value: " + t,
+                    "xpath:"+pathExpression,                    //pathExpression is xpath
+                    Alert.LEVEL.ERROR);
+            return "";
+        }
+    }
+
+    public Object gotJson(String jsonPath){
+        return JsonPath.read(this.result, jsonPath);
     }
 
     /** This method may be called from a test case, using a syntax like ${oe9.reqValue("personauthorities_common","//shortIdentifier")}    */
@@ -823,12 +869,14 @@ public class ServiceResult {
         public enum TYPE {OBJECT, ARRAY, STRING}
         public TYPE type;
         public String toString(){
-            if (this.type.compareTo(JSONSuper.TYPE.ARRAY) == 0){
-                return "<root>"+XML.toString(this.jsonArray)+"</root>";
-            } else if (this.type.compareTo(JSONSuper.TYPE.OBJECT) == 0) {
-                return "<root>"+XML.toString(this.jsonObject)+"</root>";
-            }  else {
-                return payload;
+            switch (this.type) {
+                case ARRAY:
+                    return "<root>"+XML.toString(this.jsonArray)+"</root>";
+                case OBJECT:
+                    return "<root>"+XML.toString(this.jsonObject)+"</root>";
+                case STRING:
+                default:
+                    return payload;
             }
         }
         public JSONSuper(String payload){
