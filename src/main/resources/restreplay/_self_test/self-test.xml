@@ -26,7 +26,7 @@
 
         <test ID="importer">
             <method>GET</method>
-            <uri>${SELFTEST_SERVER}/tagonomy?mock=true&amp;TOKEN_ID=${TOKEN_ID}</uri>
+            <uri>/tagonomy?mock=true&amp;TOKEN_ID=${TOKEN_ID}</uri>
             <vars>
                 <var ID="TOKEN_ID">${myImportedTokenTest.status}</var>
             </vars>
@@ -58,6 +58,12 @@
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
+        <test ID="simpleGET">
+            <uri>/tagonomy</uri>
+        </test>
+        <test ID="simpleGET_EmptyResponse">
+            <uri>/jsonCompare1</uri>
+        </test>
         <test ID="token">
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
@@ -523,6 +529,14 @@
                 </vars>
             </exports>
         </test>
+
+        <!--"problem": "This file starts with an array, but never ends it."" if needed: /jsonCompare1?mimeOut=text/json-->
+        <test ID="badJson">
+            <method>POST</method>
+            <uri>/jsonCompare1</uri>
+            <filename>_self_test/bad-json.json</filename>
+        </test>
+
     </testGroup>
 
 

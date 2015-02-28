@@ -250,7 +250,6 @@ public class Main {
                 if (Tools.notBlank(selfTestPort)){
                     restReplay.getMasterVars().put("SELFTEST_PORT", selfTestPort);
                 }
-                //restReplay.setEnvID(envID);
 
                 List<String> reportsList = new ArrayList<String>();
                 restReplay.runRestReplayFile(
@@ -262,12 +261,10 @@ public class Main {
                         bAutoDeletePOSTS,
                         "",
                         null,
-                        reportsList,
+                        reportsList,   // method prints out reportsList if last parameter (masterFilenameInfo) is empty.
                         reportsDir,
-                        ""/*no master, so no env in path. */,
-                        "");
-                //No need to dump the reportsList because we were just running one test, and its report gets created and reported on command line OK.
-                //System.out.println("DEPRECATED: reportsList is generated, but not dumped: "+reportsList.toString());
+                        "",            //no master, so no env in path.
+                        "");           //masterFilenameInfo. If blank, stand-alone report with reportsList is printed.
             }
             if (line.hasOption("noexit")){
                 pause("RestReplay is now waiting to be profiled. Hit enter when ready to continue.");

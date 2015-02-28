@@ -245,6 +245,27 @@ public class Tools {
         return sb.toString();
     }
 
+    public static String getStackTraceTop(Throwable t, int lo, int hi, String delimiter){
+        if ( t == null ) {
+            return "";
+        }
+            StringBuffer result = new StringBuffer();
+            StackTraceElement[] elements = t.getStackTrace();
+            int elements_size = elements.length;
+            StackTraceElement element;
+            String test;
+            for (int i=lo; i < elements_size; i++) {
+                if (i>=hi){
+                    break;
+                }
+                element = elements[i];
+                test = element.toString();
+                result.append(test);
+                result.append(delimiter);
+            }
+            return result.toString();
+    }
+
     public static String errorToString(Throwable e, boolean stackTraceOnException){
         return errorToString(e, stackTraceOnException, 0);
     }

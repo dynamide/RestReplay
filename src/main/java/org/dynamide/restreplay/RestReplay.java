@@ -614,7 +614,10 @@ public class RestReplay extends ConfigFile {
         return b.toString();
     }
 
-    private static class ImportFilter {
+    /** This class handles an import element in the control file, for example:
+     * <code>&lt;import ID="myImportedTokenTest" control="_self_test/self-test.xml" testGroup="login" test="token" /></code>
+     */
+    protected static class ImportFilter {
         Map<String,ServiceResult> map;
         String key = "";
         String ID = "";
@@ -624,9 +627,7 @@ public class RestReplay extends ConfigFile {
         String failureMessage = "";
         boolean failure = false;
 
-        public Map<String,ServiceResult> filter(Node testgroup,
-                                                Map<String,ServiceResult> masterNamespace){
-            //e.g. <import ID="myImportedTokenTest" control="_self_test/self-test.xml" testGroup="login" test="token" />
+        public Map<String,ServiceResult> filter(Node testgroup, Map<String,ServiceResult> masterNamespace) {
             map = new LinkedHashMap<String,ServiceResult>();
             List<Node> nodeList = testgroup.selectNodes("imports/import");
             for (Node importNode : nodeList) {
@@ -646,12 +647,40 @@ public class RestReplay extends ConfigFile {
             }
             return map;
         }
+        public static String makeImportsKey(String controlFileName, String testGroup, String test){
+            return controlFileName+':'+testGroup+'.'+test;
+        }
     }
 
-    public static String makeImportsKey(String controlFileName, String testGroup, String test){
-        return controlFileName+':'+testGroup+'.'+test;
-    }
+    private boolean handleImports(Eval evalStruct,
+                               RestReplayReport report,
+                               Node testgroup,
+                               String currentTestGroupID)
+    {
+        String RUNINFOLINE = "========================================================================";
 
+        ImportFilter importFilter = new ImportFilter();
+        importFilter.filter(testgroup, masterNamespace);
+
+        evalStruct.importsNamespace = importFilter.map;
+        String filterImportsStr = getFilterImportsDump(importFilter.map);
+
+        if (Tools.notBlank(filterImportsStr)){
+            report.addRunInfo(filterImportsStr);
+        }
+        System.out.println(RUNINFOLINE);
+        System.out.print(report.getRunInfo());
+        System.out.println(RUNINFOLINE+"\n\r");
+
+        if (importFilter.failure) {
+            String errstring = "ERROR: Bad import, skipping test group: ["+controlFileName+":"+currentTestGroupID+"]"
+                    +"\r\n  failureMessage: \r\n"+importFilter.failureMessage+"\r\n";
+            report.addFailure(errstring);
+            System.out.println(errstring);
+            return false;
+        }
+        return true;
+    }
 
     //================= runRestReplayFile ======================================================
 
@@ -715,7 +744,6 @@ public class RestReplay extends ConfigFile {
             noMaster = true;
         }
 
-        String RUNINFOLINE = "========================================================================";
         String restReplayHeader =
                   "RestReplay running:"
                 + "\r\n   testGroup: " + testGroupID
@@ -729,37 +757,34 @@ public class RestReplay extends ConfigFile {
                 + "\r\n   masterVars: " + dumpMasterVars(masterVars)
                 + "\r\n   param_autoDeletePOSTS: " + param_autoDeletePOSTS
                 + "\r\n   Dump info: " + getDump()
-                + "\r\n   RunOptions: " + getRunOptions()
-                + "\r\n";
+                + "\r\n   RunOptions: " + getRunOptions();
 
         String autoDeletePOSTS = "";
-        List<Node> testgroupNodes;
-        if (Tools.notEmpty(testGroupID)) {
-            testgroupNodes = document.selectNodes("//testGroup[@ID='" + testGroupID + "']");
-        } else {
-            testgroupNodes = document.selectNodes("//testGroup");
-        }
 
         Eval evalStruct = new Eval();
         evalStruct.runOptions = this.getRunOptions();
         evalStruct.serviceResultsMap = this.serviceResultsMap;
 
-        //So this loop gets run when you have multiple test groups from above selectNodes call,
-        // that is, when the command line has -control but no -testGroup argument.
+        String OUTERTestGroupID = testGroupID;
+
+        List<Node> testgroupNodes;
+        if (Tools.notEmpty(testGroupID)) {
+            testgroupNodes = document.selectNodes("//testGroup[@ID='" + testGroupID + "']");   //If you specify the testGroup then the loop will only happen once.
+        } else {
+            testgroupNodes = document.selectNodes("//testGroup");   //When the command line has -control but no -testGroup argument.
+        }
 
         OUTER:
         for (Node testgroup : testgroupNodes) {
             String currentTestGroupID = testgroup.valueOf("@ID");
             RestReplayReport report = new RestReplayReport(reportsDir);
 
-            //todo: really tempting:
             testGroupID = currentTestGroupID;
 
             report.clearRunInfo();
             evalStruct.resetContext();    // Get a new JexlContext for each test group.
 
             report.addTestGroup(currentTestGroupID, controlFileName);
-
 
             //vars var = get control file vars and merge masterVars into it, replacing
             Map<String, Object> testGroupVars = readVars(testgroup);
@@ -769,98 +794,73 @@ public class RestReplay extends ConfigFile {
             }
             clonedMasterVars.putAll(testGroupVars);
 
-
-            //======= begin imports =====================
-            ImportFilter importFilter = new ImportFilter();
-            importFilter.filter(testgroup, masterNamespace);
-
-            evalStruct.importsNamespace = importFilter.map;
-            String filterImportsStr = getFilterImportsDump(importFilter.map);
-
             report.addRunInfo(restReplayHeader);
-            if (!currentTestGroupID.equals(testGroupID)) {
+            if (!currentTestGroupID.equals(OUTERTestGroupID)) {
                 report.addRunInfo("   currentTestGroupID: " + currentTestGroupID);
             }
-            if (Tools.notBlank(filterImportsStr)){
-                report.addRunInfo("\r\n"+filterImportsStr);
-            }
-            System.out.println(RUNINFOLINE);
-            System.out.println(report.getRunInfo());
-            System.out.println(RUNINFOLINE);
 
-            if (importFilter.failure) {
-                String errstring = "ERROR: Bad import, skipping test group: ["+controlFileName+":"+currentTestGroupID+"]"
-                                   +"\r\n  failureMessage: \r\n"+importFilter.failureMessage+"\r\n";
-                report.addFailure(errstring);
-                System.out.println(errstring);
-                continue OUTER;
-            }
-            //===== end imports =====================
-
-
-            autoDeletePOSTS = testgroup.valueOf("@autoDeletePOSTS");
-            List<Node> tests;
-            if (Tools.notEmpty(oneTestID)) {
-                tests = testgroup.selectNodes("test[@ID='" + oneTestID + "']");
-            } else {
-                tests = testgroup.selectNodes("test");
-            }
-            int testElementIndex = -1;
-            for (Node testNode : tests) {
-                String testID = testNode.valueOf("@ID");
-                EvalResult token = evalStruct.setCurrentTestIDLabel(testGroupID+'.'+testID+" <span class='LABEL'>(preflight)</span>");
-                LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
-                evalStruct.popLastEvalReportItemIfUnused(token);
-                if (loopHelper.error){
-                    continue OUTER;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
+            boolean importOK = handleImports(evalStruct, report, testgroup, currentTestGroupID);
+            if (importOK ) {
+                autoDeletePOSTS = testgroup.valueOf("@autoDeletePOSTS");
+                List<Node> tests;
+                if (Tools.notEmpty(oneTestID)) {
+                    tests = testgroup.selectNodes("test[@ID='" + oneTestID + "']");
+                } else {
+                    tests = testgroup.selectNodes("test");
                 }
-                for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
-                    ServiceResult serviceResult = new ServiceResult(getRunOptions());
-                    serviceResult.controlFileName = controlFileName;
-                    loopHelper.setGlobalVariablesForLooping(serviceResult, evalStruct, itnum);
-                    serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
-                    testElementIndex++;
-                    serviceResultsMap.put("this", serviceResult);
-                    String namespaceKey = makeImportsKey(controlFileName, testGroupID, testID);
-                    if (getMasterNamespace()!=null) {
-                        getMasterNamespace().put(namespaceKey, serviceResult);
+                int testElementIndex = -1;
+                for (Node testNode : tests) {
+                    String testID = testNode.valueOf("@ID");
+                    EvalResult token = evalStruct.setCurrentTestIDLabel(testGroupID + '.' + testID + " <span class='LABEL'>(preflight)</span>");
+                    LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
+                    evalStruct.popLastEvalReportItemIfUnused(token);
+                    if (loopHelper.error) {
+                        continue OUTER;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
                     }
-                    executeTestNode(serviceResult,
-                            null,
-                            null,
-                            testNode,
-                            testgroup,
-                            protoHostPort,
-                            clonedMasterVars,
-                            null,
-                            testElementIndex,
-                            testGroupID,
-                            evalStruct,
-                            authsMap,
-                            authsFromMaster,
-                            testdir,
-                            report,
-                            results);
-                    serviceResultsMap.remove("this");
+                    for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
+                        ServiceResult serviceResult = new ServiceResult(getRunOptions());
+                        serviceResult.controlFileName = controlFileName;
+                        loopHelper.setGlobalVariablesForLooping(serviceResult, evalStruct, itnum);
+                        serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
+                        testElementIndex++;
+                        serviceResultsMap.put("this", serviceResult);
+                        String namespaceKey = ImportFilter.makeImportsKey(controlFileName, testGroupID, testID);
+                        if (getMasterNamespace() != null) {
+                            getMasterNamespace().put(namespaceKey, serviceResult);
+                        }
+                        executeTestNode(serviceResult,
+                                null,
+                                null,
+                                testNode,
+                                testgroup,
+                                protoHostPort,
+                                clonedMasterVars,
+                                null,
+                                testElementIndex,
+                                testGroupID,
+                                evalStruct,
+                                authsMap,
+                                authsFromMaster,
+                                testdir,
+                                report,
+                                results);
+                        serviceResultsMap.remove("this");
+                    }
                 }
-            }
-            serviceResultsMap.remove("result");
-            if (Tools.isTrue(autoDeletePOSTS) && param_autoDeletePOSTS) {
-                List<ServiceResult> deleteResults = autoDelete(serviceResultsMap, "default");
-                for (ServiceResult r: deleteResults){
-                    serviceResultsMap.put(r.testID+"_delete", r);
-                    report.addTestResult(r);
+                serviceResultsMap.remove("result");
+                if (Tools.isTrue(autoDeletePOSTS) && param_autoDeletePOSTS) {
+                    List<ServiceResult> deleteResults = autoDelete(serviceResultsMap, "default");
+                    for (ServiceResult r : deleteResults) {
+                        serviceResultsMap.put(r.testID + "_delete", r);
+                        report.addTestResult(r);
+                    }
                 }
-            }
+            } // else, still produce a report, so that import errors will show.
 
             this.evalReport = evalStruct.getEvalReport();
 
             //=== Now spit out the HTML report file ===
-            //    This will happen for each testGroup.  If you run with -control and no -master and no -testGroup,
-            //    then you will come in here with testgroupNodes containing all the testGroups in the control file.
-            //    If you come in here with no -master, then the individual files will be written out, but the master
-            //    index file will not be created, even though the resportsList will contain them.
-            //    If you specify the testGroup then the loop will only happen once.
+            //    This will happen for each testGroup.
             File m = new File(controlFileName);  //don't instantiate, just use File to extract file name without directory.
             String relpath = m.getParentFile().toString();
             this.relToMasterPath = calculateElipses(relpath);
@@ -872,28 +872,18 @@ public class RestReplay extends ConfigFile {
                 reportsList.add(toc);
             }
 
-        }
-        //END OUTER loop over testGroups
+        }        //END OUTER loop over testGroups
 
         if (noMaster){
-            //File masterAutogeneratedReport =
-                    RestReplayReport.saveIndexNoMaster(
-                            getResourceManager(),
-                            testdir,
-                            reportsDir,
-                            masterFilenameInfo,
-                            reportsList
-                    );
-           /* if (null != masterAutogeneratedReport) {
-            *    System.out.println("No -master, reportsList has been generated: " + masterAutogeneratedReport.getCanonicalPath());
-            * } else {
-            *    System.out.println("null produced from masterAutogeneratedReport");
-            * }
-            */
+            RestReplayReport.saveIndexNoMaster(
+                    getResourceManager(),
+                    testdir,
+                    reportsDir,
+                    masterFilenameInfo,
+                    reportsList
+            );
         }
 
-
-        //================================
         if (getRunOptions().dumpResourceManagerSummary) {
             System.out.println(getResourceManager().formatSummaryPlain());
         }
@@ -964,6 +954,9 @@ public class RestReplay extends ConfigFile {
             this.setCurrentTestIDLabel(testIDLabel);
             lastTestLabel = testIDLabel;
             String method = testNode.valueOf("method");
+            if (Tools.isBlank(method)){
+                method = "GET";
+            }
             String uri = testNode.valueOf("uri");
             String mutatorType = testNode.valueOf("mutator/@type");
             boolean mutatorSkipParent = Tools.isTrue(testNode.valueOf("mutator/@skipParent"));

@@ -107,23 +107,25 @@ public class ServiceResult {
         PRETTY_FORMAT format = contentTypeFromResponse();
         if (Tools.notBlank(result) && format.equals(PRETTY_FORMAT.JSON)){
             try {
+                this.prettyJSON = prettyPrintJSON(result);
+            } catch (Exception e){
+                String stack = Tools.getStackTrace(e);
+                String resultString = RestReplayReport.escape(result);
+                resultString = resultString.substring(0, Math.min(resultString.length(), RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT));
+                addError("trying to prettyPrintJSON(result) where result claimed to be format:" + format
+                                + ", result : <br />   &laquo;" + resultString +"....&raquo; <br />",
+                        e);
+            }
+            try {
                 String foo = payloadJSONtoXML(result);
                 this.xmlResult = foo;
             } catch (Exception e){
                 String stack = Tools.getStackTrace(e);
-                addError("trying to convert result as JSON to XML where result claimed to be format:" + format
-                                + ", result was:" + RestReplayReport.escape(result)
-                                +" STACK: "+stack,
+                String resultString = RestReplayReport.escape(result);
+                resultString = resultString.substring(0, Math.min(resultString.length(), RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT));
+                addError("Error trying to convert result as JSON to XML where result claimed to be format:" + format
+                                + ", result : <br />   &laquo;" + resultString +"....&raquo; <br />",
                                 e);
-            }
-            try {
-                this.prettyJSON = prettyPrintJSON(result);
-            } catch (Exception e){
-                String stack = Tools.getStackTrace(e);
-                addError("trying to prettyPrintJSON(result) where result claimed to be format:" + format
-                        + ", result was:" + RestReplayReport.escape(result)
-                        +" STACK: "+stack,
-                        e);
             }
         }
     }
@@ -143,13 +145,21 @@ public class ServiceResult {
         addError(msg, null);
     }
     public void addError(String msg, Throwable t){
+        Throwable there = new Throwable("Marker");
+        String here = Tools.getStackTraceTop(there, 0, 3, " / ");
+        here = "<br />\r\nreported by: ["+RestReplayReport.escape(here)+"]\r\n";
+
         if (null!=t){
             msg += ": "+t.getLocalizedMessage();
             errorDetail += msg + "<br />\r\n"+Tools.getStackTrace(t, 4);
+            errorDetail += here;
         }
-        error = (Tools.notEmpty(error))
-                ? error+ "<br />\r\n"+msg
-                : msg;
+
+        //error = (Tools.notEmpty(error)) This was here because I thought some error might get overwritten.  Looking for cases now...
+        //        ? error+ "<br />\r\n"+msg
+        //        : msg;
+        error = msg + here;
+
         addAlert(error, testIDLabel, Alert.LEVEL.ERROR);
     }
     public void addWarning(String msg){

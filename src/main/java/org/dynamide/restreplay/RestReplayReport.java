@@ -403,7 +403,8 @@ public class RestReplayReport {
     public String getRunInfo(){
         StringBuilder b = new StringBuilder();
         for (String s: runInfo){
-            b.append(s);
+            //b.append("(*getRunInfo:"+i+"*)").append(s).append("(*"+i+"*)\r\n");
+            b.append(s).append("\r\n");
         }
         return b.toString();
     }
@@ -411,7 +412,7 @@ public class RestReplayReport {
         StringBuilder b = new StringBuilder();
         b.append(RUNINFO_START);
         for (String text: runInfo){
-            b.append(text);
+            b.append(text).append("\r\n");
         }
         b.append(RUNINFO_END);
         return b.toString();
@@ -892,7 +893,7 @@ public class RestReplayReport {
                 //THIS WORKS, BUT IS VERBOSE: + ( Tools.notEmpty(s.fromTestID) ? "fromTestID:"+s.fromTestID+linesep : "" )
                 + (Tools.notEmpty(s.responseMessage) ? lbl("msg") + s.responseMessage + linesep : "")
                 + (Tools.notBlank(s.auth) ? lbl("auth") + s.auth + linesep:"")
-                + alertsToHtml(s.alerts) + linesep
+                + lbl("alerts") + alertsToHtml(s.alerts) + linesep
                 +(s.parentSkipped
                    ?    ""
                    :
@@ -902,8 +903,8 @@ public class RestReplayReport {
                  )
                 + (Tools.notEmpty(s.deleteURL) ? lbl("deleteURL") + small(s.deleteURL) + linesep : "")
                 + (Tools.notEmpty(s.location) ? lbl("location") + small(s.location) + linesep : "")
-                + (Tools.notEmpty(s.getError()) ?  alertError(s.getError()) + linesep : "")
-                + (Tools.notEmpty(s.getErrorDetail()) ?  alertError(s.getErrorDetail()) + linesep : "")
+                //+ (Tools.notEmpty(s.getError()) ?  lbl("more alerts") + alertError(s.getError()) + linesep : "")
+                //+ (Tools.notEmpty(s.getErrorDetail()) ?  lbl("even more alert detail") + alertError(s.getErrorDetail()) + linesep : "")
                 + ((s.getVars().size()>0) ? lbl("vars")+varsToHtml(s) + linesep : "")
                 + ((s.getExports().size()>0) ? lbl("exports")+exportsToHtml(s) + linesep : "")
                 + ((includePartSummary && Tools.notBlank(partSummary))
