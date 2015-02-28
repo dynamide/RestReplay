@@ -1,1 +1,1 @@
-- Added ./commit script, which uses the ./COMMIT-MESSAGE and generates the ./CHANGES.txt file.
+- Added ./commit script, which uses the ./commit-message and generates the ./CHANGES.md file.
