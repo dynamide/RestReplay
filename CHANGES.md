@@ -1,5 +1,5 @@
 ===========Fri Feb 27 18:32:31 PST 2015======================
-- Added fail-safe imports from other control files and testGroups.  
+- Added fail-safe imports from other control files and testGroups.
   If import is not available at runtime, report shows group was skipped.
 - Shortened output of long error json strings to MAX_CHARS_FOR_REPORT_LEVEL_SHORT
 - Added GET as default method, rather than error.
@@ -16,8 +16,9 @@
 - Added ./commit script, which uses the ./commit-message and generates the ./CHANGES.md file.
 
 ===========Fri Feb 27 21:38:47 PST 2015======================
-Added JsonPath to the expressions ServiceResult.got(path) can accept.  
-Syntax here: https://github.com/jayway/JsonPath
-And XPath is still supported.
-Also added ServiceResult.gotJson(JsonPath).
-Also added ServiceResult.gotXPath(xpath).
+
+- Added JsonPath to the expressions ServiceResult.got(path) can accept.
+--   Syntax here: https://github.com/jayway/JsonPath
+- And XPath is still supported.
+- Also added ServiceResult.gotJson(JsonPath).
+- Also added ServiceResult.gotXPath(xpath).
