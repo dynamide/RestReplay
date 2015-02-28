@@ -11,8 +11,10 @@
 
 ===========Fri Feb 27 20:15:23 PST 2015======================
 - Added ./commit script, which uses the ./commit-message and generates the ./CHANGES.md file.
+
 ===========Fri Feb 27 20:15:41 PST 2015======================
 - Added ./commit script, which uses the ./commit-message and generates the ./CHANGES.md file.
+i
 ===========Fri Feb 27 21:38:47 PST 2015======================
 Added JsonPath to the expressions ServiceResult.got(path) can accept.  
 Syntax here: https://github.com/jayway/JsonPath
