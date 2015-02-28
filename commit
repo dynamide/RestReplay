@@ -1,0 +1,3 @@
+echo ===========`date`====================== >> CHANGES.txt
+cat commit-message >> CHANGES.txt
+git commit -t commit-message $*

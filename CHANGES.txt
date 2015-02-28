@@ -1,4 +1,6 @@
-- Added fail-safe imports (skip group on failure)
+===========Fri Feb 27 18:32:31 PST 2015======================
+- Added fail-safe imports from other control files and testGroups.  
+  If import is not available at runtime, report shows group was skipped.
 - Shortened output of long error json strings to MAX_CHARS_FOR_REPORT_LEVEL_SHORT
 - Added GET as default method, rather than error.
 - Trimmed excessive error message down when JSON error in file.
