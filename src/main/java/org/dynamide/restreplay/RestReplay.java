@@ -1487,7 +1487,14 @@ public class RestReplay extends ConfigFile {
         serviceResult.populateSerializedFields();
         Gson gson = new Gson();
         String json = gson.toJson(serviceResult);
-        File result = FileTools.saveFile(".",serviceResult.testIDLabel+".json", json, false);
+        String dir = "";
+        int lastdot = serviceResult.controlFileName.lastIndexOf('.');
+        if (lastdot>0){
+            dir = serviceResult.controlFileName.substring(0, lastdot);
+        }
+        dir = Tools.join(reportsDir, Tools.join("db",dir));
+
+        File result = FileTools.saveFile(dir, serviceResult.testIDLabel+".json", json, true);
         System.out.println("~~~~~~~~~~~~~ saved file to: "+result.getCanonicalPath());
         return result;
     }
