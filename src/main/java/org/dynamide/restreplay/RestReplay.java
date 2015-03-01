@@ -1,5 +1,6 @@
 package org.dynamide.restreplay;
 
+import com.google.gson.Gson;
 import org.apache.commons.cli.*;
 
 import org.dynamide.interpreters.*;
@@ -7,6 +8,7 @@ import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.restreplay.mutators.MutatorFactory;
 import org.dynamide.restreplay.server.EmbeddedServer;
 import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
+import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 import org.dom4j.*;
 
@@ -14,6 +16,7 @@ import java.io.*;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert.LEVEL;
+import org.json.JSONObject;
 
 /**
  * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
@@ -845,6 +848,7 @@ public class RestReplay extends ConfigFile {
                                 report,
                                 results);
                         serviceResultsMap.remove("this");
+                        saveServiceResultToJSON(serviceResult);
                     }
                 }
                 serviceResultsMap.remove("result");
@@ -1476,6 +1480,16 @@ public class RestReplay extends ConfigFile {
             return Transport.APPLICATION_XML;
         }
         return Transport.APPLICATION_XML;
+    }
+
+    public File saveServiceResultToJSON(ServiceResult serviceResult)
+    throws IOException {
+        serviceResult.populateSerializedFields();
+        Gson gson = new Gson();
+        String json = gson.toJson(serviceResult);
+        File result = FileTools.saveFile(".",serviceResult.testIDLabel+".json", json, false);
+        System.out.println("~~~~~~~~~~~~~ saved file to: "+result.getCanonicalPath());
+        return result;
     }
 
 

@@ -9,9 +9,6 @@
 2015-02-27   RestReplay now handles imports, so that a testGroup can import ServiceResult objects from another testGroup.  The imported test must have been run, otherwise the importing testGroup will receive an error and be skipped.  Thus, the imports are guaranteed to be available if you import them in your testGroup.  This means you can have one group to create some resources on a remote server via REST, another to test those resources, and a third group to tear down the resources.  The imports can reference any control file, testGroup, and testID.  In the master, ensure that all the testGroups are called in the correct order.
 
 
-===========Fri Feb 27 20:15:23 PST 2015======================
-- Added ./commit script, which uses the ./commit-message and generates the ./CHANGES.md file.
-
 ===========Fri Feb 27 20:15:41 PST 2015======================
 - Added ./commit script, which uses the ./commit-message and generates the ./CHANGES.md file.
 
@@ -22,3 +19,7 @@
 - And XPath is still supported.
 - Also added ServiceResult.gotJson(JsonPath).
 - Also added ServiceResult.gotXPath(xpath).
+===========Sat Feb 28 17:36:23 PST 2015======================
+- Added gson library for serialization of ServiceResult to JSON.
+- Added handling of JsonPath in gotJson() and got(), and added public gotXPath().
+- Added experimental handlebars templating for displaying report based on serialized export of ServiceResult as JSON.

@@ -1,0 +1,391 @@
+<html>
+<head>
+<script src="jquery-2.1.3.min.js"></script>
+<script src="handlebars-v3.0.0.js"></script>
+<script src="report-includes.js"></script>
+<link href="stylesheet.css" rel="stylesheet" type="text/css"/>
+
+<style>
+/*
+.payload-subtitle-block
+{
+    display: block;
+    height: 22px;
+    line-height: 22px;
+    padding: 4px 6px;
+    margin-bottom: 13px;
+    clear:both;
+}
+.payload-subtitle-block .right { float:right ; border: 1px solid black;}
+.payload-subtitle-block .left { float:left; border: 1px solid black; }
+*/
+
+.payload-subtitle table {
+    width: 100%;
+}
+.payload-subtitle .left {
+    text-align: left;
+    width: 80%;
+}
+.payload-subtitle .right {
+    text-align: right;
+    width: 18%;
+}
+</style>
+</head>
+<body bgcolor="#aaf">
+<h2>Template expansion</h2>
+<div id="output"></div>
+
+<h2>Raw Template:</h2>
+
+<div id="ServiceResultTemplate">
+
+  <div id="mutation_parent_selftestGroup.useMutator">
+    <div class="TESTCASE">
+      <div class="payloads">
+        <a name="TOC7" id="TOC7"></a><a name="{{testID}}" id="{{testID}}"></a>
+
+        <table border="1" class="DETAIL_TABLE">
+          <tbody>
+            <tr>
+              <td><span class="LABEL">{{calcSuccessLabel}}:</span> &nbsp;&nbsp;&nbsp;{{testID}} &nbsp;&nbsp;&nbsp;</td>
+            </tr>
+            <tr>
+              <td>{{method}}&nbsp;&nbsp;&nbsp;<a class="URL_A" href="{{fullURL}}">{{fullURL}}</a></td>
+            </tr>
+            <tr>
+              <td>{{responseCode}}&nbsp;&nbsp;&nbsp; <span class="LABEL">gotExpected:</span> {{calcGotExpectedResult}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="LABEL">time:</span> {{time}}<span class="LABEL">ms</span></td>
+            </tr>
+            <tr>
+              <td><span class="LABEL">msg:</span>{{responseMessage}}</td>
+            </tr>
+            <tr>
+              <td><span class="LABEL">alerts:</span> 
+              {{#each alerts}}
+              
+              <span class="Alert{{level}}"><span class="AlertLevel">{{level}}</span>
+              <span class="AlertContext">{{{context}}}</span>{{message}}</span>
+              {{/each}}
+              </td>
+            </tr>
+            <tr>
+              <td><span class="HEADERBLOCK">
+              <span class="LABEL">req-headers(mime-only):</span> 
+              {{#each requestHeaders}}
+              <span class="header">{{.}}</span>
+              {{/each}}
+              </span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+              <span class="HEADERBLOCK">
+                  <span class="LABEL">req-headers:</span> 
+                  {{#each requestHeadersMap}}
+                  <span class="header">{{.}}</span>
+                  {{/each}}
+              </span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+              <span class="HEADERBLOCK">
+                  <span class="LABEL">resp-headers:</span> 
+                  {{{responseHeadersDump}}}
+              </span>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="LABEL">vars:</span> 
+              {{#each vars}}
+              <span class="vars">{{@key}}: {{.}}<br></span>
+              {{/each}} 
+              </td>
+            </tr>
+            <tr>
+              <td>
+              {{{calcExpectedTreewalkRangeColumns}}}
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+        {{#each payloads}}
+        <span class="payload-link" id="{{id}}_link"><a href="javascript:;" onmousedown="toggleDiv('{{id}}');">{{title}}</a></span>
+        <div id="{{id}}" class="PAYLOAD" style="display:none">
+            
+            <div class="payload-subtitle">
+            <table>
+                <tr>
+                    <td class="left">{{subtitle}}</td>
+                    <td class="right">[{{format}}] [<a href="javascript:;" onmousedown="selectText('clip_{{id}}');">copy</a>]</td>
+                </tr>
+            </table>
+            </div>
+            
+            {{#if usePRE}}
+            <pre id="clip_{{id}}" class="SUMMARY">{{body}}</pre>
+            {{else}}
+            <div id="clip_{{id}}" class='SUMMARY_WRAP'>{{body}}</div>
+            {{/if}}
+        </div>
+        
+        {{/each}}
+      </div>
+    </div>
+  </div>
+ 
+  
+</div>
+
+
+</body>
+<script>
+$('#output').html("yo");
+
+var serviceResult = {
+    "runOptions": {
+        "evalReportLevel": "SHORT",
+        "connectionTimeout": 3000,
+        "socketTimeout": 5000,
+        "errorsBecomeEmptyStrings": true,
+        "acceptAlertLevel": "OK",
+        "skipMutators": false,
+        "skipMutatorsOnFailure": true,
+        "dumpResourceManagerSummary": false,
+        "reportResourceManagerSummary": true,
+        "failTestOnErrors": true,
+        "failTestOnWarnings": false
+    },
+    "controlFileName": "_self_test/self-test.xml",
+    "testID": "useMutator",
+    "testGroupID": "selftestGroup",
+    "testIDLabel": "selftestGroup.useMutator",
+    "idFromMutator": "",
+    "isMutation": false,
+    "mutatorType": "ExcludeFields",
+    "mutationDetailBlockID": "",
+    "mutatorSkipped": false,
+    "mutatorSkippedByOpts": false,
+    "isAutodelete": false,
+    "parentSkipped": false,
+    "loopIndex": -1,
+    "fullURL": "http://localhost:28080/tagonomy?mock=true",
+    "deleteURL": "",
+    "AMONG": "A",
+    "protoHostPort": "http://localhost:28080",
+    "location": "",
+    "CSID": "",
+    "subresourceCSID": "",
+    "requestPayloadFilename": "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json",
+    "requestPayload": "{\n        \"details\":{\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ],\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }",
+    "requestPayloadsRaw": "{\n        \"details\":{\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ],\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }",
+    "xmlResult": "<root><result>OK</result><method>POST</method><req><details><numberOfItems>2</numberOfItems><items><title>The Size and Shape of Items</title><itemType>Novella</itemType></items><items><title>The Clarity of Morning</title><itemType>Tome</itemType></items></details><order_id>540f4515e4b004e7d8f22fc8</order_id></req></root>",
+    "prettyJSON": "{\n    \"result\": \"OK\",\n    \"method\": \"POST\",\n    \"req\": {\n        \"details\": {\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ]\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }\n}",
+    "result": "{\"result\":\"OK\", \"method\":\"POST\", \n\"req\": {\n        \"details\":{\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ],\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }}",
+    "time": 15,
+    "responseCode": 200,
+    "responseMessage": "OK",
+    "method": "POST",
+    "error": "",
+    "errorDetail": "",
+    "socketTimeout": 5000,
+    "connectionTimeout": 3000,
+    "fromTestID": "",
+    "boundary": "",
+    "payloadStrictness": "",
+    "contentLength": 0,
+    "mimeType": "application/json",
+    "failureReason": "",
+    "expectedFailure": false,
+    "expectedContentExpandedWasJson": true,
+    "expectedContentExpanded": "{\n    \"result\": \"OK\",\n    \"method\": \"POST\",\n}",
+    "expectedContentExpandedAsXml": "<root><result>OK</result><method>POST</method></root>",
+    "expectedContentRaw": "{\n    \"result\": \"OK\",\n    \"method\": \"POST\",\n}",
+    "expectedResponseFilenameUsed": "_self_test/res/content-mutator-base.json",
+    "domcheck": "",
+    "requestHeaders": [
+        "Accept:application/json",
+        "content-type:application/json"
+    ],
+    "requestHeadersMap": {
+        "Accept": "application/json",
+        "content-type": "application/json"
+    },
+    "headerMap": {},
+    "responseHeaderMap": {},
+    "responseHeaders": [],
+    "responseHeadersDump": "<span class='header response'>Content-type: application/json\r\n</span><span class='header response'>Content-length: 466\r\n</span><span class='header response'>Date: Sat, 28 Feb 2015 21:48:42 GMT\r\n</span>",
+    "ranges": [],
+    "vars": {
+        "SELFTEST_PORT": "28080",
+        "SELFTEST_SERVER": "http://localhost:28080"
+    },
+    "exports": {},
+    "trappedExports": [],
+    "alerts": [
+        {
+            "level": "OK",
+            "message": "",
+            "context": "<b>validator:</b> [inline]"
+        }
+    ],
+    "labelCounter": 1,
+    "partSummaries": {
+        "0": [
+            {
+                "lpath": "",
+                "rpath": "",
+                "ltextTrimmed": "",
+                "rtextTrimmed": "",
+                "expected": "<root><result>OK</result><method>POST</method></root>",
+                "actual": "<root><result>OK</result><method>POST</method><req><details><numberOfItems>2</numberOfItems><items><title>The Size and Shape of Items</title><itemType>Novella</itemType></items><items><title>The Clarity of Morning</title><itemType>Tome</itemType></items></details><order_id>540f4515e4b004e7d8f22fc8</order_id></req></root>",
+                "message": "\r\n    LEFT file: {from expected part, label: filename: _self_test/res/content-mutator-base.json}\r\n    RIGHT file: {from server, label: fromTestID:  URL: http://localhost:28080/tagonomy?mock=true}",
+                "errmessage": "",
+                "status": "INFO"
+            },
+            {
+                "lpath": "/result",
+                "rpath": "/result",
+                "ltextTrimmed": "OK",
+                "rtextTrimmed": "OK",
+                "expected": "",
+                "actual": "",
+                "message": "",
+                "errmessage": "",
+                "status": "MATCHED"
+            },
+            {
+                "lpath": "/method",
+                "rpath": "/method",
+                "ltextTrimmed": "POST",
+                "rtextTrimmed": "POST",
+                "expected": "",
+                "actual": "",
+                "message": "",
+                "errmessage": "",
+                "status": "MATCHED"
+            },
+            {
+                "lpath": "",
+                "rpath": "/req",
+                "ltextTrimmed": "",
+                "rtextTrimmed": "",
+                "expected": "",
+                "actual": "",
+                "message": "",
+                "errmessage": "",
+                "status": "ADDED"
+            }
+        ]
+    },
+    "overrideExpectedResult": false,
+    "gotExpectedResultBecause": " test[useMutator]",
+    "payloads": {
+        "REQUESTRAW0": {
+            "id": "REQUESTRAW0",
+            "body": "{\n        \"details\":{\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ],\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }",
+            "format": "JSON",
+            "title": "REQUEST (raw) ",
+            "subtitle": "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json",
+            "usePRE": true
+        },
+        "REQUEST0": {
+            "id": "REQUEST0",
+            "body": "{\n    \"details\": {\n        \"numberOfItems\": 2,\n        \"items\": [\n            {\n                \"title\": \"The Size and Shape of Items\",\n                \"itemType\": \"Novella\"\n            },\n            {\n                \"title\": \"The Clarity of Morning\",\n                \"itemType\": \"Tome\"\n            }\n        ]\n    },\n    \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n}",
+            "format": "JSON",
+            "title": "REQUEST (expanded)",
+            "subtitle": "",
+            "usePRE": false
+        },
+        "RESPONSERAW0": {
+            "id": "RESPONSERAW0",
+            "body": "{\"result\":\"OK\", \"method\":\"POST\", \n\"req\": {\n        \"details\":{\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ],\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }}",
+            "format": "JSON",
+            "title": "RESPONSE (raw)",
+            "subtitle": "",
+            "usePRE": true
+        },
+        "RESPONSE0": {
+            "id": "RESPONSE0",
+            "body": "{\n    \"result\": \"OK\",\n    \"method\": \"POST\",\n    \"req\": {\n        \"details\": {\n            \"numberOfItems\": 2,\n            \"items\": [\n                {\n                    \"title\": \"The Size and Shape of Items\",\n                    \"itemType\": \"Novella\"\n                },\n                {\n                    \"title\": \"The Clarity of Morning\",\n                    \"itemType\": \"Tome\"\n                }\n            ]\n        },\n        \"order_id\": \"540f4515e4b004e7d8f22fc8\"\n    }\n}",
+            "format": "JSON",
+            "title": "RESPONSE",
+            "subtitle": "",
+            "usePRE": false
+        },
+        "RESPONSEXML0": {
+            "id": "RESPONSEXML0",
+            "body": "<root><result>OK</result><method>POST</method><req><details><numberOfItems>2</numberOfItems><items><title>The Size and Shape of Items</title><itemType>Novella</itemType></items><items><title>The Clarity of Morning</title><itemType>Tome</itemType></items></details><order_id>540f4515e4b004e7d8f22fc8</order_id></req></root>",
+            "format": "XML",
+            "title": "RESPONSE (as xml)",
+            "subtitle": "",
+            "usePRE": false
+        },
+        "EXPECTEDraw0": {
+            "id": "EXPECTEDraw0",
+            "body": "{\n    \"result\": \"OK\",\n    \"method\": \"POST\",\n}",
+            "format": "JSON",
+            "title": "EXPECTED (raw)",
+            "subtitle": "_self_test/res/content-mutator-base.json",
+            "usePRE": true
+        },
+        "EXPECTEDexpanded0": {
+            "id": "EXPECTEDexpanded0",
+            "body": "{\n    \"result\": \"OK\",\n    \"method\": \"POST\",\n}",
+            "format": "JSON",
+            "title": "EXPECTED (expanded)",
+            "subtitle": "",
+            "usePRE": true
+        },
+        "EXPECTEDasxml0": {
+            "id": "EXPECTEDasxml0",
+            "body": "<root><result>OK</result><method>POST</method></root>",
+            "format": "XML",
+            "title": "EXPECTED  (as xml)",
+            "subtitle": "",
+            "usePRE": true
+        },
+        "DOMComparison0": {
+            "id": "DOMComparison0",
+            "body": " label:0: \r\nSTATUS: {INFO:1,MATCHED:2,REMOVED:0,ADDED:1,ERROR:0,DIFFERENT:0,NESTED_ERROR:0}\r\n{INFO, message:\r\n    LEFT file: {from expected part, label: filename: _self_test/res/content-mutator-base.json}\r\n    RIGHT file: {from server, label: fromTestID:  URL: http://localhost:28080/tagonomy?mock=true}, status:INFO\r\nEXPECTED:\r\n------------------\r\n&lt;root>&lt;result>OK&lt;/result>&lt;method>POST&lt;/method>&lt;/root>\r\n------------------\r\nACTUAL:\r\n------------------\r\n&lt;root>&lt;result>OK&lt;/result>&lt;method>POST&lt;/method>&lt;req>&lt;details>&lt;numberOfItems>2&lt;/numberOfItems>&lt;items>&lt;title>The Size and Shape of Items&lt;/title>&lt;itemType>Novella&lt;/itemType>&lt;/items>&lt;items>&lt;title>The Clarity of Morning&lt;/title>&lt;itemType>Tome&lt;/itemType>&lt;/items>&lt;/details>&lt;order_id>540f4515e4b004e7d8f22fc8&lt;/order_id>&lt;/req>&lt;/root>\r\n------------------\r\n}\r\n\r\n{MATCHED, L.path:/result, R.path:/result, status:MATCHED}\r\n\r\n{MATCHED, L.path:/method, R.path:/method, status:MATCHED}\r\n\r\n{ADDED, R.path:/req, status:ADDED}\r\n",
+            "format": "NONE",
+            "title": "DOM Comparison",
+            "subtitle": "",
+            "usePRE": true
+        }
+    },
+    "calcGotExpectedResult": true,
+    "calcSuccessLabel": "SUCCESS +2/2",
+    "calcExpectedTreewalkRangeColumns": "<table class='dom-match-table'><tr><th>DOM Comparison</th><th>MATCHED</th><th>DIFFERENT</th><th>REMOVED</th><th>ADDED</th><th>ERROR</th><th>NESTED_ERROR</th></tr><tr><th>actual</th><td>2</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr><tr><th>expected</th><td></td><td>[0]</td><td>[0]</td><td></td><td></td><td></td></tr></table>"
+}
+
+
+function selectText(containerid) {
+alert("element:"+document.getElementById(containerid));
+    if (document.selection) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById(containerid));
+        range.select();
+    } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById(containerid));
+        window.getSelection().addRange(range);
+    }
+}
+
+var source = "<p>ServiceResult :: {{calcGotExpectedResult}}. RunOptions:  {{runOptions}}. " +
+             "{{partSummaries.length}} partSummaries:</p>" +
+             "<ul>{{#requestHeaders}}<li>{{.}}</li>{{/requestHeaders}}</ul>";
+source = $('#ServiceResultTemplate').html();
+var template = Handlebars.compile(source);
+
+var result = template(serviceResult);
+
+$('#output').html(result);
+
+</script>
+</html>

@@ -267,6 +267,11 @@ public class PayloadLogger{
         return traffic;
     }
 
+    //Some random, old usage, culled from ServiceResult:
+    //  PayloadLogger.HttpTraffic traffic = PayloadLogger.readPayloads(this.result, this.boundary, this.contentLength);
+    //  PayloadLogger.Part partFromServer = traffic.getPart(partName);
+    //  String source = partFromServer.getContent();
+
     protected static int readPayloads(HttpTraffic traffic, String[]lines, int i){
         if (traffic.boundary.length()<=0){   //END of headers, and no boundary, so read remaining and return.
             if (traffic.contentLength == 0){

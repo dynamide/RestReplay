@@ -28,7 +28,7 @@ public class ServiceResult {
         return runOptions;
     }
 
-    private List<ServiceResult>childResults = new ArrayList<ServiceResult>();
+    private transient List<ServiceResult>childResults = new ArrayList<ServiceResult>();
     public void addChild(ServiceResult child){
         child.setParent(this);
         childResults.add(child);
@@ -37,7 +37,7 @@ public class ServiceResult {
         return childResults;
     }
 
-    private ServiceResult parent;
+    private transient ServiceResult parent;
     public ServiceResult getParent(){
         return parent;
     }
@@ -51,7 +51,7 @@ public class ServiceResult {
     public String idFromMutator = ""; //if a mutator turns a test into many tests, each gets a unique mutator id, as a subset of one of the test cases.
     public boolean isMutation = false;
     public String mutatorType = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
-    public IMutator mutator = null;
+    public transient IMutator mutator = null;
     public IMutator getMutator(){return mutator;}
     public String mutationDetailBlockID = "";
     public boolean mutatorSkipped = false;
@@ -199,8 +199,8 @@ public class ServiceResult {
     public String expectedContentRaw = "";
     public String expectedResponseFilenameUsed = "";
     public String domcheck = "";
-    public List<Column> expectedTreewalkRangeColumns;
-    public Map<STATUS,Range> expectedTreewalkRangeMap = new HashMap<STATUS, Range>();
+    public transient List<Column> expectedTreewalkRangeColumns;
+    public transient Map<STATUS,Range> expectedTreewalkRangeMap = new HashMap<STATUS, Range>();
     public String expectedTreewalkRangeMapToString(){
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<STATUS,Range> rangeEntry: expectedTreewalkRangeMap.entrySet()){
@@ -720,53 +720,34 @@ public class ServiceResult {
         }
     }
 
-    /** This method may be called from a test case, using a syntax like ${testID3.got("persons_common", "//refName")}
+    /** <p></p>This method may be called from a test case, using a syntax
+     *  with XPath like this:
+     *      <code>${testID3.got("//refName")}</code>
+     *  or with JSON, like this:
+     *     <code>${testID3.got("$..refName")}</code></p>
+     *
+     *  <p>JsonPath docs say ALL expressions start with $.</p>
+     *
+     *  <p>An XPath could only start with a $ if you named a variable like so: <code>$myvariable</code>.  So don't do that.</p>
+     *
+     *  <p>If you know which syntax you want to use, see these variants: {@see #gotXPath(String)} {@see  #gotJson(String)} </p>
+     *
      *  @param pathExpression If this.result is JSON, as determined by contentTypeFromResponse(), then JsonPath is assumed,
      *                        otherwise XPath is assumed. */
     public Object got(String pathExpression) throws Exception {
-        if (Tools.isBlank(pathExpression)) {
-            addAlertWarning("pathExpression was empty in " + this.testIDLabel);
-            return "";
+        if (pathExpression.startsWith("$")
+                && Tools.notBlank(result)
+                && contentTypeFromResponse().equals(PRETTY_FORMAT.JSON)) {
+            return gotJson(pathExpression);  //pathExpression is jsonPath
         }
-        //PayloadLogger.HttpTraffic traffic = PayloadLogger.readPayloads(this.result, this.boundary, this.contentLength);
-        //PayloadLogger.Part partFromServer = traffic.getPart(partName);
-        //String source = partFromServer.getContent();
-        try {
-            if (pathExpression.startsWith("$")
-                    && Tools.notBlank(result)
-                    && contentTypeFromResponse().equals(PRETTY_FORMAT.JSON)) {
-                return gotJson(pathExpression);  //pathExpression is jsonPath
-            }
-
-            String source;
-            if (Tools.notBlank(this.getXmlResult())) {
-                source = this.getXmlResult();
-            } else {
-                source = this.result;
-            }
-            if (Tools.isBlank(source)) {
-                return "";
-            }
-            org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, pathExpression, null);
-            String sr = element != null ? element.getText() : "";
-            return sr;
-        } catch (Throwable t){
-            addAlert("ERROR reading response value: " + t,
-                    "xpath:"+pathExpression,                    //pathExpression is xpath
-                    Alert.LEVEL.ERROR);
-            return "";
-        }
+        return gotXPath(pathExpression);
     }
-    
-//todo......
+
     public Object gotXPath(String pathExpression) throws Exception {
         if (Tools.isBlank(pathExpression)) {
-            addAlertWarning("pathExpression was empty in " + this.testIDLabel);
+            addAlertWarning("XPath pathExpression was empty in " + this.testIDLabel);
             return "";
         }
-        //PayloadLogger.HttpTraffic traffic = PayloadLogger.readPayloads(this.result, this.boundary, this.contentLength);
-        //PayloadLogger.Part partFromServer = traffic.getPart(partName);
-        //String source = partFromServer.getContent();
         try {
             String source;
             if (Tools.notBlank(this.getXmlResult())) {
@@ -789,7 +770,18 @@ public class ServiceResult {
     }
 
     public Object gotJson(String jsonPath){
-        return JsonPath.read(this.result, jsonPath);
+        if (Tools.isBlank(jsonPath)) {
+            addAlertWarning("JsonPath pathExpression was empty in " + this.testIDLabel);
+            return "";
+        }
+        try {
+            return JsonPath.read(this.result, jsonPath);
+        } catch (Throwable t){
+            addAlert("ERROR reading response value: " + t,
+                    "JsonPath:"+jsonPath,                    //jsonPath is JsonPath
+                    Alert.LEVEL.ERROR);
+            return "";
+        }
     }
 
     /** This method may be called from a test case, using a syntax like ${oe9.reqValue("personauthorities_common","//shortIdentifier")}    */
@@ -897,8 +889,6 @@ public class ServiceResult {
     public static String payloadJSONtoXML(String payload) {
         JSONSuper maybe = new JSONSuper(payload);
         String xml = maybe.toString();
-        //System.out.println("PAYLOAD raw:" + payload);
-        //System.out.println("PAYLOAD xml:"+xml);
         return xml;
     }
 
@@ -963,6 +953,36 @@ public class ServiceResult {
     }
     public void addAlertOK(String message){
         alerts.add(new Alert(message, getCurrentValidatorContextName(), Alert.LEVEL.OK));
+    }
+
+    // ========= Payload serialization support ========================
+    public static class Payload{
+        String id;
+        String body;
+        ServiceResult.PRETTY_FORMAT format;
+        String title;
+        String subtitle;
+        boolean usePRE;
+        public String toString(){
+            return "id:"+id+";title:"+title+";subtitle:"+subtitle+";usePRE:"+usePRE;
+        }
+    }
+    public Map<String,Payload> payloads = new LinkedHashMap<String, Payload>();
+
+    // ========= calculated fields for serialization ==================
+    public boolean calcGotExpectedResult = false;
+    public String calcSuccessLabel = "";
+    public String calcExpectedTreewalkRangeColumns = "";
+
+    public void populateSerializedFields(){
+        RestReplayReport.formatPayloads(this, 0);//tocID==0
+        this.calcGotExpectedResult = gotExpectedResult();
+        this.calcSuccessLabel = RestReplayReport.formatMutatorSUCCESS(this);
+        this.calcExpectedTreewalkRangeColumns = RestReplayReport.formatExpectedTreewalkRangeColumns(this);
+        System.out.println("************************************************* SERIALIZING "+payloads.size());
+        for (Map.Entry<String,Payload> entry: payloads.entrySet()){
+            System.out.println("---------------------------->>>>> payload:"+entry.getValue().id);
+        }
     }
 
 }

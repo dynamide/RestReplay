@@ -171,7 +171,7 @@ public class RestReplayReport {
         return getTOC("").toString();
     }
 
-    private String formatMutatorSUCCESS(ServiceResult serviceResult) {
+    public static String formatMutatorSUCCESS(ServiceResult serviceResult) {
         if (serviceResult.getChildResults().size() > 0) {
             int numGotExpected = 0;
             int numResults = 0;
@@ -691,7 +691,7 @@ public class RestReplayReport {
         return buffer.toString();
     }
 
-    protected String formatSummary(ServiceResult serviceResult, int tocID) {
+    public String formatSummary(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
         fb.append("<a name='TOC" + tocID + "'></a>");
         fb.append("<a name='" + serviceResult.testID + "'></a>");
@@ -700,30 +700,30 @@ public class RestReplayReport {
         return fb.toString();
     }
 
-    protected String formatPayloads(ServiceResult serviceResult, int tocID) {
-        StringBuffer fb = new StringBuffer();
+    public static String formatPayloads(ServiceResult serviceResult, int tocID) {
+        StringBuffer buffer = new StringBuffer();
         ServiceResult.PRETTY_FORMAT respType = serviceResult.contentTypeFromResponse();
-        appendPayload(fb, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw) ", "REQUESTRAW" + tocID, serviceResult.requestPayloadFilename);
-        appendPayload(fb, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID,"", false);
-        appendPayload(fb, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
-        appendPayload(fb, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
+        appendPayload(serviceResult, buffer, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw) ", "REQUESTRAW" + tocID, serviceResult.requestPayloadFilename);
+        appendPayload(serviceResult, buffer, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID,"", false);
+        appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
+        appendPayload(serviceResult, buffer, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
         if (Tools.notBlank(serviceResult.getXmlResult())){
-            appendPayload(fb, serviceResult.getXmlResult(), ServiceResult.PRETTY_FORMAT.XML, "RESPONSE (as xml)", "RESPONSEXML" + tocID, "", false);
+            appendPayload(serviceResult, buffer, serviceResult.getXmlResult(), ServiceResult.PRETTY_FORMAT.XML, "RESPONSE (as xml)", "RESPONSEXML" + tocID, "", false);
         }
 
         if (Tools.notBlank(serviceResult.expectedContentRaw)) {
-            appendPayload(fb, serviceResult.expectedContentRaw, respType, "EXPECTED (raw)", "EXPECTEDraw" + tocID, serviceResult.expectedResponseFilenameUsed);
-            appendPayload(fb, serviceResult.expectedContentExpanded, respType, "EXPECTED (expanded)", "EXPECTEDexpanded" + tocID, "");
-            appendPayload(fb, serviceResult.expectedContentExpandedAsXml, ServiceResult.PRETTY_FORMAT.XML, "EXPECTED  (as xml)", "EXPECTEDasxml" + tocID, "");
+            appendPayload(serviceResult, buffer, serviceResult.expectedContentRaw, respType, "EXPECTED (raw)", "EXPECTEDraw" + tocID, serviceResult.expectedResponseFilenameUsed);
+            appendPayload(serviceResult, buffer, serviceResult.expectedContentExpanded, respType, "EXPECTED (expanded)", "EXPECTEDexpanded" + tocID, "");
+            appendPayload(serviceResult, buffer, serviceResult.expectedContentExpandedAsXml, ServiceResult.PRETTY_FORMAT.XML, "EXPECTED  (as xml)", "EXPECTEDasxml" + tocID, "");
             if (!serviceResult.expectedContentExpandedWasJson) {
-                appendPayload(fb, ServiceResult.payloadXMLtoJSON(serviceResult.expectedContentExpanded), ServiceResult.PRETTY_FORMAT.JSON, "EXPECTED (as JSON)", "EXPECTEDJSON" + tocID, "");
+                appendPayload(serviceResult, buffer, ServiceResult.payloadXMLtoJSON(serviceResult.expectedContentExpanded), ServiceResult.PRETTY_FORMAT.JSON, "EXPECTED (as JSON)", "EXPECTEDJSON" + tocID, "");
             }
         }
         String partSummary = serviceResult.partsSummaryHTML(true);//true for detailed.
-        appendPayload(fb, partSummary, ServiceResult.PRETTY_FORMAT.NONE, "DOM Comparison", "DOMComparison" + tocID, "");
-        return fb.toString();
+        appendPayload(serviceResult, buffer, partSummary, ServiceResult.PRETTY_FORMAT.NONE, "DOM Comparison", "DOMComparison" + tocID, "");
+        return buffer.toString();
     }
-    private String safeJSONToString(String in){
+    private static String safeJSONToString(String in){
         try {
             String out = ServiceResult.prettyPrintJSON(in);
             if (out == null) {
@@ -735,14 +735,24 @@ public class RestReplayReport {
         }
     }
 
-    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, String subtitle) {
-        appendPayload(fb, payload, format, title, theDivID, subtitle, true);
+    protected static void appendPayload(ServiceResult serviceResult, StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, String subtitle) {
+        appendPayload(serviceResult, fb, payload, format, title, theDivID, subtitle, true);
     }
 
 
-    protected void appendPayload(StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, String subtitle, boolean usePRE) {
+    protected static void appendPayload(ServiceResult serviceResult, StringBuffer fb, String payload, ServiceResult.PRETTY_FORMAT format, String title, String theDivID, String subtitle, boolean usePRE) {
         if (Tools.notBlank(payload)) {
             //fb.append(BR+title+":"+BR);
+            ServiceResult.Payload pl = new ServiceResult.Payload();
+            pl.body = payload;
+            pl.format = format;
+            pl.id = theDivID;
+            pl.title = title;
+            pl.subtitle = subtitle;
+            pl.usePRE = usePRE;
+            serviceResult.payloads.put(theDivID, pl);
+            System.out.println("===========================~~>>>> payload: "+pl);
+
             try {
                 String pre_start,
                        pre_end;
@@ -802,7 +812,7 @@ public class RestReplayReport {
         }
     }
 
-    private String prettyPrint(String rawXml) throws Exception {
+    private static String prettyPrint(String rawXml) throws Exception {
         Document document = DocumentHelper.parseText(rawXml);
         return XmlTools.prettyPrint(document, "    ");
     }
@@ -920,7 +930,7 @@ public class RestReplayReport {
         return res;
     }
 
-    private String formatExpectedTreewalkRangeColumns(ServiceResult s){
+    public static String formatExpectedTreewalkRangeColumns(ServiceResult s){
         if (s == null || s.expectedTreewalkRangeColumns==null){
             return "";
         }
