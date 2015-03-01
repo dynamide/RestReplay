@@ -23,3 +23,7 @@
 - Added gson library for serialization of ServiceResult to JSON.
 - Added handling of JsonPath in gotJson() and got(), and added public gotXPath().
 - Added experimental handlebars templating for displaying report based on serialized export of ServiceResult as JSON.
+===========Sat Feb 28 22:24:26 PST 2015======================
+Support files for serialization of ServiceResult to JSON thence to handlebar templates and jQuery .
+
+removeme
