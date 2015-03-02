@@ -1,7 +1,7 @@
 <html>
 <head>
-<script src="jquery-2.1.3.min.js"></script>
 <script src="handlebars-v3.0.0.js"></script>
+<script src="jquery-2.1.3.min.js"></script>
 <script src="reports-include.js"></script>
 <link href="reports-include.css" rel="stylesheet" type="text/css"/>
 
@@ -36,26 +36,21 @@
 <body bgcolor="#aaf">
 <h2>Template expansion</h2>
 <div id="output"></div>
-<div id="output2"></div>
 
 <h2>Raw Template:</h2>
 
 <div id="ServiceResultTemplate">
 
 
-{{#if isMutation}}isMutation{{else}}isMutation:false {{/if}}mojo
 
-
-
-
-
-<div id="mutation_parent_selftestGroup.useMutator" >the div</div>
-  <div id="mutation_parent_selftestGroup.useMutator" class="mutation-detail-block">
+<div id="childresults_main_createAssignmentZZ">
+    
+    <div id="mutation_parent_selftestGroup.useMutator" class="{{#if isMutation}}mutation-detail-block{{/if}}" >
+    
     <div class="TESTCASE">
-      <div class="payloads {{#if isMutation}} mutation{{/if}}">
+      <div class="payloads {{#if isMutation}}mutation{{/if}}">
         <a name="TOC7" id="TOC7"></a><a name="{{testID}}" id="{{testID}}"></a>
-
-        <table border="1" class="DETAIL_TABLE">
+        <table border="1" class="DETAIL_TABLE {{#if isMutation}}mutation{{/if}} ">
           <tbody>
             <tr>
               <td><span class="LABEL">{{calcSuccessLabel}}:</span> &nbsp;&nbsp;&nbsp;{{testID}} &nbsp;&nbsp;&nbsp;</td>
@@ -152,20 +147,7 @@
 
 
 </body>
-
-<script id="entry-template" src="my-template.js" type="text/x-handlebars-template"></script>
-
 <script>
-
-var source   = $("#entry-template").html();
-var template = Handlebars.compile(source);
-
-var context = {title: "My New Post", body: "This is my first post!"};
-var html    = template(context);
-$('#output2').html(html);
-    
-$('#output').html("yo");
-
 var serviceResult = {
     "runOptions": {
         "evalReportLevel": "SHORT",
@@ -385,7 +367,6 @@ var serviceResult = {
 
 
 function selectText(containerid) {
-alert("element:"+document.getElementById(containerid));
     if (document.selection) {
         var range = document.body.createTextRange();
         range.moveToElementText(document.getElementById(containerid));
@@ -393,19 +374,13 @@ alert("element:"+document.getElementById(containerid));
     } else if (window.getSelection) {
         var range = document.createRange();
         range.selectNode(document.getElementById(containerid));
+        window.getSelection().removeAllRanges();
         window.getSelection().addRange(range);
     }
 }
-
-var source = "<p>ServiceResult :: {{calcGotExpectedResult}}. RunOptions:  {{runOptions}}. " +
-             "{{partSummaries.length}} partSummaries:</p>" +
-             "<ul>{{#requestHeaders}}<li>{{.}}</li>{{/requestHeaders}}</ul>";
-source = $('#ServiceResultTemplate').html();
+var source = document.getElementById('ServiceResultTemplate').innerHTML
 var template = Handlebars.compile(source);
-
 var result = template(serviceResult);
-
-$('#output').html(result);
-
+document.getElementById('output').innerHTML = result;
 </script>
 </html>

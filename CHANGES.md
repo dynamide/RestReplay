@@ -35,3 +35,7 @@ removeme
 Added working template for handlebars.js expansion of ServiceResult JSON files.
 
 removeme
+===========Mon Mar 2 11:22:38 PST 2015======================
+Added working template for handlebars.js expansion of ServiceResult JSON files.
+
+removeme
