@@ -183,6 +183,8 @@ public class ConfigFile {
     public void readDefaultRunOptions() {
         setRunOptions(new RunOptions());
         try {
+            String fullPath = Tools.glue(testdir, "/", RunOptions.RUN_OPTIONS_FILENAME);
+            System.out.println("Reading default RunOptions from "+fullPath);
             Document doc = getResourceManager().getDocument("RestReplay:constructor:runOptions",
                                                             testdir,
                                                             RunOptions.RUN_OPTIONS_FILENAME);

@@ -39,3 +39,8 @@ removeme
 Added working template for handlebars.js expansion of ServiceResult JSON files.
 
 removeme
+===========Mon Mar 2 12:32:20 PST 2015======================
+Added RunOptions.outputServiceResultDB so you can produce output JSON or not.
+Added sent(jsonpath/xpath) and its helpers sentJson and sentXPath.
+Updated doco about using XPath versus JsonPath.
+removeme

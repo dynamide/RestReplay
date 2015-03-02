@@ -588,12 +588,12 @@ For arrays:
       public class ServiceResult ::
 
           <span class="comments">//dig into the schema part from the expanded request, identified by partName,</span>
-          <span class="comments">//  and get the text value of node identified by xpath</span>
-          public String sent(String partName, String xpath);
+          <span class="comments">//  and get the text value of node identified by path</span>
+          public String sent(String partName, String path); //path is either <a href="http://www.w3schools.com/xpath/xpath_syntax.asp">XPath</a> or <a href="https://github.com/jayway/JsonPath/blob/master/README.md">JsonPath</a>.
 
           <span class="comments">//dig into the schema part returned by the server, identified by partName,</span>
           <span class="comments">// and get the text value of node identified by xpath </span>
-          public String got(String partName, String xpath);
+          public String got(String partName, String path); //path is either <a href="http://www.w3schools.com/xpath/xpath_syntax.asp">XPath</a> or <a href="https://github.com/jayway/JsonPath/blob/master/README.md">JsonPath</a>.
 
           public String location <span class="comments">//the Location: header value of the resource, which is a full URL.</span>
       </div>
@@ -2842,6 +2842,7 @@ if (r && r.count){
 
     <p>In this case, the XPath is <b>//data</b> which means <i>"find the value of the node called data, anywhere in the tree"</i>.</p>
 
+    <p>Note: you can use either <a href="http://www.w3schools.com/xpath/xpath_syntax.asp">XPath</a> or <a href="https://github.com/jayway/JsonPath/blob/master/README.md">JsonPath</a>.</p>
 
     <p>First, let's say we have a token service, that when called, returns some JSON like so, and all we
         need to grab from the token is the value of the <b>data</b> element from that JSON:</p>
@@ -2882,6 +2883,7 @@ if (r && r.count){
 
     <p>Next we'll show another way to export that same value, and some cleaner ways to use it.
         These are all equivalent to the code above in <a href="#RestReplay-3.a.2.XPath">3.a.2, Using XPath</a></p>
+    <p>Note: you can use either <a href="http://www.w3schools.com/xpath/xpath_syntax.asp">XPath</a> or <a href="https://github.com/jayway/JsonPath/blob/master/README.md">JsonPath</a>.</p>
     <p>First, the selftestToken could be modified to export a var</p>
 
     <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[

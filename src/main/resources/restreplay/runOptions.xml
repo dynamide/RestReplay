@@ -15,5 +15,6 @@
     <failTestOnErrors>true</failTestOnErrors>
     <dumpResourceManagerSummary>false</dumpResourceManagerSummary>
     <skipMutators>false</skipMutators>
+    <outputServiceResultDB>false</outputServiceResultDB>
 </runOptions>
 

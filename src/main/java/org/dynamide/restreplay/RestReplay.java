@@ -848,7 +848,9 @@ public class RestReplay extends ConfigFile {
                                 report,
                                 results);
                         serviceResultsMap.remove("this");
-                        saveServiceResultToJSON(serviceResult);
+                        if (getRunOptions().outputServiceResultDB){
+                            saveServiceResultToJSON(serviceResult);
+                        }
                     }
                 }
                 serviceResultsMap.remove("result");
@@ -1495,7 +1497,7 @@ public class RestReplay extends ConfigFile {
         dir = Tools.join(reportsDir, Tools.join("db",dir));
 
         File result = FileTools.saveFile(dir, serviceResult.testIDLabel+".json", json, true);
-        System.out.println("~~~~~~~~~~~~~ saved file to: "+result.getCanonicalPath());
+        System.out.println("ServiceResult saved to DB: "+result.getCanonicalPath());
         return result;
     }
 

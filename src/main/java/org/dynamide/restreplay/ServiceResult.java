@@ -784,15 +784,44 @@ public class ServiceResult {
         }
     }
 
-    /** This method may be called from a test case, using a syntax like ${oe9.reqValue("personauthorities_common","//shortIdentifier")}    */
-    public String sent(String xpath) throws Exception {
-        String source = this.requestPayload; // REM - 5/9/2012 : Changing to requestPayload from requestPayloadsRaw to get actual sent payload
-        if (source == null){
-            return "ERROR:null:requestPayloadsRaw";
+    /** This method may be called from a test case, using XPath syntax: ${"//shortIdentifier")} or JsonPath syntax: ${"$..shortIdentifier")}  */
+    public Object sent(String path) throws Exception {
+        if (path.startsWith("$")
+                && Tools.notBlank(this.requestPayload) ) {
+            return sentJson(path, this.requestPayload);  //pathExpression is jsonPath
         }
+        return sentXPath(path, this.requestPayload);
+    }
+
+    public Object sentXPath(String path) throws Exception {
+        if (this.requestPayload == null){
+            return "ERROR:null:requestPayloads";
+        }
+        return sentXPath(path, this.requestPayload);
+    }
+
+    public Object sentXPath(String xpath, String source) throws Exception {
         org.jdom.Element element = (org.jdom.Element) XmlCompareJdom.selectSingleNode(source, xpath, null);   //e.g. "//shortIdentifier");
         String sr = element != null ? element.getText() : "";
         return sr;
+    }
+
+    public Object sentJson(String jsonPath) {
+        if (this.requestPayload == null){
+            return "ERROR:null:requestPayloads";
+        }
+        return sentJson(jsonPath, this.requestPayload);
+    }
+
+    public Object sentJson(String jsonPath, String source){
+        try {
+            return JsonPath.read(source, jsonPath);
+        } catch (Throwable t){
+            addAlert("ERROR reading response value: " + t,
+                    "JsonPath:"+jsonPath,                    //jsonPath is JsonPath
+                    Alert.LEVEL.ERROR);
+            return "";
+        }
     }
 
     /* Responding to these string names makes these accessible by Jexl.
@@ -979,10 +1008,6 @@ public class ServiceResult {
         this.calcGotExpectedResult = gotExpectedResult();
         this.calcSuccessLabel = RestReplayReport.formatMutatorSUCCESS(this);
         this.calcExpectedTreewalkRangeColumns = RestReplayReport.formatExpectedTreewalkRangeColumns(this);
-        System.out.println("************************************************* SERIALIZING "+payloads.size());
-        for (Map.Entry<String,Payload> entry: payloads.entrySet()){
-            System.out.println("---------------------------->>>>> payload:"+entry.getValue().id);
-        }
     }
 
 }

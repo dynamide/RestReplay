@@ -8,6 +8,7 @@
         <connectionTimeout>3000</connectionTimeout>
         <socketTimeout>5000</socketTimeout>
         <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
+        <outputServiceResultDB>true</outputServiceResultDB>
     </runOptions>
 
     <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />

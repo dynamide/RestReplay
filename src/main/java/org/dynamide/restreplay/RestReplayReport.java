@@ -751,7 +751,6 @@ public class RestReplayReport {
             pl.subtitle = subtitle;
             pl.usePRE = usePRE;
             serviceResult.payloads.put(theDivID, pl);
-            System.out.println("===========================~~>>>> payload: "+pl);
 
             try {
                 String pre_start,

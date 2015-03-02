@@ -22,6 +22,7 @@ public class RunOptions {
     public boolean reportResourceManagerSummary = true;
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
+    public boolean outputServiceResultDB = false;
 
 
     public boolean breakNow(Alert alert) {
@@ -50,7 +51,8 @@ public class RunOptions {
                 "    dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
                 "    reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
                 "    skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
-                "    skipMutators=" + skipMutators + "\r\n   }";
+                "    skipMutators=" + skipMutators + CR+
+                "    outputServiceResultDB=" + outputServiceResultDB + "\r\n   }";
     }
 
     public String toHTML() {
@@ -68,6 +70,7 @@ public class RunOptions {
                 "reportResourceManagerSummary=" + reportResourceManagerSummary +C+BR+
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
+                "outputServiceResultDB=" + outputServiceResultDB +BR+
                 "}</div>";
     }
 
@@ -86,6 +89,7 @@ public class RunOptions {
         String skipMutators = runOptionsNode.valueOf("skipMutators");
         String skipMutatorsOnFailure = runOptionsNode.valueOf("skipMutatorsOnFailure");
         String evalReportLevel = runOptionsNode.valueOf("evalReportLevel");
+        String outputServiceResultDB = runOptionsNode.valueOf("outputServiceResultDB");
 
         if (Tools.notBlank(connectionTimeout)) {
             this.connectionTimeout = Integer.parseInt(connectionTimeout);
@@ -119,6 +123,9 @@ public class RunOptions {
         }
         if (Tools.notBlank(skipMutatorsOnFailure)) {
             this.skipMutatorsOnFailure = Tools.isTrue(skipMutatorsOnFailure);
+        }
+        if (Tools.notBlank(outputServiceResultDB)) {
+            this.outputServiceResultDB = Tools.isTrue(outputServiceResultDB);
         }
         System.out.println("set RunOptions ("+context+"): "+toString());
     }
