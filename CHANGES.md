@@ -31,3 +31,7 @@ removeme
 Support files for serialization of ServiceResult to JSON thence to handlebar templates and jQuery .
 
 removeme
+===========Mon Mar 2 11:22:01 PST 2015======================
+Added working template for handlebars.js expansion of ServiceResult JSON files.
+
+removeme
