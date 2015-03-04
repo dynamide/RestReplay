@@ -63,11 +63,12 @@ public class RestReplayReport {
     protected static final String EVAL_REPORT_HDR = "<a name='EvalReport'></a><h2 class='DETAIL_HDR'>Eval Report</h2>";
 
     protected static final String TOC_START = "<a name='SummaryTOC'></a><table border='1' class='TOC_TABLE'><tr><td colspan='8' class='TOC_HDR'>Summary</td></tr>"
-                                              +"<tr><th>testID</th><th>method</th><th>code</th><th>time(ms)</th><th>status</th><th>warn</th><th>error</th><th>DOM</th></tr>\r\n"
-                                              +"<tr><td>\r\n";
-    protected static final String TOC_LINESEP = "</td></tr>\r\n<tr class='%s'><td class='%s'>";
+                                              +"<tr><th>testID</th><th>method</th><th>code</th><th>time(ms)</th><th>status</th><th>warn</th><th>error</th><th>DOM</th></tr>\r\n";
+    protected static final String TOC_LINESEP = "\r\n";
     protected static final String TOC_CELLSEP = "</td><td>";
-    protected static final String TOC_END = "</td></tr></table>";
+    protected static final String TOC_END = "</table>";
+    protected static final String TOC_CELLSTART = "\r\n<tr class='%s'><td class='%s'>";
+    protected static final String TOC_CELLEND = "</td></tr>";
 
     protected static final String HDRBEGIN = "<span class='HEADERBLOCK'>";
     protected static final String HDREND = "</span>";
@@ -364,10 +365,12 @@ public class RestReplayReport {
             String cssClassTR = toc.isMutation ? "mutationTR" : "";
             String cssClassTD = toc.isMutation ? "mutationTD" : "";
             String sep = String.format(TOC_LINESEP, cssClassTR, cssClassTD);
+            String rowstart = String.format(TOC_CELLSTART, cssClassTR, cssClassTD);
             String autodeleteBullet = toc.isAutodelete ? " &#10034; " : "";  // or just &bull;
             if (count>0){tocBuffer.append(sep);}
             count++;
             //tocBuffer.append("<a href='" + reportName + "#TOC" + toc.tocID + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
+            tocBuffer.append(rowstart);
             tocBuffer.append(autodeleteBullet)
                      .append("<a href='" + relativeReportName + "#"+ toc.testID /*"#TOC" +toc.tocID*/ + "'>" + toc.testID/*+toc.idFromMutator*/ + "</a> ")
                      .append((toc.children))
@@ -385,6 +388,7 @@ public class RestReplayReport {
                      .append(tocError(toc.errors))
                      .append(TOC_CELLSEP)
                      .append("<span class='summary-domcheck'>" + toc.domcheck + "</span>");
+            tocBuffer.append(TOC_CELLEND);
         }
         tocBuffer.append(TOC_END);
         tocBuffer.append(BR);
@@ -887,11 +891,20 @@ public class RestReplayReport {
                 statusLabel = "<span class='ERROR'>FAILURE</b></span>";
             }
         }
+        String longComment = null;
+        String shortComment = null;
+        if (s.comment.length()>100){
+            longComment = s.comment;
+        } else {
+            shortComment = s.comment;
+        }
         String res =
                 start
                 + statusLabel
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
+                + SP + (Tools.notBlank(shortComment) ? SP+SP+smallblack(shortComment) : "")
                 + SP + linesep
+                + (Tools.notBlank(longComment) ? lbl("comment") + smallblack(longComment) + linesep:"")
                 + s.method + SP + "<a class='URL_A' href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + formatResponseCodeBlock(s) +  linesep
                 + (Tools.notBlank(s.failureReason) ? s.failureReason + linesep : "")
@@ -906,8 +919,7 @@ public class RestReplayReport {
                 +(s.parentSkipped
                    ?    ""
                    :
-                        (s.requestHeaders.size()>0?HDRBEGIN + lbl("req-headers(mime-only)") + requestHeadersToHtml(s.requestHeaders) + HDREND + linesep:"")
-                        + (s.headerMap.size()>0?HDRBEGIN + lbl("req-headers(from-control-file)") + requestHeadersToHtml(s.headerMap) + HDREND + linesep:"")
+                        (s.headerMap.size()>0?HDRBEGIN + lbl("req-headers") + requestHeadersToHtml(s.headerMap) + HDREND + linesep:"")
                         + (Tools.notBlank(s.responseHeadersDump)?  HDRBEGIN + lbl("resp-headers") + s.responseHeadersDump + HDREND + linesep:"")
                  )
                 + (Tools.notEmpty(s.deleteURL) ? lbl("deleteURL") + small(s.deleteURL) + linesep : "")

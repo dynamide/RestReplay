@@ -44,3 +44,12 @@ Added RunOptions.outputServiceResultDB so you can produce output JSON or not.
 Added sent(jsonpath/xpath) and its helpers sentJson and sentXPath.
 Updated doco about using XPath versus JsonPath.
 removeme
+===========Tue Mar 3 16:17:30 PST 2015======================
+Added /restReplay/testGroup/test/comment tag support: 
+    comments in this location will end up in the ServiceResult display in the report.
+Fixed handling of mime-type headers, properly condensing multiple headers such as Accept.
+Added runtime visibility of jar version number from the pom, in the Transport.addRestReplayHeaders()
+    where I set the header X-RestReplay-version
+Added ResourceManager.readPropertiesFromClasspath()
+
+removeme

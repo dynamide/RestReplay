@@ -12,10 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ResourceManager {
 
@@ -203,6 +200,19 @@ public class ResourceManager {
         }
     }
 
+    public static Properties readPropertiesFromClasspath() {
+        Properties prop = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream("application.properties");
+        if (stream!=null){
+            try {
+                prop.load(stream);
+            } catch (IOException e){
+                System.out.println("ERROR reading properties for application.properties :"+e);
+            }
+        }
+        return prop;
+    }
 
     private static final String formatSummaryLine(String css, String name, String value){
         if (Tools.isBlank(value)){

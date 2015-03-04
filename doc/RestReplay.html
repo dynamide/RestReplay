@@ -1312,6 +1312,7 @@ When overriding RunOptions in a master file, consider these two development scen
           &lt;<a href="#RestReplay-restReplay.testGroup.vars.var">vars</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.headers.header">headers</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.test">test</a>&gt;
+              &lt;<a href="#RestReplay-restReplay.testGroup.test.comment">comment</a> /&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.method">method</a> /&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.uri">uri</a> /&gt;
               &lt;<a href="#RestReplay-restReplay.testGroup.test.filename">filename</a> /&gt;<br>              &lt;<a href="#RestReplay-restReplay.testGroup.test.expected.code">expected</a>&gt;
@@ -1641,11 +1642,12 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>child elements</td>
 
-            <td>method<br>
-            uri<br>expected<br>
-            part<br>
-            parts</td>
-          </tr>
+            <td>comment<br>
+                method<br>
+                uri<br>expected<br>
+                part<br>
+                parts</td>
+            </tr>
 
           <tr>
             <td>Example</td>
@@ -1696,16 +1698,32 @@ When overriding RunOptions in a master file, consider these two development scen
 &lt;/test&gt;              </div>
             </td>
           </tr>
-          
-          
+
+
+          <tr>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.comment" id="RestReplay-restReplay.testGroup.test.comment"></a>
+                  /restReplay/testGroup/test/comment</td>
+          </tr>
+          <tr>
+              <td>comment</td>
+              <td><p>Any text you want to include in the report for this test.  If the text is less than 100 characters, comment appears on the
+              same line as the testID, otherwise on the next line down.</p>
+              <p>&lt;comment> elements may be put anywhere in the XML control files to for documentation and for turning off elements
+                  by wrapping them in &lt;comment>&lt;/comment> rather than HTML comments &lt;!-- -->, which don't nest.  &lt;comment> elements will only be displayed in the
+              report if they appear in the path <code>/restReplay/testGroup/test/comment</code></td>
+          </tr>
+
+
           <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.vars.var" id="RestReplay-restReplay.testGroup.test.vars.var"></a>
              /restReplay/testGroup/test/vars/var</td>
           </tr>
           <tr>
             <td>var</td>
-            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>, but limited to one test.&nbsp; See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td></tr>
-            <tr>
+            <td>The same as <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>, but limited to one test.&nbsp; See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td>
+          </tr>
+
+          <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.expected.code" id="RestReplay-restReplay.testGroup.test.expected.code"></a>
               /restReplay/testGroup/test/expected/code</td>
             <td><br></td></tr>

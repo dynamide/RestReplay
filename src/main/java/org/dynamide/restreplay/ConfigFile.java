@@ -1,5 +1,7 @@
 package org.dynamide.restreplay;
 
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderGroup;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -158,24 +160,40 @@ public class ConfigFile {
         return vars;
     }
 
-    public static Map<String,String> readHeaders(Node testNode,
-                                                  Eval evalStruct,
-                                                  ServiceResult serviceResult){
-        Map<String,String> headerMap = new LinkedHashMap<String,String>();
-        List<Node> headers = testNode.selectNodes("headers/header");
-        for (Node header: headers){
-            String headerValue = header.getStringValue();
-            String headerName = header.valueOf("@name");
-            //System.out.println("header from control file: "+headerName +": "+ headerValue);
+    /** Inserts headers read from file into headerMap, condensing multiples
+     *  with org.apache.commons.httpclient.HeaderGroup, so that if you set
+     *  a header in the map such as [Accept: text/json] and then read another
+     *  header such as [Accept: application/json], then the result will be one header entry with
+     *  [Accept: text/json, application/json]
+     */
+    public void readHeaders(Node testNode,
+                            Eval evalStruct,
+                            ServiceResult serviceResult,
+                            Map<String,String> headerMap){
+        List<Node> headerNodes = testNode.selectNodes("headers/header");
+        for (Node headerNode: headerNodes){
+            String headerValue = headerNode.getStringValue();
+            String headerName = headerNode.valueOf("@name");
             if (headerValue.indexOf("$")>-1){
                 EvalResult evalResult = evalStruct.eval(headerName, headerValue, null);
                 headerValue = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
             }
-            //System.out.println("eval'd header from control file: "+headerName +": "+ headerValue);
+            addHeader(headerMap, headerName, headerValue);
+        }
+    }
+
+    public static void addHeader(Map<String,String> headerMap, String headerName, String headerValue){
+        String currentHeaderValue = headerMap.get(headerName);
+        if (Tools.notBlank(currentHeaderValue)){
+            HeaderGroup headerGroup = new HeaderGroup();
+            headerGroup.addHeader(new Header(headerName, currentHeaderValue));
+            headerGroup.addHeader(new Header(headerName, headerValue));
+            Header headerCondensed = headerGroup.getCondensedHeader(headerName);
+            headerMap.put(headerName, headerCondensed.getValue());
+        } else {
             headerMap.put(headerName, headerValue);
         }
-        return headerMap;
     }
 
     /** Prerequisites: ResourceManager has been set, testdir has been set.

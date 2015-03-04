@@ -10,6 +10,7 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Properties;
 
 import org.dynamide.util.Tools;
 
@@ -39,6 +40,24 @@ public class Transport {
         client.setParams(params);
     }
 
+    private static void addRestReplayHeaders(HttpMethodBase method, String authForTest, String fromTestID){
+        if (Tools.notBlank(authForTest)){
+            method.setRequestHeader("Authorization", "Basic " + authForTest); //"dGVzdDp0ZXN0");
+        }
+        method.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
+        Properties properties = ResourceManager.readPropertiesFromClasspath();
+        Object propObj = properties.get("application.version");
+        if (propObj != null) {
+            method.setRequestHeader("X-RestReplay-version", propObj.toString());
+        }
+    }
+
+    private static void putActualReqHeadersIntoServiceResult(ServiceResult result, HttpMethodBase method){
+        for (Header header: method.getRequestHeaders()){
+            result.addRequestHeader(header.getName(), header.getValue());
+        }
+    }
+
     public static ServiceResult doGET(ServiceResult result, String urlString, String authForTest, String fromTestID,
                                       Map<String, String> headerMap) throws Exception {
         result.fromTestID = fromTestID;
@@ -47,16 +66,12 @@ public class Transport {
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
         GetMethod getMethod = new GetMethod(urlString);
-        getMethod.addRequestHeader("Accept", "multipart/mixed");
-        getMethod.addRequestHeader("Accept", APPLICATION_XML);
-               result.addRequestHeader("Accept", APPLICATION_XML);
-        getMethod.addRequestHeader("Accept", APPLICATION_JSON);
-               result.addRequestHeader("Accept", APPLICATION_JSON);
-        getMethod.setRequestHeader("Authorization", "Basic " + authForTest); //"dGVzdDp0ZXN0");
-        getMethod.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
+        addRestReplayHeaders(getMethod, authForTest, fromTestID);
         for (Map.Entry<String,String> entry: headerMap.entrySet()){
             getMethod.setRequestHeader(entry.getKey(), entry.getValue());
         }
+        putActualReqHeadersIntoServiceResult(result, getMethod);
+
         try {
             int statusCode1 = client.executeMethod(getMethod);
             result.responseCode = statusCode1;
@@ -100,17 +115,11 @@ public class Transport {
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
         DeleteMethod deleteMethod = new DeleteMethod(urlString);
-        deleteMethod.setRequestHeader("Accept", "multipart/mixed");
-        deleteMethod.addRequestHeader("Accept", Transport.APPLICATION_XML);
-                  result.addRequestHeader("Accept",Transport.APPLICATION_XML);
-        deleteMethod.addRequestHeader("Accept", Transport.APPLICATION_JSON);  //TODO: test whether this impl sets multiple accepts correctly.
-                  result.addRequestHeader("Accept", Transport.APPLICATION_JSON);
-
-        deleteMethod.setRequestHeader("Authorization", "Basic " + authForTest);
-        deleteMethod.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
+        addRestReplayHeaders(deleteMethod, authForTest, fromTestID);
         for (Map.Entry<String,String> entry: headerMap.entrySet()){
             deleteMethod.setRequestHeader(entry.getKey(), entry.getValue());
         }
+        putActualReqHeadersIntoServiceResult(result, deleteMethod);
         int statusCode1 = 0;
         String res = "";
         try {
@@ -157,6 +166,7 @@ public class Transport {
     {
         result.method = method;
         result.headerMap = headerMap;
+        ConfigFile.addHeader(result.headerMap, "content-type", contentType);
 
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
@@ -174,17 +184,12 @@ public class Transport {
             return result;
         }
 
-        httpMethod.setRequestHeader  ("Accept", contentType);
-        result.addRequestHeader("Accept", contentType);
-        httpMethod.setRequestHeader  ("content-type", contentType);
-        result.addRequestHeader("content-type", contentType);
-
+        addRestReplayHeaders(httpMethod, authForTest, fromTestID);
         for (Map.Entry<String,String> entry: headerMap.entrySet()){
             httpMethod.setRequestHeader(entry.getKey(), entry.getValue());
         }
-        httpMethod.setRequestHeader("Authorization", "Basic " + authForTest);
-        httpMethod.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
-        httpMethod.setRequestHeader("X-RestReplay-version", "1.0.4");
+        putActualReqHeadersIntoServiceResult(result, httpMethod);
+
         if (postMethod!=null){
             postMethod.setRequestBody(content);
         } else if (putMethod!=null){

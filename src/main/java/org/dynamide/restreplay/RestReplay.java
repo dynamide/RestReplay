@@ -967,6 +967,9 @@ public class RestReplay extends ConfigFile {
             String mutatorType = testNode.valueOf("mutator/@type");
             boolean mutatorSkipParent = Tools.isTrue(testNode.valueOf("mutator/@skipParent"));
 
+            String comment = testNode.valueOf("comment");
+            serviceResult.comment = comment;
+
             //get default timeouts from master config file.
             serviceResult.connectionTimeout = getRunOptions().connectionTimeout;
             serviceResult.socketTimeout = getRunOptions().socketTimeout;
@@ -991,13 +994,13 @@ public class RestReplay extends ConfigFile {
 
 
             //====Headers==========================
-            Map<String, String> headerMap = readHeaders(testNode, evalStruct, serviceResult);
+            Map<String, String> headerMap = new HashMap<String, String>();
             String inheritHeaders = testNode.valueOf("@inheritHeaders");
             boolean skipInheritHeaders = Tools.notBlank(inheritHeaders) && inheritHeaders.equalsIgnoreCase("FALSE");
             if (!skipInheritHeaders) {
-                Map<String, String> headerMapFromTestGroup = readHeaders(testGroupNode, evalStruct, serviceResult);
-                headerMap.putAll(headerMapFromTestGroup);
+                readHeaders(testGroupNode, evalStruct, serviceResult, headerMap);  //inserts into headerMap, condensing multiples.
             }
+            readHeaders(testNode, evalStruct, serviceResult, headerMap);  //inserts into headerMap, condensing multiples.
             serviceResult.headerMap = headerMap;
             //========END Headers=====================
 

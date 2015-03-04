@@ -904,7 +904,26 @@
         </test>
     </testGroup>
 
-    <testGroup ID="debug" autoDeletePOSTS="true">
+    <testGroup ID="debug" autoDeletePOSTS="false">
+        <headers>
+            <header name="Accept">text/html</header>
+        </headers>
+
+        <test ID="headersFromGet">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <comment>Ensure that ACCEPT headers and all other headers condense properly</comment>
+            <headers>
+                <header name="Accept">application/json</header>
+                <header name="Accept">text/json</header>
+            </headers>
+            <exports>
+                <vars>
+                    <var ID="Accept">${this.get('Accept')}</var>
+                    <var ID="ACCEPT">${this.get('ACCEPT')}</var>
+                </vars>
+            </exports>
+        </test>
     </testGroup>
 
 
