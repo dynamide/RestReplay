@@ -62,3 +62,7 @@ Added runtime visibility of jar version number from the pom, in the Transport.ad
 Added ResourceManager.readPropertiesFromClasspath()
 
 removeme
+===========Tue Mar 3 20:27:24 PST 2015======================
+Cleaning up header handling.
+
+removeme

@@ -83,6 +83,14 @@ public class ResourceManager {
         return "";
     }
 
+    public static String getRestReplayVersion() {
+        Properties properties = readPropertiesFromClasspath();
+        Object propObj = properties.get("application.version");
+        if (propObj != null) {
+            return propObj.toString();
+        }
+        return "";
+    }
 
     //I tested, and the correct form for this is *without* the slash before a relative resourcename on the classpath.
     //InputStream res2 = RestReplay.class.getClassLoader().getResourceAsStream("/restreplay/"+masterFilename);

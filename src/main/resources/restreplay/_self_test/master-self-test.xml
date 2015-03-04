@@ -11,9 +11,8 @@
         <outputServiceResultDB>false</outputServiceResultDB>
     </runOptions>
 
-    <!--
     <run controlFile="_self_test/self-test.xml" testGroup="debug" />
-    -->
+    <!--
     <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
     <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
     <run controlFile="_self_test/self-test.xml" testGroup="VarsAndValidators" />
@@ -34,6 +33,7 @@
     <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
     <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
     <run controlFile="_self_test/nested/level1/foo.xml"/><comment>-this one runs all testGroups in file.</comment>
+-->
 
 </restReplayMaster>
 

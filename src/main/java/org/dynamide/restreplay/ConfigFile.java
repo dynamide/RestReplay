@@ -160,7 +160,7 @@ public class ConfigFile {
         return vars;
     }
 
-    /** Inserts headers read from file into headerMap, condensing multiples
+    /** Inserts headers read from file into requestHeaderMap, condensing multiples
      *  with org.apache.commons.httpclient.HeaderGroup, so that if you set
      *  a header in the map such as [Accept: text/json] and then read another
      *  header such as [Accept: application/json], then the result will be one header entry with

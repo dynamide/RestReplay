@@ -10,7 +10,6 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Properties;
 
 import org.dynamide.util.Tools;
 
@@ -40,16 +39,22 @@ public class Transport {
         client.setParams(params);
     }
 
-    private static void addRestReplayHeaders(HttpMethodBase method, String authForTest, String fromTestID){
+    private static void addRestReplayHeaders(ServiceResult serviceResult,
+                                             HttpMethodBase method,
+                                             String authForTest,
+                                             String fromTestID){
         if (Tools.notBlank(authForTest)){
             method.setRequestHeader("Authorization", "Basic " + authForTest); //"dGVzdDp0ZXN0");
         }
         method.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
-        Properties properties = ResourceManager.readPropertiesFromClasspath();
-        Object propObj = properties.get("application.version");
-        if (propObj != null) {
-            method.setRequestHeader("X-RestReplay-version", propObj.toString());
+        String version = ResourceManager.getRestReplayVersion();
+        if (Tools.notBlank(version)) {
+            method.setRequestHeader("X-RestReplay-version", version);
         }
+        for (Map.Entry<String,String> entry: serviceResult.requestHeaderMap.entrySet()){
+            method.setRequestHeader(entry.getKey(), entry.getValue());
+        }
+        putActualReqHeadersIntoServiceResult(serviceResult, method);
     }
 
     private static void putActualReqHeadersIntoServiceResult(ServiceResult result, HttpMethodBase method){
@@ -58,20 +63,14 @@ public class Transport {
         }
     }
 
-    public static ServiceResult doGET(ServiceResult result, String urlString, String authForTest, String fromTestID,
-                                      Map<String, String> headerMap) throws Exception {
+    public static ServiceResult doGET(ServiceResult result, String urlString, String authForTest, String fromTestID)
+    throws Exception {
         result.fromTestID = fromTestID;
-        result.headerMap = headerMap;
         result.method = "GET";
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
         GetMethod getMethod = new GetMethod(urlString);
-        addRestReplayHeaders(getMethod, authForTest, fromTestID);
-        for (Map.Entry<String,String> entry: headerMap.entrySet()){
-            getMethod.setRequestHeader(entry.getKey(), entry.getValue());
-        }
-        putActualReqHeadersIntoServiceResult(result, getMethod);
-
+        addRestReplayHeaders(result, getMethod, authForTest, fromTestID);
         try {
             int statusCode1 = client.executeMethod(getMethod);
             result.responseCode = statusCode1;
@@ -101,13 +100,11 @@ public class Transport {
     }
 
     public static ServiceResult doDELETE(ServiceResult result,
-                                         String urlString, String authForTest, String testID, String fromTestID,
-                                         Map<String, String> headerMap)  {
+                                         String urlString, String authForTest, String testID, String fromTestID)  {
         result.failureReason = "";
         result.method = "DELETE";
         result.fullURL = urlString;
         result.fromTestID = fromTestID;
-        result.headerMap = headerMap;
         if (Tools.isEmpty(urlString)){
             result.addError("url was empty.  Check the result for fromTestID: "+fromTestID+". currentTest: "+testID);
             return result;
@@ -115,11 +112,7 @@ public class Transport {
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
         DeleteMethod deleteMethod = new DeleteMethod(urlString);
-        addRestReplayHeaders(deleteMethod, authForTest, fromTestID);
-        for (Map.Entry<String,String> entry: headerMap.entrySet()){
-            deleteMethod.setRequestHeader(entry.getKey(), entry.getValue());
-        }
-        putActualReqHeadersIntoServiceResult(result, deleteMethod);
+        addRestReplayHeaders(result, deleteMethod, authForTest, fromTestID);
         int statusCode1 = 0;
         String res = "";
         try {
@@ -141,13 +134,12 @@ public class Transport {
     }
 
     public static ServiceResult doLIST(ServiceResult result,
-                                       String urlString, String listQueryParams, String authForTest, String fromTestID,
-                                       Map<String, String> headerMap) throws Exception {
+                                       String urlString, String listQueryParams, String authForTest, String fromTestID) throws Exception {
         //String u = Tools.glue(urlString, "/", "items/");
         if (Tools.notEmpty(listQueryParams)){
             urlString = Tools.glue(urlString, "?", listQueryParams);
         }
-        return doGET(result, urlString, authForTest, fromTestID, headerMap);
+        return doGET(result, urlString, authForTest, fromTestID);
     }
 
 
@@ -161,12 +153,10 @@ public class Transport {
                                            String contentType,
                                            String authForTest,
                                            String fromTestID,
-                                           String requestPayloadFilename,
-                                           Map<String, String> headerMap)
+                                           String requestPayloadFilename)
     {
         result.method = method;
-        result.headerMap = headerMap;
-        ConfigFile.addHeader(result.headerMap, "content-type", contentType);
+        ConfigFile.addHeader(result.requestHeaderMap, "content-type", contentType);
 
         HttpClient client = new HttpClient();
         setTimeouts(client, result);
@@ -183,13 +173,7 @@ public class Transport {
             result.addError("Method not supported: "+method);
             return result;
         }
-
-        addRestReplayHeaders(httpMethod, authForTest, fromTestID);
-        for (Map.Entry<String,String> entry: headerMap.entrySet()){
-            httpMethod.setRequestHeader(entry.getKey(), entry.getValue());
-        }
-        putActualReqHeadersIntoServiceResult(result, httpMethod);
-
+        addRestReplayHeaders(result, httpMethod, authForTest, fromTestID);
         if (postMethod!=null){
             postMethod.setRequestBody(content);
         } else if (putMethod!=null){

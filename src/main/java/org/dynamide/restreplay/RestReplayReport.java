@@ -9,7 +9,6 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert;
@@ -919,7 +918,7 @@ public class RestReplayReport {
                 +(s.parentSkipped
                    ?    ""
                    :
-                        (s.headerMap.size()>0?HDRBEGIN + lbl("req-headers") + requestHeadersToHtml(s.headerMap) + HDREND + linesep:"")
+                        (s.requestHeaderMap.size()>0?HDRBEGIN + lbl("req-headers") + requestHeadersToHtml(s.requestHeaderMap) + HDREND + linesep:"")
                         + (Tools.notBlank(s.responseHeadersDump)?  HDRBEGIN + lbl("resp-headers") + s.responseHeadersDump + HDREND + linesep:"")
                  )
                 + (Tools.notEmpty(s.deleteURL) ? lbl("deleteURL") + small(s.deleteURL) + linesep : "")
@@ -1007,14 +1006,6 @@ public class RestReplayReport {
                 + SP + (s.getParent()!=null?lbl("type")+smallblack(s.getParent().mutatorType):"")
                 + SP + (s.loopIndex>-1?lbl("loop")+smallblack(""+s.loopIndex):"")
                 + SP + lbl(" time")+s.time + units("ms") ;
-    }
-
-    private String requestHeadersToHtml(List<String> hdrs) {
-        StringBuffer sb = new StringBuffer();
-        for (String hdr : hdrs) {
-            sb.append("<span class='header'>").append(hdr).append("</span>");
-        }
-        return sb.toString();
     }
 
     private String requestHeadersToHtml(Map<String, String> headerMap) {

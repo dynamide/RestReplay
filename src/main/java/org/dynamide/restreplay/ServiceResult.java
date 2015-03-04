@@ -212,10 +212,8 @@ public class ServiceResult {
         return sb.toString();
     }
     public List<String> requestHeaders = new ArrayList<String>();  //for building report and dump
-    public Map<String, String> requestHeadersMap = Tools.createSortedCaseInsensitiveMap();//new HashMap<String,String>();
-    public Map<String,String> headerMap = new LinkedHashMap<String, String>();  //for doing autodelete, contains x-authorization, etc.
-
-    public Map<String,String> responseHeaderMap = Tools.createSortedCaseInsensitiveMap();//new HashMap<String, String>();
+    public Map<String,String> requestHeaderMap  = Tools.createSortedCaseInsensitiveMap();
+    public Map<String,String> responseHeaderMap = Tools.createSortedCaseInsensitiveMap();
     public Header[] responseHeaders = new Header[0];
     public void setResponseHeaders(Header[] headers){
         responseHeaderMap.clear();
@@ -619,8 +617,8 @@ public class ServiceResult {
     }
 
     public void addRequestHeader(String name, String value){
-        headerMap.put(name, value);
-        requestHeaders.add(name+':'+value);
+        requestHeaderMap.put(name, value);
+        //requestHeaders.add(name+':'+value);
     }
 
 
@@ -865,8 +863,8 @@ public class ServiceResult {
         if (responseHeaderMap.containsKey(what)){
             return responseHeaderMap.get(what);
         }
-        if (requestHeadersMap.containsKey(what)){
-            return requestHeadersMap.get(what);
+        if (requestHeaderMap.containsKey(what)){
+            return requestHeaderMap.get(what);
         }
         return "";
     }

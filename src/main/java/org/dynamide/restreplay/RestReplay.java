@@ -1,12 +1,10 @@
 package org.dynamide.restreplay;
 
 import com.google.gson.Gson;
-import org.apache.commons.cli.*;
 
 import org.dynamide.interpreters.*;
 import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.restreplay.mutators.MutatorFactory;
-import org.dynamide.restreplay.server.EmbeddedServer;
 import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
 import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
@@ -16,7 +14,6 @@ import java.io.*;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert.LEVEL;
-import org.json.JSONObject;
 
 /**
  * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
@@ -148,7 +145,7 @@ public class RestReplay extends ConfigFile {
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
                     //System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
-                    deleteResult = Transport.doDELETE(deleteResult, pr.deleteURL, pr.auth, pr.testID, "[autodelete:" + logName + "]", pr.headerMap);
+                    deleteResult = Transport.doDELETE(deleteResult, pr.deleteURL, pr.auth, pr.testID, "[autodelete:" + logName + "]");
                     //System.out.println("DONE AUTODELETE: ==>" + pr.deleteURL + "<== : " + deleteResult);
                     writeRowToConsoleWDump(deleteResult, true, deleteResult.testID);
                     results.add(deleteResult);
@@ -749,6 +746,7 @@ public class RestReplay extends ConfigFile {
 
         String restReplayHeader =
                   "RestReplay running:"
+                + "\r\n   version: " + ResourceManager.getRestReplayVersion()
                 + "\r\n   testGroup: " + testGroupID
                 + "\r\n   controlFile: " + controlFileName
                 + "\r\n   Master: " + masterFilenameInfo
@@ -994,14 +992,12 @@ public class RestReplay extends ConfigFile {
 
 
             //====Headers==========================
-            Map<String, String> headerMap = new HashMap<String, String>();
             String inheritHeaders = testNode.valueOf("@inheritHeaders");
             boolean skipInheritHeaders = Tools.notBlank(inheritHeaders) && inheritHeaders.equalsIgnoreCase("FALSE");
             if (!skipInheritHeaders) {
-                readHeaders(testGroupNode, evalStruct, serviceResult, headerMap);  //inserts into headerMap, condensing multiples.
+                readHeaders(testGroupNode, evalStruct, serviceResult, serviceResult.requestHeaderMap);  //inserts into requestHeaderMap, condensing multiples.
             }
-            readHeaders(testNode, evalStruct, serviceResult, headerMap);  //inserts into headerMap, condensing multiples.
-            serviceResult.headerMap = headerMap;
+            readHeaders(testNode, evalStruct, serviceResult, serviceResult.requestHeaderMap);  //inserts into requestHeaderMap, condensing multiples.
             //========END Headers=====================
 
             String oneProtoHostPort = protoHostPort;
@@ -1043,7 +1039,6 @@ public class RestReplay extends ConfigFile {
                                 results,
                                 testNode,
                                 testGroupNode,
-                                headerMap,
                                 evalStruct,
                                 testIDLabel,
                                 testID,
@@ -1070,7 +1065,6 @@ public class RestReplay extends ConfigFile {
                         results,
                         testNode,
                         testGroupNode, //not needed
-                        headerMap,
                         evalStruct,
                         testIDLabel,
                         testID,
@@ -1082,14 +1076,14 @@ public class RestReplay extends ConfigFile {
             } else if (method.equalsIgnoreCase("GET")) {
                 fullURL = fromTestID(fullURL, testNode, serviceResultsMap);
                 serviceResult.fullURL = fullURL;
-                serviceResult = Transport.doGET(serviceResult, fullURL, authForTest, testIDLabel, headerMap);
+                serviceResult = Transport.doGET(serviceResult, fullURL, authForTest, testIDLabel);
                 results.add(serviceResult);
                 serviceResult.time = (System.currentTimeMillis() - startTime);
                 serviceResultsMap.put(testID, serviceResult);
                 serviceResultsMap.put("result", serviceResult);
             } else if (method.equalsIgnoreCase("LIST")) {
                 String listQueryParams = ""; //TODO: empty for now, later may pick up from XML control file.
-                serviceResult = Transport.doLIST(serviceResult, fullURL, listQueryParams, authForTest, testIDLabel, headerMap);
+                serviceResult = Transport.doLIST(serviceResult, fullURL, listQueryParams, authForTest, testIDLabel);
                 results.add(serviceResult);
                 serviceResult.time = (System.currentTimeMillis() - startTime);
                 serviceResultsMap.put(testID, serviceResult);
@@ -1170,7 +1164,6 @@ public class RestReplay extends ConfigFile {
                 List<ServiceResult> results,
                 Node testNode,
                 Node testgroup,
-                Map<String, String> headerMap,
                 Eval evalStruct,
                 String testIDLabel,
                 String testID,
@@ -1184,7 +1177,6 @@ public class RestReplay extends ConfigFile {
             this.results = results;
             this.testNode = testNode;
             this.testgroup = testgroup;
-            this.headerMap = headerMap;
             this.evalStruct = evalStruct;
             this.testIDLabel = testIDLabel;
             this.testID = testID;
@@ -1199,7 +1191,6 @@ public class RestReplay extends ConfigFile {
         List<ServiceResult> results;
         Node testNode;
         Node testgroup;
-        Map<String, String> headerMap;
         Eval evalStruct;
         String testIDLabel;
         String testID;
@@ -1220,8 +1211,7 @@ public class RestReplay extends ConfigFile {
                     pr.deleteURL,
                     test.authForTest,
                     test.testIDLabel,
-                    test.fromTestID,
-                    test.headerMap);
+                    test.fromTestID);
             serviceResult.time = (System.currentTimeMillis() - test.startTime);
             serviceResult.fromTestID = fromTestID;
             test.results.add(serviceResult);
@@ -1236,7 +1226,7 @@ public class RestReplay extends ConfigFile {
                 serviceResult.addError("ID not found in element fromTestID: " + fromTestID);
                 System.err.println("****\r\nServiceResult: " + serviceResult.getError() + ". SKIPPING TEST. Full URL: " + test.fullURL);
             } else {
-                serviceResult = Transport.doDELETE(serviceResult, test.fullURL, test.authForTest, test.testID, fromTestID, test.headerMap);
+                serviceResult = Transport.doDELETE(serviceResult, test.fullURL, test.authForTest, test.testID, fromTestID);
             }
             serviceResult.time = (System.currentTimeMillis() - test.startTime);
             serviceResult.fromTestID = fromTestID;
@@ -1328,8 +1318,7 @@ public class RestReplay extends ConfigFile {
                     contentType,
                     test.authForTest,
                     test.testIDLabel,
-                    serviceResult.requestPayloadFilename,//it just sets it back to this for us.
-                    test.headerMap);
+                    serviceResult.requestPayloadFilename);//it just sets it back to this for us.
         }
 
         test.results.add(serviceResult);
@@ -1480,7 +1469,7 @@ public class RestReplay extends ConfigFile {
 
     private static String contentTypeFromRequestPart(String filename) {
         if (filename.toUpperCase().endsWith(".JSON")) {
-            return "application/json";
+            return Transport.APPLICATION_JSON;
         } else if (filename.toUpperCase().endsWith(".XML")) {
             return Transport.APPLICATION_XML;
         }
