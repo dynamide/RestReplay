@@ -27,6 +27,7 @@
             <uri>/jsonCompare1</uri>
         </test>
         <test ID="token">
+            <comment>This token service always returns the same token, useful to simulate a real single-sign-on service.</comment>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
             <exports>

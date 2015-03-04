@@ -53,3 +53,12 @@ Added runtime visibility of jar version number from the pom, in the Transport.ad
 Added ResourceManager.readPropertiesFromClasspath()
 
 removeme
+===========Tue Mar 3 16:21:58 PST 2015======================
+Added /restReplay/testGroup/test/comment tag support: 
+    comments in this location will end up in the ServiceResult display in the report.
+Fixed handling of mime-type headers, properly condensing multiple headers such as Accept.
+Added runtime visibility of jar version number from the pom, in the Transport.addRestReplayHeaders()
+    where I set the header X-RestReplay-version
+Added ResourceManager.readPropertiesFromClasspath()
+
+removeme
