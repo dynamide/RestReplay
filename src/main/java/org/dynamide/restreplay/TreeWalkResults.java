@@ -219,19 +219,19 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
     public String leftID;
     public String rightID;
 
-    public static Map<TreeWalkEntry.STATUS,Range> createDOMSet(String ma,
-                                                               String mi,
-                                                               String ad,
-                                                               String de,
-                                                               String te,
-                                                               String ne){
+    public static Map<TreeWalkEntry.STATUS,Range> createDOMSet(String matched,
+                                                               String missing,
+                                                               String added,
+                                                               String error,
+                                                               String different,
+                                                               String nested){
             Map<TreeWalkEntry.STATUS,Range> rangeMap = new HashMap<TreeWalkEntry.STATUS, Range>();
-            rangeMap.put(TreeWalkEntry.STATUS.MATCHED, new Range(ma));
-            rangeMap.put(TreeWalkEntry.STATUS.REMOVED, new Range(mi));
-            rangeMap.put(TreeWalkEntry.STATUS.ADDED, new Range(ad));
-            rangeMap.put(TreeWalkEntry.STATUS.ERROR, new Range(de));
-            rangeMap.put(TreeWalkEntry.STATUS.DIFFERENT, new Range(te));
-            rangeMap.put(TreeWalkEntry.STATUS.NESTED_ERROR, new Range(ne));
+            rangeMap.put(TreeWalkEntry.STATUS.MATCHED, new Range(matched));
+            rangeMap.put(TreeWalkEntry.STATUS.REMOVED, new Range(missing));
+            rangeMap.put(TreeWalkEntry.STATUS.ADDED, new Range(added));
+            rangeMap.put(TreeWalkEntry.STATUS.ERROR, new Range(error));
+            rangeMap.put(TreeWalkEntry.STATUS.DIFFERENT, new Range(different));
+            rangeMap.put(TreeWalkEntry.STATUS.NESTED_ERROR, new Range(nested));
             return rangeMap;
     }
 

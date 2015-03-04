@@ -406,7 +406,6 @@ public class RestReplayReport {
     public String getRunInfo(){
         StringBuilder b = new StringBuilder();
         for (String s: runInfo){
-            //b.append("(*getRunInfo:"+i+"*)").append(s).append("(*"+i+"*)\r\n");
             b.append(s).append("\r\n");
         }
         return b.toString();
@@ -428,13 +427,6 @@ public class RestReplayReport {
         header.failureMessage = "";
         header.failure = false;
     }
-
-    /**
-     * Call this method to insert arbitrary HTML in your report file, at the point after the last call to addTestResult() or addTestGroup().
-     */
-   // public void addText(String text) {
-   //     buffer.append(text);
-   // }
 
     private class Header {
         public boolean failure = false;
@@ -472,7 +464,6 @@ public class RestReplayReport {
 
     public void addTestResult(ServiceResult serviceResult) {
         reportsList.add(serviceResult);
-
     }
 
     private void appendServiceResult(ServiceResult serviceResult, StringBuffer buffer){
@@ -559,10 +550,6 @@ public class RestReplayReport {
         }
         return null;
     }
-
-    //public static String getReportsDir(String basename){
-    //    return Tools.glue(basename,"/","TEST-REPORTS");
-    //}
 
     public static class MasterReportNameTupple {
         public String directory;

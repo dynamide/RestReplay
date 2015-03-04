@@ -111,16 +111,14 @@ public class ServiceResult {
             try {
                 this.prettyJSON = prettyPrintJSON(result);
             } catch (Exception e){
-                String stack = Tools.getStackTrace(e);
                 String resultString = RestReplayReport.escape(result);
                 resultString = resultString.substring(0, Math.min(resultString.length(), RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT));
                 addError("trying to prettyPrintJSON(RESPONSE) which claimed to be format:" + format
                                 + ", RESPONSE : <br />   &laquo;" + resultString +"....&raquo; <br />",
-                        e);
+                         e);
             }
             try {
-                String foo = payloadJSONtoXML(result);
-                this.xmlResult = foo;
+                this.xmlResult = payloadJSONtoXML(result);
             } catch (Exception e){
                 String stack = Tools.getStackTrace(e);
                 String resultString = RestReplayReport.escape(result);
@@ -150,18 +148,12 @@ public class ServiceResult {
         Throwable there = new Throwable("Marker");
         String here = Tools.getStackTraceTop(there, 0, 3, " / ");
         here = "<br />\r\nreported by: ["+RestReplayReport.escape(here)+"]\r\n";
-
         if (null!=t){
             msg += ": "+t.getLocalizedMessage();
             errorDetail += msg + "<br />\r\n"+Tools.getStackTrace(t, 4);
             errorDetail += here;
         }
-
-        //error = (Tools.notEmpty(error)) This was here because I thought some error might get overwritten.  Looking for cases now...
-        //        ? error+ "<br />\r\n"+msg
-        //        : msg;
         error = msg + here;
-
         addAlert(error, testIDLabel, Alert.LEVEL.ERROR);
     }
     public void addWarning(String msg){
@@ -189,8 +181,6 @@ public class ServiceResult {
         } else {
             mimeType = mimeHeader.trim();
         }
-
-        //System.out.println("setting mimeType:"+mimeHeader);
     }
     public String failureReason = "";
     public boolean expectedFailure = false;
@@ -211,13 +201,11 @@ public class ServiceResult {
         }
         return sb.toString();
     }
-    public List<String> requestHeaders = new ArrayList<String>();  //for building report and dump
     public Map<String,String> requestHeaderMap  = Tools.createSortedCaseInsensitiveMap();
     public Map<String,String> responseHeaderMap = Tools.createSortedCaseInsensitiveMap();
     public Header[] responseHeaders = new Header[0];
     public void setResponseHeaders(Header[] headers){
         responseHeaderMap.clear();
-        responseHeaders = Arrays.copyOf(headers, headers.length);
         for (Header header: headers){
             String value = header.getValue();
             String name= header.getName();
@@ -263,15 +251,12 @@ public class ServiceResult {
         trappedExports.addAll(newexports.keySet());
         exports.putAll(newexports);
     }
-    //public void addExport(String key, String value){
-    //    exports.put(key, value);
-    //}
     public void addExport(String key, Object value){
         trappedExports.add(key);
         exports.put(key, value);
     }
 
-    private List<String> trappedExports = new ArrayList<String>();
+    private transient List<String> trappedExports = new ArrayList<String>();
     public void beginTrappingExports(){
         trappedExports = new ArrayList<String>();
     }
@@ -319,7 +304,7 @@ public class ServiceResult {
         return buf.toString();
     }
 
-    private String encode(String in){
+    private static String encode(String in){
         return in.replaceAll("<", "&lt;");
     }
     public String partsSummaryHTML(boolean detailed){
@@ -343,7 +328,7 @@ public class ServiceResult {
         return buf.toString();
     }
 
-    public boolean codeInSuccessRange(int code){
+    public static boolean codeInSuccessRange(int code){
         if (200<=code && code<400){
             return true;
         }
@@ -374,12 +359,12 @@ public class ServiceResult {
         }
 
         Map<STATUS,Range> result;
-        /* createDOMSet(String ma,
-                        String mi,
-                        String ad,
-                        String de,
-                        String te,
-                        String ne);  */
+        /* createDOMSet(String matched,
+                         String missing,
+                         String added,
+                         String error,
+                         String different,
+                         String nested);  */
         switch (strictness){
             case STRICT:
                 result = TreeWalkResults.createDOMSet("","0","0","0","0","0");
@@ -418,62 +403,6 @@ public class ServiceResult {
         }
         PAYLOAD_STRICTNESS strictness = PAYLOAD_STRICTNESS.valueOf(payloadStrictness);
         return isDomWalkOKByRanges(createRangesForLevel(strictness));
-    }
-
-
-    private boolean OLD_isDomWalkOK(){
-        PAYLOAD_STRICTNESS strictness = PAYLOAD_STRICTNESS.valueOf(payloadStrictness);
-        for (Map.Entry<String,TreeWalkResults> entry : partSummaries.entrySet()) {
-            String key = entry.getKey();
-            TreeWalkResults value = entry.getValue();
-            if (value.hasDocErrors()){
-                failureReason = " : DOM ERROR; ";
-                return false;
-            }
-            switch (strictness){
-                case STRICT:
-                    if (!value.isStrictMatch()) {
-                        failureReason = " : DOM NOT STRICT; ";
-                        return false;
-                    }
-                    break;
-                case ADDOK:
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT)>0) {
-                        failureReason = " : DOM DIFFERENT; ";
-                        return false;
-                    }
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.REMOVED)>0){
-                        failureReason = " : DOM REMOVED; ";
-                        return false;
-                    }
-                    break;
-                case TEXT:
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT)>0) {
-                        failureReason = " : DOM DIFFERENT; ";
-                        return false;
-                    }
-                    break;
-                case TREE:
-                    if (!value.treesMatch()) {
-                        failureReason = " : DOM TREE MISMATCH; ";
-                        return false;
-                    }
-                    break;
-                case TREE_TEXT:
-                    if (value.countFor(TreeWalkResults.TreeWalkEntry.STATUS.DIFFERENT)>0) {
-                        failureReason = " : DOM DIFFERENT; ";
-                        return false;
-                    }
-                    if (!value.treesMatch()) {
-                        failureReason = " : DOM TREE MISMATCH; ";
-                        return false;
-                    }
-                    break;
-                case ZERO:
-                    break;
-            }
-        }
-        return true;
     }
 
     private boolean checkRange(TreeWalkResults value,
@@ -618,11 +547,9 @@ public class ServiceResult {
 
     public void addRequestHeader(String name, String value){
         requestHeaderMap.put(name, value);
-        //requestHeaders.add(name+':'+value);
     }
 
 
-    //public static final String[] DUMP_OPTIONS = {"minimal", "detailed", "full"};
     public static enum DUMP_OPTIONS {minimal, detailed, full, auto};
 
     public static enum PAYLOAD_STRICTNESS {ZERO, ADDOK, TREE, TEXT, TREE_TEXT, STRICT};
@@ -670,7 +597,6 @@ public class ServiceResult {
                 + ( Tools.notEmpty(location) ? "; location:"+location : "" )
                 + ( Tools.notEmpty(error) ? "; ERROR_IN_DETAIL:"+error : "" )
                 + "; gotExpected:"+gotExpectedResult()
-                //+";result:"+result+";"
                 + ( "; parts-summary: {"+partsSummary(true)+"}")
                 +"}"
                 + ( includePayloads  ? dumpPayloads() : "" )
@@ -719,7 +645,7 @@ public class ServiceResult {
         }
     }
 
-    /** <p></p>This method may be called from a test case, using a syntax
+    /** <p>This method may be called from a test case, using a syntax
      *  with XPath like this:
      *      <code>${testID3.got("//refName")}</code>
      *  or with JSON, like this:
@@ -783,7 +709,20 @@ public class ServiceResult {
         }
     }
 
-    /** This method may be called from a test case, using XPath syntax: ${"//shortIdentifier")} or JsonPath syntax: ${"$..shortIdentifier")}  */
+    /** <p></p>This method may be called from a test case, using a syntax
+     *  with XPath like this:
+     *      <code>${testID3.sent("//refName")}</code>
+     *  or with JSON, like this:
+     *     <code>${testID3.sent("$..refName")}</code></p>
+     *
+     *  <p>JsonPath docs say ALL expressions start with $.</p>
+     *
+     *  <p>An XPath could only start with a $ if you named a variable like so: <code>$myvariable</code>.  So don't do that.</p>
+     *
+     *  <p>If you know which syntax you want to use, see these variants: {@see #sentXPath(String)} {@see  #sentJson(String)} </p>
+     *
+     *  @param path If this.result is JSON, as determined by contentTypeFromResponse(), then JsonPath is assumed,
+     *                        otherwise XPath is assumed. */
     public Object sent(String path) throws Exception {
         if (path.startsWith("$")
                 && Tools.notBlank(this.requestPayload) ) {
@@ -882,41 +821,9 @@ public class ServiceResult {
         }
     }
 
-    public static class JSONSuper {
-        public JSONObject jsonObject;
-        public JSONArray jsonArray;
-        public String payload;
-        public enum TYPE {OBJECT, ARRAY, STRING}
-        public TYPE type;
-        public String toString(){
-            switch (this.type) {
-                case ARRAY:
-                    return "<root>"+XML.toString(this.jsonArray)+"</root>";
-                case OBJECT:
-                    return "<root>"+XML.toString(this.jsonObject)+"</root>";
-                case STRING:
-                default:
-                    return payload;
-            }
-        }
-        public JSONSuper(String payload){
-            this.payload = payload;
-            Object json = new JSONTokener(payload).nextValue();
-            if (json instanceof JSONObject) {
-                JSONObject jsonobject = new JSONObject(payload);
-                this.jsonObject = jsonobject;
-                this.type = JSONSuper.TYPE.OBJECT;
-            } else if (json instanceof JSONArray) {
-                JSONArray jsonarray = new JSONArray(payload);
-                this.jsonArray = jsonarray;
-                this.type = JSONSuper.TYPE.ARRAY;
-            }
-        }
-    }
-
     public static String payloadJSONtoXML(String payload) {
         JSONSuper maybe = new JSONSuper(payload);
-        String xml = maybe.toString();
+        String xml = maybe.toXMLString();
         return xml;
     }
 

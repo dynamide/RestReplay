@@ -1,0 +1,25 @@
+    <html>
+    <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.0/handlebars.js"></script>
+    </head>
+    <body>
+        <h2>Template expansion</h2>
+        <div id="output"></div>
+        
+        <script id="entry-template" type="text/x-handlebars-template">
+          {{#if isMutation}}<div style="color: red;">{{else}}<div style="color: green">{{/if}}
+            I'm in color.
+            </div>
+        </script>
+    </body>
+    <script>
+        var serviceResult = {
+            "testID": "useMutator",
+            "isMutation": false,
+        }
+        var source   = document.getElementById('entry-template').innerHTML;
+        var template = Handlebars.compile(source);
+        var result = template(serviceResult);
+        document.getElementById('output').innerHTML = result;
+    </script>
+    </html>

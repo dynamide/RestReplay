@@ -66,3 +66,9 @@ removeme
 Cleaning up header handling.
 
 removeme
+===========Wed Mar 4 08:13:27 PST 2015======================
+General code cleanup, JSONSuper moved to its own class, 
+changed JSONSuper.toString() to toXMLString().
+made ServiceResult.trappedExports transient - no need to include in serialized report.
+
+removeme

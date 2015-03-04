@@ -24,9 +24,6 @@ public class Transport {
     public static final String APPLICATION_JSON = "application/json";
 
 
-    private static String DD = "--";
-    private static String CRLF = "\r\n";
-
     private static void setTimeouts(HttpClient client, ServiceResult sr){
         //client.getParams().setParameter("http.socket.timeout", milliseconds);
         //client.getParams().setParameter("http.connection.timeout", milliseconds);
@@ -81,7 +78,6 @@ public class Transport {
             Header[] headers = getMethod.getResponseHeaders();
             dumpResponseHeaders(headers, result);
             result.setResponseHeaders(headers);
-            result.responseHeaders = Arrays.copyOf(headers, headers.length);
             Header hdr = getMethod.getResponseHeader("CONTENT-TYPE");
             if (hdr != null) {
                 String hdrStr = hdr.toExternalForm();
@@ -135,7 +131,6 @@ public class Transport {
 
     public static ServiceResult doLIST(ServiceResult result,
                                        String urlString, String listQueryParams, String authForTest, String fromTestID) throws Exception {
-        //String u = Tools.glue(urlString, "/", "items/");
         if (Tools.notEmpty(listQueryParams)){
             urlString = Tools.glue(urlString, "?", listQueryParams);
         }
