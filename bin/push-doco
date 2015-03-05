@@ -7,7 +7,7 @@ zip -r reports.zip reports
 echo ssh-ing with $RESTREPLAY_SSH
 scp reports.zip $RESTREPLAY_SSH:~/sites/dynamide.com/RestReplay/
 
-ssh $RESTREPLAY_SSH  'cd ~/sites/dynamide.com/RestReplay; unzip -f -o reports.zip'
+ssh $RESTREPLAY_SSH  'cd ~/sites/dynamide.com/RestReplay; source ./.clean-reports; echo "pwd: `pwd`"; unzip -o reports.zip; ls -la; echo "ls after reports unzipped"; ls -la'
 
 rm ./reports.zip
 

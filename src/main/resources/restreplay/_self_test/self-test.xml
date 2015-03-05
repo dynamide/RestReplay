@@ -908,7 +908,7 @@
         </test>
     </testGroup>
 
-    <testGroup ID="comments" autoDeletePOSTS="false">
+    <testGroup ID="commentsGroup" autoDeletePOSTS="false">
         <comment><a href="">FEATURE-1393</a> Implement comments in testGroups.
             &lt;comment> tags should be able to include any HTML markup, such as unordered lists:
             <ul>
@@ -926,15 +926,15 @@
                     </tr>
                     <tr>
                         <th>1</th>
-                        <td>cell r1, c3</td>
-                        <td>cell r1, c3</td>
-                        <td>cell r1, c3</td>
+                        <td>cell r1,c1</td>
+                        <td>cell r1,c2</td>
+                        <td>cell r1,c3</td>
                     </tr>
                     <tr>
                         <th>2</th>
                         <td>cell r2,c1</td>
                         <td>cell r2,c2</td>
-                        <td>cell r2, c3</td>
+                        <td>cell r2,c3</td>
                     </tr>
                 </table>
             </p>
@@ -960,15 +960,15 @@
                         </tr>
                         <tr>
                             <th>1</th>
-                            <td>cell r1, c3</td>
-                            <td>cell r1, c3</td>
-                            <td>cell r1, c3</td>
+                            <td>cell r1,c1</td>
+                            <td>cell r1,c2</td>
+                            <td>cell r1,c3</td>
                         </tr>
                         <tr>
                             <th>2</th>
                             <td>cell r2,c1</td>
                             <td>cell r2,c2</td>
-                            <td>cell r2, c3</td>
+                            <td>cell r2,c3</td>
                         </tr>
                     </table>
                 </p>
