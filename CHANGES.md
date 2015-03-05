@@ -19,31 +19,33 @@
 - And XPath is still supported.
 - Also added ServiceResult.gotJson(JsonPath).
 - Also added ServiceResult.gotXPath(xpath).
+
 ===========Sat Feb 28 17:36:23 PST 2015======================
 - Added gson library for serialization of ServiceResult to JSON.
 - Added handling of JsonPath in gotJson() and got(), and added public gotXPath().
 - Added experimental handlebars templating for displaying report based on serialized export of ServiceResult as JSON.
+
 ===========Sat Feb 28 22:24:26 PST 2015======================
 Support files for serialization of ServiceResult to JSON thence to handlebar templates and jQuery .
 
-removeme
+
 ===========Sat Feb 28 22:24:53 PST 2015======================
 Support files for serialization of ServiceResult to JSON thence to handlebar templates and jQuery .
 
-removeme
+
 ===========Mon Mar 2 11:22:01 PST 2015======================
 Added working template for handlebars.js expansion of ServiceResult JSON files.
 
-removeme
+
 ===========Mon Mar 2 11:22:38 PST 2015======================
 Added working template for handlebars.js expansion of ServiceResult JSON files.
 
-removeme
+
 ===========Mon Mar 2 12:32:20 PST 2015======================
 Added RunOptions.outputServiceResultDB so you can produce output JSON or not.
 Added sent(jsonpath/xpath) and its helpers sentJson and sentXPath.
 Updated doco about using XPath versus JsonPath.
-removeme
+
 ===========Tue Mar 3 16:17:30 PST 2015======================
 Added /restReplay/testGroup/test/comment tag support: 
     comments in this location will end up in the ServiceResult display in the report.
@@ -52,7 +54,7 @@ Added runtime visibility of jar version number from the pom, in the Transport.ad
     where I set the header X-RestReplay-version
 Added ResourceManager.readPropertiesFromClasspath()
 
-removeme
+
 ===========Tue Mar 3 16:21:58 PST 2015======================
 Added /restReplay/testGroup/test/comment tag support: 
     comments in this location will end up in the ServiceResult display in the report.
@@ -61,17 +63,17 @@ Added runtime visibility of jar version number from the pom, in the Transport.ad
     where I set the header X-RestReplay-version
 Added ResourceManager.readPropertiesFromClasspath()
 
-removeme
+
 ===========Tue Mar 3 20:27:24 PST 2015======================
 Cleaning up header handling.
 
-removeme
+
 ===========Wed Mar 4 08:13:27 PST 2015======================
 General code cleanup, JSONSuper moved to its own class, 
 changed JSONSuper.toString() to toXMLString().
 made ServiceResult.trappedExports transient - no need to include in serialized report.
 
-removeme
+
 ===========Wed Mar 4 17:53:23 PST 2015======================
 Added Javadoc overview files.
 Made <comment> tags display with more... links, collapsible spans, and correct fonts.
@@ -79,10 +81,10 @@ General code cleanup, JSONSuper moved to its own class,
 changed JSONSuper.toString() to toXMLString().
 made ServiceResult.trappedExports transient - no need to include in serialized report.
 
-removeme
+
 ===========Wed Mar 4 18:34:40 PST 2015======================
 Made <comment> blocks in testGroup and test both allow HTML markup.
 Also test/comment to show in green even if not so long it causes the more... link.
 typo in TreeWalkResults.
 
-removeme
+
