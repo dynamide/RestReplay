@@ -18,6 +18,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+/** This class represents the entire transaction of a test: the options used, the request, the response, and the validation.
+ *  Many of the fields exposed by this class have no getters or setters.  This is to make use within validators and JEXL expressions
+ *  as easy as possible.  Also, this class supports serialization, including some calculated fields, which is used to produce
+ *  a database of all the JSON representations of this class for all the test cases run.  That database, if requested
+ *  by {@link RunOptions#outputServiceResultDB} is present in reports/db/ after a successful run ( {@link RestReplay#getReportsDir()}/{@link RestReplay#REL_PATH_TO_DB} ).
+ */
 public class ServiceResult {
     public ServiceResult(RunOptions options){
         runOptions = options;
@@ -77,7 +83,6 @@ public class ServiceResult {
     }
     public String fullURL = "";
     public String deleteURL = "";
-    public String AMONG = "A"; //informational: for inspection after the test.
     public String protoHostPort = ""; //informational: for inspection after the test.
     public String location = "";
     public String CSID = "";
@@ -653,7 +658,7 @@ public class ServiceResult {
      *
      *  <p>JsonPath docs say ALL expressions start with $.</p>
      *
-     *  <p>An XPath could only start with a $ if you named a variable like so: <code>$myvariable</code>.  So don't do that.</p>
+     *  <p>An XPath could only start with a $ if you named an element like so: <code>$myvariable</code>.  So don't do that.</p>
      *
      *  <p>If you know which syntax you want to use, see these variants: {@see #gotXPath(String)} {@see  #gotJson(String)} </p>
      *
@@ -717,7 +722,7 @@ public class ServiceResult {
      *
      *  <p>JsonPath docs say ALL expressions start with $.</p>
      *
-     *  <p>An XPath could only start with a $ if you named a variable like so: <code>$myvariable</code>.  So don't do that.</p>
+     *  <p>An XPath could only start with a $ if you named an element like so: <code>$myvariable</code>.  So don't do that.</p>
      *
      *  <p>If you know which syntax you want to use, see these variants: {@see #sentXPath(String)} {@see  #sentJson(String)} </p>
      *

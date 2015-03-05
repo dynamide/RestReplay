@@ -397,13 +397,13 @@ tr.mutationTR {
 }
 DIV.payloads {
     margin-left: 5px;
-    margin-bottom:12px;
-    margin-top: 22px;
+    padding-bottom:8px;
+    padding-top: 12px;
 }
 DIV.mutation {
     padding-left: 30px;
-    margin-top: 0px;
-    margin-bottom:12px;
+    padding-top: 0px;
+    padding-bottom:12px;
 }
 .payloads A {
    /* the payload show/hide links under each test. */
@@ -640,4 +640,28 @@ td.dom-not-matched {
     padding: 20px;
     max-width: 600px;
     background-color: white;
+}
+.comment {
+    border: 1px solid black;
+    border-top: none;
+    margin: 0;
+    font-size: 90%;
+    background-color: #EBFFD6;
+    padding: 12px;
+    padding-top: 18px;
+    padding-right: 80px; /* avoid the floating tool menu */
+}
+.comment-short {
+    color: green;
+}
+.comment-short A {
+    font-size: 100%;
+}
+.comment-full {
+    display: none;
+    font-size: 150%;
+    padding: 1em;
+}
+.comment-full A {
+    font-size: 100%;
 }

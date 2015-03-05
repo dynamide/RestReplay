@@ -17,8 +17,9 @@ import org.dynamide.interpreters.Alert.LEVEL;
 
 /**
  * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
- * in an appropriate Multipart request.
- * See example usage in calling class RestReplayTest and RestReplaySelfTest, and also in main() in this class.
+ * in an appropriate Multipart request.  This class is a runtime representation of a control file, which starts with the XML
+ * element &lt;restReplay>.
+ * See example usage in calling class RestReplayTest and RestReplaySelfTest, and also in the class {@see Main}
  *
  * @author Laramie Crocker
  */
@@ -33,6 +34,8 @@ public class RestReplay extends ConfigFile {
             setRunOptions(parentRunOptions);
         }
     }
+
+    public static final String REL_PATH_TO_DB = "db";
 
     private String controlFileName = "";
     public String getControlFileName() {
@@ -778,6 +781,11 @@ public class RestReplay extends ConfigFile {
         OUTER:
         for (Node testgroup : testgroupNodes) {
             String currentTestGroupID = testgroup.valueOf("@ID");
+            Node commentNode = testgroup.selectSingleNode("comment");
+            String comment = "";
+            if (commentNode!=null) {
+                comment = commentNode.asXML();
+            }
             RestReplayReport report = new RestReplayReport(reportsDir);
 
             testGroupID = currentTestGroupID;
@@ -785,7 +793,7 @@ public class RestReplay extends ConfigFile {
             report.clearRunInfo();
             evalStruct.resetContext();    // Get a new JexlContext for each test group.
 
-            report.addTestGroup(currentTestGroupID, controlFileName);
+            report.addTestGroup(currentTestGroupID, controlFileName, comment);
 
             //vars var = get control file vars and merge masterVars into it, replacing
             Map<String, Object> testGroupVars = readVars(testgroup);
@@ -1486,7 +1494,7 @@ public class RestReplay extends ConfigFile {
         if (lastdot>0){
             dir = serviceResult.controlFileName.substring(0, lastdot);
         }
-        dir = Tools.join(reportsDir, Tools.join("db",dir));
+        dir = Tools.join(reportsDir, Tools.join(REL_PATH_TO_DB,dir));
 
         File result = FileTools.saveFile(dir, serviceResult.testIDLabel+".json", json, true);
         System.out.println("ServiceResult saved to DB: "+result.getCanonicalPath());

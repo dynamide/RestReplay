@@ -13,7 +13,8 @@ import java.util.Map;
 
 import org.dynamide.util.Tools;
 
-/**
+/** This class handles all the transport level protocol for hitting the services, using
+ *  http protocol.
  *   @author Laramie Crocker
  */
 public class Transport {

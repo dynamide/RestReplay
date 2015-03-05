@@ -434,6 +434,7 @@ public class RestReplayReport {
         public String groupID;
         public String controlFile;
         public String reportNameLink;
+        public String comment = "";
         public String toString(){
            StringBuffer sb = new StringBuffer();
             sb.append(GROUP_START);
@@ -444,15 +445,20 @@ public class RestReplayReport {
             if (failure) {
                 sb.append("<div class='group-failure'>"+failureMessage+"</div>");//it is white-space: pre, so \r\n will be OK.
             }
+
             sb.append(GROUP_END);
+            if (Tools.notBlank(comment)){
+                sb.append("<div class='comment'>"+comment+"</div>");
+            }
             return sb.toString();
         }
     }
     private Header header = new Header();
 
-    public void addTestGroup(String groupID, String controlFile) {
+    public void addTestGroup(String groupID, String controlFile, String comment) {
         header.groupID = groupID;
         header.controlFile = controlFile;
+        header.comment = comment;
     }
 
     public void addFailure(String msg){
@@ -466,14 +472,19 @@ public class RestReplayReport {
         reportsList.add(serviceResult);
     }
 
+    private static void appendTestAnchor(StringBuffer buffer, int tocID, ServiceResult serviceResult){
+        buffer.append("<a name='TOC" + tocID + "'></a>");
+        buffer.append("<a name='" + serviceResult.testID + "'></a>");
+    }
+
     private void appendServiceResult(ServiceResult serviceResult, StringBuffer buffer){
-        buffer.append(HTML_TEST_START);
         int tocID = divID++;
+        appendTestAnchor(buffer, tocID, serviceResult);
+        buffer.append(HTML_TEST_START);
         String cssClass = serviceResult.isMutation
                 ?"payloads mutation"
                 :"payloads";
         buffer.append("<div class='"+cssClass+"'>");
-
         buffer.append(formatSummary(serviceResult, tocID));
         buffer.append(formatPayloads(serviceResult, tocID));
         buffer.append("</div>");
@@ -681,10 +692,9 @@ public class RestReplayReport {
         return buffer.toString();
     }
 
+    /** Note: anchor tag is spit out by appendTestAnchor() before this because this gets wrapped in divs by appendServiceResult() */
     public String formatSummary(ServiceResult serviceResult, int tocID) {
         StringBuffer fb = new StringBuffer();
-        fb.append("<a name='TOC" + tocID + "'></a>");
-        fb.append("<a name='" + serviceResult.testID + "'></a>");
         boolean includePartSummary = true;
         fb.append(detail(serviceResult, false, includePartSummary, DETAIL_LINESEP, DETAIL_END, tocID));
         return fb.toString();
@@ -855,6 +865,31 @@ public class RestReplayReport {
         return "<span class='AlertError'>" + msg + "</span> ";
     }
 
+    public static String makeShort(String theComment, String blockID) {
+        if (Tools.isBlank(theComment)){
+            return "";
+        }
+        String result = theComment;
+        if (theComment.length() > RunOptions.MAX_CHARS_FOR_COMMENT_SHORT) {
+            int endLen = Math.min(theComment.length(), RunOptions.MAX_CHARS_FOR_COMMENT_SHORT);
+            result =     "<span class='comment-short' id='comment_short_"+blockID+"'>"
+                        + theComment.substring(0, endLen)
+                        +" <a href=\"javascript:showBlock('#LIVE_SECTION #comment_full_"+blockID+"','block');hideBlock('#LIVE_SECTION #comment_short_"+blockID+"')\">more &raquo;</a>"
+                        +"</span>"
+                        +"<span class='comment-full' id='comment_full_"+blockID+"'>"
+                        + theComment
+                        +" <a href=\"javascript:showBlock('#LIVE_SECTION #comment_short_"+blockID+"','inline');hideBlock('#LIVE_SECTION #comment_full_"+blockID+"')\">&laquo; less</a>"
+                        +"</span>";
+        }
+
+        return result;
+    }
+
+    public static String scriptifyName(String name){
+        name = name.replace('.','_');
+        return name;
+    }
+
     public String detail(ServiceResult s, boolean includePayloads, boolean includePartSummary,String linesep, String end, int tocID) {
         String mutationClass = s.isMutation ? " mutation" : "";
         String autodeleteClass = s.isAutodelete ? " autodelete" : "";
@@ -877,20 +912,13 @@ public class RestReplayReport {
                 statusLabel = "<span class='ERROR'>FAILURE</b></span>";
             }
         }
-        String longComment = null;
-        String shortComment = null;
-        if (s.comment.length()>100){
-            longComment = s.comment;
-        } else {
-            shortComment = s.comment;
-        }
+        String shortComment = makeShort(s.comment, scriptifyName(s.testIDLabel));
         String res =
                 start
                 + statusLabel
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
-                + SP + (Tools.notBlank(shortComment) ? SP+SP+smallblack(shortComment) : "")
-                + SP + linesep
-                + (Tools.notBlank(longComment) ? lbl("comment") + smallblack(longComment) + linesep:"")
+                + SP + (Tools.notBlank(shortComment) ? SP+smallblack(shortComment) : "")
+                + linesep
                 + s.method + SP + "<a class='URL_A' href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + formatResponseCodeBlock(s) +  linesep
                 + (Tools.notBlank(s.failureReason) ? s.failureReason + linesep : "")

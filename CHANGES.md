@@ -72,3 +72,11 @@ changed JSONSuper.toString() to toXMLString().
 made ServiceResult.trappedExports transient - no need to include in serialized report.
 
 removeme
+===========Wed Mar 4 17:53:23 PST 2015======================
+Added Javadoc overview files.
+Made <comment> tags display with more... links, collapsible spans, and correct fonts.
+General code cleanup, JSONSuper moved to its own class, 
+changed JSONSuper.toString() to toXMLString().
+made ServiceResult.trappedExports transient - no need to include in serialized report.
+
+removeme

@@ -9,6 +9,7 @@ import java.util.List;
 public class RunOptions {
     public static enum EVAL_REPORT_LEVEL {NONE, SHORT, ALL};
     public final static int MAX_CHARS_FOR_REPORT_LEVEL_SHORT = 300;
+    public final static int MAX_CHARS_FOR_COMMENT_SHORT = 100;
 
     public EVAL_REPORT_LEVEL evalReportLevel = EVAL_REPORT_LEVEL.SHORT;
     public static final String RUN_OPTIONS_FILENAME = "runOptions.xml";

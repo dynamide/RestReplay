@@ -17,6 +17,9 @@
     </testGroup>
 
     <testGroup ID="selftestGroup" autoDeletePOSTS="false">
+        <comment>This is the main testGroup which self-tests the RestReplay installation, by hitting
+            the internal server launched for this test with
+                 the CLI parameter <nobr><b>-selftest</b></nobr>.</comment>
         <vars>
             <var ID="SELFTEST_SERVER">http://localhost:${SELFTEST_PORT}</var>
         </vars>
@@ -27,7 +30,8 @@
             <uri>/jsonCompare1</uri>
         </test>
         <test ID="token">
-            <comment>This token service always returns the same token, useful to simulate a real single-sign-on service.</comment>
+            <comment>This token service always returns the same token, useful to simulate a real single-sign-on service.
+                Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. END Bla.</comment>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
             <exports>

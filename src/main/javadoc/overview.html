@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>RestReplay Java API Overview</title>
+</head>
+<body>
+<a href="http://dynamide.org/RestReplay/">RestReplay</a> automates REST API testing via configuration files and scripts, which
+can call methods of this API.
+
+This Java API is documented for those who need:
+<ul>
+    <li>Property-name access to simple request or response values</li>
+    <li>XPath filtering of response XML</li>
+    <li>JsonPath filtering of response JSON</li>
+    <li>Automation of test cases or test suites</li>
+    <li>Programmatic (java) control of REST resource cleanup</li>
+    <li>Programmatic (java) control of how RestReplay orders tests and testGroups</li>
+</ul>
+<p>Main classes:
+    <ul>
+    <li>{@see org.dynamide.restreplay.Main} - Main class</li>
+    <li>{@see org.dynamide.restreplay.Master} - represents a Master file from the configuration.</li>
+    <li>{@see org.dynamide.restreplay.RestReplay} - represents a control file from the test and testGroup configuration.</li>
+    <li>{@see org.dynamide.restreplay.RunOptions} - A control file block of Admin configuration parameters.</li>
+    <li>{@see org.dynamide.restreplay.ServiceResult} - A java object representing all state (request/response/validation) from a service request.</li>
+    <li>{@see org.dynamide.restreplay.RestReplayReport} - Report generator for the three output formats: All-in-one-html, JSON database, and CLI output.</li>
+    </ul>
+</p>
+
+<p>Entry to these classes is usually through our CLI, which is handled by the class {@see org.dynamide.restreplay.Main}.</p>
+
+<p>If you need a custom installation, you can look at how we wire our self-test,
+    which is in the test branch of our code
+    on <a href="https://github.com/dynamide/RestReplayGitHub/dynamide">github</a>, through the Maven surefire plugin.
+    See org.dynamide.restreplay.RestReplaySelfTest, and the configurable examples in src/test/
+    such as org.dynamide.restreplay.RestReplayMasterTest and  org.dynamide.restreplay.RestReplayDevTest.</p>
+
+<p>Please visit our <a href="http://dynamide.org/RestReplay/doc/index.html">Documentation</a> page.</p>
+
+</body>
+
+</html>

@@ -1068,7 +1068,7 @@ When overriding RunOptions in a master file, consider these two development scen
             defining host endpoints, or other values that will apply across all tests under a master.</td>
           </tr>
           <tr>
-            <td>Example:</td>
+            <td><a name="protoHostPort_Example"></a>Master Example (with vars, uri, and protoHostPort):</td>
 
             <td>
 <div class="code">    &lt;restReplayMaster&gt;
@@ -1308,6 +1308,7 @@ When overriding RunOptions in a master file, consider these two development scen
           &lt;<a href="#RestReplay-restReplay.auths.auth">auth</a>&gt;&lt;/auth&gt;
       &lt;/auths&gt;
       &lt;<a href="#RestReplay-restReplay.testGroup">testGroup</a>&gt;
+          &lt;<a href="#RestReplay-restReplay.testGroup.comment">comment</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.protoHostPort">protoHostPort</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.vars.var">vars</a> /&gt;
           &lt;<a href="#RestReplay-restReplay.testGroup.headers.header">headers</a> /&gt;
@@ -1445,7 +1446,8 @@ When overriding RunOptions in a master file, consider these two development scen
 
           <tr>
             <td>child elements</td>
-            <td>headers<br>
+            <td>comment<br />
+                headers<br>
                           vars<br>
                           test
           </td></tr>
@@ -1479,7 +1481,15 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
 
-
+          <tr>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-restReplay.testGroup.test.comment" id="RestReplay-restReplay.testGroup.comment"></a>
+                  /restReplay/testGroup/comment</td>
+          </tr>
+          <tr>
+              <td>comment</td>
+              <td><p>Any text you want to include in the report to describe this testGroup.  Appears just under the testGroup banner
+              in the master report index and in the detail pages.  You may include any HTML markup.</p></td>
+          </tr>
 
 
          
@@ -1706,11 +1716,9 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
               <td>comment</td>
-              <td><p>Any text you want to include in the report for this test.  If the text is less than 100 characters, comment appears on the
-              same line as the testID, otherwise on the next line down.</p>
-              <p>&lt;comment> elements may be put anywhere in the XML control files to for documentation and for turning off elements
-                  by wrapping them in &lt;comment>&lt;/comment> rather than HTML comments &lt;!-- -->, which don't nest.  &lt;comment> elements will only be displayed in the
-              report if they appear in the path <code>/restReplay/testGroup/test/comment</code></td>
+              <td><p>Any text you want to include in the report for this test, on the same line as the testID.  If the text is long, comment appears with a "more..." link. You may include any HTML markup.
+              </p>
+              </td>
           </tr>
 
 

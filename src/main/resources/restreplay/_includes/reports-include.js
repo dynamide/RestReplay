@@ -160,10 +160,11 @@ function showMutator(sender, id){
      }
 }
 
-function showBlock(selector){
+function showBlock(selector, displayStyle){
     var els = document.querySelectorAll(selector);
+    var displayStlye = displayStyle || 'block';
     for (i = 0; i < els.length; ++i) {
-      els[i].style.display = 'block';
+      els[i].style.display = displayStlye;
     }
 }
 
