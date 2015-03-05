@@ -1,0 +1,5 @@
+Made <comment> blocks in testGroup and test both allow HTML markup.
+Also test/comment to show in green even if not so long it causes the more... link.
+typo in TreeWalkResults.
+
+removeme

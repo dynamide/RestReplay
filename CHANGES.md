@@ -80,3 +80,9 @@ changed JSONSuper.toString() to toXMLString().
 made ServiceResult.trappedExports transient - no need to include in serialized report.
 
 removeme
+===========Wed Mar 4 18:34:40 PST 2015======================
+Made <comment> blocks in testGroup and test both allow HTML markup.
+Also test/comment to show in green even if not so long it causes the more... link.
+typo in TreeWalkResults.
+
+removeme

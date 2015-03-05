@@ -973,8 +973,8 @@ public class RestReplay extends ConfigFile {
             String mutatorType = testNode.valueOf("mutator/@type");
             boolean mutatorSkipParent = Tools.isTrue(testNode.valueOf("mutator/@skipParent"));
 
-            String comment = testNode.valueOf("comment");
-            serviceResult.comment = comment;
+            Node commentNode = testNode.selectSingleNode("comment");
+            serviceResult.comment = commentNode!=null?commentNode.asXML():"";
 
             //get default timeouts from master config file.
             serviceResult.connectionTimeout = getRunOptions().connectionTimeout;

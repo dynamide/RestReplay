@@ -874,14 +874,17 @@ public class RestReplayReport {
             int endLen = Math.min(theComment.length(), RunOptions.MAX_CHARS_FOR_COMMENT_SHORT);
             result =     "<span class='comment-short' id='comment_short_"+blockID+"'>"
                         + theComment.substring(0, endLen)
-                        +" <a href=\"javascript:showBlock('#LIVE_SECTION #comment_full_"+blockID+"','block');hideBlock('#LIVE_SECTION #comment_short_"+blockID+"')\">more &raquo;</a>"
+                        +" <nobr><a href=\"javascript:showBlock('#LIVE_SECTION #comment_full_"+blockID+"','block');hideBlock('#LIVE_SECTION #comment_short_"+blockID+"')\">more &raquo;</a></nobr>"
                         +"</span>"
                         +"<span class='comment-full' id='comment_full_"+blockID+"'>"
                         + theComment
-                        +" <a href=\"javascript:showBlock('#LIVE_SECTION #comment_short_"+blockID+"','inline');hideBlock('#LIVE_SECTION #comment_full_"+blockID+"')\">&laquo; less</a>"
+                        +" <nobr><a href=\"javascript:showBlock('#LIVE_SECTION #comment_short_"+blockID+"','inline');hideBlock('#LIVE_SECTION #comment_full_"+blockID+"')\">&laquo; less</a></nobr>"
+                        +"</span>";
+        } else {
+                result = "<span class='comment-all'>"
+                        + theComment
                         +"</span>";
         }
-
         return result;
     }
 

@@ -30,8 +30,7 @@
             <uri>/jsonCompare1</uri>
         </test>
         <test ID="token">
-            <comment>This token service always returns the same token, useful to simulate a real single-sign-on service.
-                Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. Di bla di bla di bla. END Bla.</comment>
+            <comment>This token service always returns the same token, useful to simulate a real single-sign-on service.</comment>
             <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
             <exports>
@@ -908,6 +907,78 @@
             </vars>
         </test>
     </testGroup>
+
+    <testGroup ID="comments" autoDeletePOSTS="false">
+        <comment><a href="">FEATURE-1393</a> Implement comments in testGroups.
+            &lt;comment> tags should be able to include any HTML markup, such as unordered lists:
+            <ul>
+                <li>First point about testGroup</li>
+                <li>Second point</li>
+                <li>Third point</li>
+            </ul>
+            <p>And paragraphs with <b>bold</b> and <i>italics</i>.</p>
+            <p>And tables with attributes:
+                <table border="1">
+                    <tr>
+                        <th colspan="2">title 1</th>
+                        <th>title 2</th>
+                        <th>title 3</th>
+                    </tr>
+                    <tr>
+                        <th>1</th>
+                        <td>cell r1, c3</td>
+                        <td>cell r1, c3</td>
+                        <td>cell r1, c3</td>
+                    </tr>
+                    <tr>
+                        <th>2</th>
+                        <td>cell r2,c1</td>
+                        <td>cell r2,c2</td>
+                        <td>cell r2, c3</td>
+                    </tr>
+                </table>
+            </p>
+            End.
+        </comment>
+        <test ID="comments">
+            <comment><a href="">FEATURE-1394</a> Implement comments in tests. Should handle long text and short text.
+                Long text should be broken on the character limit
+                <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/restreplay/RunOptions.html#MAX_CHARS_FOR_COMMENT_SHORT">RunOptions.MAX_CHARS_FOR_COMMENT_SHORT</a>.
+                &lt;comment> tags should be able to include any HTML markup, such as unordered lists:
+                <ul>
+                    <li>First</li>
+                    <li>Second</li>
+                    <li>Third</li>
+                </ul>
+                <p>And paragraphs with <b>bold</b> and <i>italics</i>.</p>
+                <p>
+                    <table border="1">
+                        <tr>
+                            <th colspan="2">title 1</th>
+                            <th>title 2</th>
+                            <th>title 3</th>
+                        </tr>
+                        <tr>
+                            <th>1</th>
+                            <td>cell r1, c3</td>
+                            <td>cell r1, c3</td>
+                            <td>cell r1, c3</td>
+                        </tr>
+                        <tr>
+                            <th>2</th>
+                            <td>cell r2,c1</td>
+                            <td>cell r2,c2</td>
+                            <td>cell r2, c3</td>
+                        </tr>
+                    </table>
+                </p>
+                End.
+            </comment>
+            <uri>/tagonomy?mock=token</uri>
+        </test>
+    </testGroup>
+
+
 
     <testGroup ID="debug" autoDeletePOSTS="false">
         <headers>

@@ -22,7 +22,7 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
           return  res.toString();
       }
 
-    /** This cllass has two public Lists: you can construct your own to set the acceptable and unacceptable STATUS codes.
+    /** This class has two public Lists: you can construct your own to set the acceptable and unacceptable STATUS codes.
      *   They are defaulted to ADDED being acceptable. */
     public static class MatchSpec {
         public static final TreeWalkEntry.STATUS[]  defaultAcceptableStatiArray = {TreeWalkEntry.STATUS.INFO,

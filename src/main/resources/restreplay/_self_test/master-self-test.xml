@@ -34,7 +34,8 @@
     </run>
     <run controlFile="_self_test/nested/level1/level2/bar.xml" testGroup="barGroup" />
     <run controlFile="_self_test/nested/level1-sibling/sibling.xml" testGroup="aSiblingGroup" />
-    <run controlFile="_self_test/nested/level1/foo.xml"/><comment>-this one runs all testGroups in file.</comment>
+    <run controlFile="_self_test/nested/level1/foo.xml"/><note>-this one runs all testGroups in file.</note>
+    <run controlFile="_self_test/self-test.xml" testGroup="comments" />
 
 </restReplayMaster>
 

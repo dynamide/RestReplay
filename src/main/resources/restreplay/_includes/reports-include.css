@@ -641,7 +641,7 @@ td.dom-not-matched {
     max-width: 600px;
     background-color: white;
 }
-.comment {
+.comment {  /* used for the testGroup comment */
     border: 1px solid black;
     border-top: none;
     margin: 0;
@@ -651,11 +651,17 @@ td.dom-not-matched {
     padding-top: 18px;
     padding-right: 80px; /* avoid the floating tool menu */
 }
+/*These other comment-xxxx classes are for the comments under each test. */
 .comment-short {
     color: green;
 }
 .comment-short A {
     font-size: 100%;
+}
+
+.comment-all {   /* just like comment-full, but always displayed, and no hide/show link. */
+     color: green;
+     padding: 1em;
 }
 .comment-full {
     display: none;
