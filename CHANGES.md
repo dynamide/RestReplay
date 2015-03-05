@@ -48,6 +48,5 @@
 - Added Javadoc overview files.
 - Made <comment> tags display with "more..." links, collapsible spans, styles. 
 - <comment> tags in **testGroup** and **test** both allow HTML markup.
-- typo in TreeWalkResults.
 
 
