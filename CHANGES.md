@@ -25,7 +25,7 @@
 - Added handling of JsonPath in gotJson() and got(), and added public gotXPath().
 - Added experimental handlebars templating for displaying report based on serialized export of ServiceResult as JSON.
 
-2015-02-28  RestReplay now outputs a database of all the ServiceResult objects serialized to JSON, if you set the RunOption outputServiceResultDB to "true".  The database is a directory of directories of flat JSON files, one per test.  The directory structure matches the controlFile/testGroup/test structure of your test directory.  For now, these JSON objects can be used to archive the results and do any Javascript-based manipulation, analytics, or reporting against these raw and calculated data.  In a future version, Handlebars.js templates will convert the database into jQuery-enabled HTML.   (These currently live in the tests/_self_test/_includes/ folder.)
+**2015-02-28**  RestReplay now outputs a database of all the ServiceResult objects serialized to JSON, if you set the RunOption outputServiceResultDB to "true".  The database is a directory of directories of flat JSON files, one per test.  The directory structure matches the controlFile/testGroup/test structure of your test directory.  For now, these JSON objects can be archived, or be available to Javascript-based manipulation, analytics, or reporting.  In a future version, Handlebars.js templates will convert the database into jQuery-enabled HTML.   (These currently live in the tests/_self_test/_includes/ folder.)
 
 ===========Sat Feb 28 22:24:26 PST 2015======================
 - Support files for serialization of ServiceResult to JSON thence to handlebar templates and jQuery .
