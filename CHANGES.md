@@ -55,11 +55,7 @@
 - Reworked ResourceManager to return Resource objects not Strings
 - Added test for missing filenames.
 - Added ResourceManager legend on control file report page
-removeme
 
-===========Sat Mar 7 08:46:25 PST 2015======================
-- Added class javadoc
-- Reworked ResourceManager to return Resource objects not Strings
-- Added test for missing filenames.
-- Added ResourceManager legend on control file report page
+===========Sat Mar 7 08:51:46 PST 2015======================
+- fixed commit script
 removeme

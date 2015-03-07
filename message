@@ -1,5 +1,2 @@
-- Added class javadoc
-- Reworked ResourceManager to return Resource objects not Strings
-- Added test for missing filenames.
-- Added ResourceManager legend on control file report page
+- fixed commit script
 removeme
