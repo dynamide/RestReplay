@@ -19,7 +19,7 @@ import org.dynamide.interpreters.Alert.LEVEL;
  * This class is used to replay a request to the Services layer, by sending the XML or JSON payload
  * in an appropriate Multipart request.  This class is a runtime representation of a control file, which starts with the XML
  * element &lt;restReplay>.
- * See example usage in calling class RestReplayTest and RestReplaySelfTest, and also in the class {@see Main}
+ * See example usage in the calling class {@see Main}, and the calling maven surefire classes RestReplayTest and RestReplaySelfTest.
  *
  * @author Laramie Crocker
  */
@@ -371,11 +371,17 @@ public class RestReplay extends ConfigFile {
                                                         expFilenameRel,
                                                         varsDup);
                 expFilenameRel = evalResult.getResultString();
-                expectedPartContent = getResourceManager().readResource("validateResponseSinglePayload",
-                                                                        expFilenameRel,
-                                                                        expFilename);
-                //System.out.println("\r\n====expectedPartContent: "+expFilenameRel+"::"+expectedPartContent+"\r\n");
-
+                ResourceManager.Resource expectedPartContentRES
+                    = getResourceManager().readResource("validateResponseSinglePayload",
+                                                         expFilenameRel,
+                                                         expFilename);
+                if (expectedPartContentRES.provider == ResourceManager.Resource.SOURCE.NOTFOUND) {
+                    serviceResult.addAlertError("Resource not found: "+expectedPartContentRES.toString(),
+                                                "executeTestNode:POST/PUT:" + serviceResult.testIDLabel);
+                    expectedPartContent = "";
+                } else {
+                    expectedPartContent = expectedPartContentRES.contents;
+                }
                 expectedResponseFilenameUsed = expFilenameRel;
                 serviceResult.expectedContentRaw = expectedPartContent;
                 if (RestReplay.PartsStruct.fnIsJSON(expFilenameRel)){
@@ -472,7 +478,16 @@ public class RestReplay extends ConfigFile {
             source = scriptBody;
             resourceName = "inline validator";
         } else if (Tools.notBlank(scriptFilename)) {
-            source = getResourceManager().readResource("runValidatorScript", scriptFilename, fullPath);
+            ResourceManager.Resource rez
+                = getResourceManager().readResource("runValidatorScript", scriptFilename, fullPath);
+
+            if (rez.provider == ResourceManager.Resource.SOURCE.NOTFOUND) {
+                serviceResult.addAlertError("Resource not found: "+rez.toString(),
+                        "executeTestNode:POST/PUT:" + serviceResult.testIDLabel);
+                source = "";
+            } else {
+                source = rez.contents;
+            }
             resourceName = Tools.join(testdir, scriptFilename);
         }
         if (Tools.notBlank(source)) {
@@ -1299,9 +1314,19 @@ public class RestReplay extends ConfigFile {
             String contentType = contentTypeFromRequestPart(requestPayloadFilenameExp);
             String contentRaw = "";
             if (contentRawFromMutator == null) {
-                contentRaw = getResourceManager().readResource("executeTestNode:POST/PUT:" + test.testIDLabel,
-                        requestPayloadFilenameRelExp,
-                        requestPayloadFilenameExp);
+
+                ResourceManager.Resource cachedResource
+                        = getResourceManager().readResource("executeTestNode:POST/PUT",
+                            requestPayloadFilenameRelExp,
+                            requestPayloadFilenameExp);
+
+                if (cachedResource.provider == ResourceManager.Resource.SOURCE.NOTFOUND) {
+                    serviceResult.addAlertError("Resource not found: "+cachedResource.toString(),
+                                                 "executeTestNode:POST/PUT:" + test.testIDLabel);
+                    contentRaw = "";
+                } else {
+                    contentRaw = cachedResource.contents;
+                }
             } else {
                 contentRaw = contentRawFromMutator;
                 vars = clonedMasterVars;

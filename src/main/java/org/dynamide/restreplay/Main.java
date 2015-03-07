@@ -11,6 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * <p>
+ * This is the main entry point to RestReplay
+ * from the command line, from running the jar file,
+ * or for launching the self-test with its self-test web server.
+ * This class, <code>Main</code>,
+ * is marked as the entry point in the ResReplay jar file distribution, so running the jar file
+ * runs this class, passing all the jar command line options here.
+ * </p>
+ *
+ * <p>Main checks {@see org.dynamide.restreplay.RunOptions}, and runs an instance of
+ *  {@see org.dynamide.restreplay.Master} to run master files, and  {@see org.dynamide.restreplay.RestReplay}
+ *  to run control files.
+ * </p>
+ *
  * @author Laramie Crocker
  */
 public class Main {

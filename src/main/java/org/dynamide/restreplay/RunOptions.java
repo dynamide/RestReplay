@@ -6,6 +6,12 @@ import org.dynamide.util.Tools;
 
 import java.util.List;
 
+/**
+ * All global configurable run-time options are here,
+ * and are set by either the runOptions.xml file in the RestReplay directory,
+ * or the &lt;runOptions> elements in the master or control file.
+ * @author Laramie Crocker
+ */
 public class RunOptions {
     public static enum EVAL_REPORT_LEVEL {NONE, SHORT, ALL};
     public final static int MAX_CHARS_FOR_REPORT_LEVEL_SHORT = 300;

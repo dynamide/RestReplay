@@ -45,8 +45,8 @@ public class XmlCompareJdomRepeatingTest {
         ResourceManager resourceManager = ResourceManager.createRootResourceManager();
         String relLeft  = "_self_test/XmlCompareJdom/1-left.xml";
         String relRight = "_self_test/XmlCompareJdom/1-right.xml";
-        String expectedPartContent = resourceManager.readResource("testLeftAndRightSame", relLeft, dir+'/'+relLeft);
-        String fromServerContent  =  resourceManager.readResource("testLeftAndRightSame", relRight, dir+'/'+relRight);
+        String expectedPartContent = resourceManager.readResource("testLeftAndRightSame", relLeft, dir+'/'+relLeft).contents;
+        String fromServerContent  =  resourceManager.readResource("testLeftAndRightSame", relRight, dir+'/'+relRight).contents;
 
         String startPath = "/document/*[local-name()='relations-common-list']";
         TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();
@@ -71,8 +71,8 @@ public class XmlCompareJdomRepeatingTest {
 
         String relLeft  = "_self_test/XmlCompareJdom/2-left.xml";
         String relRight = "_self_test/XmlCompareJdom/2-right.xml";
-        String expectedPartContent = resourceManager.readResource("testLeftAndRightSameNoStartElement", relLeft, dir+'/'+relLeft);
-        String fromServerContent  =  resourceManager.readResource("testLeftAndRightSameNoStartElement", relRight, dir+'/'+relRight);
+        String expectedPartContent = resourceManager.readResource("testLeftAndRightSameNoStartElement", relLeft, dir+'/'+relLeft).contents;
+        String fromServerContent  =  resourceManager.readResource("testLeftAndRightSameNoStartElement", relRight, dir+'/'+relRight).contents;
 
         String startPath = "/document";
         TreeWalkResults.MatchSpec matchSpec = TreeWalkResults.MatchSpec.createDefault();

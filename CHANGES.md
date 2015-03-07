@@ -50,3 +50,16 @@
 - <comment> tags in **testGroup** and **test** both allow HTML markup.
 
 
+===========Sat Mar 7 08:43:33 PST 2015======================
+- Added class javadoc
+- Reworked ResourceManager to return Resource objects not Strings
+- Added test for missing filenames.
+- Added ResourceManager legend on control file report page
+removeme
+
+===========Sat Mar 7 08:46:25 PST 2015======================
+- Added class javadoc
+- Reworked ResourceManager to return Resource objects not Strings
+- Added test for missing filenames.
+- Added ResourceManager legend on control file report page
+removeme

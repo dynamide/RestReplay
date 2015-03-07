@@ -23,6 +23,8 @@ import java.util.*;
  *  as easy as possible.  Also, this class supports serialization, including some calculated fields, which is used to produce
  *  a database of all the JSON representations of this class for all the test cases run.  That database, if requested
  *  by {@link RunOptions#outputServiceResultDB} is present in reports/db/ after a successful run ( {@link RestReplay#getReportsDir()}/{@link RestReplay#REL_PATH_TO_DB} ).
+ *
+ * @author Laramie Crocker
  */
 public class ServiceResult {
     public ServiceResult(RunOptions options){

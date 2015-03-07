@@ -117,14 +117,19 @@ public class RestReplayReport {
                 + HR
                 + evalReportToString(restReplay)
                 + LIVE_SECTION_END
-                +restReplay.getResourceManager().readResource("RestReplayReport.getPage.readFooter", "_includes/html-footer.html", "_includes/html-footer.html")
+                +restReplay.getResourceManager().readResource("RestReplayReport.getPage.readFooter", "_includes/html-footer.html", "_includes/html-footer.html").contents
                 + HTML_PAGE_END;
     }
 
     private String getInclude(RestReplay replay, String resourceName){
         try {
-            String res = replay.getResourceManager().readResource("RestReplayReport.getInclude", resourceName, resourceName);
-            return res;
+            ResourceManager.Resource rez = replay.getResourceManager().readResource("RestReplayReport.getInclude", resourceName, resourceName);
+            if (rez.provider == ResourceManager.Resource.SOURCE.NOTFOUND) {
+                System.out.println("ERROR reading resource("+resourceName+"): not found.");
+                return "ERROR reading "+resourceName;
+            } else {
+                return rez.contents;
+            }
         } catch (IOException ioe){
             System.out.println("ERROR reading resource("+resourceName+"): "+ioe);
             return "ERROR reading "+resourceName;
@@ -512,8 +517,8 @@ public class RestReplayReport {
     public static String formatPageStart(String testdir, ResourceManager rm,
                                          String pageTitle) throws IOException {
 
-        String script = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js", testdir + "/" + INCLUDES_DIR + "/reports-include.js");
-        String style  = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", testdir + "/" + INCLUDES_DIR + "/reports-include.css");
+        String script = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.js", testdir + "/" + INCLUDES_DIR + "/reports-include.js").contents;
+        String style  = rm.readResource("formatPageStart", INCLUDES_DIR + "/reports-include.css", testdir + "/" + INCLUDES_DIR + "/reports-include.css").contents;
         //String script = FileTools.readFile(testdir, INCLUDES_DIR + "/reports-include.js");
         //String style = FileTools.readFile(testdir, INCLUDES_DIR + "/reports-include.css");
         return "<html><head><title>"+pageTitle+"</title><script type='text/javascript'>\r\n"

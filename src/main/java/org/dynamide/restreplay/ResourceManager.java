@@ -19,6 +19,7 @@ public class ResourceManager {
     public static class Resource{
         public enum SOURCE {FILE,CLASSPATH,STREAM,URL,ZIP,NOTFOUND}
         public Document document;
+        public String contents = "";
         public String name = "";
         public String relPath = "";
         public String base = "";
@@ -49,7 +50,7 @@ public class ResourceManager {
                     +", name:"+name
                     +", path:"+relPath
                     +", base:"+base
-                    +", found:"+foundPath
+                    +", fullpath:"+foundPath
                     +", provider:"+provider.toString()
                     +"}";
         }
@@ -64,7 +65,7 @@ public class ResourceManager {
 
     private final List<Resource> resourceHistory = new ArrayList<Resource>();
 
-    private final Map<String,String> cache = new LinkedHashMap<String, String>();
+    private final Map<String,Resource> cache = new LinkedHashMap<String, Resource>();
 
     private final Map<String,CachedDoc> docCache = new LinkedHashMap<String, CachedDoc>();
 
@@ -146,17 +147,27 @@ public class ResourceManager {
         return document;
     }
 
-    public String readResource(String context, String relResourcePath, String fullPath) throws IOException {
+    protected static final Resource CACHE_NEXT_TIME = new Resource();
+
+    /** Internally, this implements a write-on-second-access cache, because we end up reading many small
+     *  files once, and a few files many times.
+     * @param context
+     * @param relResourcePath
+     * @param fullPath
+     * @return
+     * @throws IOException
+     */
+    public Resource readResource(String context, String relResourcePath, String fullPath) throws IOException {
         //System.out.println("===> resource: "+relResourcePath
         //              +"\r\n     fullPath: "+fullPath);
         boolean markForCache = false;
-        String cachedResource = cache.get(relResourcePath);
+        Resource cachedResource = cache.get(relResourcePath);
         //implement a cache that caches on the *second* access.
-        if (cachedResource != null  ){
-            if (cachedResource.length()==0){
-                markForCache = true;
-            } else {
+        if (cachedResource != null){
+            if (cachedResource != CACHE_NEXT_TIME){
                 return cachedResource;
+            } else {
+                markForCache = true;
             }
         }
 
@@ -177,14 +188,15 @@ public class ResourceManager {
                 resource.provider = Resource.SOURCE.CLASSPATH;
                 resource.relPath = relResourcePath;
                 resource.foundPath = relResourcePath;
+                resource.contents = res;
                 if (markForCache){
                     resource.cached = true;
                     //System.out.println("====adding to cache===>>>"+relResourcePath);
-                    cache.put(relResourcePath, res);  //second time actually cache it.
+                    cache.put(relResourcePath, resource);  //second time actually cache it.
                 } else {
-                    cache.put(relResourcePath, "");  //first time is empty string
+                    cache.put(relResourcePath, CACHE_NEXT_TIME);  //first time is empty string
                 }
-                return res;
+                return resource;
             }
         }
         //System.out.println("======> using File for fullPath: "+fullPath);
@@ -194,17 +206,17 @@ public class ResourceManager {
             byte[] b = FileUtils.readFileToByteArray(fullPathFile);
             String res = new String(b);
             resource.provider = Resource.SOURCE.FILE;
+            resource.contents = res;
             if (markForCache) {
-                //System.out.println("====adding to cache===>>>"+relResourcePath);
-                cache.put(relResourcePath, res);  //second time actually cache it.
+                cache.put(relResourcePath, resource);  //second time actually cache it.
                 resource.cached = true;
             } else {
-                cache.put(relResourcePath, "");  //first time is empty string
+                cache.put(relResourcePath, CACHE_NEXT_TIME);  //first time is empty string
             }
-            return res;
+            return resource;
         } else {
             resource.provider = Resource.SOURCE.NOTFOUND;
-            return "";
+            return resource;
         }
     }
 

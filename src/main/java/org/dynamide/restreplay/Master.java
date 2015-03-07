@@ -7,6 +7,10 @@ import org.dynamide.util.Tools;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+/**
+ * This class represents the master-control file, which simply sets up an environment, and calls multiple control files.
+ * @author Laramie Crocker
+ */
 public class Master extends ConfigFile {
 
     public Master(String testdir, String reportsDir, ResourceManager manager){

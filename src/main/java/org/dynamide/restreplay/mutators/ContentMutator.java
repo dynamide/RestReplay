@@ -24,10 +24,13 @@ public abstract class ContentMutator implements IMutator {
 
     public void init(String relResourceName, String theFileName, ResourceManager resourceManager) throws IOException {
         contentRawFilename = theFileName;
-        contentRaw = resourceManager.readResource("ContentMutator:constructor", relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(contentRawFilename)));
+        ResourceManager.Resource rez = resourceManager.readResource("ContentMutator:constructor", relResourceName, theFileName);//new String(FileUtils.readFileToByteArray(new File(contentRawFilename)));
+        if (rez.provider != ResourceManager.Resource.SOURCE.NOTFOUND) {
+            contentRaw = rez.contents;
+        }
     }
 
-    private String contentRaw;
+    private String contentRaw="";
     protected String getContentRaw(){
         return contentRaw;
     }

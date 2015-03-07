@@ -106,7 +106,7 @@ public class VarMutator extends ContentMutator implements IMutator {
 
                 return resourceManager.readResource("ContentMutator:constructor",
                         requestPayloadFilenameRelExp,
-                        contentRawFilename);//new String(FileUtils.readFileToByteArray(new File(contentRawFilename)));
+                        contentRawFilename).contents;//new String(FileUtils.readFileToByteArray(new File(contentRawFilename)));
             }
         } catch (Exception e){
             System.out.println("ERROR in getContentRaw()"+e);

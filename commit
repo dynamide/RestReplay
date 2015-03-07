@@ -1,3 +1,4 @@
+echo ''  >> CHANGES.md
 echo ===========`date`====================== >> CHANGES.md
 cat message >> CHANGES.md
 git add CHANGES.md

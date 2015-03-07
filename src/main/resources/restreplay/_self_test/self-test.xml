@@ -870,6 +870,18 @@
         </test>
     </testGroup>
 
+    <testGroup ID="badResourcePaths" autoDeletePOSTS="false">
+        <test ID="missingDirectory">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <filename>_self_test/bad-directory/loop-dates.json</filename>
+        </test>
+        <test ID="missingFile">
+            <method>POST</method>
+            <uri>/jsonCompare1?mimeOut=application/json</uri>
+            <filename>_self_test/no-file-here.json</filename>
+        </test>
+    </testGroup>
 
     <testGroup ID="useImports" autoDeletePOSTS="false">
         <imports>
