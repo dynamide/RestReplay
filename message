@@ -1,0 +1,2 @@
+- Added toc-toc to master report
+- Fixed test report error aborting testGroup node, that was hidden until toc-toc showed an unreachable testGroup.

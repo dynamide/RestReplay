@@ -671,3 +671,12 @@ td.dom-not-matched {
 .comment-full A {
     font-size: 100%;
 }
+.toc-toc {
+    font-family: Tahoma;
+    font-size: 70%;
+    border: 1px solid gray;
+    padding: 10px;
+    display: inline-block;
+    margin-bottom: 1em;
+    background-color: white;
+}

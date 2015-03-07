@@ -433,15 +433,18 @@ public class RestReplayReport {
         header.failure = false;
     }
 
-    private class Header {
+    public static class Header {
         public boolean failure = false;
         public String failureMessage = "";
-        public String groupID;
+        public String groupID="";
         public String controlFile;
         public String reportNameLink;
         public String comment = "";
+        public int index = -1;
+        public String anchor = "";
         public String toString(){
            StringBuffer sb = new StringBuffer();
+            sb.append("<a name='"+anchor+"'></a>");
             sb.append(GROUP_START);
             String groupIDLink = (Tools.isEmpty(reportNameLink))
                                  ? groupID
@@ -457,13 +460,27 @@ public class RestReplayReport {
             }
             return sb.toString();
         }
+        public static Header findInList(List<Header>list, String findID){
+            if(list==null){
+                return null;
+            }
+            for(Header hdr:list){
+              if(hdr!=null&&hdr.groupID.equals(findID)){
+                  return hdr;
+              }
+            }
+            return null;
+        }
     }
     private Header header = new Header();
 
-    public void addTestGroup(String groupID, String controlFile, String comment) {
+    public Header addTestGroup(String groupID, String controlFile, String comment, String anchor, int idx) {
         header.groupID = groupID;
         header.controlFile = controlFile;
         header.comment = comment;
+        header.anchor = anchor;
+        header.index = idx;
+        return header;
     }
 
     public void addFailure(String msg){
@@ -606,6 +623,7 @@ public class RestReplayReport {
                                           List<String> reportsList,
                                           String envID,
                                           Map<String,Object> masterVars,
+                                          List<Header> testGroups,
                                           Master master) {
 
         MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
@@ -625,6 +643,16 @@ public class RestReplayReport {
             sb.append("<div class='masterVars'>")
               .append("<span class='LABEL'>environment:</span> <span class='env'>"+envID+"</span><br />")
               .append(formatMasterVars(masterVars)).append("</div>");
+
+            sb.append("<br />");
+            sb.append("<div class='toc-toc'>");
+            sb.append("<b>Test Groups Run</b><br /><br />");
+            for (Header testGroup: testGroups) {
+                sb.append("<a href='#"+testGroup.anchor+"'>"+testGroup.groupID+"</a><br />");
+            }
+            sb.append("</div>");
+
+
             for (String oneToc : reportsList) {
                 sb.append(oneToc);
                 sb.append("<hr />");

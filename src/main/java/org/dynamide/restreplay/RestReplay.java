@@ -3,6 +3,7 @@ package org.dynamide.restreplay;
 import com.google.gson.Gson;
 
 import org.dynamide.interpreters.*;
+import org.dynamide.restreplay.RestReplayReport.Header;
 import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.restreplay.mutators.MutatorFactory;
 import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
@@ -107,7 +108,7 @@ public class RestReplay extends ConfigFile {
     /**
      * Use this if you wish to run named tests within a testGroup.
      */
-    public List<ServiceResult> runTests(String testGroupID, String testID) throws Exception {
+    public List<ServiceResult> runTests(String testGroupID, String testID, List<RestReplayReport.Header>testGroups) throws Exception {
         List<ServiceResult> result = runRestReplayFile(
                 this.getTestDir(),
                 this.controlFileName,
@@ -120,7 +121,8 @@ public class RestReplay extends ConfigFile {
                 this.getReportsList(),
                 this.reportsDir,
                 this.getRelativePathFromReportsDir(),
-                this.getMasterFilename());
+                this.getMasterFilename(),
+                testGroups);
         return result;
     }
 
@@ -714,7 +716,8 @@ public class RestReplay extends ConfigFile {
             List<String> reportsList,
             String reportsDir,
             String relativePathFromReportsDir,
-            String masterFilenameInfo)
+            String masterFilenameInfo,
+            List<RestReplayReport.Header> testGroups)
             throws Exception {
 
         if (masterVarsOverride!=null){
@@ -796,6 +799,7 @@ public class RestReplay extends ConfigFile {
         OUTER:
         for (Node testgroup : testgroupNodes) {
             String currentTestGroupID = testgroup.valueOf("@ID");
+
             Node commentNode = testgroup.selectSingleNode("comment");
             String comment = "";
             if (commentNode!=null) {
@@ -808,7 +812,15 @@ public class RestReplay extends ConfigFile {
             report.clearRunInfo();
             evalStruct.resetContext();    // Get a new JexlContext for each test group.
 
-            report.addTestGroup(currentTestGroupID, controlFileName, comment);
+
+            int idx = -1;
+            Header foundHdr = Header.findInList(testGroups, currentTestGroupID);
+            if (foundHdr!=null){
+                idx = foundHdr.index+1;
+            }
+            String anchor = (idx > -1) ? currentTestGroupID+'_'+(idx+1) : currentTestGroupID;
+            RestReplayReport.Header hdr = report.addTestGroup(currentTestGroupID, controlFileName, comment, anchor, idx);
+            testGroups.add(hdr);
 
             //vars var = get control file vars and merge masterVars into it, replacing
             Map<String, Object> testGroupVars = readVars(testgroup);
@@ -833,45 +845,56 @@ public class RestReplay extends ConfigFile {
                     tests = testgroup.selectNodes("test");
                 }
                 int testElementIndex = -1;
+                TESTNODES:
                 for (Node testNode : tests) {
-                    String testID = testNode.valueOf("@ID");
-                    EvalResult token = evalStruct.setCurrentTestIDLabel(testGroupID + '.' + testID + " <span class='LABEL'>(preflight)</span>");
-                    LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
-                    evalStruct.popLastEvalReportItemIfUnused(token);
-                    if (loopHelper.error) {
-                        continue OUTER;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
-                    }
-                    for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
-                        ServiceResult serviceResult = new ServiceResult(getRunOptions());
-                        serviceResult.controlFileName = controlFileName;
-                        loopHelper.setGlobalVariablesForLooping(serviceResult, evalStruct, itnum);
-                        serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
-                        testElementIndex++;
-                        serviceResultsMap.put("this", serviceResult);
-                        String namespaceKey = ImportFilter.makeImportsKey(controlFileName, testGroupID, testID);
-                        if (getMasterNamespace() != null) {
-                            getMasterNamespace().put(namespaceKey, serviceResult);
+                    ServiceResult serviceResult = null;
+                    String testID = "";
+                    try {
+                        testID = testNode.valueOf("@ID");
+                        EvalResult token = evalStruct.setCurrentTestIDLabel(testGroupID + '.' + testID + " <span class='LABEL'>(preflight)</span>");
+                        LoopHelper loopHelper = LoopHelper.getIterationsLoop(testElementIndex, testGroupID, testNode, evalStruct, clonedMasterVars, getRunOptions(), report, results);
+                        evalStruct.popLastEvalReportItemIfUnused(token);
+                        if (loopHelper.error) {
+                            continue TESTNODES;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
                         }
-                        executeTestNode(serviceResult,
-                                null,
-                                null,
-                                testNode,
-                                testgroup,
-                                protoHostPort,
-                                clonedMasterVars,
-                                null,
-                                testElementIndex,
-                                testGroupID,
-                                evalStruct,
-                                authsMap,
-                                authsFromMaster,
-                                testdir,
-                                report,
-                                results);
-                        serviceResultsMap.remove("this");
-                        if (getRunOptions().outputServiceResultDB){
-                            saveServiceResultToJSON(serviceResult);
+                        for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
+                            serviceResult = new ServiceResult(getRunOptions());
+                            serviceResult.controlFileName = controlFileName;
+                            loopHelper.setGlobalVariablesForLooping(serviceResult, evalStruct, itnum);
+                            serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
+                            testElementIndex++;
+                            serviceResultsMap.put("this", serviceResult);
+                            String namespaceKey = ImportFilter.makeImportsKey(controlFileName, testGroupID, testID);
+                            if (getMasterNamespace() != null) {
+                                getMasterNamespace().put(namespaceKey, serviceResult);
+                            }
+                            executeTestNode(serviceResult,
+                                    null,
+                                    null,
+                                    testNode,
+                                    testgroup,
+                                    protoHostPort,
+                                    clonedMasterVars,
+                                    null,
+                                    testElementIndex,
+                                    testGroupID,
+                                    evalStruct,
+                                    authsMap,
+                                    authsFromMaster,
+                                    testdir,
+                                    report,
+                                    results);
+                            serviceResultsMap.remove("this");
+                            if (getRunOptions().outputServiceResultDB) {
+                                saveServiceResultToJSON(serviceResult);
+                            }
                         }
+                    } catch (Exception e){
+                        if (serviceResult==null){
+                            serviceResult = new ServiceResult(getRunOptions());
+                            serviceResult.testID = testID;
+                        }
+                        serviceResult.addError("Exception caught attempting to run testNode", e);
                     }
                 }
                 serviceResultsMap.remove("result");
@@ -917,7 +940,6 @@ public class RestReplay extends ConfigFile {
 
         return results;
     }
-
 
     public String calculateElipses(String relpath) {
         String result = "";

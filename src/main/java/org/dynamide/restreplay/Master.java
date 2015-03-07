@@ -144,18 +144,21 @@ public class Master extends ConfigFile {
      *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
     public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
+        List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
         org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         String controlFile, testGroup, test;
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+
         List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
         for (Node runNode : runNodes) {
             controlFile = runNode.valueOf("@controlFile");
             testGroup = runNode.valueOf("@testGroup");
             test = runNode.valueOf("@test"); //may be empty
             Map<String, Object> runVars = readVars(runNode);
-            list.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname));
+            //testGroups.add(testGroup);
+            list.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, testGroups));//TODO: remove dups.
         }
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this);
         return list;
     }
 
@@ -167,8 +170,9 @@ public class Master extends ConfigFile {
         List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
         //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
-        list.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname));
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, this);
+        List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
+        list.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, testGroups));//TODO: remove dups.
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this);
         return list;
     }
 
@@ -177,7 +181,8 @@ public class Master extends ConfigFile {
                                         String testGroup,
                                         String test,
                                         Map<String, Object> runVars,
-                                        String relToMaster)
+                                        String relToMaster,
+                                        List<RestReplayReport.Header>testGroups)
     throws Exception {
         String envReportsDir = this.reportsDir;
         if (Tools.notBlank(this.getEnvID())) {
@@ -207,7 +212,7 @@ public class Master extends ConfigFile {
 
 
         //======================== Now run *that* instance. ======================
-        return replay.runTests(testGroup, test);
+        return replay.runTests(testGroup, test, testGroups);
         //========================================================================
 
     }

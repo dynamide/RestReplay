@@ -265,6 +265,7 @@ public class Main {
                     restReplay.getMasterVars().put("SELFTEST_PORT", selfTestPort);
                 }
 
+                List<RestReplayReport.Header>testGroups = new ArrayList<RestReplayReport.Header>();
                 List<String> reportsList = new ArrayList<String>();
                 restReplay.runRestReplayFile(
                         testdirResolved,
@@ -278,7 +279,8 @@ public class Main {
                         reportsList,   // method prints out reportsList if last parameter (masterFilenameInfo) is empty.
                         reportsDir,
                         "",            //no master, so no env in path.
-                        "");           //masterFilenameInfo. If blank, stand-alone report with reportsList is printed.
+                        "",           //masterFilenameInfo. If blank, stand-alone report with reportsList is printed.
+                        testGroups);
             }
             if (line.hasOption("noexit")){
                 pause("RestReplay is now waiting to be profiled. Hit enter when ready to continue.");
