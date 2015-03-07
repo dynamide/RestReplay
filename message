@@ -1,2 +1,1 @@
-- fixed commit script with message-template temp file.
-- added message-template to .gitignore
+- cleaned up script

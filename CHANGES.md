@@ -63,3 +63,6 @@
 ===========Sat Mar 7 09:10:58 PST 2015======================
 - fixed commit script with message-template temp file.
 - added message-template to .gitignore
+
+===========Sat Mar 7 09:12:22 PST 2015======================
+- cleaned up script
