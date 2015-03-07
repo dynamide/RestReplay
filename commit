@@ -3,4 +3,7 @@ echo ===========`date`====================== >> CHANGES.md
 cat message >> CHANGES.md
 git add CHANGES.md
 git add message
-git commit -t message $*
+cat message > message-template
+cat 'remove me' >> message-template
+git commit -t message-template $*
+#rm message-template

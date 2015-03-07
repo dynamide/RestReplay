@@ -1,2 +1,2 @@
-- fixed commit script
-removeme
+- fixed commit script with message-template temp file.
+- added message-template to .gitignore

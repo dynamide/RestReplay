@@ -59,3 +59,14 @@
 ===========Sat Mar 7 08:51:46 PST 2015======================
 - fixed commit script
 removeme
+
+===========Sat Mar 7 09:06:14 PST 2015======================
+- fixed commit script with message-template temp file.
+
+===========Sat Mar 7 09:07:50 PST 2015======================
+- fixed commit script with message-template temp file.
+- added message-template to .gitignore
+
+===========Sat Mar 7 09:09:26 PST 2015======================
+- fixed commit script with message-template temp file.
+- added message-template to .gitignore
