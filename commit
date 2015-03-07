@@ -4,6 +4,6 @@ cat message >> CHANGES.md
 git add CHANGES.md
 git add message
 cat message > message-template
-cat 'remove me' >> message-template
+echo 'remove me' >> message-template
 git commit -t message-template $*
 #rm message-template
