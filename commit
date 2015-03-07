@@ -6,4 +6,4 @@ git add message
 cat message > message-template
 echo 'remove me' >> message-template
 git commit -t message-template $*
-#rm message-template
+rm message-template
