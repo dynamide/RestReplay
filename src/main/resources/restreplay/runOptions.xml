@@ -16,5 +16,6 @@
     <dumpResourceManagerSummary>false</dumpResourceManagerSummary>
     <skipMutators>false</skipMutators>
     <outputServiceResultDB>false</outputServiceResultDB>
+    <emitRestReplayHeaders>false</emitRestReplayHeaders>
 </runOptions>
 

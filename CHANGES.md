@@ -67,3 +67,6 @@
 - Added fix: some headers allow condensed, some don't.
 -  to be safe, we now define a list of condensing headers in runOptions.xml, and default them in RunOptions.
 - current list is ACCEPT,CONTENT-TYPE,COOKIE, and you can pass NONE to remove even these defaults.
+
+===========Mon Mar 9 16:03:44 PDT 2015======================
+Added runOption emitRestReplayHeaders to turn off RestReplay headers that are on by default: X-RestReplay-fromTestID:, and X-RestReplay-version.

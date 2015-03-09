@@ -44,10 +44,12 @@ public class Transport {
         if (Tools.notBlank(authForTest)){
             method.setRequestHeader("Authorization", "Basic " + authForTest); //"dGVzdDp0ZXN0");
         }
-        method.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
-        String version = ResourceManager.getRestReplayVersion();
-        if (Tools.notBlank(version)) {
-            method.setRequestHeader("X-RestReplay-version", version);
+        if (serviceResult.getRunOptions().emitRestReplayHeaders){
+            method.setRequestHeader("X-RestReplay-fromTestID", fromTestID);
+            String version = ResourceManager.getRestReplayVersion();
+            if (Tools.notBlank(version)) {
+                method.setRequestHeader("X-RestReplay-version", version);
+            }
         }
         for (Map.Entry<String,String> entry: serviceResult.requestHeaderMap.entrySet()){
             method.setRequestHeader(entry.getKey(), entry.getValue());

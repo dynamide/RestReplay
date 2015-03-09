@@ -38,6 +38,7 @@ public class RunOptions {
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
     public boolean outputServiceResultDB = false;
     public Map<String,String> condensedHeaders= Tools.createSortedCaseInsensitiveMap();
+    public boolean emitRestReplayHeaders = true;
 
     public boolean breakNow(Alert alert) {
         return (alert.level.compareTo(this.acceptAlertLevel) > 0);
@@ -67,6 +68,7 @@ public class RunOptions {
                 "    skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
                 "    skipMutators=" + skipMutators + CR+
                 "    condensedHeaders=" + condensedHeaders.keySet().toString() +CR+
+                "    emitRestReplayHeaders=" + emitRestReplayHeaders +CR+
                 "    outputServiceResultDB=" + outputServiceResultDB + "\r\n   }";
     }
 
@@ -86,6 +88,7 @@ public class RunOptions {
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
                 "condensedHeaders=" + condensedHeaders.keySet().toString() +BR+
+                "emitRestReplayHeaders=" + emitRestReplayHeaders +BR+
                 "outputServiceResultDB=" + outputServiceResultDB +BR+
                 "}</div>";
     }
@@ -119,6 +122,7 @@ public class RunOptions {
         String evalReportLevel = runOptionsNode.valueOf("evalReportLevel");
         String outputServiceResultDB = runOptionsNode.valueOf("outputServiceResultDB");
         String sCondensedHeaders = runOptionsNode.valueOf("condensedHeaders");
+        String sEmitRestReplayHeaders = runOptionsNode.valueOf("emitRestReplayHeaders");
 
         if (Tools.notBlank(connectionTimeout)) {
             this.connectionTimeout = Integer.parseInt(connectionTimeout);
@@ -155,6 +159,10 @@ public class RunOptions {
         }
         if (Tools.notBlank(outputServiceResultDB)) {
             this.outputServiceResultDB = Tools.isTrue(outputServiceResultDB);
+        }
+
+        if (Tools.notBlank(sEmitRestReplayHeaders)) {
+            this.emitRestReplayHeaders = Tools.isTrue(sEmitRestReplayHeaders);
         }
         if (Tools.notBlank(sCondensedHeaders)) {
             setCondensedHeadersString(sCondensedHeaders);
