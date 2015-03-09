@@ -179,13 +179,14 @@ public class ConfigFile {
                 headerValue = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
             }
-            addHeader(headerMap, headerName, headerValue);
+            addHeader(headerMap, headerName, headerValue,  serviceResult.getRunOptions().condensedHeaders);
         }
     }
 
-    public static void addHeader(Map<String,String> headerMap, String headerName, String headerValue){
+    public static void addHeader(Map<String,String> headerMap, String headerName, String headerValue, Map<String,String> condensedHeaders){
+
         String currentHeaderValue = headerMap.get(headerName);
-        if (Tools.notBlank(currentHeaderValue)){
+        if (Tools.notBlank(currentHeaderValue) && (condensedHeaders.get(headerName) != null)){
             HeaderGroup headerGroup = new HeaderGroup();
             headerGroup.addHeader(new Header(headerName, currentHeaderValue));
             headerGroup.addHeader(new Header(headerName, headerValue));

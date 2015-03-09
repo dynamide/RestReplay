@@ -4,7 +4,9 @@ import org.dom4j.Node;
 import org.dynamide.interpreters.Alert;
 import org.dynamide.util.Tools;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * All global configurable run-time options are here,
@@ -13,9 +15,14 @@ import java.util.List;
  * @author Laramie Crocker
  */
 public class RunOptions {
+    public RunOptions(){
+        setCondensedHeadersString(DEFAULT_CONDENSE_HEADERS);
+
+    }
     public static enum EVAL_REPORT_LEVEL {NONE, SHORT, ALL};
     public final static int MAX_CHARS_FOR_REPORT_LEVEL_SHORT = 300;
     public final static int MAX_CHARS_FOR_COMMENT_SHORT = 120;
+    public final static String DEFAULT_CONDENSE_HEADERS = "ACCEPT,CONTENT-TYPE,COOKIE";
 
     public EVAL_REPORT_LEVEL evalReportLevel = EVAL_REPORT_LEVEL.SHORT;
     public static final String RUN_OPTIONS_FILENAME = "runOptions.xml";
@@ -30,7 +37,7 @@ public class RunOptions {
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
     public boolean outputServiceResultDB = false;
-
+    public Map<String,String> condensedHeaders= Tools.createSortedCaseInsensitiveMap();
 
     public boolean breakNow(Alert alert) {
         return (alert.level.compareTo(this.acceptAlertLevel) > 0);
@@ -59,6 +66,7 @@ public class RunOptions {
                 "    reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
                 "    skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
                 "    skipMutators=" + skipMutators + CR+
+                "    condensedHeaders=" + condensedHeaders.keySet().toString() +CR+
                 "    outputServiceResultDB=" + outputServiceResultDB + "\r\n   }";
     }
 
@@ -77,10 +85,23 @@ public class RunOptions {
                 "reportResourceManagerSummary=" + reportResourceManagerSummary +C+BR+
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
+                "condensedHeaders=" + condensedHeaders.keySet().toString() +BR+
                 "outputServiceResultDB=" + outputServiceResultDB +BR+
                 "}</div>";
     }
 
+    protected void setCondensedHeadersString(String sCondensedHeaders){
+        if (Tools.notBlank(sCondensedHeaders)) {
+            List<String> items = Arrays.asList(sCondensedHeaders.split("\\s*,\\s*"));
+            for (String s : items) {
+                if (Tools.notBlank(s) && s.equalsIgnoreCase("NONE")) {
+                    condensedHeaders.clear();
+                } else {
+                    condensedHeaders.put(s, s);
+                }
+            }
+        }
+    }
 
 
     // from xml file as xpath: "/restReplayMaster/runOptions"
@@ -97,6 +118,7 @@ public class RunOptions {
         String skipMutatorsOnFailure = runOptionsNode.valueOf("skipMutatorsOnFailure");
         String evalReportLevel = runOptionsNode.valueOf("evalReportLevel");
         String outputServiceResultDB = runOptionsNode.valueOf("outputServiceResultDB");
+        String sCondensedHeaders = runOptionsNode.valueOf("condensedHeaders");
 
         if (Tools.notBlank(connectionTimeout)) {
             this.connectionTimeout = Integer.parseInt(connectionTimeout);
@@ -133,6 +155,9 @@ public class RunOptions {
         }
         if (Tools.notBlank(outputServiceResultDB)) {
             this.outputServiceResultDB = Tools.isTrue(outputServiceResultDB);
+        }
+        if (Tools.notBlank(sCondensedHeaders)) {
+            setCondensedHeadersString(sCondensedHeaders);
         }
         System.out.println("set RunOptions ("+context+"): "+toString());
     }

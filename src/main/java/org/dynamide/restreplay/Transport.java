@@ -152,7 +152,7 @@ public class Transport {
                                            String requestPayloadFilename)
     {
         result.method = method;
-        ConfigFile.addHeader(result.requestHeaderMap, "content-type", contentType);
+        ConfigFile.addHeader(result.requestHeaderMap, "content-type", contentType, result.getRunOptions().condensedHeaders);
 
         HttpClient client = new HttpClient();
         setTimeouts(client, result);

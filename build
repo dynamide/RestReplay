@@ -1,0 +1,4 @@
+. ./java-options
+
+mvn -o -DskipTests=true install
+

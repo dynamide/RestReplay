@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplayMaster>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
+
+    <dump payloads="false" dumpServiceResult="minimal" /> <!-- TODO: set dumpServiceResult to auto to test behavior for releases. -->
+
+    <runOptions>
+        <connectionTimeout>3000</connectionTimeout>
+        <socketTimeout>5000</socketTimeout>
+        <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
+        <outputServiceResultDB>false</outputServiceResultDB>
+        <condensedHeaders>ACCEPT,CONTENT-TYPE,NONE,COOKIE,X-FOO</condensedHeaders>
+        <!-- condensedHeaders: the NONE should clear the list, so ACCEPT and CONTENT-TYPE will not be in the list,
+              so not condensed (which would be wrong, of course, but this is a test of that functionality
+              in case the condensing doesn't play well with a particular site, you can kill
+              this behavior for the whole installation in runOptions.xml, or per-master right here).-->
+    </runOptions>
+
+    <run controlFile="_self_test/condensed-headers/condensed-headers.xml" testGroup="main" />
+</restReplayMaster>

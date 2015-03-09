@@ -603,11 +603,11 @@ public class RestReplayReport {
         if (masterFilenameNameOnly.endsWith(".xml")){
             masterFilenameNameOnly = masterFilenameNameOnly.substring(0, masterFilenameNameOnly.length()-4);
         }
-        masterFilenameNameOnly += ".html";
-        String masterFilenameDirectory = reportsDir; //Tools.join(reportsDir, relPath);
+        String masterFilenameNameFull = masterFilenameNameOnly+".html";
+        String masterFilenameDirectory =  reportsDir;// this doesn't get propogated to control file reports. :(   Tools.join(reportsDir, masterFilenameNameOnly);;
         MasterReportNameTupple tupple = new MasterReportNameTupple();
         tupple.directory = masterFilenameDirectory;
-        tupple.relname = masterFilenameNameOnly;
+        tupple.relname = masterFilenameNameFull;
         return tupple;
     }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplayMaster>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
+
+    <dump payloads="false" dumpServiceResult="minimal" /> <!-- TODO: set dumpServiceResult to auto to test behavior for releases. -->
+
+    <runOptions>
+        <connectionTimeout>3000</connectionTimeout>
+        <socketTimeout>5000</socketTimeout>
+        <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
+        <outputServiceResultDB>false</outputServiceResultDB>
+        <condensedHeaders></condensedHeaders>
+    </runOptions>
+
+    <run controlFile="_self_test/condensed-headers/condensed-headers.xml" testGroup="main" />
+</restReplayMaster>

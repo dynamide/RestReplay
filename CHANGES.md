@@ -62,3 +62,8 @@
 ===========Sat Mar 7 12:18:21 PST 2015======================
 - Added toc-toc to master report
 - Fixed test report error aborting testGroup node, that was hidden until toc-toc showed an unreachable testGroup.
+
+===========Mon Mar 9 15:14:23 PDT 2015======================
+- Added fix: some headers allow condensed, some don't.
+-  to be safe, we now define a list of condensing headers in runOptions.xml, and default them in RunOptions.
+- current list is ACCEPT,CONTENT-TYPE,COOKIE, and you can pass NONE to remove even these defaults.
