@@ -23,6 +23,7 @@ public class Transport {
     public static final String MULTIPART_MIXED = "multipart/mixed";
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String NOOP = "NOOP";
 
 
     private static void setTimeouts(HttpClient client, ServiceResult sr){

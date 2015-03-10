@@ -486,7 +486,7 @@ public class ServiceResult {
         return result;
     }
 
-    private boolean overrideExpectedResult = false;
+    public boolean overrideExpectedResult = false;
 
     /** Call this method to create a ServiceResult mock object, for when you are doing autoDelete, and you come
      *  across a GET : GETs don't have a DELETE url, so they don't need to be autoDeleted, so an empty ServiceResult object

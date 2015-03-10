@@ -293,6 +293,10 @@ public class RestReplayReport {
         return value;
     }
 
+    public static String dotdotdot(String value){
+        return dotdotdot(value, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
+    }
+
 
     public String evalReportToString(RestReplay replay){
         if (replay.getRunOptions().evalReportLevel.equals(RunOptions.EVAL_REPORT_LEVEL.NONE)){

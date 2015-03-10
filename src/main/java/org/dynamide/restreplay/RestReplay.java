@@ -300,13 +300,54 @@ public class RestReplay extends ConfigFile {
         return result;
     }
 
+    protected void runValidatorScriptSinglePayload(ServiceResult serviceResult,
+                                                   PartsStruct expectedResponseParts,
+                                                   Eval evalStruct)
+    throws Exception {
+        serviceResult.beginTrappingExports();
+        int errorCountBefore = serviceResult.alertsCount(LEVEL.ERROR);
+        int warnCountBefore = serviceResult.alertsCount(LEVEL.WARN);
+        EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
+        String validationResultStr = validationResult != null ? validationResult.toString() : "";
+        if (Tools.notBlank(expectedResponseParts.validator) && validationResult != null) {
+            List<String> exports = serviceResult.endTrappingExports();
+            int errorCountAfter = serviceResult.alertsCount(LEVEL.ERROR);
+            int warnCountAfter = serviceResult.alertsCount(LEVEL.WARN);
+
+            String validatorDisplayName = expectedResponseParts.validatorFilenameRel;
+            if (Tools.notBlank(expectedResponseParts.validator)) {
+                validatorDisplayName = "[inline]";
+            }
+            String counts = "";
+            if ((errorCountAfter - errorCountBefore) > 0) {
+                counts = "<div><b>errors:</b> " + (errorCountAfter - errorCountBefore) + "</div>";
+
+            }
+            if ((warnCountAfter - warnCountBefore) > 0) {
+                counts += "<div><b>warnings:</b> " + (warnCountAfter - warnCountBefore) + "</div>";
+            }
+            String exportString = exports.size() > 0
+                    ? "<div><b>exports:</b> <div class='validator-exports'>" + exports + "</div></div>"
+                    : "";
+            String validatorResultBlock = Tools.notBlank(validationResultStr)
+                    ? "<b>validator result:</b><br /><span class='validator-result'>" + validationResultStr + "</span>"
+                    : "";
+            serviceResult.addAlert(validatorResultBlock
+                            + exportString
+                            + counts,
+                    "<b>validator:</b> " + validatorDisplayName,
+                    validationResult.worstLevel
+            );
+        }
+    }
+
     protected String validateResponse(ServiceResult serviceResult,
                                       PartsStruct expectedResponseParts,
                                       Eval evalStruct) {
         String OK = "";
         if (expectedResponseParts == null) return OK;
         if (serviceResult == null) return OK;
-        if (serviceResult.getResult().length() == 0) return OK;
+        //NEWcomment. if (serviceResult.getResult().length() == 0) return OK;
         try {
             return validateResponseSinglePayload(serviceResult, expectedResponseParts, evalStruct);
         } catch (Exception e) {
@@ -321,41 +362,6 @@ public class RestReplay extends ConfigFile {
                                                    Eval evalStruct)
     throws Exception {
         String OK = "";
-        serviceResult.beginTrappingExports();
-        int errorCountBefore = serviceResult.alertsCount(LEVEL.ERROR);
-        int warnCountBefore = serviceResult.alertsCount(LEVEL.WARN);
-        EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
-        String validationResultStr = validationResult != null ? validationResult.toString() : "";
-        if (Tools.notBlank(expectedResponseParts.validator) && validationResult != null){
-            List<String> exports = serviceResult.endTrappingExports();
-            int errorCountAfter = serviceResult.alertsCount(LEVEL.ERROR);
-            int warnCountAfter = serviceResult.alertsCount(LEVEL.WARN);
-
-            String validatorDisplayName = expectedResponseParts.validatorFilenameRel;
-            if (Tools.notBlank(expectedResponseParts.validator)){
-                validatorDisplayName = "[inline]";
-            }
-            String counts = "";
-            if ((errorCountAfter - errorCountBefore) > 0){
-                counts = "<div><b>errors:</b> " + (errorCountAfter - errorCountBefore)+"</div>";
-
-            }
-            if ((warnCountAfter - warnCountBefore)>0){
-                counts += "<div><b>warnings:</b> " + (warnCountAfter - warnCountBefore)+"</div>";
-            }
-            String exportString = exports.size()>0
-                    ? "<div><b>exports:</b> <div class='validator-exports'>"+exports+"</div></div>"
-                    : "";
-            String validatorResultBlock = Tools.notBlank(validationResultStr)
-                    ? "<b>validator result:</b><br /><span class='validator-result'>"+validationResultStr+"</span>"
-                    : "";
-            serviceResult.addAlert(validatorResultBlock
-                                      +exportString
-                                      +counts,
-                                    "<b>validator:</b> "+validatorDisplayName,
-                                    validationResult.worstLevel);
-        }
-
         boolean expectedPartContentWasJSON = false;
         String expectedResponseFilenameUsed = "";
 
@@ -373,10 +379,17 @@ public class RestReplay extends ConfigFile {
                                                         expFilenameRel,
                                                         varsDup);
                 expFilenameRel = evalResult.getResultString();
+
+                evalResult = evalStruct.eval("expanding:"+expFilename,
+                    expFilename,
+                    varsDup);
+                expFilename = evalResult.getResultString();
+
+
                 ResourceManager.Resource expectedPartContentRES
-                    = getResourceManager().readResource("validateResponseSinglePayload",
-                                                         expFilenameRel,
-                                                         expFilename);
+                        = getResourceManager().readResource("validateResponseSinglePayload",
+                                                             expFilenameRel,
+                                                             expFilename);
                 if (expectedPartContentRES.provider == ResourceManager.Resource.SOURCE.NOTFOUND) {
                     serviceResult.addAlertError("Resource not found: "+expectedPartContentRES.toString(),
                                                 "executeTestNode:POST/PUT:" + serviceResult.testIDLabel);
@@ -400,6 +413,7 @@ public class RestReplay extends ConfigFile {
             }
         }
         if (Tools.isBlank(expectedPartContent)){
+            runValidatorScriptSinglePayload(serviceResult, expectedResponseParts, evalStruct);//this is also run below...
             return OK;
         }
 
@@ -451,11 +465,19 @@ public class RestReplay extends ConfigFile {
                                 matchSpec);
                 serviceResult.addPartSummary(label, list);
             } else {
-                System.out.println("ERROR: "+serviceResult.testID+" expectedPartContent but no xmlResult sr:"+serviceResult+ " CONTENT:"+expectedPartContent);
+                if (serviceResult.method.equalsIgnoreCase(Transport.NOOP)){
+
+                } else {
+                    System.out.println("ERROR: " + serviceResult.testID + " expectedPartContent but no xmlResult sr:" + serviceResult
+                            + " CONTENT:" + RestReplayReport.dotdotdot(expectedPartContent));
+                }
             }
         } else {
             System.out.println("expectedPartContent blank in test "+serviceResult.testID);
         }
+
+        runValidatorScriptSinglePayload(serviceResult, expectedResponseParts, evalStruct);//this is also run above in case of early return.
+
         return OK;
     }
 
@@ -1133,6 +1155,9 @@ public class RestReplay extends ConfigFile {
                 serviceResult.time = (System.currentTimeMillis() - startTime);
                 serviceResultsMap.put(testID, serviceResult);
                 serviceResultsMap.put("result", serviceResult);
+            } else if (method.equalsIgnoreCase(Transport.NOOP)) {
+                serviceResult.overrideExpectedResult = true;
+                System.out.println("Processing "+Transport.NOOP+" request for side-effects.");
             } else {
                 throw new Exception("HTTP method not supported by RestReplay: " + method);
             }

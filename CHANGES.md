@@ -70,3 +70,8 @@
 
 ===========Mon Mar 9 16:03:44 PDT 2015======================
 Added runOption emitRestReplayHeaders to turn off RestReplay headers that are on by default: X-RestReplay-fromTestID:, and X-RestReplay-version.
+
+===========Tue Mar 10 15:24:21 PDT 2015======================
+Added NOOP as a valid HTTP method, so that you can run tests that hit no server, but still do side-effects such as validation.
+- to this end, re-ordered reading of expected parts so that they would be available in validators
+- also changed rules about empty parts if doing a NOOP.

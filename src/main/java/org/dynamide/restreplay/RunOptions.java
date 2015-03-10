@@ -109,6 +109,9 @@ public class RunOptions {
 
     // from xml file as xpath: "/restReplayMaster/runOptions"
     public void addRunOptions(Node runOptionsNode, String context){
+        if (runOptionsNode==null){
+            return;
+        }
         String connectionTimeout = runOptionsNode.valueOf("connectionTimeout");
         String socketTimeout = runOptionsNode.valueOf("socketTimeout");
         String errorsBecomeEmptyStrings = runOptionsNode.valueOf("errorsBecomeEmptyStrings");

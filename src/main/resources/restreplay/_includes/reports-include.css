@@ -10,7 +10,9 @@ body {
 
 /* =============== Below this there should be no absolute font-sizes ================ */
 
-
+textarea {
+    font-size: 90%;
+}
 caption {
     font-size: inherit;
     font-weight: inherit;
