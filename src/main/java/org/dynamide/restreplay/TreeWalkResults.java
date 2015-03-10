@@ -97,10 +97,13 @@ public class TreeWalkResults extends ArrayList<TreeWalkResults.TreeWalkEntry> {
                  +", status:"+status
                  +((status != STATUS.MATCHED) && Tools.notEmpty(ltextTrimmed) ? ","+LEAD+"    L.trimmed:"+ltextTrimmed : "")
                  +((status != STATUS.MATCHED) && Tools.notEmpty(rtextTrimmed) ? ","+LEAD+"    R.trimmed:"+rtextTrimmed : "")
-                 +((status != STATUS.MATCHED) && Tools.notEmpty(expected) ? LEAD+"EXPECTED:"+LEAD+"------------------"+LEAD+expected.trim()+LEAD+"------------------" : "")
-                 +((status != STATUS.MATCHED) && Tools.notEmpty(actual) ? LEAD+"ACTUAL:"+LEAD+"------------------"+LEAD+actual.trim()+LEAD+"------------------"+LEAD : "")
-                 +((status != STATUS.MATCHED) && (nested != null) ? LEAD+"NESTED:"+LEAD+"------------------"+LEAD+nested.toString(LEAD+INDENT)+LEAD+"------------------"+LEAD : "")
+                 +((status != STATUS.MATCHED) && Tools.notEmpty(expected) ? LEAD+"EXPECTED:"+LEAD+"------------------"+LEAD+sh(expected).trim()+LEAD+"------------------" : "")
+                 +((status != STATUS.MATCHED) && Tools.notEmpty(actual) ? LEAD+"ACTUAL:"+LEAD+"------------------"+LEAD+sh(actual).trim()+LEAD+"------------------"+LEAD : "")
+                 +((status != STATUS.MATCHED) && (nested != null) ? LEAD+"NESTED:"+LEAD+"------------------"+LEAD+sh(nested.toString(LEAD+INDENT))+LEAD+"------------------"+LEAD : "")
                  +"}";
+        }
+        public String sh(String in){
+            return RestReplayReport.dotdotdot(in, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
         }
     }
 

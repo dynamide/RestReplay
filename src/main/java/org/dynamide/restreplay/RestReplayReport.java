@@ -102,7 +102,9 @@ public class RestReplayReport {
     private List<String> runInfo = new ArrayList<String>();
 
     public String getPage(String testdir, RestReplay restReplay, String testGroupID) throws IOException {
-        String pageTitle = "RestReplay testGroup: "+testGroupID;
+        String env = restReplay.getEnvID();
+        String envTitle = Tools.notBlank(env) ? '['+env + "] " : "";
+        String pageTitle = envTitle+"RestReplay testGroup: "+testGroupID;
         return formatPageStart(testdir, restReplay.getResourceManager(), pageTitle)
                 + "<div class='REPORTTIME'><b>RestReplay</b> "+lbl(" run on")+" " + Tools.nowLocale() + "&nbsp;&nbsp;&nbsp;"+lbl("test group")+testGroupID+"&nbsp;&nbsp;<a href='"+restReplay.getRelToMasterURL()+"'>Back to Master</a>"+"</div>"
                 + header.toString()
@@ -284,7 +286,7 @@ public class RestReplayReport {
         return buffer.toString();
     }
 
-    private String dotdotdot(String value, int newlen){
+    public static String dotdotdot(String value, int newlen){
         if (value.length()>newlen){
             value = value.substring(0, newlen) + "...";
         }

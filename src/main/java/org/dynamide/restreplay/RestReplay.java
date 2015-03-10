@@ -347,7 +347,7 @@ public class RestReplay extends ConfigFile {
                     ? "<div><b>exports:</b> <div class='validator-exports'>"+exports+"</div></div>"
                     : "";
             String validatorResultBlock = Tools.notBlank(validationResultStr)
-                    ? "<b>validator result:</b> <span class='validator-result'>"+validationResultStr+"</span>"
+                    ? "<b>validator result:</b><br /><span class='validator-result'>"+validationResultStr+"</span>"
                     : "";
             serviceResult.addAlert(validatorResultBlock
                                       +exportString
