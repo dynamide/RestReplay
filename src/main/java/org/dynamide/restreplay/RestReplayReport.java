@@ -652,11 +652,11 @@ public class RestReplayReport {
 
             sb.append("<br />");
             sb.append("<div class='toc-toc'>");
-            sb.append("<b>Test Groups Run</b><br /><br />");
+            sb.append("<b>Test Groups Run</b><br /><table border='0'>");
             for (Header testGroup: testGroups) {
-                sb.append("<a href='#"+testGroup.anchor+"'>"+testGroup.groupID+"</a><br />");
+                sb.append("<tr><td><small>"+testGroup.controlFile+"</small></td><td><a href='#"+testGroup.anchor+"'>"+testGroup.groupID+"</a></td></tr>");
             }
-            sb.append("</div>");
+            sb.append("</table></div>");
 
 
             for (String oneToc : reportsList) {

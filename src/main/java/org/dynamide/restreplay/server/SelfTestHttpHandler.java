@@ -39,6 +39,8 @@ public class SelfTestHttpHandler implements HttpHandler {
 
     private static final boolean DEBUG = false;
 
+    private static int gLocationIndex = 0; // to spice up the Location: header, only.
+
     public void handle(HttpExchange t) throws IOException {
         //System.out.println("self-test web server received URI: "+t.getRequestURI());
         URI uri = t.getRequestURI();
@@ -69,6 +71,7 @@ public class SelfTestHttpHandler implements HttpHandler {
                     writeResponse(t, JSON, "{\"result\":\"OK\", \"method\":\"" + method + "\"}");
                 } else if (method.equals("POST")) {
                     body = readRequestBody(t);
+                    addHeader(t, "Location", "http://localhost:28080/tagonomy?ID="+(gLocationIndex++));
                     writeResponse(t, JSON, "{\"result\":\"OK\", \"method\":\"" + method + "\", \n\"req\": " + body + "}");
                 } else if (method.equals("PUT")) {
                     body = readRequestBody(t);
@@ -102,6 +105,7 @@ public class SelfTestHttpHandler implements HttpHandler {
                 outputType = JSON;
             }
             body = readRequestBody(t);
+            addHeader(t, "Location", "http://localhost:28080/jsonCompare1?ID="+(gLocationIndex++));
             writeResponse(t, 200, outputType, body);
         } else {
             writeResponse(t, JSON, "{\"result\":\"NO HANDLER for path "+path+"\"}");

@@ -24,6 +24,10 @@ public class Transport {
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_JSON = "application/json";
     public static final String NOOP = "NOOP";
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    public static final String PUT = "PUT";
+    public static final String DELETE = "DELETE";
 
 
     private static void setTimeouts(HttpClient client, ServiceResult sr){
@@ -119,7 +123,7 @@ public class Transport {
             statusCode1 = client.executeMethod(deleteMethod);
             result.responseCode = statusCode1;
             result.responseMessage = deleteMethod.getStatusText();
-            res = deleteMethod.getResponseBodyAsString();
+            res = readStreamToString(deleteMethod, result);
             deleteMethod.releaseConnection();
         } catch (Throwable t){
             result.addError("Error in doDELETE", t);
@@ -180,7 +184,7 @@ public class Transport {
         }
         try {
             int iResponseCode = client.executeMethod(httpMethod);
-            String responseBody = httpMethod.getResponseBodyAsString();
+            String responseBody = readStreamToString(httpMethod, result);
             result.setResultWMime(responseBody, getResponseContentType(httpMethod));
             result.responseMessage = httpMethod.getStatusText();
             result.requestPayloadFilename = requestPayloadFilename;
@@ -249,7 +253,9 @@ public class Transport {
             String locationZero = headers[0].getValue();
             if (locationZero != null){
                 result.location = locationZero;
-                result.deleteURL = locationZero;
+                if (result.method.equals(POST)) {
+                    result.deleteURL = locationZero;
+                }
             }
         }
     }

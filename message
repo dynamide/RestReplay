@@ -1,3 +1,8 @@
-Added NOOP as a valid HTTP method, so that you can run tests that hit no server, but still do side-effects such as validation.
-- to this end, re-ordered reading of expected parts so that they would be available in validators
-- also changed rules about empty parts if doing a NOOP.
+- autodelete had some bugs where results were not being displayed. This result showed up, but not any errors.  Fixed by including missing fields in errorResult. 
+- Also GET requests were autodeleted.  This is fixed by having Transport.extractLocation() only mark a ServiceResult.deleteURL if it is a Transport.POST when handling a Location header.
+- Fixed toc-toc anchor values not incrementing.
+- Re-styled toc-toc.
+- Corrected behavior requested by apache httpclient, to only getResponseBodyAsStream().
+- Color changes for method boxes.
+
+

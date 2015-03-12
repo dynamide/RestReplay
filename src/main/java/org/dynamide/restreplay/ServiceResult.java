@@ -152,9 +152,13 @@ public class ServiceResult {
         addError(msg, null);
     }
     public void addError(String msg, Throwable t){
-        Throwable there = new Throwable("Marker");
-        String here = Tools.getStackTraceTop(there, 0, 3, " / ");
-        here = "<br />\r\nreported by: ["+RestReplayReport.escape(here)+"]\r\n";
+        String here = "";
+        boolean DEBUG_REPORTED_BY = false;
+        if (DEBUG_REPORTED_BY) {
+            Throwable there = new Throwable("Marker");
+            here = Tools.getStackTraceTop(there, 0, 3, " / ");
+            here = "<br />\r\nreported by: [" + RestReplayReport.escape(here) + "]\r\n";
+        }
         if (null!=t){
             msg += ": "+t.getLocalizedMessage();
             errorDetail += msg + "<br />\r\n"+Tools.getStackTrace(t, 4);

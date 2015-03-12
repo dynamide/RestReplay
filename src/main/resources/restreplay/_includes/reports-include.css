@@ -29,7 +29,7 @@ table {
 }
 
 td, th {
-    background-color: #e0ffff;
+    background-color: white;
     font-size: 100%;
 }
 
@@ -134,6 +134,10 @@ td, th {
 .TOPLINKS {
     font-size: 90%pt;
     padding: 20px;
+}
+
+.DETAIL_TABLE td {
+    background-color: #e0ffff;
 }
 
 .DETAIL_TABLE {
@@ -241,49 +245,56 @@ td, th {
     padding: 2px;
 }
 .http-get {
-   border: 1px solid #0f6ab4;
-       font-family: 'courier new';
-       color: black;
-       width: 100%;
-       font-size: 8pt;
-       display: inline-block;
-       border-radius: 2px;
-       margin: 0px;
-       padding: 1px;
-
-}
-.http-post {
-    border: 1px solid #10a54a;
-    font-family: 'courier new';
-    color: black;
-    width: 100%;
     font-size: 8pt;
+    font-family: 'courier new';
+    font-weight: bold;
+    border: 1px solid #0f6ab4;
+    color: #0f6ab4;
+    width: 100%;
     display: inline-block;
     border-radius: 2px;
     margin: 0px;
     padding: 1px;
+    background-color: white;
+}
+.http-post {
+    font-size: 8pt;
+    font-family: 'courier new';
+    font-weight: bold;
+    border: 1px solid #10a54a;
+    color: #10a54a;
+    width: 100%;
+    display: inline-block;
+    border-radius: 2px;
+    margin: 0px;
+    padding: 1px;
+    background-color: white;
 }
 .http-put {
+    font-size: 8pt;
+    font-family: 'courier new';
+    font-weight: bold;
     border: 1px solid #c5862b;
-        font-family: 'courier new';
-        color: black;
-        width: 100%;
-        font-size: 8pt;
-        display: inline-block;
-        border-radius: 2px;
-        margin: 0px;
-        padding: 1px;
+    color: #c5862b;
+    width: 100%;
+    display: inline-block;
+    border-radius: 2px;
+    margin: 0px;
+    padding: 1px;
+    background-color: white;
     }
 .http-delete {
+    font-size: 8pt;
+    font-family: 'courier new';
+    font-weight: bold;
     border: 1px solid #a41e22;
-        font-family: 'courier new';
-        color: black;
-        width: 100%;
-        font-size: 8pt;
-        display: inline-block;
-        border-radius: 2px;
-        margin: 0px;
-        padding: 1px;
+    color: #a41e22;
+    width: 100%;
+    display: inline-block;
+    border-radius: 2px;
+    margin: 0px;
+    padding: 1px;
+    background-color: white;
 }
 
 .varslist {
@@ -343,10 +354,15 @@ td, th {
     border: 1px solid green;
 }
 
+.TOC_TABLE {
+    background-color: #e0ffff;
+}
+
 .TOC_TABLE td {
    padding: 6px;
    border-color: lightblue;
     font-size: 100%;
+    background-color: #e0ffff;
 }
 
 .TOC_TABLE th {

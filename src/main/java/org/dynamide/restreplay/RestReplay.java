@@ -133,6 +133,9 @@ public class RestReplay extends ConfigFile {
     /**
      * Use this method to clean up resources created on the server that returned CSIDs, if you have
      * specified autoDeletePOSTS==false, which means you are managing the cleanup yourself.
+     * POST and PUT requests automatically should be able to be autodeleted,
+     *  they will cause an error if they don't have a deleteURL.
+     * GET requests will not cause an error if they don't have a deleteURL.
      *
      * @param theServiceResultsMap a Map of ServiceResult objects, which will contain ServiceResult.deleteURL.
      * @return a List<ServiceResult> including error result for which URLs could not be deleted.
@@ -149,23 +152,27 @@ public class RestReplay extends ConfigFile {
                     deleteResult.testGroupID = pr.testGroupID;
                     deleteResult.connectionTimeout = pr.connectionTimeout;
                     deleteResult.socketTimeout = pr.socketTimeout;
-                    //System.out.println("ATTEMPTING AUTODELETE: ==>" + pr.deleteURL + "<==");
+                    long startTime = System.currentTimeMillis();
                     deleteResult = Transport.doDELETE(deleteResult, pr.deleteURL, pr.auth, pr.testID, "[autodelete:" + logName + "]");
-                    //System.out.println("DONE AUTODELETE: ==>" + pr.deleteURL + "<== : " + deleteResult);
+                    deleteResult.time = (System.currentTimeMillis() - startTime);
                     writeRowToConsoleWDump(deleteResult, true, deleteResult.testID);
                     results.add(deleteResult);
                 } else {
-                    ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
-                    errorResult.controlFileName = controlFileName;
-                    errorResult.isAutodelete = true;
-                    errorResult.fullURL = pr.fullURL;
-                    errorResult.testID = pr.testID+"_autodelete";
-                    errorResult.testGroupID = pr.testGroupID;
-                    errorResult.fromTestID = pr.fromTestID;
-                    errorResult.overrideGotExpectedResult();
-                    results.add(errorResult);
-                    writeRowToConsoleWDump(errorResult, true, errorResult.testID);
-                    //System.out.println("DONE AUTODELETE (errorResult): ==>" + pr.deleteURL + "<== : " + errorResult);
+                    if (pr.method.equals(Transport.POST)) {
+                        ServiceResult errorResult = new ServiceResult(pr.getRunOptions());
+                        errorResult.addError("deleteURL not found, could not autodelete.");
+                        errorResult.controlFileName = controlFileName;
+                        errorResult.isAutodelete = true;
+                        errorResult.method = "DELETE";
+                        errorResult.fullURL = pr.fullURL;
+                        errorResult.testID = pr.testID + "_autodelete";
+                        errorResult.testGroupID = pr.testGroupID;
+                        errorResult.fromTestID = pr.fromTestID;
+                        errorResult.overrideGotExpectedResult();
+                        results.add(errorResult);
+                        writeRowToConsoleWDump(errorResult, true, errorResult.testID);
+                        //System.out.println("DONE AUTODELETE (errorResult): ==>" + pr.deleteURL + "<== : " + errorResult);
+                    }
                 }
             } catch (Throwable t) {
                 String s = (pr != null) ? "ERROR while attempting to autodelete a ServiceResult: " + pr + ",   using URL:  \"" + pr.deleteURL + "\",  Exception: " + t
@@ -726,6 +733,8 @@ public class RestReplay extends ConfigFile {
 
     //================= runRestReplayFile ======================================================
 
+    private static int gTestGroupID = 0;
+
     public List<ServiceResult> runRestReplayFile(
             String testdir,
             String controlFileName,
@@ -818,6 +827,7 @@ public class RestReplay extends ConfigFile {
             testgroupNodes = document.selectNodes("//testGroup");   //When the command line has -control but no -testGroup argument.
         }
 
+
         OUTER:
         for (Node testgroup : testgroupNodes) {
             String currentTestGroupID = testgroup.valueOf("@ID");
@@ -841,6 +851,7 @@ public class RestReplay extends ConfigFile {
                 idx = foundHdr.index+1;
             }
             String anchor = (idx > -1) ? currentTestGroupID+'_'+(idx+1) : currentTestGroupID;
+            anchor = anchor + "_"+(gTestGroupID++);
             RestReplayReport.Header hdr = report.addTestGroup(currentTestGroupID, controlFileName, comment, anchor, idx);
             testGroups.add(hdr);
 

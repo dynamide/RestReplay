@@ -677,6 +677,15 @@
                 <var ID="LOOP">${loop}</var>
             </vars>
         </test>
+
+        <test ID="createResourceToAutodelete">
+            <comment>Show when service returns body text, during autodelete.</comment>
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <filename>_self_test/selftest-token-post.json</filename>
+        </test>
+
+
         <test ID="loopStringArray" loop="${['10','18','21']}">
             <method>POST</method>
             <uri>/jsonCompare1?mimeOut=application/json</uri>
@@ -998,65 +1007,18 @@
 
 
 
-    <testGroup ID="debug" autoDeletePOSTS="false">
+    <testGroup ID="debug" autoDeletePOSTS="true">
         <headers>
             <header name="Accept">text/html</header>
         </headers>
 
-        <test ID="AllSessionsInChrome"
-              loop="${['_self_test/res/chrome-session.har',
-                     '_self_test/res/chrome-session.har']}">
-            <comment>This test lets you see the top-level elements in the object saved by Chrome's "save to HAR".
-            Simply save the file to <code>_self_test/res/chrome-session.har</code></comment>
-            <method>NOOP</method>
+        <test ID="loopStringArraySimple" loop="${['10']}">
+            <method>GET</method>
             <uri>/tagonomy?mock=token</uri>
-            <response>
-                <filename>${loop.value}</filename>
-                <validator lang="javascript"><![CDATA[
-                    var outstring = "";
-                    var rr = JSON.parse(result.expectedContentExpanded);
-                    if (rr && rr.log) {
-                        var entries = rr.log.entries;
-                        outstring += "<h2>Tests in session</h2>Omitting OPTIONS requests...<br />";
-                        var buff = [];
-                        for (var i=0; i<entries.length; i++) {
-                            var entry = entries[i];
-                            var postDataBlock = '';
-                            var responseBlock = '';
-                            if (entry.request.method ==  "OPTIONS"){
-                                continue;
-                            }
-                            if (entry.request.postData){
-                                var pd = entry.request.postData;
-                                var ps = JSON.parse(pd.text);
-                                postDataBlock += "<div><small><font color='green'>request ["+JSON.stringify(pd.mimeType)+"]<br /> <textarea rows='5' cols='80'>"+JSON.stringify(ps,null,4)+"</textarea></font></small></div>";
-                            }
-                            if (entry.response && entry.response.content.text){
-                                var ps = entry.response.content.text;
-                                var mt = entry.response.content.mimeType;
-                                if (mt == 'application/json'){
-                                    ps = JSON.parse(ps);
-                                    responseBlock += "<br /><small><font color='green'>response ["+mt+"]<br /><textarea rows='5' cols='80'>"+JSON.stringify(ps,null,4)+"</textarea></font></small>";
-                                } else {
-                                    //responseBlock += "<br /><small><font color='green'>response ["+mt+"]<br /><textarea>"+JSON.stringify(ps)+"</textarea></font></small>";
-                                    responseBlock = "<br /><small><font color='green'>response ["+mt+"]<br /></font></small>";
-                                }
-                            }
-
-                            buff.push( "<br /><hr /><b>"+entry.request.method+"</b>"
-                                      +" "+entry.request.url+""
-                                      +postDataBlock
-                                      +responseBlock
-                                      +"<br />" );
-                        }
-                        outstring += buff.join('');
-                    } else {
-                        outstring += "INVALID";
-                    }
-
-                    outstring;
-                ]]></validator>
-            </response>
+            <vars>
+                <var ID="someArray">${["103","183","213"]}</var>
+                <var ID="LOOP">${loop}</var>
+            </vars>
         </test>
     </testGroup>
 

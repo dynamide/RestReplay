@@ -46,8 +46,6 @@ public class JSONSuper {
             this.type = JSONSuper.TYPE.ARRAY;
         }
     }
-    public static void unescape(JSONObject obj){
-    }
 }
 
 
