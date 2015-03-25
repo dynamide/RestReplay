@@ -27,6 +27,7 @@ public class ResourceManager {
         public SOURCE provider;
         public String context = "";
         public boolean cached = false;
+        public boolean relative = true;
         public String getDocumentSnippet(){
             String docstring = "";
             if (document!=null){
@@ -200,10 +201,21 @@ public class ResourceManager {
             }
         }
         //System.out.println("======> using File for fullPath: "+fullPath);
-        resource.foundPath = fullPath;
         File fullPathFile = new File(fullPath);
-        if (fullPathFile.exists()){
-            byte[] b = FileUtils.readFileToByteArray(fullPathFile);
+        File relResourcePathFile = new File(relResourcePath);
+        File theFile = null;
+        if (relResourcePathFile.exists()) {
+            theFile = relResourcePathFile;
+            resource.foundPath = relResourcePath;
+            resource.relative = false;  //We found it using the relative path, which turned out to be a full path.
+        } else if (fullPathFile.exists()) {
+            theFile = fullPathFile;
+            resource.foundPath = fullPath;
+            resource.relative = true;  //relPath not found, so fullPath has the test dir already glued on ==> relative.
+        }
+
+        if (theFile!=null && theFile.exists()){
+            byte[] b = FileUtils.readFileToByteArray(theFile);
             String res = new String(b);
             resource.provider = Resource.SOURCE.FILE;
             resource.contents = res;
@@ -254,13 +266,20 @@ public class ResourceManager {
         for (Resource resource: resourceHistory){
             boolean notFound = resource.provider.equals(Resource.SOURCE.NOTFOUND);
             String css;
-            if (notFound) {
-                css = "class='resource-not-found'";
-            } else {
-               css = resource.cached ? "class='resource-cached'" : "";
+            List<String> classes = new ArrayList<String>();
+
+            if (notFound){
+                classes.add("resource-not-found");
             }
+            if (resource.cached){
+                classes.add("resource-cached");
+            }
+            if (!resource.relative){
+                classes.add("resource-fullpath");
+            }
+
             b.append("<tr><td>")
-                    .append("<b " + css + ">" + resource.relPath + "</b>")
+                    .append("<b class='" + Tools.join(" ",classes) + "'>" + resource.relPath + "</b>")
                     .append(formatSummaryLine("SMALL res-mananger-caption", "base:", resource.base))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "foundPath:",resource.foundPath))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "source: ",
@@ -270,7 +289,8 @@ public class ResourceManager {
                                 )))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "context:", resource.context))
                     .append(formatSummaryLine("SMALL res-mananger-caption", "doc:", resource.getDocumentSnippet()))
-                    .append(formatSummaryLine("SMALL res-mananger-caption", "cached:", resource.cached?"true":""))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "cached:", resource.cached?"<span class='resource-cached'>true</span>":""))
+                    .append(formatSummaryLine("SMALL res-mananger-caption", "fullpath:", (!resource.relative)?"<span class='resource-fullpath'>true</span>":""))
                     .append("</td></tr>");
         }
         b.append("</table>");
@@ -289,7 +309,8 @@ public class ResourceManager {
                     .append(formatSummaryLinePlain("source:", resource.provider.toString()))
                     .append(formatSummaryLinePlain("context:", resource.context))
                     .append(formatSummaryLinePlain("doc:", resource.getDocumentSnippet()))
-                    .append(formatSummaryLinePlain("cached:", resource.cached ? "true" : ""));
+                    .append(formatSummaryLinePlain("cached:", resource.cached ? "true" : ""))
+                    .append(formatSummaryLinePlain("fullpath:", (!resource.relative) ? "true" : ""));
         }
         return b.toString();
     }

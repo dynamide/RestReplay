@@ -359,6 +359,14 @@
             </response>
         </test>
 
+        <test ID="fullPathFilename">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token</uri>
+            <response>
+                <filename>/Users/vcrocla/src/RestReplay/run</filename>
+            </response>
+        </test>
+
         <test ID="jsonTreeCompare">
             <comment>This test checks one API's response against three expected possibilities,
               by looping three times, and supplying three different filenames, and using the same
@@ -916,6 +924,13 @@
     </testGroup>
 
     <testGroup ID="badImports" autoDeletePOSTS="false">
+        <comment>An invalid imports block or import statement in a testGroup
+            invalidates the testGroup so that no tests in the group are run.
+            This testGroup imports resources that don't exist, each named by their fault.
+            This test expects that an error message will
+                 display the errors about the testGroup, but not run any tests.
+            </comment>
+
         <imports>
             <import ID="myImportedTokenTestGOOD" control="_self_test/self-test.xml" testGroup="login" test="token" />
             <import ID="myImportedTokenTestBAD1" control="_self_test/self-test.xml" testGroup="login" test="tokenWRONG" />
@@ -1008,17 +1023,21 @@
 
 
     <testGroup ID="debug" autoDeletePOSTS="true">
-        <headers>
-            <header name="Accept">text/html</header>
-        </headers>
-
-        <test ID="loopStringArraySimple" loop="${['10']}">
-            <method>GET</method>
+        <test ID="ViewHTTPArchives">
+            <comment>This test lets you see the top-level elements in the object saved by Chrome's "save to HAR".
+                As masterVar "INFILE", pass the full or relative path to your .har file, e.g.
+                <code>chrome-sessions/my-session.har</code></comment>
+            <method>NOOP</method>
             <uri>/tagonomy?mock=token</uri>
             <vars>
-                <var ID="someArray">${["103","183","213"]}</var>
-                <var ID="LOOP">${loop}</var>
+                <var ID="INFILE">/Users/vcrocla/tmp/restreplay-local-tests/revel-chrome-sessions/console-stg.pearson.com-delete-course.har</var>
             </vars>
+            <response>
+                <note>Validator script uses result.expectedResponse as input file.</note>
+                <filename>${INFILE}</filename>
+                <validator lang="javascript" filename="_self_test/s/ViewHTTPArchives.validator.js" />
+                <novalidator lang="javascript">var f='hi';f;</novalidator>
+            </response>
         </test>
     </testGroup>
 

@@ -2,6 +2,7 @@ package org.dynamide.restreplay;
 
 import org.apache.commons.cli.*;
 import org.dynamide.restreplay.server.EmbeddedServer;
+import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 
 import java.io.DataInputStream;
@@ -169,9 +170,9 @@ public class Main {
             if (Tools.isBlank(reportsDir)) {
                 reportsDir = testdir + '/' + RestReplayTest.REPORTS_DIRNAME;
             }
-            reportsDir = Tools.fixFilename(reportsDir);
-            testdir = Tools.fixFilename(testdir);
-            controlFilename = Tools.fixFilename(controlFilename);
+            reportsDir = FileTools.fixFilename(reportsDir);
+            testdir = FileTools.fixFilename(testdir);
+            controlFilename = FileTools.fixFilename(controlFilename);
 
             boolean bAutoDeletePOSTS = true;
             if (Tools.notEmpty(autoDeletePOSTS)) {

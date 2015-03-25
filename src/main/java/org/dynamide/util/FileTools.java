@@ -260,4 +260,64 @@ public class FileTools {
         }
         return strBuf.toString();
     }
+
+    static boolean m_fileSystemIsDOS = "\\".equals(File.separator);
+    static boolean m_fileSystemIsMac = ":".equals(File.separator);
+
+    public final static String FILE_EXTENSION_SEPARATOR = ".";
+
+    public static boolean fileSystemIsDOS(){return m_fileSystemIsDOS;}
+    public static boolean fileSystemIsMac(){return m_fileSystemIsMac;}
+
+    public static String fixFilename(String filename){
+        if ( m_fileSystemIsDOS ) {
+            return filename.replace('/', '\\');
+        }
+        if ( m_fileSystemIsMac ) {
+            String t = filename.replace('/', ':');
+            t = t.replace('\\', ':');
+            return t;
+        }
+        return filename.replace('\\','/');
+    }
+
+    public static String join(String dir, String file){
+        if ( dir.length() == 0 ) {
+            return file;
+        }
+        dir = fixFilename(dir);
+        file = fixFilename(file);
+        if ( ! dir.endsWith(File.separator) ) {
+            dir += File.separator;
+        }
+        if ( file.startsWith(File.separator) ) {
+            file = file.substring(1);
+        }
+        return dir + file;
+    }
+
+    public static String getFilenameExtension(String filename) {
+        int dot = filename.lastIndexOf(FILE_EXTENSION_SEPARATOR);
+        return (dot>=0)?filename.substring(dot + 1):null;
+    }
+
+    public static String getFilenameBase(String filename) {
+        int dot = filename.lastIndexOf(FILE_EXTENSION_SEPARATOR);
+        if(dot<0)
+            dot = filename.length();
+        int sep = filename.lastIndexOf(File.separator); // Note: if -1, then sep+1=0, which is right
+        return filename.substring(sep + 1, dot);
+    }
+
+    /** @return path without last slash and without filename, returns "" if slash not found (slash is File.separator).*/
+    public static String getFilenamePath(String filename) {
+        int slash = filename.lastIndexOf(File.separator);
+        return (slash>=0)?filename.substring(0, slash):"";
+    }
+
+    public static String safeFilename(String relPath){
+        return relPath.replaceAll ("[\\/\\\\:\\.\\ ]", "_");
+    }
+
+
 }

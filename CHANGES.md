@@ -85,3 +85,8 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 - Color changes for method boxes.
 
 
+
+===========Wed Mar 25 16:50:41 PDT 2015======================
+- Refactored Tools functions into FileTools where they had to do with files and filenames.
+
+

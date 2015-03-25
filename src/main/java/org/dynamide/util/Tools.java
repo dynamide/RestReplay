@@ -2,8 +2,7 @@ package org.dynamide.util;
 
 import java.io.File;
 import java.net.URLEncoder;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -30,6 +29,24 @@ public class Tools {
         }
         return first+separator+second;
     }
+
+    public static String joinArray(String s, Object... a) {
+        return a.length == 0 ? "" : a[0] + (a.length == 1 ? "" : s + joinArray(s, Arrays.copyOfRange(a, 1, a.length)));
+    }
+
+    public static String join(String delim, List<String> l) {
+        int idx = 0;
+        StringBuilder b = new StringBuilder();
+        for (String s: l){
+            if (idx>0) {
+                b.append(delim);
+            }
+            b.append(s);
+            idx++;
+        }
+        return b.toString();
+    }
+
 
     public static String chop(String source, int length){
         return source.substring(0, Math.min(source.length(), length));
@@ -116,64 +133,6 @@ public class Tools {
         Matcher matcher = pattern.matcher(source);
         String output = matcher.replaceAll(matcher.quoteReplacement(replace));
         return output;
-    }
-
-    static boolean m_fileSystemIsDOS = "\\".equals(File.separator);
-    static boolean m_fileSystemIsMac = ":".equals(File.separator);
-    
-    public final static String FILE_EXTENSION_SEPARATOR = ".";
-
-    public static boolean fileSystemIsDOS(){return m_fileSystemIsDOS;}
-    public static boolean fileSystemIsMac(){return m_fileSystemIsMac;}
-
-    public static String fixFilename(String filename){
-        if ( m_fileSystemIsDOS ) {
-            return filename.replace('/', '\\');
-        }
-        if ( m_fileSystemIsMac ) {
-            String t = filename.replace('/', ':');
-            t = t.replace('\\', ':');
-            return t;
-        }
-        return filename.replace('\\','/');
-    }
-
-    public static String join(String dir, String file){
-        if ( dir.length() == 0 ) {
-            return file;
-        }
-        dir = Tools.fixFilename(dir);
-        file = Tools.fixFilename(file);
-        if ( ! dir.endsWith(File.separator) ) {
-            dir += File.separator;
-        }
-        if ( file.startsWith(File.separator) ) {
-            file = file.substring(1);
-        }
-        return dir + file;
-    }
-    
-    public static String getFilenameExtension(String filename) {
-        int dot = filename.lastIndexOf(FILE_EXTENSION_SEPARATOR);
-        return (dot>=0)?filename.substring(dot + 1):null;
-    }
-
-    public static String getFilenameBase(String filename) {
-        int dot = filename.lastIndexOf(FILE_EXTENSION_SEPARATOR);
-        if(dot<0)
-        	dot = filename.length();
-        int sep = filename.lastIndexOf(File.separator); // Note: if -1, then sep+1=0, which is right
-        return filename.substring(sep + 1, dot);
-    }
-
-    /** @return path without last slash and without filename, returns "" if slash not found (slash is File.separator).*/
-    public static String getFilenamePath(String filename) {
-        int slash = filename.lastIndexOf(File.separator);
-        return (slash>=0)?filename.substring(0, slash):"";
-    }
-
-    public static String safeFilename(String relPath){
-        return relPath.replaceAll ("[\\/\\\\:\\.\\ ]", "_");
     }
 
 
@@ -308,6 +267,11 @@ public class Tools {
     public static void testStatic(){
         System.out.println(getStackTrace());
         System.out.println(getStackTrace(new Exception("Created exception."), 2));
+        List list = new ArrayList();
+        list.add("item1");
+        System.out.println("one item: "+join(" ", list));
+        list.add("item2");
+        System.out.println("two items: "+join(" ", list));
     }
 
     public static void main(String[]args)

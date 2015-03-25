@@ -316,7 +316,7 @@ public class RestReplay extends ConfigFile {
         int warnCountBefore = serviceResult.alertsCount(LEVEL.WARN);
         EvalResult validationResult = runValidatorScript(serviceResult, expectedResponseParts, evalStruct);
         String validationResultStr = validationResult != null ? validationResult.toString() : "";
-        if (Tools.notBlank(expectedResponseParts.validator) && validationResult != null) {
+        if (validationResult != null) {
             List<String> exports = serviceResult.endTrappingExports();
             int errorCountAfter = serviceResult.alertsCount(LEVEL.ERROR);
             int warnCountAfter = serviceResult.alertsCount(LEVEL.WARN);
@@ -500,7 +500,7 @@ public class RestReplay extends ConfigFile {
         String scriptBody = expectedResponseParts.validator;
         String testdir = expectedResponseParts.testdir;
         String lang = expectedResponseParts.validatorLang;
-        String fullPath = Tools.join(testdir, scriptFilename);
+        String fullPath = FileTools.join(testdir, scriptFilename);
 
         String source = null;
         String resourceName = "";
@@ -519,7 +519,7 @@ public class RestReplay extends ConfigFile {
             } else {
                 source = rez.contents;
             }
-            resourceName = Tools.join(testdir, scriptFilename);
+            resourceName = FileTools.join(testdir, scriptFilename);
         }
         if (Tools.notBlank(source)) {
             serviceResult.setCurrentValidatorContextName(scriptFilename);
@@ -606,9 +606,10 @@ public class RestReplay extends ConfigFile {
         for (Map.Entry<String,ServiceResult> entry: serviceResultsMap.entrySet()){
             if (entry.getKey().equals("this")){
                 //skip "this" because it conflicts with javascript.
+            } else {
+                interpreter.setVariable(entry.getKey(), entry.getValue());
+                //System.out.println("adding ServiceResults: "+entry.getKey());
             }
-            interpreter.setVariable(entry.getKey(), entry.getValue());
-            //System.out.println("adding ServiceResults: "+entry.getKey());
         }
         EvalResult result = interpreter.eval(resourceName, source);
         evalStruct.addToEvalReport(result);
@@ -1577,7 +1578,7 @@ public class RestReplay extends ConfigFile {
         if (lastdot>0){
             dir = serviceResult.controlFileName.substring(0, lastdot);
         }
-        dir = Tools.join(reportsDir, Tools.join(REL_PATH_TO_DB,dir));
+        dir = FileTools.join(reportsDir, FileTools.join(REL_PATH_TO_DB,dir));
 
         File result = FileTools.saveFile(dir, serviceResult.testIDLabel+".json", json, true);
         System.out.println("ServiceResult saved to DB: "+result.getCanonicalPath());

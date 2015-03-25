@@ -504,6 +504,9 @@ DIV.mutation {
 .resource-not-found {
     color: red;
 }
+.resource-fullpath {
+    color: #00F;
+}
 .SUMMARY {
     font-family: monospace;
     font-size: 80%;

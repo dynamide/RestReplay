@@ -2,7 +2,7 @@ pushd ~/src/RestReplay
 
 . ./java-options
 
-mvn -o -DskipTests=true install
+mvn -q -o -DskipTests=true install
 
 java $JAVA_OPTS -jar target/$RESTREPLAY_JAR \
    -master _self_test/master-self-test.xml \

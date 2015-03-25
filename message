@@ -1,8 +1,3 @@
-- autodelete had some bugs where results were not being displayed. This result showed up, but not any errors.  Fixed by including missing fields in errorResult. 
-- Also GET requests were autodeleted.  This is fixed by having Transport.extractLocation() only mark a ServiceResult.deleteURL if it is a Transport.POST when handling a Location header.
-- Fixed toc-toc anchor values not incrementing.
-- Re-styled toc-toc.
-- Corrected behavior requested by apache httpclient, to only getResponseBodyAsStream().
-- Color changes for method boxes.
+- Refactored Tools functions into FileTools where they had to do with files and filenames.
 
 

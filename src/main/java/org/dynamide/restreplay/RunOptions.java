@@ -73,23 +73,23 @@ public class RunOptions {
     }
 
     public String toHTML() {
-        String BR = "<br />\r\n";
-        String C = ",";
+        String BR = ",<br />\r\n";
+        String BE = "<br />\r\n";
         return "<div class='RunOptions'>{" +BR+
-                "connectionTimeout=" + connectionTimeout +C+BR+
-                "socketTimeout=" + socketTimeout +C+BR+
-                "errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +C+BR+
-                "acceptAlertLevel=" + acceptAlertLevel +C+BR+
-                "failTestOnWarnings=" + failTestOnWarnings +C+BR+
-                "failTestOnErrors=" + failTestOnErrors +C+BR+
-                "evalReportLevel=" + evalReportLevel +C+BR+
-                "dumpResourceManagerSummary=" + dumpResourceManagerSummary +C+BR+
-                "reportResourceManagerSummary=" + reportResourceManagerSummary +C+BR+
+                "connectionTimeout=" + connectionTimeout +BR+
+                "socketTimeout=" + socketTimeout +BR+
+                "errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +BR+
+                "acceptAlertLevel=" + acceptAlertLevel +BR+
+                "failTestOnWarnings=" + failTestOnWarnings +BR+
+                "failTestOnErrors=" + failTestOnErrors +BR+
+                "evalReportLevel=" + evalReportLevel +BR+
+                "dumpResourceManagerSummary=" + dumpResourceManagerSummary +BR+
+                "reportResourceManagerSummary=" + reportResourceManagerSummary +BR+
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
                 "condensedHeaders=" + condensedHeaders.keySet().toString() +BR+
                 "emitRestReplayHeaders=" + emitRestReplayHeaders +BR+
-                "outputServiceResultDB=" + outputServiceResultDB +BR+
+                "outputServiceResultDB=" + outputServiceResultDB +BE+
                 "}</div>";
     }
 

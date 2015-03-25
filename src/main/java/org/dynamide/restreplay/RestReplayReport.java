@@ -560,7 +560,7 @@ public class RestReplayReport {
         FilePath result = new FilePath();
         File f = new File(reportName);
         result.filenameOnly = f.getName();
-        result.relPath = Tools.getFilenamePath(f.getPath());
+        result.relPath = FileTools.getFilenamePath(f.getPath());
         //System.out.println("=====extractRelPath========>>> result.relPath:"+result.relPath);
         //System.out.println("=====extractRelPath========>>> result.filenameOnly:"+result.filenameOnly);
         return result;
@@ -570,7 +570,7 @@ public class RestReplayReport {
         try {
             FilePath filePath = extractRelPath(reportName);
             String relPath = filePath.relPath;
-            String detailDirectory = Tools.join(reportsDir, relPath);
+            String detailDirectory = FileTools.join(reportsDir, relPath);
 
             File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(testdir, restReplay, testGroupID), true);
             if (resultFile != null) {
@@ -598,9 +598,9 @@ public class RestReplayReport {
                                                        String localMasterFilename,
                                                        String envID){
         File f = new File(localMasterFilename);
-        String relPath = Tools.getFilenamePath(f.getPath());
+        String relPath = FileTools.getFilenamePath(f.getPath());
         String relPathNameComponent = Tools.notBlank(relPath)
-                ? Tools.safeFilename(relPath)+'.'
+                ? FileTools.safeFilename(relPath)+'.'
                 : "";
         String masterFilenameNameOnly = "index."
                 +(Tools.notBlank(envID)?envID+'.':"")
