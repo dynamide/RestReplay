@@ -1,6 +1,6 @@
 . ./java-options
 
-java $JAVA_OPTS -jar target/$RESTREPLAY_JAR \
+java $JAVA_OPTS -jar $RESTREPLAY_JAR \
    -testdir ./src/main/resources/restreplay \
    -selftest \
    -reports /Users/vcrocla/src/RestReplay/reports \
