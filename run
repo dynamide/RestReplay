@@ -1,12 +1,7 @@
-pushd ~/src/RestReplay
-
 . ./java-options
 
-mvn -o -DskipTests=true install
-
-java $JAVA_OPTS -jar target/$RESTREPLAY_JAR \
+java $JAVA_OPTS -jar $RESTREPLAY_JAR \
    -master _self_test/master-self-test.xml \
    -testdir ./src/main/resources/restreplay \
    -selftest \
-   -reports /Users/vcrocla/src/RestReplay/reports
-popd
+   -reports ./reports
