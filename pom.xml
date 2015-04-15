@@ -289,7 +289,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <finalName>${project.artifactId}-${project.version}-standalone</finalName>
+                    <finalName>${project.artifactId}-${project.version}</finalName>
                 </configuration>
             </plugin>
 
@@ -310,8 +310,26 @@
                 <version>2.10.1</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+                     <finalName>${project.artifactId}-${project.version}</finalName>
                 </configuration>
             </plugin>
+            
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+                  <finalName>${project.artifactId}-${project.version}</finalName>
+                </configuration>
+			</plugin>
+			
         </plugins>
     </build>
 
@@ -329,7 +347,7 @@
                 <version>2.10.1</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/javadoc2</outputDirectory>
-                </configuration>
+                </configuration>   
             </plugin>
 
             <!--  http://maven.apache.org/plugins/maven-project-info-reports-plugin/license-mojo.html

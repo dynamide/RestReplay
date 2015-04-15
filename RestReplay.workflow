@@ -32,9 +32,20 @@ Push to public server
 =============================================================
 javadoc:
 	mvn javadoc:jar
-  scp to ~/sites/dynamide.com/RestReplay/javadoc/
-  jar xvf RestReplay-javadoc.jar
-
+        produces, for example: 
+            /Users/vcrocla/src/RestReplay/target/RestReplay-javadoc.jar
+    
+	scp to 
+	    ~/sites/dynamide.com/RestReplay/javadoc/
+    
+    which you extract with: 
+        jar xvf RestReplay-javadoc.jar
+    
+docs:
+artifacts:
+    run the maven "package" phase:
+        mvn package
+        
 =============================================================
 Deploy to Revel/LAS:
 =============================================================
