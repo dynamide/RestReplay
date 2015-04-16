@@ -162,22 +162,25 @@ history:
 =============================================================
   Using plugings to automate signing, deploying, and releasing to maven central
 =============================================================
-set up:
+documentation:
+
+    http://central.sonatype.org/pages/ossrh-guide.html
+    http://central.sonatype.org/pages/releasing-the-deployment.html
+
     http://maven.apache.org/plugins/maven-gpg-plugin/
     http://maven.apache.org/plugins/maven-gpg-plugin/usage.html
-        DONE
     
     http://central.sonatype.org/pages/apache-maven.html
     
+set up:
     I installed gpg, then added maven-gpg-plugin to the pom, which you execute manually with 
         mvn verify
     or: 
         mvn verify -Dgpg.passphrase=thephrase
         
-   I installed nexus-staging
-   then just:
-       mvn deploy
-
+   I installed nexus-staging plugin:
+        mvn deploy
+       
 
 
 =============================================================
