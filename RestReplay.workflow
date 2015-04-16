@@ -118,6 +118,67 @@ You can run within RestReplay with -selftest
 But you can also run the server yourself, just run main() in org.dynamide.restreplay.server.EmbeddedServer.
 
 
+=============================================================
+  Setting up org.dynamide in central maven repo
+=============================================================
+
+http://central.sonatype.org/pages/ossrh-guide.html
+http://central.sonatype.org/pages/requirements.html
+
+gpg: checking the trustdb
+gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+gpg: depth: 0  valid:   2  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 2u
+gpg: next trustdb check due at 2018-08-19
+pub   2048R/76AF320F 2015-04-16
+      Key fingerprint = 8B78 9494 6487 09A8 83A4  B14F 6E3E BC34 76AF 320F
+uid       [ultimate] Laramie Crocker (contact info at: http://dynamide.org) <order3@dynamide.org>
+sub   2048R/0E44E730 2015-04-16
+
+https://issues.sonatype.org/browse/OSSRH-15028
+
+history: 
+    [vcrocla@SFCAML-G2XFD56] ~/src/RestReplay (master)
+    $ h gpg
+      475  gpg  --list-keys
+      476  gpg2 --list-secret-keys
+      477  gpg --edit-key 76AF320F
+      481  gpg -ab FooRestReplay.jar
+      482  gpg2 --verify FooRestReplay.jar.asc
+      486  gpg2 --keyserver hkp://pool.sks-keyservers.net --recv-keys 76AF320F
+      487  gpg --gen-key
+      490  gpg --delete-secret-keys 68C43CEB
+      491  gpg --delete-key 68C43CEB
+      492  gpg2 --keyserver hkp://pool.sks-keyservers.net --send-keys 76AF320F
+      494  gpg --version
+      495  gpg2 --version
+      496  gpg --help
+      501  gpg --export -a "Laramie Crocker" > public.key
+      504  gpg --edit-key E53EB251
+      515  gpg2 -ab -u 'Laramie Crocker' RestReplay-1.0.6-sources.jar
+      516  gpg2 -ab -u 'Laramie Crocker' RestReplay-1.0.6-javadoc.jar
+      517  gpg2 -ab -u 'Laramie Crocker' RestReplay-1.0.6.jar
+      526  gpg2 -ab -u 'Laramie Crocker' pom.xml
+
+=============================================================
+  Using plugings to automate signing, deploying, and releasing to maven central
+=============================================================
+set up:
+    http://maven.apache.org/plugins/maven-gpg-plugin/
+    http://maven.apache.org/plugins/maven-gpg-plugin/usage.html
+        DONE
+    
+    http://central.sonatype.org/pages/apache-maven.html
+    
+    I installed gpg, then added maven-gpg-plugin to the pom, which you execute manually with 
+        mvn verify
+    or: 
+        mvn verify -Dgpg.passphrase=thephrase
+        
+   I installed nexus-staging
+   then just:
+       mvn deploy
+
+
 
 =============================================================
 TODO:
