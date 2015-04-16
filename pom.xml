@@ -9,6 +9,11 @@
     <version>1.0.6</version>
     <name>RestReplay</name>
     <packaging>jar</packaging>
+    <description>RestReplay is a dynamide.org utility to send REST requests to the services layer 
+    (including JSON, XML, and multipart XML requests), 
+    read responses, validate responses, 
+    and compare the resulting payloads with templates.</description>
+    <url>http://dynamide.org/RestReplay/doc/index.html</url>
 
     <repositories>
         <repository>

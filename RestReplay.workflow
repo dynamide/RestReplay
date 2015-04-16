@@ -45,7 +45,10 @@ docs:
 artifacts:
     run the maven "package" phase:
         mvn package
-        
+    You should get: 
+target//RestReplay-1.0.6-javadoc.jar
+target//RestReplay-1.0.6-sources.jar
+target//RestReplay-1.0.6.jar
 =============================================================
 Deploy to Revel/LAS:
 =============================================================
