@@ -46,9 +46,14 @@ artifacts:
     run the maven "package" phase:
         mvn package
     You should get: 
-target//RestReplay-1.0.6-javadoc.jar
-target//RestReplay-1.0.6-sources.jar
-target//RestReplay-1.0.6.jar
+        target//RestReplay-1.0.6-javadoc.jar
+        target//RestReplay-1.0.6-sources.jar
+        target//RestReplay-1.0.6.jar
+        
+deploy new jar version to maven central:
+    vi ~/src/RestReplay/pom.xml     ##update the version number
+    mvn deploy                      ## see my signing info doco for gpg passphrase.
+        
 =============================================================
 Deploy to Revel/LAS:
 =============================================================
@@ -178,11 +183,16 @@ set up:
     or: 
         mvn verify -Dgpg.passphrase=thephrase
         
-   I installed nexus-staging plugin:
+   I installed nexus-staging plugin, it does everything, including staging it, closing it:
         mvn deploy
-       
-
-
+   When you are done, go here to release it.  
+       Also can be done from command line:
+           mvn nexus-staging:release
+       Or, from the web interface:    
+           https://oss.sonatype.org/#stagingRepositories
+           staging repositories
+           select the latest one, then click Promote on the top of the rows.
+        
 =============================================================
 TODO:
 =============================================================
