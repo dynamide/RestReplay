@@ -192,6 +192,8 @@ set up:
            https://oss.sonatype.org/#stagingRepositories
            staging repositories
            select the latest one, then click Promote on the top of the rows.
+           
+           https://oss.sonatype.org/content/repositories/releases/org/dynamide/RestReplay/1.0.7/RestReplay-1.0.7.jar
         
 =============================================================
 TODO:

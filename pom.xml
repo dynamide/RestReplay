@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dynamide</groupId>
     <artifactId>RestReplay</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <name>RestReplay</name>
     <packaging>jar</packaging>
     <description>RestReplay is a dynamide.org utility to send REST requests to the services layer 
@@ -310,7 +310,7 @@
                     </archive>
                 </configuration>
             </plugin>
-
+            
             <!-- to get this to work, just run
                   mvn package
             -->
@@ -325,12 +325,19 @@
                             <goal>shade</goal>
                         </goals>
                     </execution>
+                    
                 </executions>
+                <configuration>
+                  <shadedArtifactAttached>true</shadedArtifactAttached>
+                  <shadedClassifierName>standalone</shadedClassifierName> <!-- Any name that makes sense -->
+                </configuration>
                 <!--configuration>
                     <finalName>${project.artifactId}-${project.version}</finalName>
                 </configuration-->
             </plugin>
-
+            
+            <!-- consider trying this: https://code.google.com/p/onejar-maven-plugin/ -->
+            
             <!-- http://maven.apache.org/plugins/maven-javadoc-plugin/usage.html
                  sez:
                     mvn javadoc:javadoc
