@@ -2,13 +2,11 @@
 =============================================================
 Doco:
 =============================================================
-    doc/RestReplay.html
+    vi doc/RestReplay.html
 
-    cp doco to public site:
-	    on git server,
-        cd ~/git/RestReplayGithub
-        git pull
-        cp -r ~/git/RestReplayGithub/doc ~/sites/dynamide.com/RestReplay
+    pushd ~/src/RestReplay
+    bin/push-doco
+
 =============================================================
 Building:
 =============================================================
@@ -23,7 +21,7 @@ Building:
     Remember that this creates the release jar, such as target/RestReplay-1.0.4-standalone.jar
       which should be copied to any deployed clients.
 
-    DEPLOY on Retina LAPPY WITH: 
+    DEPLOY on Retina LAPPY WITH:
          restreplay -u
      (this is a script installed in ~/bin/restreplay )
 
@@ -32,35 +30,43 @@ Push to public server
 =============================================================
 javadoc:
 	mvn javadoc:jar
-        produces, for example: 
+        produces, for example:
             /Users/vcrocla/src/RestReplay/target/RestReplay-javadoc.jar
-    
-	scp to 
+
+	scp to
 	    ~/sites/dynamide.com/RestReplay/javadoc/
-    
-    which you extract with: 
+
+    which you extract with:
         jar xvf RestReplay-javadoc.jar
-    
+
 docs:
 artifacts:
     run the maven "package" phase:
         mvn package
-    You should get: 
+    You should get:
         target//RestReplay-1.0.6-javadoc.jar
         target//RestReplay-1.0.6-sources.jar
         target//RestReplay-1.0.6.jar
-        
+
 deploy new jar version to maven central:
     vi ~/src/RestReplay/pom.xml     ##update the version number
-    mvn deploy                      ## see my signing info doco for gpg passphrase.
-        
+    mvn deploy                      ## see wallet-card for gpg passphrase.
+
 =============================================================
 Deploy to Revel/LAS:
 =============================================================
    cd ~/src/RestReplay
    mvn -o -DskipTests install
-   cd ~/ws/las.ws/las/restreplay
+   cd ~/ws/las/las/restreplay
    ./c
+
+Alternately, if you want to test between maven central releases, in a dependent project that lives in ~/ws/las/restreplay, do: 
+
+   cd ~/src/RestReplay
+   mvn -o -DskipTests install
+   cd ~/ws/las/restreplay
+   cp /Users/vcrocla/.m2/repository/org/dynamide/RestReplay/1.0.9/RestReplay-1.0.9-standalone.jar lib/
+   java  $JAVA_OPTS -jar $RESTREPLAY_JAR -testdir ./tests -master las-master.xml  -env dev
 
 =============================================================
 Running:

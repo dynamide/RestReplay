@@ -90,3 +90,31 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 - Refactored Tools functions into FileTools where they had to do with files and filenames.
 
 
+
+===========Wed May 6 16:31:08 PDT 2015======================
+- Added response/expected/code handling in addition to expected/code.
+
+- Added options to RunOptions:
+    - reportResponseRaw,
+    - dumpRunOptions: cleaned up RunOptions dump,
+    - reportPayloadsAsXML: controls output of RESPONSE (as xml) and EXPECTED  (as xml)
+
+- Added Totals section to report, to command-line output, and added a RunOption to control the command-line output of a summary list, dumpMasterSummary.
+
+- Made RestReplay available through Maven Central.
+
+- Finalized portable run scripts, all now use just RESTREPLAY_JAR without adding to the path. RESTREPLAY_JAR now should contain full path or relative to dir run is in.
+
+===========Wed May 6 16:31:26 PDT 2015======================
+- Added response/expected/code handling in addition to expected/code.
+
+- Added options to RunOptions:
+    - reportResponseRaw,
+    - dumpRunOptions: cleaned up RunOptions dump,
+    - reportPayloadsAsXML: controls output of RESPONSE (as xml) and EXPECTED  (as xml)
+
+- Added Totals section to report, to command-line output, and added a RunOption to control the command-line output of a summary list, dumpMasterSummary.
+
+- Made RestReplay available through Maven Central.
+
+- Finalized portable run scripts, all now use just RESTREPLAY_JAR without adding to the path. RESTREPLAY_JAR now should contain full path or relative to dir run is in.
