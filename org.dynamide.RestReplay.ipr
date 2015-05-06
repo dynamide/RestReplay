@@ -26,6 +26,9 @@
         <module name="org.dynamide.RestReplay" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="org.dynamide.RestReplay" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
   <component name="CopyrightManager" default="">
     <LanguageOptions name="JAVA">
@@ -186,11 +189,11 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/ws/las.ws/las/restreplay/RestReplayLas.iml" filepath="$USER_HOME$/ws/las.ws/las/restreplay/RestReplayLas.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.dynamide.RestReplay.iml" filepath="$PROJECT_DIR$/org.dynamide.RestReplay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/restreplay-las/restreplay-las.iml" filepath="$PROJECT_DIR$/restreplay-las/restreplay-las.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" default="true" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="VcsDirectoryMappings">
@@ -406,15 +409,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.7/slf4j-api-1.7.7-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.slf4j:slf4j-log4j12:1.7.10">
+    <library name="Maven: org.slf4j:slf4j-log4j12:1.7.12">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.10/slf4j-log4j12-1.7.10.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.12/slf4j-log4j12-1.7.12.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.10/slf4j-log4j12-1.7.10-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.12/slf4j-log4j12-1.7.12-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.10/slf4j-log4j12-1.7.10-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.12/slf4j-log4j12-1.7.12-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.testng:testng:6.8.21">

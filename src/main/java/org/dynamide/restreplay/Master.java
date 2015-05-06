@@ -158,7 +158,7 @@ public class Master extends ConfigFile {
             //testGroups.add(testGroup);
             list.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, testGroups));//TODO: remove dups.
         }
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, list);
         return list;
     }
 
@@ -172,7 +172,7 @@ public class Master extends ConfigFile {
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
         List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
         list.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, testGroups));//TODO: remove dups.
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, list);
         return list;
     }
 

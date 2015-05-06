@@ -630,7 +630,8 @@ public class RestReplayReport {
                                           String envID,
                                           Map<String,Object> masterVars,
                                           List<Header> testGroups,
-                                          Master master) {
+                                          Master master,
+                                          List<List<ServiceResult>> list) {
 
         MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
 
@@ -642,6 +643,26 @@ public class RestReplayReport {
         //                +"\n masterFilenameNameOnly:"+masterFilenameNameOnly);
 
         try {
+            int numSUCCESS = 0;
+            int numFAILURE = 0;
+            int numTests = 0;
+            StringBuffer masterSummary = new StringBuffer();
+            for (List<ServiceResult>srlist:  list){
+                for (ServiceResult sr: srlist){
+                    numTests++;
+                    if (sr.isSUCCESS()){
+                        numSUCCESS++;
+                    } else {
+                        numFAILURE++;
+                    }
+                    if (master.getRunOptions().dumpMasterSummary){
+                        masterSummary.append("").append(sr.tiny()).append('\n');
+                    }
+                }
+            }
+            String masterSummaryLine = "TESTS: "+numTests+" SUCCESS: "+numSUCCESS + " FAILURE: "+numFAILURE;
+            String masterSummaryLineHTML = smallblack("TESTS: ")+numTests+' '+ok("SUCCESS:")+numSUCCESS + ' '+red("FAILURE:")+numFAILURE;
+
             String pageTitle = "RestReplay "+localMasterFilename+(Tools.notBlank(envID)?" ("+envID+")":"");
             StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager(), pageTitle));
             String dateStr = Tools.nowLocale();
@@ -658,6 +679,11 @@ public class RestReplayReport {
             }
             sb.append("</table></div>");
 
+            sb.append("<br /><div class='toc-toc'><b>Totals</b>");
+            sb.append("<br />"+masterSummaryLineHTML);
+            sb.append("</div>");
+
+
 
             for (String oneToc : reportsList) {
                 sb.append(oneToc);
@@ -673,7 +699,16 @@ public class RestReplayReport {
                 sb.append("<p>ResourceManager Summary off. To see summary, set reportResourceManagerSummary=\"true\" in master::runOptions or runOptions.xml.</p>");
             }
             sb.append(HTML_PAGE_END);
+
+            if (master.getRunOptions().dumpMasterSummary) {
+                System.out.println(masterSummary+"\n");
+            }
+
             System.out.println("====|\r\n====|  Master Report Index:       "+Tools.glue(tupple.directory, tupple.relname)+"\r\n====|\n\n");
+
+            System.out.println(masterSummaryLine);
+
+
             return FileTools.saveFile(tupple.directory, tupple.relname, sb.toString(), true);
         } catch (Exception e) {
             System.out.println("ERROR saving RestReplay report index: in  testdir: " + reportsDir + "localMasterFilename: " + localMasterFilename +" directory:"+tupple.directory+ " masterFilename: " + tupple.relname + " list: " + reportsList + " error: " + e);
@@ -858,11 +893,11 @@ public class RestReplayReport {
     private static final String LINE = "<hr />\r\n";
     private static final String CRLF = "<br />\r\n";
 
-    protected String red(String label) {
+    protected static String red(String label) {
         return "<span class='ERROR'>" + label + "</span> ";
     }
 
-    protected String brown(String label) {
+    protected static String brown(String label) {
         return "<span class='EXPECTED'>" + label + "</span> ";
     }
 
