@@ -231,9 +231,17 @@ public class ServiceResult {
     /** if xml sets no expected/code nodes, then DEFAULT_SUCCESS_RANGE is used. */
     public void initExpectedCodeRanges(Node testNode) {
         List<Node> nodes = testNode.selectNodes("expected/code");
-        for (Node codeNode : nodes) {
-            Range range = new Range(codeNode.valueOf("@range"));
-            ranges.add(range);
+        if (nodes.size() > 0) {
+            for (Node codeNode : nodes) {
+                Range range = new Range(codeNode.valueOf("@range"));
+                ranges.add(range);
+            }
+        } else {
+            nodes = testNode.selectNodes("response/expected/code");
+            for (Node codeNode : nodes) {
+                Range range = new Range(codeNode.valueOf("@range"));
+                ranges.add(range);
+            }
         }
     }
 

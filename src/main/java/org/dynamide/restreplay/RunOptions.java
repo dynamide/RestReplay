@@ -26,6 +26,7 @@ public class RunOptions {
 
     public EVAL_REPORT_LEVEL evalReportLevel = EVAL_REPORT_LEVEL.SHORT;
     public static final String RUN_OPTIONS_FILENAME = "runOptions.xml";
+
     public int connectionTimeout = 30000;   //millis until gives up on establishing a connection.
     public int socketTimeout = 30000;  //millis until gives up on data bytes transmitted, apache docs say "timeout for waiting for data".
     public boolean errorsBecomeEmptyStrings = true;
@@ -41,6 +42,7 @@ public class RunOptions {
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
     public boolean outputServiceResultDB = false;
+
     public Map<String,String> condensedHeaders= Tools.createSortedCaseInsensitiveMap();
     public boolean emitRestReplayHeaders = true;
 
