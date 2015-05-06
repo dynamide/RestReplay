@@ -641,6 +641,26 @@ public class ServiceResult {
                 + "; parts-summary: {"+(verbosePartsSummary ? partsSummary(true) : partsSummary(false) )+"}"
                 +"}";
     }
+
+    public String tiny(){
+        int warnings = alertsCount(Alert.LEVEL.WARN);
+        int errors =   alertsCount(Alert.LEVEL.ERROR);
+        String expected = "";
+        if (ranges.size()>0){ expected = "; expected:"+ranges; }
+        return "{"
+                + ( isSUCCESS() ? "SUCCESS" : "FAILURE"  )
+                + (Tools.notBlank(failureReason) ? ", reason: {"+ failureReason+"}" : "")
+                + ( Tools.notEmpty(testID) ? "; "+testID : "" )
+                +"; "+method
+                +"; "+responseCode
+                + expected
+                + ( errors>0 ? "; ERRORS:"+errors : "" )
+                + ( warnings>0 ? "; WARNINGS:"+warnings : "" )
+                +"; time:"+time+"ms"
+                + ( Tools.notEmpty(error) ? "; ERROR_IN_PART:"+error : "" )
+                +"}";
+    }
+
     public String dump(ServiceResult.DUMP_OPTIONS opt, boolean hasError){
         switch (opt){
             case minimal:

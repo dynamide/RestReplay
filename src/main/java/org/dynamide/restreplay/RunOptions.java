@@ -32,6 +32,7 @@ public class RunOptions {
     public Alert.LEVEL acceptAlertLevel = Alert.LEVEL.OK;  //OK means breaks on WARN and ERROR.
     public boolean skipMutators = false;
     public boolean skipMutatorsOnFailure = true;
+    public boolean dumpMasterSummary = false;
     public boolean dumpResourceManagerSummary = true;
     public boolean reportResourceManagerSummary = true;
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
@@ -63,6 +64,7 @@ public class RunOptions {
                 "    failTestOnWarnings=" + failTestOnWarnings + CR+
                 "    failTestOnErrors=" + failTestOnErrors + CR+
                 "    evalReportLevel=" + evalReportLevel +CR+
+                "    dumpMasterSummary=" + dumpMasterSummary + CR+
                 "    dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
                 "    reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
                 "    skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
@@ -83,6 +85,7 @@ public class RunOptions {
                 "failTestOnWarnings=" + failTestOnWarnings +BR+
                 "failTestOnErrors=" + failTestOnErrors +BR+
                 "evalReportLevel=" + evalReportLevel +BR+
+                "dumpMasterSummary=" + dumpMasterSummary +BR+
                 "dumpResourceManagerSummary=" + dumpResourceManagerSummary +BR+
                 "reportResourceManagerSummary=" + reportResourceManagerSummary +BR+
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
@@ -118,6 +121,7 @@ public class RunOptions {
         String acceptAlertLevel = runOptionsNode.valueOf("acceptAlertLevel");
         String failTestOnWarnings = runOptionsNode.valueOf("failTestOnWarnings");
         String failTestOnErrors = runOptionsNode.valueOf("failTestOnErrors");
+        String dumpMasterSummary = runOptionsNode.valueOf("dumpMasterSummary");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
         String reportResourceManagerSummary = runOptionsNode.valueOf("reportResourceManagerSummary");
         String skipMutators = runOptionsNode.valueOf("skipMutators");
@@ -144,6 +148,9 @@ public class RunOptions {
         }
         if (Tools.notBlank(failTestOnErrors)) {
             this.failTestOnErrors = Tools.isTrue(failTestOnErrors);
+        }
+        if (Tools.notBlank(dumpMasterSummary)) {
+            this.dumpMasterSummary = Tools.isTrue(dumpMasterSummary);
         }
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             this.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
