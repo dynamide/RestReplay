@@ -778,17 +778,22 @@ public class RestReplayReport {
         StringBuffer buffer = new StringBuffer();
         ServiceResult.PRETTY_FORMAT respType = serviceResult.contentTypeFromResponse();
         appendPayload(serviceResult, buffer, serviceResult.requestPayloadsRaw, respType, "REQUEST (raw) ", "REQUESTRAW" + tocID, serviceResult.requestPayloadFilename);
-        appendPayload(serviceResult, buffer, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID,"", false);
-        appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
-        appendPayload(serviceResult, buffer, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
-        if (Tools.notBlank(serviceResult.getXmlResult())){
-            appendPayload(serviceResult, buffer, serviceResult.getXmlResult(), ServiceResult.PRETTY_FORMAT.XML, "RESPONSE (as xml)", "RESPONSEXML" + tocID, "", false);
+        appendPayload(serviceResult, buffer, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID, "", false);
+        if (serviceResult.getRunOptions().reportResponseRaw) {
+            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
         }
-
+        appendPayload(serviceResult, buffer, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
+        if (serviceResult.getRunOptions().reportPayloadsAsXML) {
+            if (Tools.notBlank(serviceResult.getXmlResult())) {
+                appendPayload(serviceResult, buffer, serviceResult.getXmlResult(), ServiceResult.PRETTY_FORMAT.XML, "RESPONSE (as xml)", "RESPONSEXML" + tocID, "", false);
+            }
+        }
         if (Tools.notBlank(serviceResult.expectedContentRaw)) {
             appendPayload(serviceResult, buffer, serviceResult.expectedContentRaw, respType, "EXPECTED (raw)", "EXPECTEDraw" + tocID, serviceResult.expectedResponseFilenameUsed);
             appendPayload(serviceResult, buffer, serviceResult.expectedContentExpanded, respType, "EXPECTED (expanded)", "EXPECTEDexpanded" + tocID, "");
-            appendPayload(serviceResult, buffer, serviceResult.expectedContentExpandedAsXml, ServiceResult.PRETTY_FORMAT.XML, "EXPECTED  (as xml)", "EXPECTEDasxml" + tocID, "");
+            if (serviceResult.getRunOptions().reportPayloadsAsXML) {
+                appendPayload(serviceResult, buffer, serviceResult.expectedContentExpandedAsXml, ServiceResult.PRETTY_FORMAT.XML, "EXPECTED (as xml)", "EXPECTEDasxml" + tocID, "");
+            }
             if (!serviceResult.expectedContentExpandedWasJson) {
                 appendPayload(serviceResult, buffer, ServiceResult.payloadXMLtoJSON(serviceResult.expectedContentExpanded), ServiceResult.PRETTY_FORMAT.JSON, "EXPECTED (as JSON)", "EXPECTEDJSON" + tocID, "");
             }

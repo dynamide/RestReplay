@@ -33,8 +33,11 @@ public class RunOptions {
     public boolean skipMutators = false;
     public boolean skipMutatorsOnFailure = true;
     public boolean dumpMasterSummary = false;
+    public boolean dumpRunOptions = false;
     public boolean dumpResourceManagerSummary = true;
     public boolean reportResourceManagerSummary = true;
+    public boolean reportResponseRaw = false;
+    public boolean reportPayloadsAsXML = false;
     public boolean failTestOnErrors = true;   //for one test, do we report SUCCESS or FAILURE.
     public boolean failTestOnWarnings = true; //for one test, do we report SUCCESS or FAILURE.
     public boolean outputServiceResultDB = false;
@@ -55,8 +58,9 @@ public class RunOptions {
 
     @Override
     public String toString() {
+        String CR0 = "\r\n   ";
         String CR = ",\r\n   ";
-        return "{" + CR +
+        return "{" + CR0 +
                 "    connectionTimeout=" + connectionTimeout + CR +
                 "    socketTimeout=" + socketTimeout + CR+
                 "    errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings + CR+
@@ -65,8 +69,11 @@ public class RunOptions {
                 "    failTestOnErrors=" + failTestOnErrors + CR+
                 "    evalReportLevel=" + evalReportLevel +CR+
                 "    dumpMasterSummary=" + dumpMasterSummary + CR+
+                "    dumpRunOptions=" + dumpRunOptions + CR+
                 "    dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
                 "    reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
+                "    reportResponseRaw=" + reportResponseRaw +CR+
+                "    reportPayloadsAsXML=" + reportPayloadsAsXML +CR+
                 "    skipMutatorsOnFailure=" + skipMutatorsOnFailure + CR+
                 "    skipMutators=" + skipMutators + CR+
                 "    condensedHeaders=" + condensedHeaders.keySet().toString() +CR+
@@ -86,8 +93,11 @@ public class RunOptions {
                 "failTestOnErrors=" + failTestOnErrors +BR+
                 "evalReportLevel=" + evalReportLevel +BR+
                 "dumpMasterSummary=" + dumpMasterSummary +BR+
+                "dumpRunOptions=" + dumpRunOptions +BR+
                 "dumpResourceManagerSummary=" + dumpResourceManagerSummary +BR+
                 "reportResourceManagerSummary=" + reportResourceManagerSummary +BR+
+                "reportResponseRaw=" + reportResponseRaw +BR+
+                "reportPayloadsAsXML=" + reportPayloadsAsXML +BR+
                 "skipMutatorsOnFailure=" + skipMutatorsOnFailure +BR+
                 "skipMutators=" + skipMutators +BR+
                 "condensedHeaders=" + condensedHeaders.keySet().toString() +BR+
@@ -122,8 +132,11 @@ public class RunOptions {
         String failTestOnWarnings = runOptionsNode.valueOf("failTestOnWarnings");
         String failTestOnErrors = runOptionsNode.valueOf("failTestOnErrors");
         String dumpMasterSummary = runOptionsNode.valueOf("dumpMasterSummary");
+        String dumpRunOptions = runOptionsNode.valueOf("dumpRunOptions");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
         String reportResourceManagerSummary = runOptionsNode.valueOf("reportResourceManagerSummary");
+        String reportResponseRaw = runOptionsNode.valueOf("reportResponseRaw");
+        String reportPayloadsAsXML = runOptionsNode.valueOf("reportPayloadsAsXML");
         String skipMutators = runOptionsNode.valueOf("skipMutators");
         String skipMutatorsOnFailure = runOptionsNode.valueOf("skipMutatorsOnFailure");
         String evalReportLevel = runOptionsNode.valueOf("evalReportLevel");
@@ -152,11 +165,20 @@ public class RunOptions {
         if (Tools.notBlank(dumpMasterSummary)) {
             this.dumpMasterSummary = Tools.isTrue(dumpMasterSummary);
         }
+        if (Tools.notBlank(dumpRunOptions)) {
+            this.dumpRunOptions = Tools.isTrue(dumpRunOptions);
+        }
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             this.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
         }
         if (Tools.notBlank(reportResourceManagerSummary)) {
             this.reportResourceManagerSummary = Tools.isTrue(reportResourceManagerSummary);
+        }
+        if (Tools.notBlank(reportResponseRaw)) {
+            this.reportResponseRaw = Tools.isTrue(reportResponseRaw);
+        }
+        if (Tools.notBlank(reportPayloadsAsXML)) {
+            this.reportPayloadsAsXML = Tools.isTrue(reportPayloadsAsXML);
         }
         if (Tools.notBlank(evalReportLevel)) {
             this.evalReportLevel = EVAL_REPORT_LEVEL.valueOf(evalReportLevel);

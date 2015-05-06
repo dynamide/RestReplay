@@ -811,7 +811,8 @@ public class RestReplay extends ConfigFile {
                 + "\r\n   masterVars: " + dumpMasterVars(masterVars)
                 + "\r\n   param_autoDeletePOSTS: " + param_autoDeletePOSTS
                 + "\r\n   Dump info: " + getDump()
-                + "\r\n   RunOptions: " + getRunOptions();
+                + ((getRunOptions().dumpRunOptions) ? "\r\n   RunOptions: " + getRunOptions() : "\r\n   RunOptions.dumpRunOptions: false" )
+                ;
 
         String autoDeletePOSTS = "";
 
