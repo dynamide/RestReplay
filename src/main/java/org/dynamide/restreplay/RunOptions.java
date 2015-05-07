@@ -86,7 +86,7 @@ public class RunOptions {
     public String toHTML() {
         String BR = ",<br />\r\n";
         String BE = "<br />\r\n";
-        return "<div class='RunOptions'>{" +BR+
+        return "<div class='RunOptions'>{" +BE+
                 "connectionTimeout=" + connectionTimeout +BR+
                 "socketTimeout=" + socketTimeout +BR+
                 "errorsBecomeEmptyStrings=" + errorsBecomeEmptyStrings +BR+

@@ -20,8 +20,8 @@ ssh $RESTREPLAY_SSH  'cd ~/git/RestReplayGithub; git pull; cp -r ~/git/RestRepla
 
 rm javadoc.zip
 
-pushd target/site/apidocs
-zip -r ../../../javadoc.zip *
+pushd target/javadoc
+zip -r ../../javadoc.zip *
 popd
 
 scp ./javadoc.zip $RESTREPLAY_SSH:~/sites/dynamide.com/RestReplay/javadoc
