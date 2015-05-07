@@ -96,3 +96,6 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
     - dumpRunOptions: cleaned up RunOptions dump,
     - reportPayloadsAsXML: controls output of RESPONSE (as xml) and EXPECTED  (as xml)
 - Added response/expected/code handling in addition to expected/code.
+
+===========Wed May 6 18:49:45 PDT 2015======================
+- Deployed version 1.0.10 to maven central

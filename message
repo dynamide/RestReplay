@@ -1,12 +1,1 @@
-- Added response/expected/code handling in addition to expected/code.
-
-- Added options to RunOptions:
-    - reportResponseRaw,
-    - dumpRunOptions: cleaned up RunOptions dump,
-    - reportPayloadsAsXML: controls output of RESPONSE (as xml) and EXPECTED  (as xml)
-
-- Added Totals section to report, to command-line output, and added a RunOption to control the command-line output of a summary list, dumpMasterSummary.
-
-- Made RestReplay available through Maven Central.
-
-- Finalized portable run scripts, all now use just RESTREPLAY_JAR without adding to the path. RESTREPLAY_JAR now should contain full path or relative to dir run is in.
+- Deployed version 1.0.10 to maven central
