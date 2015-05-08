@@ -656,10 +656,11 @@ public class RestReplayReport {
                         numFAILURE++;
                     }
                     if (master.getRunOptions().dumpMasterSummary){
-                        masterSummary.append("").append(sr.tiny()).append('\n');
+                        masterSummary.append(sr.tiny()).append('\n');
                     }
                 }
             }
+
             String masterSummaryLine = "TESTS: "+numTests+" SUCCESS: "+numSUCCESS + " FAILURE: "+numFAILURE;
             String masterSummaryLineHTML = smallblack("TESTS: ")+numTests+' '+ok("SUCCESS:")+numSUCCESS + ' '+red("FAILURE:")+numFAILURE;
 
@@ -698,9 +699,20 @@ public class RestReplayReport {
             } else {
                 sb.append("<p>ResourceManager Summary off. To see summary, set reportResourceManagerSummary=\"true\" in master::runOptions or runOptions.xml.</p>");
             }
+
+            String onSummaryScriptResult = master.fireOnSummary();
+            if (Tools.notBlank(onSummaryScriptResult)){
+                sb.append("<h2>Master onSummary event results</h2>");
+                sb.append("<div ID='onSummaryScriptResult' class='white-box'>");
+                sb.append("<div class='payload-subtitle' style='border: 1px solid black;'>"+master.onSummaryScriptName+"</div>");
+                sb.append(onSummaryScriptResult);
+                sb.append("</div>");
+            }
+
             sb.append(HTML_PAGE_END);
 
             if (master.getRunOptions().dumpMasterSummary) {
+                System.out.println("\nMaster Summary:\n");
                 System.out.println(masterSummary+"\n");
             }
 

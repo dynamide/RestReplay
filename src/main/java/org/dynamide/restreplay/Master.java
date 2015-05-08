@@ -2,9 +2,13 @@ package org.dynamide.restreplay;
 
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
+import org.dynamide.interpreters.Eval;
+import org.dynamide.interpreters.EvalResult;
+import org.dynamide.interpreters.RhinoInterpreter;
 import org.dynamide.util.Tools;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -26,6 +30,12 @@ public class Master extends ConfigFile {
     public Map<String, ServiceResult> getMasterNamespace(){
         return masterNamespace;
     }
+
+    private String onSummaryScript = "";
+    public String onSummaryScriptName = "";
+
+    List<List<ServiceResult>> serviceResultsListList = new ArrayList<List<ServiceResult>>();
+
 
     public Map<String,Object> vars = new LinkedHashMap<String,Object>();
     public Map<String, Object> getVars() {
@@ -90,7 +100,108 @@ public class Master extends ConfigFile {
         }
         getVars().putAll(readVars(nodeWVars));
         this.getRunOptions().addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
+        readOnSummary(masterNode);
+        readOnBeginMaster(masterNode);
+        readOnEndMaster(masterNode);
         return document;
+    }
+
+    private void readOnSummary(Node masterNode)
+    throws  FileNotFoundException {
+        readEvent(masterNode, "onSummary");
+    }
+
+    private void readOnBeginMaster(Node masterNode)
+    throws  FileNotFoundException {
+        readEvent(masterNode, "onBeginMaster");
+    }
+
+    private void readOnEndMaster(Node masterNode)
+    throws  FileNotFoundException {
+        readEvent(masterNode, "onEndMaster");
+    }
+
+    String fireOnSummary(){
+        return fireEvent("onSummary");
+    }
+
+    private String fireOnBeginMaster(){
+        return fireEvent("onBeginMaster");
+    }
+
+    private String fireOnEndMaster(){
+        return fireEvent("onEndMaster");
+    }
+
+    /* supports javascript only, not jexl.*/
+    private void readEvent(Node masterNode, String eventID)
+    throws  FileNotFoundException {
+        Event event = new Event();
+        Node eventNode = masterNode.selectSingleNode("event[@ID='"+eventID+"']");
+        String language = eventNode.valueOf("@language");
+        if (Tools.notBlank(language)){
+            if ( ! language.equalsIgnoreCase("javascript")){
+                throw new FileNotFoundException("language not supported for event ("+eventID+") : "+language+". Use language='javascript'");
+            }
+        }
+        event.language = "javascript";
+        String filenameRel = eventNode.valueOf("@filename");
+        if (Tools.notBlank(filenameRel)){
+            String filenameFull = getTestDir() + '/' + filenameRel;
+            try {
+                ResourceManager.Resource scriptResource = getResourceManager().readResource("event "+eventID,
+                        filenameRel,
+                        filenameFull);
+                if (scriptResource.provider == ResourceManager.Resource.SOURCE.NOTFOUND) {
+                    System.out.println("Master loading "+eventID+" event, but Resource not found: " + scriptResource.toString());
+                    onSummaryScript = "";
+                } else {
+                    onSummaryScript = scriptResource.contents;
+                    onSummaryScriptName = filenameRel;
+                }
+            } catch (IOException e){
+                throw new FileNotFoundException("could not load event script: "+filenameRel);
+            }
+        } else {
+            onSummaryScript = eventNode.valueOf(".");
+            onSummaryScriptName = "[inline]";
+        }
+        event.eventID = eventID;
+        event.name = onSummaryScriptName;
+        event.script = onSummaryScript;
+        events.put(eventID, event);
+    }
+
+    public static class Event {
+        public String eventID = "";
+        public String name = "";
+        public String script = "";
+        public String language = "";
+    }
+
+    private Map<String,Event> events = new HashMap<String,Event>();
+
+    public String fireEvent(String eventID){
+        Event event = events.get(eventID);
+        if (event == null || Tools.isBlank(event.script)) {
+            return "";
+        }
+        //System.out.println("Firing "+eventID+" event "+event.name);
+        Map<String,Object> varsMap = new HashMap<String, Object>();
+        varsMap.put("master", this);
+        varsMap.put("serviceResultsListList", serviceResultsListList);
+
+        Eval evalStruct = new Eval();
+        evalStruct.runOptions = this.getRunOptions();
+
+        RhinoInterpreter interpreter = new RhinoInterpreter();
+        interpreter.setVariable("master", this);
+        interpreter.setVariable("serviceResultsListList", serviceResultsListList);
+        interpreter.setVariable("kit", RestReplay.KIT);  //with kit they can spit to stdout if they want.
+        interpreter.setVariable("tools", RestReplay.TOOLS);
+        EvalResult evalResult = interpreter.eval(event.name, event.script);
+        evalStruct.addToEvalReport(evalResult);
+        return evalResult.getResultString();
     }
 
     private static class EnvResult {
@@ -139,43 +250,6 @@ public class Master extends ConfigFile {
     public List<List<ServiceResult>> runMaster(String masterFilename) throws Exception {
         return runMaster(masterFilename, true);
     }
-
-    /** Creates new instances of RestReplay, one for each controlFile specified in the master,
-     *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
-    public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
-        List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
-        List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
-        org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
-        String controlFile, testGroup, test;
-        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
-
-        List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
-        for (Node runNode : runNodes) {
-            controlFile = runNode.valueOf("@controlFile");
-            testGroup = runNode.valueOf("@testGroup");
-            test = runNode.valueOf("@test"); //may be empty
-            Map<String, Object> runVars = readVars(runNode);
-            //testGroups.add(testGroup);
-            list.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, testGroups));//TODO: remove dups.
-        }
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, list);
-        return list;
-    }
-
-    public List<List<ServiceResult>> runMaster(String masterFilename,
-                                               boolean readOptionsFromMaster,
-                                               String controlFile,
-                                               String testGroup,
-                                               String test) throws Exception {
-        List<List<ServiceResult>> list = new ArrayList<List<ServiceResult>>();
-        //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
-        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
-        List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
-        list.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, testGroups));//TODO: remove dups.
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, list);
-        return list;
-    }
-
     private List<ServiceResult> runTest(String masterFilename,
                                         String controlFile,
                                         String testGroup,
@@ -216,4 +290,47 @@ public class Master extends ConfigFile {
         //========================================================================
 
     }
+
+
+    /** Creates new instances of RestReplay, one for each controlFile specified in the master,
+     *  and setting defaults from this instance, but not sharing ServiceResult objects or maps. */
+    public List<List<ServiceResult>> runMaster(String masterFilename, boolean readOptionsFromMaster) throws Exception {
+        List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
+        org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
+
+        serviceResultsListList.clear();
+        fireOnBeginMaster();
+        String controlFile, testGroup, test;
+        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+
+        List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
+        for (Node runNode : runNodes) {
+            controlFile = runNode.valueOf("@controlFile");
+            testGroup = runNode.valueOf("@testGroup");
+            test = runNode.valueOf("@test"); //may be empty
+            Map<String, Object> runVars = readVars(runNode);
+            //testGroups.add(testGroup);
+            serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, testGroups));//TODO: remove dups.
+        }
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
+        fireOnEndMaster();
+        return serviceResultsListList;
+    }
+
+    public List<List<ServiceResult>> runMaster(String masterFilename,
+                                               boolean readOptionsFromMaster,
+                                               String controlFile,
+                                               String testGroup,
+                                               String test) throws Exception {
+        serviceResultsListList.clear();
+        fireOnBeginMaster();
+        //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
+        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+        List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
+        serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, testGroups));//TODO: remove dups.
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
+        fireOnEndMaster();
+        return serviceResultsListList;
+    }
+
 }

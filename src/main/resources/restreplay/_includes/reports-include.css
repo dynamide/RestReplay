@@ -701,3 +701,12 @@ td.dom-not-matched {
     margin-bottom: 1em;
     background-color: white;
 }
+.white-box {
+    font-family: Tahoma;
+    font-size: 70%;
+    border: 1px solid gray;
+    padding: 10px;
+    display: inline-block;
+    margin-bottom: 1em;
+    background-color: white;
+}

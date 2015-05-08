@@ -322,7 +322,7 @@
                     <tr><th>this.mutator.getIndex()</th>
 <td> - zero-based index of which mutation loop this is.</td></tr>
                     <tr><th>__FILE__</th>
-<td> String name of the validator file. (only avaliable in validators)</td></tr>
+<td> String name of the validator file. (only available in validators)</td></tr>
 <tr>
 <th>this.LoopIndex</th>
 <td>If this test is run as a loop, then you can know the zero-based loop index by calling  <b>this.LoopIndex</b> </td></tr>
@@ -836,6 +836,7 @@ stand-alone within the control file.</td>
             &lt;<a href="#RestReplay-master.envs.vars.var">var</a> /&gt;
           &lt;/vars&gt;
       &lt;/envs&gt;
+      &lt;<a href="#RestReplay-master.event">event</a> /&gt;
       &lt;<a href="#RestReplay-master.run">run</a> /&gt;
   &lt;/restReplayMaster&gt;</pre>
       </div>
@@ -966,7 +967,7 @@ stand-alone within the control file.</td>
           </tr>
 
           <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.runOptions"></a>/restReplayMaster/runOptions</td>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-master.runOptions" id="RestReplay-master.runOptions"></a>/restReplayMaster/runOptions</td>
           </tr>
 
           <tr>
@@ -1146,7 +1147,7 @@ When overriding RunOptions in a master file, consider these two development scen
 </td>
 <td><br></td></tr>
 <tr>
-            <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.vars.var"></a>/restReplayMaster/vars/var</td>
+            <td colspan="3" class="element-hdr"><a name="RestReplay-master.vars.var" id="RestReplay-master.vars.var"></a>/restReplayMaster/vars/var</td>
           </tr>
           <tr>
 <td><br></td>
@@ -1338,6 +1339,118 @@ When overriding RunOptions in a master file, consider these two development scen
 
               <td>A single variable, which will be available to all tests called by this master.
 <br>                  Behaves exactly like <a href="#RestReplay-master.vars.var">/restReplayMaster/vars/var</a>&nbsp; except that the vars come from the <a href="#RestReplay-master.envs">environment</a> specified.<br>See examples at <a href="#RestReplay-master.envs">/restReplayMaster/envs</a><br>See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td>
+          </tr>
+
+
+
+
+
+
+          <tr>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.event" id="RestReplay-master.event"></a>/restReplayMaster/event</td>
+          </tr>
+
+          <tr>
+              <td><br></td>
+
+              <td>Names an event handler which gets fired at some phase.
+                  Below are the named events, specified by the attribute ID.  <i>NOTE: You only get these events if you
+                  run a Master.  Running a test or testGroup without a Master will skip these events and other Master control file features.</i>
+                  <br />Currently supported event IDs:
+                  <br /><code>onBeginMaster</code>
+                  <br /><code>onSummary</code>
+                  <br /><code>onEndMaster</code>
+              </td>
+          </tr>
+          <tr>
+              <td>ID="onSummary"</td>
+
+              <td>Names an event handler which gets fired when the report is in the summary phase.  You
+              can put any javascript you want in here, and have access to the Master, and the List of Lists of ServiceResults
+              for the whole run.  The code can be inline, or in a relative filename, just like a <a href="#RestReplay-restReplay.testGroup.test.response.validator">validator</a>.  If you
+                  return a value from the event handler, or if you put an expression on the last line of the handler,
+                  that (html) result ends up at the end of the report on the Master Report Index page.
+                  In this way, you can extend the report with any html you want, pulling from the ServiceResult values
+                  that represent each test.  If you need to create your own file output, you can call <code>master.getTestDir()</code>
+                  and any of the File handling functions in FileTools, such as: <code>kit.getFileTools().saveFile(...)</code> See the
+                  javadoc for <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/util/FileTools.html">FileTools</a>
+                  <br />
+                  <br />
+                  <b>Variables in the context of the event handler:</b><br/>
+              <code>
+                  <b>master</b> : pointer to the Master running this test.<br/>
+                  <b>kit</b> : org.dynamide.restreplay.Kit object<br/>
+                  <b>tools</b> : org.dynamide.util.Tools object<br/>
+                  <b>serviceResultsListList</b> : a List&lt;List&lt;ServiceResult>>
+              </code>
+                  <br />
+                  The outer list of serviceResultsListList is a list of all testGroups, the inner list is a list of all the tests within that testGroup. The outer list doesn't have a property for the testGroupID, but each ServiceResult
+                  does have a testGroupID property.
+              </td>
+          </tr>
+
+          <tr>
+              <td>ID="onBeginMaster"</td>
+
+              <td>Fires after the Master has been configured, but just before it runs any tests.
+              </td>
+          </tr>
+
+          <tr>
+              <td>ID="onEndMaster"</td>
+
+              <td>Fires after the report has been written.  The event handler is an appropriate place for programmatic cleanup of resources not cleaned up by autoDeletePOSTS.
+              </td>
+          </tr>
+
+
+          <tr>
+              <td>Example:<br />
+                  (inline)
+              </td>
+              <td><div class="code">
+&lt;event ID="onSummary" lang="javascript">&lt;![CDATA[
+  var outstring = "&lt;h4>APIs called&lt;/h4>";
+  var arr = [];
+  for (var i=0; i&lt;serviceResultsListList.size(); i++) {
+      var serviceResultsList = serviceResultsListList.get(i);
+      for (var j=0; j&lt;serviceResultsList.size(); j++) {
+          var serviceResult = serviceResultsList.get(j);
+          arr.push(serviceResult.method+"    "+serviceResult.fullURL);
+      }
+  }
+  outstring += "&lt;p>list: &lt;br />"+arr.join("&lt;br />")+"&lt;/p>";
+  outstring;
+]]>&lt;/event>
+              </div>
+              </td>
+          </tr>
+
+          <tr>
+              <td>Example:<br />
+                  (filename)
+              </td>
+              <td>
+                  Reference a script file in the master file <b>master-self-test.xml</b> :
+                  <div class="code">
+&lt;event ID="onSummary" lang="javascript" filename="<b>_self_test/s/master-self-test-onSummary.js</b>"/>
+              </div>
+                  Then put the javascript in that file <b>_self_test/s/master-self-test-onSummary.js</b> :
+              <div class="code">
+  var outstring = "&lt;h4>APIs called&lt;/h4>";
+  var arr = [];
+  for (var i=0; i&lt;serviceResultsListList.size(); i++) {
+      var serviceResultsList = serviceResultsListList.get(i);
+      for (var j=0; j&lt;serviceResultsList.size(); j++) {
+          var serviceResult = serviceResultsList.get(j);
+          arr.push(serviceResult.method+"    "+serviceResult.fullURL);
+      }
+  }
+  outstring += "&lt;p>list: &lt;br />"+arr.join("&lt;br />")+"&lt;/p>";
+  outstring;
+              </div>
+    <i>The name of the master file and the name of the script can be any valid filenames.</i>
+              </td>
           </tr>
 
           <tr>

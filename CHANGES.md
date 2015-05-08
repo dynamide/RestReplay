@@ -99,3 +99,10 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 
 ===========Wed May 6 18:49:45 PDT 2015======================
 - Deployed version 1.0.10 to maven central
+
+===========Thu May 7 20:24:21 PDT 2015======================
+- Added restReplayMaster/event node, so that you can add a javascript event handler to perform additional processing during the report summary phase.
+- Added three events using this mechanism: onBeginMaster, onSummary, onEndMaster.
+- Updated doco with events
+- Added these three events to master-self-test.xml
+- Deployed version 1.0.11 to maven central

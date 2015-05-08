@@ -616,7 +616,6 @@ public class RestReplay extends ConfigFile {
         return result;
     }
 
-
     private static String dumpMasterVars(Map<String, Object> masterVars) {
         if (masterVars == null) {
             return "";
