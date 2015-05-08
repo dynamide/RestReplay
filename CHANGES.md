@@ -106,3 +106,6 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 - Updated doco with events
 - Added these three events to master-self-test.xml
 - Deployed version 1.0.11 to maven central
+
+===========Thu May 7 20:38:04 PDT 2015======================
+- Deployed version 1.0.12 to maven central, fixed NPE.

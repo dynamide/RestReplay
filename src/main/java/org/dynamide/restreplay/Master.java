@@ -138,6 +138,9 @@ public class Master extends ConfigFile {
     throws  FileNotFoundException {
         Event event = new Event();
         Node eventNode = masterNode.selectSingleNode("event[@ID='"+eventID+"']");
+        if (eventNode==null){
+            return;
+        }
         String language = eventNode.valueOf("@language");
         if (Tools.notBlank(language)){
             if ( ! language.equalsIgnoreCase("javascript")){
