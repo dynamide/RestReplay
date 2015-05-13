@@ -33,6 +33,14 @@ public class GregorianCalendarDateTimeUtils {
      public static String currentDateUTC() {
          return formatAsISO8601Date(currentDateAndTime(DateUtils.UTCTimeZone()));
      }
+
+    public static String dateUTCToString(Object millis){
+        GregorianCalendar gcal = new GregorianCalendar();
+        gcal.setTimeZone(DateUtils.UTCTimeZone());
+        Date now = new Date(Long.parseLong(millis.toString()));
+        gcal.setTime(now);
+        return formatAsISO8601Date(gcal);
+    }
     
    /**
     * Returns a calendar date, representing the current date and time instance

@@ -891,6 +891,14 @@ public class RestReplay extends ConfigFile {
                         if (loopHelper.error) {
                             continue TESTNODES;  //syntax error in test/@loop, Go to the next test. getIterationsLoop creates an error ServiceResult, adds it to the reports and map.
                         }
+                        if (loopHelper.numIterations==0){
+                            serviceResult = new ServiceResult(getRunOptions());
+                            serviceResult.controlFileName = controlFileName;
+                            serviceResult.testID = testID;
+                            serviceResult.addAlertWarning("ZERO loops run:"+loopHelper.toString());
+                            report.addTestResult(serviceResult);
+                            System.out.println("\n\n~~~~~~~~~~~ ZERO loops run:"+loopHelper.toString());
+                        }
                         for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
                             serviceResult = new ServiceResult(getRunOptions());
                             serviceResult.controlFileName = controlFileName;
@@ -929,6 +937,7 @@ public class RestReplay extends ConfigFile {
                             serviceResult.testID = testID;
                         }
                         serviceResult.addError("Exception caught attempting to run testNode", e);
+                        report.addTestResult(serviceResult);
                     }
                 }
                 serviceResultsMap.remove("result");
@@ -1318,7 +1327,7 @@ public class RestReplay extends ConfigFile {
         // but "result" is supposed to be available until end of test.
     }
 
-    private void doPOSTPUT(OneTest test,
+    private void    doPOSTPUT(OneTest test,
                            boolean isPUT,
                            String method,
                            String contentRawFromMutator,

@@ -109,3 +109,10 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 
 ===========Thu May 7 20:38:04 PDT 2015======================
 - Deployed version 1.0.12 to maven central, fixed NPE.
+
+===========Tue May 12 22:50:07 PDT 2015======================
+- added serviceResultsMap to Jexl context.
+- added toString for LoopHelper
+- added warning ServiceResult for ZERO loops.
+- added error ServiceResult for untrapped error in loop.
+

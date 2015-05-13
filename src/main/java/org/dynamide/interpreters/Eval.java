@@ -114,9 +114,11 @@ public class Eval {
         result.context = logname;
         result.expression = inputJexlExpression;
         try {
+            jc.set("serviceResultsMap", serviceResultsMap);
             jc.set("itemCSID", "${itemCSID}"); //noiseless passthru.
             jc.set("tools", TOOLS);
             jc.set("kit", KIT);
+            //loop variable is set via LoopHelper.setGlobalVariablesForLooping
             if (serviceResultsMap!=null) {
                 for (Map.Entry <String,ServiceResult> entry:serviceResultsMap.entrySet()){
                     jc.set(entry.getKey(), entry.getValue());

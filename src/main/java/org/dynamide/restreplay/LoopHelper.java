@@ -15,12 +15,16 @@ import java.util.*;
 public class LoopHelper {
     public boolean error = false;
     public boolean doingIterations = false;
+    public String iterations = "";//informational only.
     public int numIterations = -1;
     public Iterator<Map.Entry<String,Object>> mapIterator = null;
     public Iterator collectionIterator = null;
     public String[] loopArray = null;
     public Object[] loopObjectArray = null;
     public Object loopObject = null;
+    public String toString(){
+        return "{ loops:"+numIterations+", expression: \""+iterations+"\"}";
+    }
     public void setGlobalVariablesForLooping(ServiceResult serviceResult, Eval evalStruct, int itnum){
         evalStruct.jc.set("loop.key", "");
         evalStruct.jc.set("loop.value", "");
@@ -64,23 +68,23 @@ public class LoopHelper {
                                           List<ServiceResult> results){
         LoopHelper loopHelper = new LoopHelper();
 
-        String iterations = testNode.valueOf("@loop");  //try as an attribute
-        if (Tools.isBlank(iterations)){
-            iterations = testNode.valueOf("loop"); //try as an element (supports multi-line expressions).
+        loopHelper.iterations = testNode.valueOf("@loop");  //try as an attribute
+        if (Tools.isBlank(loopHelper.iterations)){
+            loopHelper.iterations = testNode.valueOf("loop"); //try as an element (supports multi-line expressions).
         }
         loopHelper.doingIterations = false;
         loopHelper.numIterations = 1;
         Map<String,Object> loopMap = null;
         Collection loopCollection = null;
 
-        if (Tools.notBlank(iterations)){
+        if (Tools.notBlank(loopHelper.iterations)){
             loopHelper.doingIterations = true;
             EvalResult evalResult = null;
             try {
-                evalResult = evalStruct.eval("calculate @loop", iterations, clonedMasterVars);
+                evalResult = evalStruct.eval("calculate @loop", loopHelper.iterations, clonedMasterVars);
                 if (   evalResult.worstLevel.equals(Alert.LEVEL.WARN)
                         || evalResult.worstLevel.equals(Alert.LEVEL.ERROR)){
-                    throw new Exception(" expression: "+iterations);
+                    throw new Exception(" expression: "+loopHelper.iterations);
                 }
                 Object resultResult = evalResult.result;
                 //serviceResult.alerts.addAll(evalResult.alerts);
@@ -104,12 +108,12 @@ public class LoopHelper {
                     loopHelper.numIterations = loopCollection.size();
                     evalStruct.jc.set("loop", resultResult);
                 } else {
-                    iterations = evalResult.getResultString();
-                    loopHelper.numIterations = Integer.parseInt(iterations);
+                    loopHelper.iterations = evalResult.getResultString();
+                    loopHelper.numIterations = Integer.parseInt(loopHelper.iterations);
                 }
                 loopHelper.loopObject = evalStruct.jc.get("loop");
             } catch (Throwable t){
-                System.out.println("\n======NOT doing iterations because loop expression failed:"+iterations+"\n");
+                System.out.println("\n======NOT doing iterations because loop expression failed:"+loopHelper.iterations+"\n");
                 ServiceResult serviceResult = new ServiceResult(runOptions);
                 if (evalResult!=null)evalResult.alerts.addAll(evalResult.alerts);
                 serviceResult.testID = testNode.valueOf("@ID");

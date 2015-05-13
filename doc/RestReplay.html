@@ -314,7 +314,7 @@
 <td>  <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/restreplay/ServiceResult.html">org.dynamide.restreplay.ServiceResult</a>  - also stored as "serviceResult". </td></tr> 
                     <tr><th>serviceResultsMap</th>
 <td>  Map&lt;String, org.dynamide.restreplay.ServiceResult&gt;  - a map of all previously run tests in this same testGroup, kept in insertion order of the tests run.
-                    Key is the ID of the test element.</td></tr> 
+                    Key is the ID of the test element.  The special values <code>this</code>and <code>result</code> are also available in the serviceResultsMap, and point to the current serviceResult.</td></tr>
                     <tr><th>tools</th>
 <td>  <a href="http://dynamide.org/RestReplay/javadoc/org/dynamide/util/Tools.html">org.dynamide.util.Tools</a></td></tr>
                     <tr><th>kit</th>
@@ -386,6 +386,76 @@ for (var i=0; i&lt;r.count; i++){
 <td><br></td></tr>
                 </tbody></table>
       </p>
+
+        <p>You may specify that a test should loop. You supply either the <b>loop=""</b> attribute, or the <b>&lt;loop></b> element,
+            with an expression that returns a number, an array, a Collection, or a Map
+            (see <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
+            The loop value is a Jexl expression, or an integer.
+            For example:
+        <ul>
+            <li>10</li>
+            <li>${['a', 'b', 'c']}</li>
+            <li>${{'key-a':'a', 'key-b':'b',  'key-c':'c']}</b></li>
+            <li>${[200, 404, 202]}</b></li>
+            <li>${otherTest.exportedVarCollection}</b></li>
+            <li>${[{'a':'aVal', 'b':'bVal'},{'c':'cVal', 'd':'dVal'}]}</b></li>
+        </ul>
+        <br />
+        The last example is an array of maps.  Each of the maps becomes loop.value.  So you could access the value for key "a" like this:
+        <b>${loop.value.a}</b>
+        <br />
+
+        <br />
+        RestReplay loops the test over the range you provide, and for each iteration, makes the following values available
+        in contexts for evaluation of filenames, vars, headers, and validators.  Javascript validators also get these values via the
+        global namespace.  In both javascript and jexl, the names of the variables are shown in the table.
+        </p>
+        <table class="matrix">
+            <tbody>
+            <tr><th>loop</th>
+                <td> A loop object that has index, key, and value properties.  You may specify
+                    an array of String, an array of Object, a Collection, or a Map. (see <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
+                    If the loop expression evaluates to one of these, the variables below apply.
+                </td>
+            </tr>
+            <tr><th>loop.index</th>
+                <td>The loop index number of this iteration, zero-based.  So if you specify loop="3", the
+                    test will be run three times, with the values of loop.index being: 0, 1, and 2.
+                </td>
+            </tr>
+            <tr><th>loop.key</th>
+                <td>If the loop expression returns a map like <b>{"a":"a value","b":"b value"}</b>, then
+                    the test will be run twice.  On the first iteration, loop.index=0, loop.key="a", and loop.value="b value".
+                    Then, on the second iteration, when loop.index=1, loop.key will be "b", and loop.value will be "b value".
+                </td>
+            </tr>
+            <tr><th>loop.value</th>
+                <td>
+                    If the loop object is an array, the loop.value will be the array element at the index loop.index.
+                    For a map, the value is the value for the current key, available in loop.key.
+                    RestReplay evaluates these for you,
+                <pre>
+For maps:
+   loop.value == loop[loop.key]
+For arrays:
+   loop.value == loop[loop.index]
+                    </pre>
+                </td>
+            </tr>
+            <tr><th>loop.object</th>
+                <td>Set if the loop expression returns an object.  Will probably be a Map, Array, or Collection.
+                </td>
+            </tr>
+            </tbody></table>
+
+        See the many test cases in the <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.html">self-test</a> that use looping and vars.
+        Specifically, see this testGroup: <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loops</a>, which uses looping and vars.
+
+
+
+
+
+        </p>
 <h4><a name="1.c.3.CommonUsefulMethodsInContexts"></a>1.c.3 Common Useful Methods in Contexts</h4>
 <p>Note that the variable named "<b>this"</b> is equivalent to <b>serviceResult</b> in the following examples, e.g. these two statements are identical: </p>
 <ul>
@@ -431,74 +501,6 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 
 
 
-<p>You may specify that a test should loop. You supply either the <b>loop=""</b> attribute, or the <b>&lt;loop></b> element,
-    with an expression that returns a number, an array, a Collection, or a Map
-    (see <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
-    The loop value is a Jexl expression, or an integer.
-    For example:
-    <ul>
-        <li>10</li>
-        <li>${['a', 'b', 'c']}</li>
-        <li>${{'key-a':'a', 'key-b':'b',  'key-c':'c']}</b></li>
-        <li>${[200, 404, 202]}</b></li>
-        <li>${otherTest.exportedVarCollection}</b></li>
-        <li>${[{'a':'aVal', 'b':'bVal'},{'c':'cVal', 'd':'dVal'}]}</b></li>
-    </ul>
-    <br />
-    The last example is an array of maps.  Each of the maps becomes loop.value.  So you could access the value for key "a" like this:
-    <b>${loop.value.a}</b>
-    <br />
-    <br />
-    RestReplay loops the test over the range you provide, and for each iteration, makes the following values available
-    in contexts for evaluation of filenames, vars, headers, and validators.  Javascript validators also get these values via the
-    global namespace.  In both javascript and jexl, the names of the variables are shown in the table.
-    </p>
-    <table class="matrix">
-        <tbody>
-        <tr><th>loop</th>
-            <td> A loop object that has index, key, and value properties.  You may specify
-                an array of String, an array of Object, a Collection, or a Map. (see <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loop examples</a>)
-                If the loop expression evaluates to one of these, the variables below apply.
-            </td>
-        </tr>
-        <tr><th>loop.index</th>
-            <td>The loop index number of this iteration, zero-based.  So if you specify loop="3", the
-                test will be run three times, with the values of loop.index being: 0, 1, and 2.
-            </td>
-        </tr>
-        <tr><th>loop.key</th>
-            <td>If the loop expression returns a map like <b>{"a":"a value","b":"b value"}</b>, then
-                the test will be run twice.  On the first iteration, loop.index=0, loop.key="a", and loop.value="b value".
-                Then, on the second iteration, when loop.index=1, loop.key will be "b", and loop.value will be "b value".
-            </td>
-        </tr>
-        <tr><th>loop.value</th>
-            <td>
-                If the loop object is an array, the loop.value will be the array element at the index loop.index.
-                For a map, the value is the value for the current key, available in loop.key.
-                RestReplay evaluates these for you,
-                <pre>
-For maps:
-   loop.value == loop[loop.key]
-For arrays:
-   loop.value == loop[loop.index]
-                    </pre>
-            </td>
-        </tr>
-        <tr><th>loop.object</th>
-            <td>Set if the loop expression returns an object.  Will probably be a Map, Array, or Collection.
-            </td>
-        </tr>
-        </tbody></table>
-
-    See the many test cases in the <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.html">self-test</a> that use looping and vars.
-    Specifically, see this testGroup: <a href="http://dynamide.org/RestReplay/reports/_self_test/self-test.xml-Loops.html">Loops</a>, which uses looping and vars.
-
-
-
-
-
-      </p>
 <h4><a name="1.c.4.Vars"></a>1.c.4 Vars</h4>
 <p>The vars/var tag appears in several places in the configuration file trees.<br>They use the same rules discussed under <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>.</p>
 <p>Vars in different xml config elements have different scoping rules.</p>

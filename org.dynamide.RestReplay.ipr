@@ -211,15 +211,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/asm/asm/3.3.1/asm-3.3.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.beust:jcommander:1.27">
+    <library name="Maven: com.beust:jcommander:1.48">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.27/jcommander-1.27.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.48/jcommander-1.48.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.27/jcommander-1.27-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.48/jcommander-1.48-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.27/jcommander-1.27-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.48/jcommander-1.48-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.google.code.gson:gson:2.3.1">
@@ -420,15 +420,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.12/slf4j-log4j12-1.7.12-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.testng:testng:6.8.21">
+    <library name="Maven: org.testng:testng:6.9.4">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.8.21/testng-6.8.21.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.4/testng-6.9.4.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.8.21/testng-6.8.21-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.4/testng-6.9.4-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.8.21/testng-6.8.21-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.4/testng-6.9.4-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: xml-apis:xml-apis:1.0.b2">

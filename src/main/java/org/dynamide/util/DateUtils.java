@@ -17,10 +17,10 @@ public class DateUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
-    final static String ISO_8601_DATE_PATTERN = "yyyy-MM-dd";
-    final static String UTC_TIMEZONE_IDENTIFIER = "UTC";
-    final static String ISO_8601_UTC_TIMESTAMP_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    final static Locale NULL_LOCALE = null;
+    public final static String ISO_8601_DATE_PATTERN = "yyyy-MM-dd";
+    public final static String UTC_TIMEZONE_IDENTIFIER = "UTC";
+    public final static String ISO_8601_UTC_TIMESTAMP_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    public final static Locale NULL_LOCALE = null;
     public final static List<String> isoLanguageCodes = new ArrayList(Arrays.asList(Locale.getISOLanguages()));    
 
     /**

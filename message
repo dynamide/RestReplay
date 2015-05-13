@@ -1,1 +1,5 @@
-- Deployed version 1.0.12 to maven central, fixed NPE.
+- added serviceResultsMap to Jexl context.
+- added toString for LoopHelper
+- added warning ServiceResult for ZERO loops.
+- added error ServiceResult for untrapped error in loop.
+
