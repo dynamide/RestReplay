@@ -51,13 +51,16 @@ artifacts:
 deploy new jar version to maven central:
     vi ~/src/RestReplay/pom.xml     ##update the version number
     mvn deploy                      ## see wallet-card for gpg passphrase.
+    after this, you need to release it, see Inspect a repository, next.
 
 Inspect a repository.  
    (Note that mvn deploy is set to close the staging repository automatically, so you don't have to do this step to push to central.  )  
     log in to https://oss.sonatype.org/#welcome
     click Staging Repositories under Build Promotion on the left.
     look for orgdynamide-1xxx where 1xxx will be like 1009, or 1010 etc.
-    
+    When satisfied, click "release" button.
+    Alternatively, use
+      mvn nexus-staging:release
 
 =============================================================
 Deploy to Revel/LAS:
