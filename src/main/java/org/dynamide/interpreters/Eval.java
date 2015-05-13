@@ -152,7 +152,7 @@ public class Eval {
                             value = innerResult.getResultString();
                         }
                         if (innerResult.alerts.size()>0){
-                            result.alerts.addAll(innerResult.alerts);
+                            result.addAllAlerts(innerResult.alerts);
                         }
                         vars.put(key, value); //replace template value with actual value.
                         addToEvalReport(innerResult);
@@ -166,7 +166,7 @@ public class Eval {
             }
             EvalResult innerResult2 = parse(logname, inputJexlExpression);
             if (innerResult2.alerts.size()>0){
-                result.alerts.addAll(innerResult2.alerts);
+                result.addAllAlerts(innerResult2.alerts);
             }
             result.result = innerResult2.result;
             addToEvalReport(result);
@@ -235,7 +235,7 @@ public class Eval {
                 resultObj = script.execute(jc);
             } catch (Throwable ex){
                 System.out.println("\r\n\r\n\r\n~~~~~~~~~~~~~~~~~~ error "+ex);
-                evalResult.addAlert("Exception while evaluating variable: '"+var+"'.",// Exception: "+ex,
+                evalResult.addAlert("Exception while evaluating variable: '"+var+"'. Exception: "+ex,
                         dumpContext(jc),
                         LEVEL.ERROR);
                 resultObj = null;

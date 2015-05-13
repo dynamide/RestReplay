@@ -662,7 +662,7 @@ public class RestReplayReport {
             }
 
             String masterSummaryLine = "TESTS: "+numTests+" SUCCESS: "+numSUCCESS + " FAILURE: "+numFAILURE;
-            String masterSummaryLineHTML = smallblack("TESTS: ")+numTests+' '+ok("SUCCESS:")+numSUCCESS + ' '+red("FAILURE:")+numFAILURE;
+            String masterSummaryLineHTML = smallblack("TESTS: ")+numTests+' '+ok("SUCCESS:")+numSUCCESS + ' '+(numFAILURE>0?red("FAILURE:"):noerror("FAILURE:")) +numFAILURE;
 
             String pageTitle = "RestReplay "+localMasterFilename+(Tools.notBlank(envID)?" ("+envID+")":"");
             StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager(), pageTitle));
@@ -947,6 +947,11 @@ public class RestReplayReport {
     protected static String smallblack(String label) {
         return "<span class='SMALLBLACK'>" + label + "</span> ";
     }
+
+    protected static String noerror(String label) {
+        return "<span class='NOERROR'>" + label + "</span> ";
+    }
+
 
     protected String units(String label) {
         return "<span class='LABEL'>" + label + "</span> ";

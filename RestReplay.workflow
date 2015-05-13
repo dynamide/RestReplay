@@ -216,8 +216,13 @@ Switch to apache http client version 4.
 
    Postman Interceptor
    https://www.getpostman.com/docs/capture
-   import/export: 
-   
+   import/export:
+
+
+Consider architecting generators for requests.
+        <request>
+            <generator lang="javascript" filename="revelassignments/s/put-assignments.generator.js"/>
+        </request>
 
 
 =============================================================

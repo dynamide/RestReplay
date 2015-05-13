@@ -111,6 +111,13 @@ td, th {
     color: red;
     font-weight: bold;
 }
+.NOERROR {
+    padding: 2px;
+    font-size: 60%;
+    color: black;
+    font-weight: bold;
+}
+
 .EXPECTED {
     padding: 2px;
     font-size: 60%;

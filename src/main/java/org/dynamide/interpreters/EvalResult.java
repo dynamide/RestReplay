@@ -27,6 +27,14 @@ public class EvalResult {
         }
         this.alerts.add(new Alert(m,p,l));
     }
+    public void addAllAlerts(List<Alert> otherAlerts){
+        for (Alert otherAlert: otherAlerts){
+            this.alerts.add(otherAlert);
+            if (worstLevel.compareTo(otherAlert.level)<0){
+                this.worstLevel = otherAlert.level;
+            }
+        }
+    }
     public String toString(){
         int size =alerts.size();
         Alert[] alertArray = new Alert[size];

@@ -123,3 +123,10 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 - added warning ServiceResult for ZERO loops.
 - added error ServiceResult for untrapped error in loop.
 
+
+===========Wed May 13 13:40:59 PDT 2015======================
+- Added handling of errors in LoopHelper which were not bubbling up to ServiceResult.
+- loops of zero are now flagged as an error in the report.
+- FAILURE: 0 is now printed in black, not red.  FAILURE: 1 is printed in red, etc.
+- Set version number to 1.0.14
+

@@ -16,6 +16,7 @@ public class LoopHelper {
     public boolean error = false;
     public boolean doingIterations = false;
     public String iterations = "";//informational only.
+    public String expression = ""; //informational only.
     public int numIterations = -1;
     public Iterator<Map.Entry<String,Object>> mapIterator = null;
     public Iterator collectionIterator = null;
@@ -23,7 +24,7 @@ public class LoopHelper {
     public Object[] loopObjectArray = null;
     public Object loopObject = null;
     public String toString(){
-        return "{ loops:"+numIterations+", expression: \""+iterations+"\"}";
+        return "{ loops:"+numIterations+", expression: \""+expression+"\", iterations: \""+iterations+"\"}";
     }
     public void setGlobalVariablesForLooping(ServiceResult serviceResult, Eval evalStruct, int itnum){
         evalStruct.jc.set("loop.key", "");
@@ -72,6 +73,7 @@ public class LoopHelper {
         if (Tools.isBlank(loopHelper.iterations)){
             loopHelper.iterations = testNode.valueOf("loop"); //try as an element (supports multi-line expressions).
         }
+        loopHelper.expression = loopHelper.iterations;
         loopHelper.doingIterations = false;
         loopHelper.numIterations = 1;
         Map<String,Object> loopMap = null;
@@ -113,17 +115,16 @@ public class LoopHelper {
                 }
                 loopHelper.loopObject = evalStruct.jc.get("loop");
             } catch (Throwable t){
-                System.out.println("\n======NOT doing iterations because loop expression failed:"+loopHelper.iterations+"\n");
                 ServiceResult serviceResult = new ServiceResult(runOptions);
-                if (evalResult!=null)evalResult.alerts.addAll(evalResult.alerts);
+                if (evalResult!=null)serviceResult.alerts.addAll(evalResult.alerts);
                 serviceResult.testID = testNode.valueOf("@ID");
                 serviceResult.testIDLabel = Tools.notEmpty(serviceResult.testID)
                         ? (testGroupID + '.' + serviceResult.testID)
                         : (testGroupID + '.' + testElementIndex);
                 serviceResult.testGroupID = testGroupID;
-                String msg = "ERROR calculating loop";
+                String msg = "ERROR calculating loop "+loopHelper.toString();
                 serviceResult.addError(msg, t);
-                serviceResult.failureReason = msg+t.getMessage();
+                serviceResult.failureReason = msg+" "+t.getMessage();
                 List<Node> failures = testNode.selectNodes("response/expected/failure"); //TODO: get in sync with expected/failure handling elsewhere.
                 if (failures.size()>0){
                     serviceResult.expectedFailure = true;
