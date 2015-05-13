@@ -61,7 +61,7 @@ Inspect a repository.
     When satisfied, click "release" button.
     Alternatively, use
       mvn nexus-staging:release
-    Sonatype says their job to push to Central runs every 2 hours.
+    Sonatype says their job to push to Central runs every 10 minutes, and updates to search.maven.org take 2 hours.
 
 =============================================================
 Deploy to Revel/LAS:
