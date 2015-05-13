@@ -897,7 +897,6 @@ public class RestReplay extends ConfigFile {
                             serviceResult.testID = testID;
                             serviceResult.addAlertWarning("ZERO loops run:"+loopHelper.toString());
                             report.addTestResult(serviceResult);
-                            System.out.println("\n\n~~~~~~~~~~~ ZERO loops run:"+loopHelper.toString());
                         }
                         for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
                             serviceResult = new ServiceResult(getRunOptions());
@@ -1327,7 +1326,7 @@ public class RestReplay extends ConfigFile {
         // but "result" is supposed to be available until end of test.
     }
 
-    private void    doPOSTPUT(OneTest test,
+    private void doPOSTPUT(OneTest test,
                            boolean isPUT,
                            String method,
                            String contentRawFromMutator,

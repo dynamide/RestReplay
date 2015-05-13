@@ -116,3 +116,10 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 - added warning ServiceResult for ZERO loops.
 - added error ServiceResult for untrapped error in loop.
 
+
+===========Tue May 12 22:50:32 PDT 2015======================
+- added serviceResultsMap to Jexl context.
+- added toString for LoopHelper
+- added warning ServiceResult for ZERO loops.
+- added error ServiceResult for untrapped error in loop.
+
