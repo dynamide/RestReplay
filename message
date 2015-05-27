@@ -1,5 +1,1 @@
-- Added handling of errors in LoopHelper which were not bubbling up to ServiceResult.
-- loops of zero are now flagged as an error in the report.
-- FAILURE: 0 is now printed in black, not red.  FAILURE: 1 is printed in red, etc.
-- Set version number to 1.0.14
-
+Fixed small link in javadoc
