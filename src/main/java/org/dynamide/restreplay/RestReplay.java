@@ -954,7 +954,8 @@ public class RestReplay extends ConfigFile {
             //=== Now spit out the HTML report file ===
             //    This will happen for each testGroup.
             File m = new File(controlFileName);  //don't instantiate, just use File to extract file name without directory.
-            String relpath = m.getParentFile().toString();
+            File parentFile = m.getParentFile();
+            String relpath = parentFile!=null?parentFile.toString():"";
             this.relToMasterPath = calculateElipses(relpath);
             String reportName = controlFileName + '-' + testGroupID + ".html";
 

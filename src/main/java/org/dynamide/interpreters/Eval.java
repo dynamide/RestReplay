@@ -154,7 +154,15 @@ public class Eval {
                         if (innerResult.alerts.size()>0){
                             result.addAllAlerts(innerResult.alerts);
                         }
-                        vars.put(key, value); //replace template value with actual value.
+                        Object alreadyThereObject = vars.get(key);
+                        if (alreadyThereObject == null) {
+                            vars.put(key, value); //somehow a null value got through. probably won't hit this case.
+                        } else if (alreadyThereObject instanceof String) {
+                            vars.put(key, value); //replace template value with actual value.
+                        } else {
+                            //it is already there, and is a map or hashmap or something, so don't ask for its toString to replace itself.
+                            //System.out.println("\n====: NOT replacing template result object with that object's toString(): "+value);
+                        }
                         addToEvalReport(innerResult);
                     } catch (Exception e){
                         value = "ERROR_IN_EVAL: "+e;

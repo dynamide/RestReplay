@@ -131,7 +131,7 @@
                 <var ID="DAYS">${24*60*60*1000}</var>
                 <var ID="BASE_DATE">${tools.now()}</var>
                 <var ID="DUE_DATE_MILLIS">${BASE_DATE + loopvars[this.LoopIndex]*DAYS}</var>
-                <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}</var>
+                <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testID}</var>
                 <var ID="TITLE">Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}</var>
             </vars>
             <response>
@@ -708,7 +708,7 @@
                 <var ID="LOOP_VALUE">${loop.value}</var>
                 <var ID="LOOP_OBJECT">${loop.object}</var>
                 <var ID="DUE_DATE_MILLIS">${tools.now() + loop.value*DAYS}</var>
-                <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS} label: ${this.testIDLabel}</var>
+                <var ID="INSTRUCTOR_NOTE">Dr. L sez, assignment for ${DUE_DATE_MILLIS}  ${this.testID}</var>
                 <var ID="TITLE">Due ${kit.dates.getMonthName(DUE_DATE_MILLIS)} ${kit.dates.getDayOfMonth(DUE_DATE_MILLIS)}</var>
             </vars>
             <response>
@@ -847,6 +847,26 @@
                 </expected>
             </response>
         </test>
+        <test ID="MapInVar">
+            <method>GET</method>
+            <uri>/tagonomy?mock=true</uri>
+            <header name="Content-Type">application/json</header>
+            <vars>
+                <var ID="BAR">NIXON</var>
+                <var ID="MAP">
+                    ${{"DAY_3":"CREATE","DAY_4":"DELETE"}}
+                </var>
+            </vars>
+             <response>
+                <validator lang="javascript"><![CDATA[
+                    var ACTION = serviceResult.get("MAP").get("DAY_3")
+                    if (!ACTION.equals("CREATE")){
+                        serviceResult.addError("Value of map ("+ACTION+") didn't match \"CREATE\"");
+                    }
+                ]]></validator>
+             </response>
+         </test>
+
     </testGroup>
 
     <testGroup ID="deleteURLs">
