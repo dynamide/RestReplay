@@ -928,8 +928,25 @@ stand-alone within the control file.</td>
           <tr>
               <td><br></td>
 
-              <td>A list of users and their related Base-64 encrypted<tt>username:password</tt>strings. You can generate these strings in number of
-                  ways, among them by using the online utility at <a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel="nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.</td>
+              <td>A list of users and their related Base-64 encrypted <tt>username:password</tt> strings. You can generate these strings in number of
+                  ways:
+<pre>
+online: 
+    <a href="http://www.motobit.com/util/base64-decoder-encoder.asp" class="external-link" rel="nofollow">http://www.motobit.com/util/base64-decoder-encoder.asp</a>.
+                  
+    <a href="https://www.base64encode.org/">https://www.base64encode.org/</a>
+
+
+javascript in browser: 
+    function utf8_to_b64(str) {
+        return window.btoa(unescape(encodeURIComponent("myusername:mypassword")));
+    }
+    utf8_to_b64("myusername:mypassword");
+   
+dynamide:   
+    (new com.dynamide.util.Base64Encoder("myusername:mypassword")).processString();
+</pre>    
+    </td>
           </tr>
 
           <tr>
@@ -951,7 +968,8 @@ stand-alone within the control file.</td>
           <tr>
               <td>element text</td>
 
-              <td>Base-64 encrypted username:password to be used with "Basic Authentication" the same way a browser would.</td>
+              <td>Base-64 encrypted username:password to be used with "Basic Authentication" the same way a browser would. 
+              See: <a href="#RestReplay-master.auths">/restReplayMaster/auths</a></td>
           </tr>
 
           <tr>
@@ -1599,7 +1617,9 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>auths</td>
 
-            <td>This element adds to any auths placed in the <b>master</b> file. Any ID defined in the <b>control</b> file overrides an auth of the same ID defined in the <b>master</b> file.</td>
+            <td>This element adds to any auths placed in the <b>master</b> file. Any ID defined in the <b>control</b> file overrides an auth of the same ID defined in the <b>master</b> file.
+            <br />See: <a href="#RestReplay-master.auths">/restReplayMaster/auths</a>
+            </td>
           </tr>
 
           <tr>
@@ -1627,7 +1647,8 @@ When overriding RunOptions in a master file, consider these two development scen
           <tr>
             <td>element text</td>
 
-            <td>Base-64 encrypted username:password</td>
+            <td>Base-64 encrypted username:password
+            <br />See: <a href="#RestReplay-master.auths">/restReplayMaster/auths</a></td>
           </tr>
 
           <tr>

@@ -16,6 +16,11 @@
                      +--  pom.xml  #this file
                      +--  tests/
                      +--  reports/
+                     
+      Alternately, you can just add these dependency and build elements to your pom. 
+      The build element creates a lib directory with RestReplay, 
+      so that you can run the tests using the jar from the 
+      command line rather than through a maven exec.
         
     -->
     
