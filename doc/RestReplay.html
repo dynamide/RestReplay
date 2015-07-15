@@ -248,7 +248,7 @@
 <li>re-run over a list of values for one variable, or multiple variables</li>
 <li>mutate requests to send automatically variable data such as dates</li>
 <li>mutate requests to remove required and optional fields to test service schema compliance</li></ul>
-<li>All request payloads and expected response payload templates are stored as files within the deployed test.</li>
+<li>All request payloads and expected response payload templates are stored as files within the deployed test.  Note that only JSON and XML respons payloads are stored, not HTML.  </li>
 
         <li>Multiple tests can be grouped in a testGroup element, and each test may refer to previous tests within testGroup.&nbsp; </li>
 <li>This naturally models workflows from UX hitting a&nbsp; REST services layer, e.g. a resource is created in one test, then its ID, available in the response, is used by the next test to modify that resource.</li>
@@ -607,7 +607,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 
           public String location <span class="comments">//the Location: header value of the resource, which is a full URL.</span>
       </div>
-      <p>For each "<strong>test</strong>" node in a <strong>testGroup</strong>, RestReplay sets up a request, using the URI (which may contain expressions), the http method, and any parts specified for a POST or a PUT. The parts are read from text files in a directory relative to the RestReplay base directory, and may contain/define variables which get passed in. The value of these variables is evaluated in the <b>control</b> file just prior to the <strong>test</strong> node being run. So previous tests may be referenced. The parts are expanded for any expressions, and then put together in the appropriate http sequence and submitted to the server. The response from the server is then made available to the test to check using the "response" node. The "response" node allows you to specify a template file to compare, and any&nbsp; variables declared will be evaluated just prior to comparing the response from the server to the response template file.</p>
+      <p>For each "<strong>test</strong>" node in a <strong>testGroup</strong>, RestReplay sets up a request, using the URI (which may contain expressions), the http method, and any parts specified for a POST or a PUT. The parts are read from text files in a directory relative to the RestReplay base directory, and may contain/define variables which get passed in. The value of these variables is evaluated in the <b>control</b> file just prior to the <strong>test</strong> node being run. So previous tests may be referenced. The parts are expanded for any expressions, and then put together in the appropriate http sequence and submitted to the server. The response from the server is then made available to the test to check using the "response" node.  Note that only JSON and XML responses are reported, not HTML. The "response" node allows you to specify a template file to compare, and any&nbsp; variables declared will be evaluated just prior to comparing the response from the server to the response template file.</p>
 
       <p>After the testGroup has run, RestReplay will perform cleanup. You may control cleanup via the "autoDeletePOSTS" attribute of "testGroup".</p>
 <ul>
@@ -870,7 +870,7 @@ stand-alone within the control file.</td>
           <tr>
               <td>@dumpServiceResult</td>
 
-              <td>auto - like detailed, but always shows payloads if there is an error<br>full - like detailed, but defaults to showing payloads<br>detailed - enough information to debug<br>minimal - a one-line display<br>
+              <td>auto - like detailed, but always shows payloads if there is an error<br>full - like detailed, but defaults to showing payloads<br>detailed - enough information to debug<br>minimal - a one-line display.   Note that only JSON and XML response payloads are reported, not HTML.<br>
                   </td>
           </tr>
 
@@ -1045,7 +1045,7 @@ dynamide:
          <tr>
               <td>reportResponseRaw</td>
               <td><code>boolean: true|<b>false</b></code>
-                  In html report, include RESPONSE (raw).  The response is normally fed through a JSON pretty print.  If that causes problems, turn reportResponseRaw on.  It will not wrap in the browser, so the output doesn't look great, but it shows exactly the whitespace and all other characters that the server actually sent.
+                  In html report, include RESPONSE (raw).  The response is normally fed through a JSON pretty print.  If that causes problems, turn reportResponseRaw on.  It will not wrap in the browser, so the output doesn't look great, but it shows exactly the whitespace and all other characters that the server actually sent. Note that only JSON and XML responses are reported, not HTML.
               </td>
           </tr>
          <tr>
@@ -2619,7 +2619,7 @@ For convenience, you may place the <b>expected/code</b> node either at the top l
           </tr>
           <tr>
             <td>response</td>
-            <td>Container for evaluating the response from the server</td>
+            <td>Container for evaluating the response from the server.</td>
           </tr>
 
           <tr>
@@ -2726,6 +2726,7 @@ stdout.println("LOG from javascript: "+result);
               attribute level: can be "ZERO", "TEXT", "ADDOK", "TREE", "TREE_TEXT", and "STRICT".<br>
               (For all tests, whitespace allowed by XML is ignored, and also ignoring whitespace at either end of child node text.<br>
               i.e. a child's text node is trimmed prior to comparison.)
+               Note that only JSON and XML respons payloads are reported, not HTML.
 
 
 
