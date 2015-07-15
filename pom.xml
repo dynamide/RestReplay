@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dynamide</groupId>
     <artifactId>RestReplay</artifactId>
-    <version>1.0.15</version>
+    <version>1.0.16</version>
     <name>RestReplay</name>
     <packaging>jar</packaging>
     <description>RestReplay is a dynamide.org utility to send REST requests to the services layer 

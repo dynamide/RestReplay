@@ -895,7 +895,9 @@ public class RestReplay extends ConfigFile {
                             serviceResult = new ServiceResult(getRunOptions());
                             serviceResult.controlFileName = controlFileName;
                             serviceResult.testID = testID;
-                            serviceResult.addAlertWarning("ZERO loops run:"+loopHelper.toString());
+                            serviceResult.addAlertOK("ZERO loops run:"+loopHelper.toString());
+                            serviceResult.expectedFailure = true;
+                            serviceResult.failureReason = "";
                             report.addTestResult(serviceResult);
                         }
                         for (int itnum = 0; itnum < loopHelper.numIterations; itnum++) {
