@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<!--
+     This is an example of how you would use Maven to pull in RestReplay into your project,
+     in order to test your services project.  Here com.example.serviceproject is your parent project,
+     and it has a restreplay directory with this pom file.  This pom file pulls in RestReplay, and 
+     this directory has a tests/ folder for tests that hit your services project.
+     
+     Here is an example directory structure showing your project, and how to integrate RestReplay:
+     
+         /src/servicesproject/
+             +--  pom.xml   # a pom that defines your services project
+                 +--  restreplay/
+                     +--  pom.xml  #this file
+                     +--  tests/
+                     +--  reports/
+        
+    -->
+    
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>restreplay</artifactId>
+	<packaging>pom</packaging>
+	<name>restreplay</name>
+
+	<parent>
+		<groupId>com.example.serviceproject</groupId>
+		<version>3.0.0</version>
+		<artifactId>services</artifactId>
+	</parent>
+
+	<dependencies>
+        <dependency>
+    		<groupId>org.dynamide</groupId>
+   			<artifactId>RestReplay</artifactId>
+    		<version>1.0.16</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.dynamide</groupId>
+   			<artifactId>RestReplay</artifactId>
+    		<version>1.0.16</version>
+    		<classifier>standalone</classifier>
+		</dependency>
+	</dependencies>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.dynamide</groupId>
+                      <artifactId>RestReplay</artifactId>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${basedir}/lib</outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.dynamide</groupId>
+                      <artifactId>RestReplay</artifactId>
+                      <classifier>standalone</classifier>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${basedir}/lib</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+		</plugins>
+	</build>
+	
+</project>
