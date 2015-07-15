@@ -69,7 +69,12 @@ Deploy to Revel/LAS:
    cd ~/src/RestReplay
    mvn -o -DskipTests install
    cd ~/ws/las/las/restreplay
-   ./c
+   copy the jar, e.g.
+       cp /Users/vcrocla/.m2/repository/org/dynamide/RestReplay/1.0.15/RestReplay-1.0.15-standalone.jar lib/
+   
+   When you change a RestReplay version, you must change these files (in addition to ~/src/RestReplay/pom.xml ):
+       ~/ws/las/restreplay/pom.xml
+       ~/ws/las/restreplay/java-options
 
 Alternately, if you want to test between maven central releases, in a dependent project that lives in ~/ws/las/restreplay, do: 
 
