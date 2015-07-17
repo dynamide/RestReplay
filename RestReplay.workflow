@@ -81,7 +81,11 @@ Alternately, if you want to test between maven central releases, in a dependent 
    cd ~/src/RestReplay
    mvn -o -DskipTests install
    cd ~/ws/las/restreplay
+   
    cp /Users/vcrocla/.m2/repository/org/dynamide/RestReplay/1.0.10/RestReplay-1.0.10-standalone.jar lib/
+   use latest version, e.g.
+   cp /Users/vcrocla/.m2/repository/org/dynamide/RestReplay/1.0.16/RestReplay-1.0.16-standalone.jar lib/
+   
    java  $JAVA_OPTS -jar $RESTREPLAY_JAR -testdir ./tests -master las-master.xml  -env dev
 
 =============================================================

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplay>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
+    <testGroup ID="main" autoDeletePOSTS="false">
+        <test ID="uploadBinary" auth="anarchia-author">
+            <method>POST</method>
+            <uri>http://localhost:18080/anarchia-admin?page=addFile&amp;name=file&amp;author=laramie</uri>
+            <upload>
+                <filename>/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/upload/q/favicon.ico</filename>
+            </upload>
+        </test>
+    </testGroup>
+</restReplay>

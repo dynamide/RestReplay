@@ -5,10 +5,14 @@ import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.params.HttpClientParams;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.dynamide.util.Tools;
@@ -145,6 +149,22 @@ public class Transport {
         return doGET(result, urlString, authForTest, fromTestID);
     }
 
+    protected static boolean setupUpload(PostMethod postMethod, List<String> uploadFilenames, ServiceResult result){
+        Part[] parts = new Part[uploadFilenames.size()];
+        int i = 0;
+        for (String oneUploadFilename: uploadFilenames) {
+            File fileToUpload = new File(oneUploadFilename);
+            try {
+                parts[i++] = new FilePart(fileToUpload.getName(), fileToUpload);
+            } catch (FileNotFoundException fnf) {
+                result.addError("Upload file not found. " + fnf.getLocalizedMessage());
+                return false;
+            }
+        }
+        postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
+        return true;
+    }
+
 
     /** This does not deal with boundary or multipart since being ported. See code at bottom.  */
     public static ServiceResult doPOST_PUT(ServiceResult result,
@@ -156,7 +176,8 @@ public class Transport {
                                            String contentType,
                                            String authForTest,
                                            String fromTestID,
-                                           String requestPayloadFilename)
+                                           String requestPayloadFilename,
+                                           List<String> uploadFilenames)
     {
         result.method = method;
         ConfigFile.addHeader(result.requestHeaderMap, "content-type", contentType, result.getRunOptions().condensedHeaders);
@@ -178,7 +199,13 @@ public class Transport {
         }
         addRestReplayHeaders(result, httpMethod, authForTest, fromTestID);
         if (postMethod!=null){
-            postMethod.setRequestBody(content);
+            if (uploadFilenames!=null&&uploadFilenames.size()>0){
+                if (!setupUpload(postMethod, uploadFilenames, result)){
+                    return result;
+                }
+            } else {
+                postMethod.setRequestBody(content);
+            }
         } else if (putMethod!=null){
             putMethod.setRequestBody(content);
         }

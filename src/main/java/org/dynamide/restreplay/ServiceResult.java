@@ -560,7 +560,7 @@ public class ServiceResult {
             }
         }
 
-        failureReason = " : STATUS CODE ("+responseCode+") UNEXPECTED; ";
+        //failureReason = " : STATUS CODE ("+responseCode+") UNEXPECTED2; ";
         return false;
     }
 
@@ -831,6 +831,10 @@ public class ServiceResult {
             return ""+responseCode;
         } else if ("method".equalsIgnoreCase(what)){
             return method;
+        } else if ("JSESSIONID".equalsIgnoreCase(what)){
+            String setcookie =  responseHeaderMap.get("SET-COOKIE");
+            setcookie = setcookie.substring(0, setcookie.indexOf(';')).trim();
+            return setcookie;
         }
         if (vars.containsKey(what)){
             return vars.get(what);
@@ -881,7 +885,7 @@ public class ServiceResult {
     }
 
 
-    public enum PRETTY_FORMAT {XML, JSON, NONE}
+    public enum PRETTY_FORMAT {XML, JSON, HTML, NONE}
 
     public PRETTY_FORMAT contentTypeFromResponse(){
         String uc = "";
@@ -889,15 +893,19 @@ public class ServiceResult {
             uc = this.mimeType.toUpperCase();
             if (uc.endsWith("/JSON")){
                 return PRETTY_FORMAT.JSON;
-            } else if (uc.endsWith("/XML") || uc.endsWith("/XHTML") || uc.endsWith("/HTML")){
+            } else if (uc.endsWith("/XML") || uc.endsWith("/XHTML")) {
                 return PRETTY_FORMAT.XML;
+            } else if (uc.endsWith("/HTML")){
+                return PRETTY_FORMAT.HTML;
             };
         } else if (Tools.notBlank(this.requestPayloadFilename)){
             uc = this.requestPayloadFilename.toUpperCase();
             if (uc.endsWith(".JSON")){
                 return PRETTY_FORMAT.JSON;
-            } else if (uc.endsWith(".XML") || uc.endsWith(".XHTML") || uc.endsWith(".HTML")){
+            } else if (uc.endsWith(".XML") || uc.endsWith(".XHTML")){
                 return PRETTY_FORMAT.XML;
+            } else if (uc.endsWith("/HTML")){
+                return PRETTY_FORMAT.HTML;
             };
         } else {
             return PRETTY_FORMAT.NONE;

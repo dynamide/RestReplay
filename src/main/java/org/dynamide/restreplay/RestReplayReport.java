@@ -793,6 +793,8 @@ public class RestReplayReport {
         appendPayload(serviceResult, buffer, safeJSONToString(serviceResult.requestPayload), respType, "REQUEST (expanded)", "REQUEST" + tocID, "", false);
         if (serviceResult.getRunOptions().reportResponseRaw) {
             appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
+        } else if (respType.equals(ServiceResult.PRETTY_FORMAT.HTML)){
+            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (html)", "RESPONSERAW" + tocID, "");
         }
         appendPayload(serviceResult, buffer, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
         if (serviceResult.getRunOptions().reportPayloadsAsXML) {
@@ -870,6 +872,13 @@ public class RestReplayReport {
                     case JSON:
                     case NONE:
                         //System.out.println("PAYLOAD raw:" + payload);
+                        fb.append(formatCollapse(theDivID, title, subtitle));  //starts a div.
+                        fb.append(pre_start);
+                        fb.append(escape(payload));
+                        fb.append(pre_end);
+                        fb.append(DIV_END); //ends that div.
+                        break;
+                    case HTML:
                         fb.append(formatCollapse(theDivID, title, subtitle));  //starts a div.
                         fb.append(pre_start);
                         fb.append(escape(payload));

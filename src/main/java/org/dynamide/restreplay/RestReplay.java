@@ -198,6 +198,7 @@ public class RestReplay extends ConfigFile {
 
     private static class PartsStruct {
         public List<Map<String, Object>> varsList = new ArrayList<Map<String, Object>>();
+        public List<String> uploadFilenames = new ArrayList<String>();
         String requestPayloadFilename = "";
         String requestPayloadFilenameRel = "";
         String expectedResponseFilename = "";
@@ -255,6 +256,16 @@ public class RestReplay extends ConfigFile {
                 resultPartsStruct.validator = testNode.valueOf("validator");  //the actual script, hopefully in a CDATA.
                 resultPartsStruct.validatorFilenameRel = testNode.valueOf("validator/@filename");
                 resultPartsStruct.validatorLang = testNode.valueOf("validator/@lang");
+            }
+
+            if (!isResponse) {
+                List<Node> uploadFilenameNodes = testNode.selectNodes("upload/filename");
+                if (uploadFilenameNodes != null && uploadFilenameNodes.size()>0){
+                    for (Node var: uploadFilenameNodes){
+                        String value = var.getText();
+                        resultPartsStruct.uploadFilenames.add(value);
+                    }
+                }
             }
 
             if (Tools.notEmpty(filename)) {
@@ -1381,7 +1392,10 @@ public class RestReplay extends ConfigFile {
         }
 
         if (callTransport) {
-            String contentType = contentTypeFromRequestPart(requestPayloadFilenameExp);
+            String contentType = serviceResult.requestHeaderMap.get("Content-Type");
+            if (Tools.isBlank(contentType)) {
+                contentType = contentTypeFromRequestPart(requestPayloadFilenameExp);
+            }
             String contentRaw = "";
             if (contentRawFromMutator == null) {
 
@@ -1421,7 +1435,9 @@ public class RestReplay extends ConfigFile {
                     contentType,
                     test.authForTest,
                     test.testIDLabel,
-                    serviceResult.requestPayloadFilename);//it just sets it back to this for us.
+                    serviceResult.requestPayloadFilename,//it just sets it back to this for us.
+                    parts.uploadFilenames
+            );
         }
 
         test.results.add(serviceResult);
