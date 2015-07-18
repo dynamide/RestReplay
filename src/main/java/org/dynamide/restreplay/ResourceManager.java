@@ -8,10 +8,10 @@ import org.dom4j.io.SAXReader;
 import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class ResourceManager {
@@ -217,6 +217,18 @@ public class ResourceManager {
         if (theFile!=null && theFile.exists()){
             byte[] b = FileUtils.readFileToByteArray(theFile);
             String res = new String(b);
+            // posix or somesuch says all text files must end in \n.
+            // This hoses POSTs because the \n ends up glued to the last parameter in form encoded fields.
+            // Delete newline at end of file for \n, \r\n, and \r. (unix, windows, mac)
+            if (res.endsWith("\n")){
+                res = res.substring(0, res.length()-1);
+            }
+            if (res.endsWith("\r")){
+                res = res.substring(0, res.length()-1);
+            }
+            //this works if you want to use NIO, but still reads in the last \n of course:
+            // Path path = Paths.get(theFile.getAbsolutePath().toString());
+            // byte[] b = Files.readAllBytes(path);
             resource.provider = Resource.SOURCE.FILE;
             resource.contents = res;
             if (markForCache) {
