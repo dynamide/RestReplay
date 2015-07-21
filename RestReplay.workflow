@@ -37,10 +37,9 @@ artifacts:
         mvn package
         bin/push-doco
 
-deploy new jar version to maven central:
+deploy new jar version to maven central (this now also does an automatic release):
     vi ~/src/RestReplay/pom.xml     ##update the version number
     mvn deploy                      ## see wallet-card for gpg passphrase.
-    after this, you need to release it, see Inspect a repository, next.
 
 Inspect a repository.  
    (Note that mvn deploy is set to close the staging repository automatically, so you don't have to do this step to push to central.  )  
