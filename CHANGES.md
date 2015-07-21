@@ -5,8 +5,7 @@
 - Added GET as default method, rather than error.
 - Trimmed excessive error message down when JSON error in file.
 - Added the lovely Tools.getStackTraceTop()
-
-2015-02-27   RestReplay now handles imports, so that a testGroup can import ServiceResult objects from another testGroup.  The imported test must have been run, otherwise the importing testGroup will receive an error and be skipped.  Thus, the imports are guaranteed to be available if you import them in your testGroup.  This means you can have one group to create some resources on a remote server via REST, another to test those resources, and a third group to tear down the resources.  The imports can reference any control file, testGroup, and testID.  In the master, ensure that all the testGroups are called in the correct order.
+- RestReplay now handles imports, so that a testGroup can import ServiceResult objects from another testGroup.  The imported test must have been run, otherwise the importing testGroup will receive an error and be skipped.  Thus, the imports are guaranteed to be available if you import them in your testGroup.  This means you can have one group to create some resources on a remote server via REST, another to test those resources, and a third group to tear down the resources.  The imports can reference any control file, testGroup, and testID.  In the master, ensure that all the testGroups are called in the correct order.
 
 
 ===========Fri Feb 27 21:38:47 PST 2015======================
@@ -25,8 +24,7 @@
 - Support files for serialization of ServiceResult to JSON thence to handlebar templates and jQuery .
 - Added working template for handlebars.js expansion of ServiceResult JSON files.
 - Added RunOptions.outputServiceResultDB so you can produce output JSON or not.
-
-**2015-02-28**  RestReplay now outputs a database of all the ServiceResult objects serialized to JSON, if you set the RunOption outputServiceResultDB to "true".  The database is a directory of directories of flat JSON files, one per test.  The directory structure matches the controlFile/testGroup/test structure of your test directory.  For now, these JSON objects can be archived, or be available to Javascript-based manipulation, analytics, or reporting.  In a future version, Handlebars.js templates will convert the database into jQuery-enabled HTML.   (These currently live in the tests/_self_test/_includes/ folder.)
+- RestReplay now outputs a database of all the ServiceResult objects serialized to JSON, if you set the RunOption outputServiceResultDB to "true".  The database is a directory of directories of flat JSON files, one per test.  The directory structure matches the controlFile/testGroup/test structure of your test directory.  For now, these JSON objects can be archived, or be available to Javascript-based manipulation, analytics, or reporting.  In a future version, Handlebars.js templates will convert the database into jQuery-enabled HTML.   (These currently live in the tests/_self_test/_includes/ folder.)
 
 ===========Mon Mar 2 12:32:20 PST 2015======================
 - Added sent(jsonpath/xpath) and its helpers sentJson and sentXPath.
