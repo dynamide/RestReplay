@@ -1,0 +1,8 @@
+${
+                   if (this.LOGIN_COOKIE.equals(this.get("JSESSIONID"))){
+                       return true;
+                   } else {
+                       this.addError("AUTH_COOKIE does not match.  Tomcat is probably showing the login form.  Check RESPONSE(html).");
+                       return false;
+                   }
+                }

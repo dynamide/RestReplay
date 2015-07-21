@@ -29,7 +29,14 @@ import java.util.*;
 public class ServiceResult {
     public ServiceResult(RunOptions options){
         runOptions = options;
+        sequence = ""+(staticSequence++);
     }
+    private static int staticSequence = 0;
+    public String getSequence(){
+        return sequence;
+    }
+    public final String sequence;
+
 
     private RunOptions runOptions;
     public RunOptions getRunOptions(){
@@ -833,6 +840,9 @@ public class ServiceResult {
             return method;
         } else if ("JSESSIONID".equalsIgnoreCase(what)){
             String setcookie =  responseHeaderMap.get("SET-COOKIE");
+            if (setcookie==null||setcookie.length()==0){
+                return "";
+            }
             setcookie = setcookie.substring(0, setcookie.indexOf(';')).trim();
             return setcookie;
         }

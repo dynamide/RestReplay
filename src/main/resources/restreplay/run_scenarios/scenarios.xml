@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplay>
+    <auths default="anarchia-user">
+       <auth ID="dynamide-admin">bGFyYW1pZTplY290ZWwzMw==</auth>
+       <auth ID="dynamide-user">Y29vcGVyOmNvb3BlcjMz</auth>
+       <auth ID="anarchia-author">Y29vcGVyOmNvb3BlcjMz</auth>
+       <auth ID="anarchia-user">cnVzdHk6cnVzdHkzMw==</auth>
+    </auths>
+    
+    <testGroup ID="formLogin" autoDeletePOSTS="false">
+    
+        <comment>Tomcat provides FORM based login, but it requires a two-step through API calls.
+                 This testGroup does a FORM based login (using j_security_check) by following the 
+                 required steps.  The steps are:
+                 <ol>
+                     <li>Hit a resource, any resource, grab the response cookie</li>         
+                     <li>POST to that resource appended with j_security_check appended, and the new cookie</li>         
+                     <li>Use the cookie from the response to hit the Location returned in the Location header, or any other resource</li>         
+                 </ol>
+        </comment>
+        <test ID="authStep1">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin/files</uri>
+        </test>
+        
+        <test ID="authStep2">
+            <headers>
+                <header name="Content-Type">application/x-www-form-urlencoded</header>
+                <header name="Cookie">${authStep1.get("JSESSIONID")}</header>
+            </headers>
+            <method>POST</method>
+            <uri>${SERVER}/anarchia-admin/j_security_check</uri>
+            <filename>security/q/j_security_check.form</filename>
+            <expected>
+               <code range="200-302" />
+            </expected>
+            <exports>
+                <vars>
+                    <var ID="AUTH_COOKIE">${authStep1.get("JSESSIONID")}</var>
+                    <var ID="AUTH_USERNAME">${USERNAME}</var>
+                </vars>
+            </exports>
+        </test>
+
+        <test ID="authStep3">
+            <headers>
+                <header name="Cookie">${authStep2.AUTH_COOKIE}</header>
+            </headers>
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin/files</uri>
+            <exports>
+                <vars>
+                    <var ID="AUTH_COOKIE">${this.get("JSESSIONID")}</var>
+                    <var ID="AUTH_USERNAME">${USERNAME}</var>
+                </vars>
+            </exports>
+        </test>
+        
+        <test ID="files2">
+            <headers>
+                <header name="Cookie">${authStep3.AUTH_COOKIE}</header>
+            </headers>
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin/files</uri>
+            <exports>
+                <vars>
+                    <var ID="AUTH_USERNAME">${USERNAME}</var>
+                </vars>
+            </exports>
+        </test>
+        
+        <test ID="files3">
+            <headers>
+                <header name="Cookie">${authStep3.AUTH_COOKIE}</header>
+            </headers>
+            <method>GET</method>
+            <uri>${SERVER}/anarchia?qtype=author&amp;author=laramie</uri>
+            <exports>
+                <vars>
+                    <var ID="AUTH_USERNAME">${USERNAME}</var>
+                </vars>
+            </exports>
+        </test>
+    </testGroup>
+    
+    <!-- key-scenario -->
+        
+    <testGroup ID="dynamideViaFORMsLoginKeyScenario" autoDeletePOSTS="false">
+        <comment>
+            Check logins for dynamide secured endpoints using FORMs login.
+        </comment>
+        <imports>
+            <import ID="formLogin" control="security/security.xml"      testGroup="formLogin" test="authStep3" />
+            <import ID="formLogin_cooper"   control="security/security.xml"   runID="formLogin_cooper" testGroup="formLogin" test="authStep3" />
+            <import ID="formLogin_laramie"  control="security/security.xml"   runID="formLogin_laramie" testGroup="formLogin" test="authStep3" />
+        </imports>
+        
+        <test ID="/dynamide/admin:admin">
+            <headers>
+                <header name="Cookie">${formLogin.AUTH_COOKIE}</header>
+            </headers>
+            <vars>
+                <var ID="AUTH_USERNAME">${formLogin.AUTH_USERNAME}</var>
+            </vars>
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+        </test>
+        
+        <test ID="/dynamide/admin:adminLaramie">
+            <headers>
+                <header name="Cookie">${formLogin_laramie.AUTH_COOKIE}</header>
+            </headers>
+             <vars>
+                <var ID="AUTH_USERNAME">${formLogin_laramie.AUTH_USERNAME}</var>
+            </vars>
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+            <response>
+                <validator lang="jexl" filename="security/s/j_security_check.validator.jexl" />
+            </response>
+        </test>
+        
+        
+        <test ID="/dynamide/admin:user">
+            <headers>
+                <header name="Cookie">${formLogin_cooper.AUTH_COOKIE}</header>
+            </headers>
+            <vars>
+                <var ID="LOGIN_COOKIE">${formLogin_cooper.AUTH_COOKIE}</var>
+                <var ID="AUTH_USERNAME">${formLogin_cooper.AUTH_USERNAME}</var>
+            </vars>
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+            <response>
+                <validator lang="jexl" filename="security/s/j_security_check.validator.jexl" />
+                <expected>
+                    <failure />
+                </expected>
+            </response>
+        </test>
+        
+        <test ID="/dynamide/admin:anonymous">
+            <comment>This should NOT be available for anonymous.</comment>
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+            <response>
+                <validator lang="jexl" filename="security/s/j_security_check.validator.jexl" />
+                <expected>
+                    <failure />
+                </expected>
+            </response>
+        </test>
+    </testGroup>
+    
+    
+    <!-- loop-scenario -->
+            
+    <testGroup ID="dynamideViaFORMsLoginLoopScenario" autoDeletePOSTS="false">
+        <comment>
+            Check logins for dynamide secured endpoints using FORMs login.
+        </comment>
+        <imports>
+            <import ID="myAdminLogin" control="security/security.xml"  testGroup="formLogin" test="authStep2" />
+        </imports>
+        
+        <test ID="/dynamide/admin">
+            <headers>
+                <header name="Cookie">${myAdminLogin.AUTH_COOKIE}</header>
+            </headers>
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+        </test>
+    </testGroup>
+    
+    <!-- regular tests (the above scenarios really need to be moved to RestReplay self-test.
+         Here we use the ...
+    -->
+    
+    <testGroup ID="dynamide" autoDeletePOSTS="false">
+        <comment>
+            Check logins for dynamide secured endpoints.
+        </comment>
+        
+        <test ID="/dynamide/admin:admin" auth="dynamide-admin">
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+        </test>
+        
+        <test ID="/dynamide/admin:user" auth="dynamide-user">
+            <method>GET</method>
+            <uri>${SERVER}/dynamide/admin</uri>
+            <expected>
+               <code range="401-403" />
+            </expected>
+        </test>
+        
+        <test ID="/dynamide/admin:anonymous" auth="">
+            <comment>This should NOT be available for anonymous.</comment>
+            <method>GET</method>
+            <expected>
+               <code range="401" />
+            </expected>
+            <uri>${SERVER}/dynamide/admin</uri>
+        </test>
+    </testGroup>
+    
+    <testGroup ID="anarchia-author" autoDeletePOSTS="false">
+        <comment>
+            Check logins for anarchia secured endpoints.
+        </comment>
+        
+        <test ID="filesByAuthor" auth="anarchia-author">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin/mojo</uri>
+        </test>
+        
+        <test ID="filesByAuthor" auth="anarchia-author">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin/mojo/nixon</uri>
+        </test>
+        
+        
+        
+        
+        
+        
+        
+        
+        <test ID="filesByAuthor" auth="anarchia-author">
+            <comment>GET all files for one user</comment>
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin?page=addFile&amp;action=getFiles&amp;author=laramie</uri>
+        </test>
+        
+        <test ID="filesByAuthor:user" auth="anarchia-user">
+            <comment>GET all files for one user</comment>
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin?page=addFile&amp;action=getFiles&amp;author=laramie</uri>
+            <expected>
+               <code range="401-403" />
+            </expected>
+        </test>
+        
+        <test ID="filesByAuthor:anonymous" auth="">
+            <comment>GET all files for one user</comment>
+            <method>GET</method>
+            <uri>${SERVER}/anarchia-admin?page=addFile&amp;action=getFiles&amp;author=laramie</uri>
+            <expected>
+               <code range="401" />
+            </expected>
+        </test>
+    </testGroup>
+    
+    <testGroup ID="anarchia-public" autoDeletePOSTS="false">
+        <comment>
+            Check logins for anarchia unsecured endpoints.
+        </comment>
+        
+        <test ID="anarchia:anonymous" auth="">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia</uri>
+        </test>
+        
+        <test ID="panels" auth="anarchia-author">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia/panels.html</uri>
+        </test>
+        
+        <test ID="panels:anonymous" auth="">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia/panels.html</uri>
+        </test>
+        
+        <test ID="panelsByAuthor:author" auth="anarchia-author">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia?qtype=author&amp;author=laramie</uri>
+        </test>
+        
+        <test ID="panelsByAuthor:user" auth="anarchia-user">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia?qtype=author&amp;author=laramie</uri>
+        </test>
+        
+        <test ID="panelsByAuthor:anonymous" auth="">
+            <method>GET</method>
+            <uri>${SERVER}/anarchia?qtype=author&amp;author=laramie</uri>
+        </test>
+    </testGroup>
+</restReplay>

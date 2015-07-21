@@ -125,10 +125,6 @@ public class LoopHelper {
                 String msg = "ERROR calculating loop "+loopHelper.toString();
                 serviceResult.addError(msg, t);
                 serviceResult.failureReason = msg+" "+t.getMessage();
-                List<Node> failures = testNode.selectNodes("response/expected/failure"); //TODO: get in sync with expected/failure handling elsewhere.
-                if (failures.size()>0){
-                    serviceResult.expectedFailure = true;
-                }
                 report.addTestResult(serviceResult);
                 results.add(serviceResult);
                 loopHelper.error = true;

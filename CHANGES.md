@@ -133,3 +133,15 @@ Added NOOP as a valid HTTP method, so that you can run tests that hit no server,
 
 ===========Wed May 27 02:02:09 EDT 2015======================
 Fixed small link in javadoc
+
+===========Tue Jul 21 09:33:13 PDT 2015======================
+Added run_scenarios to test against an anarchia server (should be replaced with a generic self-test service) so that scenarios of running the run elements in master can be tested.  Multiple run elements can be repeated if you select either a key scenario or a loop scenario.  With a key scenario, each run element has an ID, and you import by that runID. With a loop scenario, you run run elements multiple times, interleaving with a run element for your test, importing the latest runs, whilst RestReplay generates a runID for reporting purposes.
+Modified the core to support these tests.  runID and sequence are included and reported now, so that re-using testGroups via multiple run elements in the master does not cause collisions.
+
+===========Tue Jul 21 09:39:50 PDT 2015======================
+Added run_scenarios to test against an anarchia server (should be replaced with a generic self-test service) so that scenarios of running the run elements in master can be tested.  Multiple run elements can be repeated if you select either a key scenario or a loop scenario.  With a key scenario, each run element has an ID, and you import by that runID. With a loop scenario, you run run elements multiple times, interleaving with a run element for your test, importing the latest runs, whilst RestReplay generates a runID for reporting purposes.
+Modified the core to support these tests.  runID and sequence are included and reported now, so that re-using testGroups via multiple run elements in the master does not cause collisions.
+
+===========Tue Jul 21 09:40:00 PDT 2015======================
+Added run_scenarios to test against an anarchia server (should be replaced with a generic self-test service) so that scenarios of running the run elements in master can be tested.  Multiple run elements can be repeated if you select either a key scenario or a loop scenario.  With a key scenario, each run element has an ID, and you import by that runID. With a loop scenario, you run run elements multiple times, interleaving with a run element for your test, importing the latest runs, whilst RestReplay generates a runID for reporting purposes.
+Modified the core to support these tests.  runID and sequence are included and reported now, so that re-using testGroups via multiple run elements in the master does not cause collisions.

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplayMaster>
+    <protoHostPort>${SERVER}</protoHostPort>
+    <dump payloads="false" dumpServiceResult="auto" />
+    <envs>
+        <env ID="local" default="true" >
+            <vars>
+                <var ID="SERVER">http://localhost:18080</var>
+            </vars>
+        </env>
+        <env ID="web1" >
+            <vars>
+                <var ID="SERVER">http://web1.anarchia.us/</var>
+            </vars>
+        </env>
+    </envs>
+
+    <run ID="cooper" controlFile="run_scenarios/scenarios.xml" testGroup="formLogin" >
+        <vars>
+            <var ID="USERNAME">cooper</var>
+            <var ID="PASSWORD">cooper33</var>
+        </vars>
+    </run>
+
+    <run ID="loop_cooper" controlFile="run_scenarios/scenarios.xml" testGroup="dynamideViaFORMsLoginLoopScenario" />
+
+    <run ID="laramie" controlFile="run_scenarios/scenarios.xml" testGroup="formLogin">
+        <vars>
+            <var ID="USERNAME">laramie</var>
+            <var ID="PASSWORD">ecotel33</var>
+        </vars>
+    </run>
+
+    <run ID="loop_laramie" controlFile="run_scenarios/scenarios.xml" testGroup="dynamideViaFORMsLoginLoopScenario" />
+    
+    <run controlFile="run_scenarios/scenarios.xml" testGroup="anarchia-author" />
+
+</restReplayMaster>
+

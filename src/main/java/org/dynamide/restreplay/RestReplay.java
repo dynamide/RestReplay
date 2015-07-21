@@ -108,7 +108,8 @@ public class RestReplay extends ConfigFile {
     /**
      * Use this if you wish to run named tests within a testGroup.
      */
-    public List<ServiceResult> runTests(String testGroupID, String testID, List<RestReplayReport.Header>testGroups) throws Exception {
+    public List<ServiceResult> runTests(String testGroupID, String testID, String runID, Integer runHashCount,
+                                        List<RestReplayReport.Header>testGroups) throws Exception {
         List<ServiceResult> result = runRestReplayFile(
                 this.getTestDir(),
                 this.controlFileName,
@@ -122,6 +123,8 @@ public class RestReplay extends ConfigFile {
                 this.reportsDir,
                 this.getRelativePathFromReportsDir(),
                 this.getMasterFilename(),
+                runID,
+                runHashCount,
                 testGroups);
         return result;
     }
@@ -638,14 +641,18 @@ public class RestReplay extends ConfigFile {
         return buffer.toString();
     }
 
-    private String dumpMasterNamespace() {
+    public String dumpMasterNamespace() {
         Map<String, ServiceResult> masterNamespace = getMasterNamespace();
         if (masterNamespace == null) {
             return "";
         }
         StringBuffer buffer = new StringBuffer();
         for (Map.Entry<String, ServiceResult> entry : masterNamespace.entrySet()) {
-            buffer.append("\r\n        ").append(entry.getKey()).append(" --> ServiceResult: ").append(entry.getValue().testIDLabel);
+            buffer.append("\r\n        ")
+                  .append(entry.getKey())
+                  .append(" --> ServiceResult: ")
+                  .append(entry.getValue().testIDLabel)
+                  .append(" seq:"+entry.getValue().getSequence());
         }
         return buffer.toString();
     }
@@ -667,6 +674,9 @@ public class RestReplay extends ConfigFile {
                 b.append(val.controlFileName)
                  .append(":")
                  .append(val.testIDLabel)
+                 .append(" [")
+                 .append(val.getSequence())
+                 .append("]")
                  .append("\r\n");
             }
         }
@@ -682,6 +692,7 @@ public class RestReplay extends ConfigFile {
         String key = "";
         String ID = "";
         String control = "";
+        String runID = "";
         String testGroup = "";
         String test = "";
         String failureMessage = "";
@@ -694,8 +705,9 @@ public class RestReplay extends ConfigFile {
                 ID = importNode.valueOf("@ID");
                 control = importNode.valueOf("@control");
                 testGroup = importNode.valueOf("@testGroup");
+                runID = importNode.valueOf("@runID");
                 test = importNode.valueOf("@test");
-                key = makeImportsKey(control, testGroup, test);
+                key = makeImportsKey(control, testGroup, test, runID);
                 ServiceResult sr = masterNamespace.get(key);
                 if (sr!=null){
                     map.put(ID, sr);
@@ -707,8 +719,9 @@ public class RestReplay extends ConfigFile {
             }
             return map;
         }
-        public static String makeImportsKey(String controlFileName, String testGroup, String test){
-            return controlFileName+':'+testGroup+'.'+test;
+        public static String makeImportsKey(String controlFileName, String testGroup, String test, String runID){
+            String runIDSegment = Tools.notBlank(runID) ? ":"+runID : "";
+            return controlFileName+':'+testGroup+runIDSegment+'.'+test;
         }
     }
 
@@ -759,6 +772,8 @@ public class RestReplay extends ConfigFile {
             String reportsDir,
             String relativePathFromReportsDir,
             String masterFilenameInfo,
+            String runID,
+            Integer runHashCount,
             List<RestReplayReport.Header> testGroups)
             throws Exception {
 
@@ -810,6 +825,8 @@ public class RestReplay extends ConfigFile {
         String restReplayHeader =
                   "RestReplay running:"
                 + "\r\n   version: " + ResourceManager.getRestReplayVersion()
+                + "\r\n   runID: " + runID
+                + "\r\n   runHashCount,: " + runHashCount
                 + "\r\n   testGroup: " + testGroupID
                 + "\r\n   controlFile: " + controlFileName
                 + "\r\n   Master: " + masterFilenameInfo
@@ -864,7 +881,7 @@ public class RestReplay extends ConfigFile {
             }
             String anchor = (idx > -1) ? currentTestGroupID+'_'+(idx+1) : currentTestGroupID;
             anchor = anchor + "_"+(gTestGroupID++);
-            RestReplayReport.Header hdr = report.addTestGroup(currentTestGroupID, controlFileName, comment, anchor, idx);
+            RestReplayReport.Header hdr = report.addTestGroup(currentTestGroupID, controlFileName, runID, comment, anchor, idx);
             testGroups.add(hdr);
 
             //vars var = get control file vars and merge masterVars into it, replacing
@@ -918,7 +935,7 @@ public class RestReplay extends ConfigFile {
                             serviceResultsMap.remove("result");  //special value so deleteURL can reference ${result.got(...)}.  "result" gets added after each of GET, POST, PUT, DELETE, LIST.
                             testElementIndex++;
                             serviceResultsMap.put("this", serviceResult);
-                            String namespaceKey = ImportFilter.makeImportsKey(controlFileName, testGroupID, testID);
+                            String namespaceKey = ImportFilter.makeImportsKey(controlFileName, testGroupID, testID, runID);
                             if (getMasterNamespace() != null) {
                                 getMasterNamespace().put(namespaceKey, serviceResult);
                             }
@@ -970,7 +987,13 @@ public class RestReplay extends ConfigFile {
             File parentFile = m.getParentFile();
             String relpath = parentFile!=null?parentFile.toString():"";
             this.relToMasterPath = calculateElipses(relpath);
-            String reportName = controlFileName + '-' + testGroupID + ".html";
+            String runIDSegment = "";
+            if (Tools.notBlank(runID)) {
+                runIDSegment = "-"+runID;
+            } else {
+                runIDSegment = "-"+runHashCount;
+            }
+            String reportName = controlFileName + '-' + testGroupID + runIDSegment + ".html";
 
             File resultFile = report.saveReport(testdir, reportsDir, reportName, this, testGroupID);
             if (resultFile != null) {
@@ -993,7 +1016,7 @@ public class RestReplay extends ConfigFile {
         if (getRunOptions().dumpResourceManagerSummary) {
             System.out.println(getResourceManager().formatSummaryPlain());
         }
-
+        System.out.println(dumpMasterNamespace());
         return results;
     }
 
@@ -1199,7 +1222,11 @@ public class RestReplay extends ConfigFile {
             if (Tools.isEmpty(serviceResult.testID)) serviceResult.testID = testIDLabel;
             if (Tools.isEmpty(serviceResult.testGroupID)) serviceResult.testGroupID = testGroupID;
 
-            Node expectedLevel = testNode.selectSingleNode("response/expected");  //TODO: sync with RestReplay::runRestReplayFile() where I select on response/expected/failure.
+            List<Node> failures = testNode.selectNodes("response/expected/failure");
+            if (failures.size()>0){
+                serviceResult.expectedFailure = true;
+            }
+            Node expectedLevel = testNode.selectSingleNode("response/expected");
             /*  attempting to map expected/dom to each mutation, but it gets messy. Removed for now.
             ServiceResult par = serviceResult.getParent();
             if (par!=null) {

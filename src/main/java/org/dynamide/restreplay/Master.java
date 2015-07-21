@@ -36,7 +36,6 @@ public class Master extends ConfigFile {
 
     List<List<ServiceResult>> serviceResultsListList = new ArrayList<List<ServiceResult>>();
 
-
     public Map<String,Object> vars = new LinkedHashMap<String,Object>();
     public Map<String, Object> getVars() {
         return vars;
@@ -259,6 +258,8 @@ public class Master extends ConfigFile {
                                         String test,
                                         Map<String, Object> runVars,
                                         String relToMaster,
+                                        String runID,
+                                        Integer runHashCount,
                                         List<RestReplayReport.Header>testGroups)
     throws Exception {
         String envReportsDir = this.reportsDir;
@@ -289,7 +290,7 @@ public class Master extends ConfigFile {
 
 
         //======================== Now run *that* instance. ======================
-        return replay.runTests(testGroup, test, testGroups);
+        return replay.runTests(testGroup, test, runID, runHashCount, testGroups);
         //========================================================================
 
     }
@@ -301,19 +302,32 @@ public class Master extends ConfigFile {
         List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
         org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
 
+        Map<String, Integer> runSequenceMap = new HashMap<String, Integer>();
+
         serviceResultsListList.clear();
         fireOnBeginMaster();
         String controlFile, testGroup, test;
+        String runID;
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
-
         List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
         for (Node runNode : runNodes) {
             controlFile = runNode.valueOf("@controlFile");
             testGroup = runNode.valueOf("@testGroup");
             test = runNode.valueOf("@test"); //may be empty
+            runID = runNode.valueOf("@ID"); //may be empty
+
+            String runHash = controlFile+':'+testGroup;
+            Integer runHashCount = runSequenceMap.get(runHash);
+            if (runHashCount==null){
+                runHashCount = new Integer(0);
+            } else {
+                runHashCount = new Integer(runHashCount + 1);
+            }
+            runSequenceMap.put(runHash, runHashCount);
+
             Map<String, Object> runVars = readVars(runNode);
             //testGroups.add(testGroup);
-            serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, testGroups));//TODO: remove dups.
+            serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, runID, runHashCount, testGroups));//TODO: remove dups.
         }
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
         fireOnEndMaster();
@@ -330,7 +344,9 @@ public class Master extends ConfigFile {
         //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
         List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
-        serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, testGroups));//TODO: remove dups.
+        String runID = "";
+        Integer runHashCount = 0;
+        serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, runID, runHashCount, testGroups));//TODO: remove dups.
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
         fireOnEndMaster();
         return serviceResultsListList;

@@ -268,6 +268,7 @@ public class Main {
 
                 List<RestReplayReport.Header>testGroups = new ArrayList<RestReplayReport.Header>();
                 List<String> reportsList = new ArrayList<String>();
+                String runID = "";
                 restReplay.runRestReplayFile(
                         testdirResolved,
                         controlFilename,
@@ -281,6 +282,8 @@ public class Main {
                         reportsDir,
                         "",            //no master, so no env in path.
                         "",           //masterFilenameInfo. If blank, stand-alone report with reportsList is printed.
+                        runID,
+                        0,
                         testGroups);
             }
             if (line.hasOption("noexit")){

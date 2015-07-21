@@ -126,8 +126,10 @@ public class Eval {
             }
 
             if (importsNamespace!=null) {
+                int i = 0;
                 for (Map.Entry <String,ServiceResult> entry:importsNamespace.entrySet()){
                     jc.set(entry.getKey(), entry.getValue());
+                    //debugging: System.out.println("==["+(i++)+"]==: importsNamespace:: "+entry.getKey()+" seq:"+entry.getValue().getSequence());
                 }
             }
 

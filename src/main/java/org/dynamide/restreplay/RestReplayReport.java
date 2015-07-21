@@ -448,6 +448,7 @@ public class RestReplayReport {
         public String comment = "";
         public int index = -1;
         public String anchor = "";
+        public String runID = "";
         public String toString(){
            StringBuffer sb = new StringBuffer();
             sb.append("<a name='"+anchor+"'></a>");
@@ -455,7 +456,11 @@ public class RestReplayReport {
             String groupIDLink = (Tools.isEmpty(reportNameLink))
                                  ? groupID
                                  : "<a href='"+reportNameLink+"'>"+groupID+"</a>";
-            sb.append(lbl("Test Group")).append(groupIDLink).append(SP).append(lbl("Control File")).append(controlFile);
+            sb.append(lbl("Test Group")).append(groupIDLink).append(SP)
+                     .append(lbl("Control File")).append(controlFile);
+            if (Tools.notBlank(runID)) {
+                sb.append(SP).append(lbl("runID")).append(runID);
+            }
             if (failure) {
                 sb.append("<div class='group-failure'>"+failureMessage+"</div>");//it is white-space: pre, so \r\n will be OK.
             }
@@ -480,12 +485,13 @@ public class RestReplayReport {
     }
     private Header header = new Header();
 
-    public Header addTestGroup(String groupID, String controlFile, String comment, String anchor, int idx) {
+    public Header addTestGroup(String groupID, String controlFile, String runID, String comment, String anchor, int idx) {
         header.groupID = groupID;
         header.controlFile = controlFile;
         header.comment = comment;
         header.anchor = anchor;
         header.index = idx;
+        header.runID = runID;
         return header;
     }
 
@@ -653,7 +659,11 @@ public class RestReplayReport {
                     if (sr.isSUCCESS()){
                         numSUCCESS++;
                     } else {
-                        numFAILURE++;
+                        if (sr.expectedFailure) {
+                            numSUCCESS++;
+                        } else {
+                            numFAILURE++;
+                        }
                     }
                     if (master.getRunOptions().dumpMasterSummary){
                         masterSummary.append(sr.tiny()).append('\n');
@@ -1026,6 +1036,7 @@ public class RestReplayReport {
                 + statusLabel
                 + SP + (Tools.notEmpty(idNoMutatorID) ?idNoMutatorID : "")+ "<span class='mutationsubscript'>"+s.idFromMutator + "</span>  "
                 + SP + (Tools.notBlank(shortComment) ? SP+smallblack(shortComment) : "")
+                + "<span style='float:right; margin-right:2px;'>"+lbl("seq")+s.getSequence()+"</span>"
                 + linesep
                 + s.method + SP + "<a class='URL_A' href='" + s.fullURL + "'>" + s.fullURL + "</a>" + linesep
                 + formatResponseCodeBlock(s) +  linesep

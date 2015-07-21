@@ -1,0 +1,94 @@
+============ authStep1 ==========================================================
+
+GET /anarchia-admin/files HTTP/1.1
+Host: localhost:18081
+Connection: keep-alive
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: en-US,en;q=0.8
+Cookie: JSESSIONID=CE06A8A3ED46689D4652D90088B6E987
+
+==>
+
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Cache-Control: private
+Expires: Fri, 17 Jul 2015 19:47:33 GMT
+Set-Cookie: JSESSIONID=EF92DE3DCD4B6FB6A636C7393E431F4D; Path=/; HttpOnly
+Content-Type: text/html;charset=ISO-8859-1
+Content-Length: 392
+Date: Fri, 17 Jul 2015 19:42:33 GMT
+
+<html>
+<body bgcolor="lightgreen">
+<br />
+<form method="POST" action="j_security_check">
+<center>
+<table>
+	<tr>
+		<td>Name:</td>
+		<td><input type="text" name="j_username" /></td>
+	</tr>
+	<tr>
+		<td>Password:</td>
+		<td><input type="password" name="j_password"/ ></td>
+	</tr>
+	<tr>
+		<td></td><td><input type="submit" value="Sign In" /></td>
+	</tr>
+</table>
+</center>
+</form>
+</body>
+</html>
+
+
+===== authStep2 =====================================================================
+
+POST /anarchia-admin/j_security_check HTTP/1.1
+Host: localhost:18081
+Connection: keep-alive
+Content-Length: 38
+Cache-Control: max-age=0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Origin: http://localhost:18081
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36
+Content-Type: application/x-www-form-urlencoded
+Referer: http://localhost:18081/anarchia-admin/files
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.8
+Cookie: JSESSIONID=EF92DE3DCD4B6FB6A636C7393E431F4D
+
+j_username=laramie&j_password=ecotel33
+==>
+HTTP/1.1 302 Found
+Server: Apache-Coyote/1.1
+Location: http://localhost:18081/anarchia-admin/files
+Content-Length: 0
+Date: Fri, 17 Jul 2015 19:46:17 GMT
+
+================ authStep3 ===============================
+
+GET /anarchia-admin/files HTTP/1.1
+Host: localhost:18081
+Connection: keep-alive
+Cache-Control: max-age=0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36
+Referer: http://localhost:18081/anarchia-admin/files
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: en-US,en;q=0.8
+Cookie: JSESSIONID=EF92DE3DCD4B6FB6A636C7393E431F4D
+
+======>
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Set-Cookie: JSESSIONID=0E4C1F437B92678B79C0ACC3AB9F4FC5; Path=/; HttpOnly
+Cache-Control: private
+Expires: Wed, 31 Dec 1969 16:00:00 PST
+Content-Type: application/json;charset=ISO-8859-1
+Content-Length: 29
+Date: Fri, 17 Jul 2015 19:46:17 GMT
+
+{"msg":"SUCCESS", "files":[]}
