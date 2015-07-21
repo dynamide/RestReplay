@@ -809,7 +809,7 @@ public class RestReplayReport {
         if (serviceResult.getRunOptions().reportResponseRaw) {
             appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
         } else if (respType.equals(ServiceResult.PRETTY_FORMAT.HTML)){
-            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (html)", "RESPONSERAW" + tocID, "");
+            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (html)", "RESPONSERAW" + tocID, "", false);
         }
         appendPayload(serviceResult, buffer, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
         if (serviceResult.getRunOptions().reportPayloadsAsXML) {

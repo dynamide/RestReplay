@@ -1,2 +1,1 @@
-Added sr.getSequence() to filenames in json db reports for disambiguation of multiple runs.
-Ensured that Master Report Index is a full path so Cmd-click works in iTerm, etc.
+- Made RESPONSE (html) not use PRE, so that source wraps in report.
