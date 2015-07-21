@@ -1016,7 +1016,7 @@ public class RestReplay extends ConfigFile {
         if (getRunOptions().dumpResourceManagerSummary) {
             System.out.println(getResourceManager().formatSummaryPlain());
         }
-        System.out.println(dumpMasterNamespace());
+        if (false) System.out.println(dumpMasterNamespace());
         return results;
     }
 
@@ -1634,7 +1634,7 @@ public class RestReplay extends ConfigFile {
         }
         dir = FileTools.join(reportsDir, FileTools.join(REL_PATH_TO_DB,dir));
 
-        File result = FileTools.saveFile(dir, serviceResult.testIDLabel+".json", json, true);
+        File result = FileTools.saveFile(dir, serviceResult.testIDLabel+'.'+serviceResult.getSequence()+".json", json, true);
         System.out.println("ServiceResult saved to DB: "+result.getCanonicalPath());
         return result;
     }

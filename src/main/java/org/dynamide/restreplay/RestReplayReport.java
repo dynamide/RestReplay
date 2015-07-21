@@ -725,8 +725,13 @@ public class RestReplayReport {
                 System.out.println("\nMaster Summary:\n");
                 System.out.println(masterSummary+"\n");
             }
-
-            System.out.println("====|\r\n====|  Master Report Index:       "+Tools.glue(tupple.directory, tupple.relname)+"\r\n====|\n\n");
+            String relname = Tools.glue(tupple.directory, tupple.relname);
+            String fn = Tools.glue(reportsDir, relname);
+            File testfn = new File(relname);
+            if (!testfn.exists()){
+                testfn = new File(fn);
+            }
+            System.out.println("====|\r\n====|  Master Report Index:       "+testfn.getCanonicalPath()+"\r\n====|\n\n");
 
             System.out.println(masterSummaryLine);
 
