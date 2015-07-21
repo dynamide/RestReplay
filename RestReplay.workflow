@@ -5,6 +5,7 @@ Doco:
     vi doc/RestReplay.html
 
     pushd ~/src/RestReplay
+    mvn package
     bin/push-doco
 
 =============================================================
@@ -29,24 +30,12 @@ Building:
 Push to public server
 =============================================================
 javadoc:
-	mvn javadoc:jar
-        produces, for example:
-            /Users/vcrocla/src/RestReplay/target/RestReplay-javadoc.jar
-
-	scp to
-	    ~/sites/dynamide.com/RestReplay/javadoc/
-
-    which you extract with:
-        jar xvf RestReplay-javadoc.jar
-
 docs:
 artifacts:
     run the maven "package" phase:
+        pushd ~/src/RestReplay
         mvn package
-    You should get:
-        target//RestReplay-1.0.6-javadoc.jar
-        target//RestReplay-1.0.6-sources.jar
-        target//RestReplay-1.0.6.jar
+        bin/push-doco
 
 deploy new jar version to maven central:
     vi ~/src/RestReplay/pom.xml     ##update the version number

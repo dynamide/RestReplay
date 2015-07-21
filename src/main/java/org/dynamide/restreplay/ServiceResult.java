@@ -31,7 +31,14 @@ public class ServiceResult {
         runOptions = options;
         sequence = ""+(staticSequence++);
     }
+
     private static int staticSequence = 0;
+
+    /** The sequence number is generated for each run, so that each ServiceResult is sequentially numbered
+     *  from zero; this number appears on the right side of the detail report on the first line of each test,
+     *  and in square brackets in the imports dump at the top of the testGroup report.  It is used
+     *  to disambiguate reports when the runID is not specified in a run element, and in filenames in the json db report.
+     */
     public String getSequence(){
         return sequence;
     }
