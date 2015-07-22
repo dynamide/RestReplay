@@ -9,6 +9,7 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert;
@@ -809,7 +810,9 @@ public class RestReplayReport {
         if (serviceResult.getRunOptions().reportResponseRaw) {
             appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (raw)", "RESPONSERAW" + tocID, "");
         } else if (respType.equals(ServiceResult.PRETTY_FORMAT.HTML)){
-            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (html)", "RESPONSERAW" + tocID, "", false);
+            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (html)", "RESPONSEHTML" + tocID, "", false);
+        } else {
+            appendPayload(serviceResult, buffer, serviceResult.getResult(), respType, "RESPONSE (unknown)", "RESPONSERAW" + tocID, "", false);
         }
         appendPayload(serviceResult, buffer, serviceResult.prettyJSON, respType, "RESPONSE", "RESPONSE" + tocID, "", false);
         if (serviceResult.getRunOptions().reportPayloadsAsXML) {
