@@ -69,7 +69,7 @@ public class ServiceResult {
     public String controlFileName = "";
     public String testID = "test-id-not-set";
     public String testGroupID = "";
-    public String testIDLabel = ""; //a place to stash the internal name used by the serviceresult, but shown for info here only.
+    public String testIDLabel = "test-id-label-not-set"; //a place to stash the internal name used by the serviceresult, but shown for info here only.
     public String idFromMutator = ""; //if a mutator turns a test into many tests, each gets a unique mutator id, as a subset of one of the test cases.
     public boolean isMutation = false;
     public String mutatorType = ""; //the value that was in the <mutator></mutator> field, stored here on the parent.
@@ -825,6 +825,8 @@ public class ServiceResult {
             return location;
         } else if ("testID".equalsIgnoreCase(what)){
             return testID;
+        } else if ("testIDLabel".equalsIgnoreCase(what)){
+            return testIDLabel;
         } else if ("mutation".equalsIgnoreCase(what)){
             return idFromMutator;
         } else if ("testGroupID".equalsIgnoreCase(what)){

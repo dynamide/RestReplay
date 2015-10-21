@@ -1,0 +1,21 @@
+After setting 500 error code, RestReplay does not get the body.
+
+
+
+diff --git a/src/java/com/dynamide/DynamideHandler.java b/src/java/com/dynamide/DynamideHandler.java
+index 31960a3..5f6ef0a 100644
+--- a/src/java/com/dynamide/DynamideHandler.java
++++ b/src/java/com/dynamide/DynamideHandler.java
+@@ -194,9 +194,12 @@ public class DynamideHandler extends DynamideObject implements Runnable {
+             String page = header+msg+more;
+             String errorID = ResourceManager.writeErrorLog(null, "unhandled-exception", "", page, Tools.getStackTrace(e), e.getCl
+             //return new HandlerResult("<html><body><h2>Dynamide :: Unhandled Exception</h2><hr/>"+header+msg+more+"</body></html
+-            return new HandlerResult("<html><body><h2>Dynamide :: Unhandled Exception</h2><hr/>"
++            HandlerResult result = new HandlerResult("<html><body><h2>Dynamide :: Unhandled Exception</h2><hr/>"
+                                      +"<a href='"+ResourceManager.errorIDToHref(errorID)+"'>"+errorID+"</a>"
+                                      +"</body></html>", false);
++            result.setResponseCode(500);
++            result.setErrorMessage("<a href='"+ResourceManager.errorIDToHref(errorID)+"'>"+errorID+"</a>");
++            return result;
+         }
+     }

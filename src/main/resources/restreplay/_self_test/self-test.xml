@@ -159,6 +159,7 @@
             <vars>
                 <var ID="TOKEN">${token.got("//data")}</var>
                 <var ID="TOKENDATA">${token.got("//data")}</var>
+                <var ID="TESTIDLABEL_TEST">this.testIDLabel: ${this.testIDLabel} this.testID: ${this.testID}</var>
             </vars>
         </test>
         <test ID="useTokenPUT">
@@ -1043,6 +1044,16 @@
 
 
     <testGroup ID="debug" autoDeletePOSTS="true">
+        <test ID="uploadBinary">
+            <method>POST</method>
+            <uri>/tagonomy?mock=true</uri>
+            <upload>
+                <filename>/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/upload/q/favicon.ico</filename>
+            </upload>
+        </test>
+    </testGroup>
+
+    <testGroup ID="debugHAR" autoDeletePOSTS="true">
         <test ID="ViewHTTPArchives">
             <comment>This test lets you see the top-level elements in the object saved by Chrome's "save to HAR".
                 As masterVar "INFILE", pass the full or relative path to your .har file, e.g.
