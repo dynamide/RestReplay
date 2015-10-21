@@ -1,3 +1,80 @@
 If the test fails, don't run the mutators.
 
 Mutator superclass, and plugin interface.
+
+
+================================================================================
+    
+    Meta-Business Rules.
+    
+          --To be implemented by plugins that can be turned on in runOptions.
+            (If they are in runOptions, then they are in tests, because tests are in groups, 
+             and groups have runOptions.)
+            Some of these will be Mutators, which apply to individual tests.
+            There may need to be global or group Mutators which can be turned on
+              for all tests.
+           
+================================================================================
+
+"Stack Traces NOT Allowed"
+
+"The file encoding shall be ____" , "...shall be set."
+
+Require Headers[]
+    What if tokens/server-side headers go missing in the workflow.
+
+Content-length reported correctly
+    Max/Min expected - test level
+    Max/Min allowed  - business rule level
+    
+
+Regression tests
+    timing
+        change over time
+        change during load
+        % of whole, relation to others
+        
+REST correctness
+
+What other things sys architect insist on for services.
+        
+ACL Security tests
+    Can User A get to Resource B [allowed/not allowed]
+    If outside, can test get to https/http, with user id's.
+    Are headers/tokens changing
+ 
+Deprecated security protocols/stragegies being used?
+    http 1.0
+    ssl layer
+    bus rule: disallow bad combinations. 
+        (check system policy e.g. SSL version versus TLS plus which cypher combo)
+    
+    
+Layers of servers/proxies/caches
+    What are the differences between responses/headers/encoding/transfer in different environments.
+    What if headers change over time?
+    
+    Report of actual servers hit
+   
+Business rule/system profiling:    
+    What should the timeout for these [] servers be.
+    Take forever to stream request data 
+      ==> map of timeouts per server.
+      
+    Take slow/forever to stream response
+      ==> map of timeouts per server.
+    
+    Do these change under load?  
+    
+Report breakdown of times (network,request-data,server response time,response-data,test-framework-time)
+
+Is there anything in the tcp headers that can be useful at this layer?
+        
+================== Proprietary ======================
+
+Import from PostMan
+
+RestReplayScannerGenerator
+
+
+    
