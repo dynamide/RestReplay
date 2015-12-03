@@ -300,6 +300,18 @@ public class RestReplayReport {
         return dotdotdot(value, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
     }
 
+    private static void accumulateVars(Map<String,List<VarInfo>> accumulator, Map<String,List<VarInfo>> vars) {
+        for (String key: vars.keySet()){
+            List<VarInfo> destlist = accumulator.get(key);
+            List<VarInfo> srclist = vars.get(key);
+            if (destlist==null){
+                destlist = new ArrayList<VarInfo>();
+            }
+            destlist.addAll(srclist);
+            accumulator.put(key, destlist);
+        }
+    }
+
     private static String formatVarsReport(Map<String,List<VarInfo>> vars){
         StringBuilder sb = new StringBuilder();
         StringBuilder sbImports = new StringBuilder();
@@ -336,6 +348,7 @@ public class RestReplayReport {
         b.append(EVAL_REPORT_HDR);
         b.append(getInclude(replay, EVAL_REPORT_LINKS_FILE));
         b.append("<div class='evalReport'>");
+        Map<String,List<VarInfo>> accumulator = new HashMap<String, List<VarInfo>>();
         for (EvalResult evalResult: replay.evalReport){
             String trimmedExpression = escape(evalResult.expression);
             String trimmedResult = evalResult.getResultString();
@@ -360,6 +373,7 @@ public class RestReplayReport {
                 b.append("<div><div class='evalReportTestIDLabel'>"+evalResult.testIDLabel+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='font-size:50%;' href='#"+evalResult.testIDLabel+"'>go to test</a></div></div>");
                 b.append("  ");
                 b.append("<div class='evalReportTestIDVars'>"+formatVarsReport(vars)+"</div>");
+                accumulateVars(accumulator, vars);
             } else {
                 String evalReportValueClass = "evalReportValue";
                 if (evalResult.isError){
@@ -375,6 +389,8 @@ public class RestReplayReport {
                  .append("</span> </div>");
             }
         }
+        b.append("<div class='evalReportSummaryLabel'>Accumulated vars and references for TestGroup</div>");
+        b.append("<div class='evalReportTestIDVars'>"+formatVarsReport(accumulator)+"</div>");
         b.append("</div>");
         return b.toString();
     }

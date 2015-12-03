@@ -1,1 +1,2 @@
-- Made RESPONSE (html) not use PRE, so that source wraps in report.
+Added tracking of variables in Eval engine for knowing where vars and references come from withing a test. This enables printing out a block of vars and of references in the EvalReport, which can show what vars or named ServiceResults you expect to be in memory by the time this test runs.
+

@@ -593,6 +593,14 @@ DIV.mutation {
     font-weight: bold;
     margin-left: -5px;
 }
+.evalReportSummaryLabel {
+    background-color: white;
+    font-size: 200%;
+    font-weight: bold;
+    margin-left: -5px;
+    margin-top: 3em;
+    border-top: 2px solid black;
+}
 .evalReportTestIDVars {
     background-color: #EBFFD6;
     font-size: 100%;
