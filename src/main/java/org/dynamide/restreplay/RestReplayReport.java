@@ -1,6 +1,8 @@
 package org.dynamide.restreplay;
 
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.dynamide.interpreters.EvalResult;
+import org.dynamide.interpreters.VarInfo;
 import org.dynamide.util.XmlTools;
 import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
@@ -298,6 +300,33 @@ public class RestReplayReport {
         return dotdotdot(value, RunOptions.MAX_CHARS_FOR_REPORT_LEVEL_SHORT);
     }
 
+    private static String formatVarsReport(Map<String,List<VarInfo>> vars){
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sbImports = new StringBuilder();
+        for (Map.Entry<String,List<VarInfo>> entrySet: vars.entrySet()){
+            String name = entrySet.getKey();
+            if (name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")){
+                List<VarInfo> list = entrySet.getValue();
+                sb.append("<div class='evalReportVarName'>")
+                  .append(name)
+                  .append(" &nbsp;&nbsp;&nbsp;<i class='SMALL'>["+list.size()+"]</i> ")
+                  .append("</div>");
+            } else {
+                sbImports.append("<div class='evalReportReference'>")
+                  .append(dotdotdot(name, 35))
+                  .append("</div>");
+            }
+        }
+        String v="", r="";
+        if (sb.length()>1) {
+            v = "<span class='SMALL'>vars:</span><br />" + sb.toString() + "</span>";
+        }
+        if (sbImports.length()>1){
+            r = "<span style=''><span class='SMALL'>references:</span><br />"+sbImports.toString()+"</span>";
+        }
+        return v + "<br />"+r;
+    }
+
 
     public String evalReportToString(RestReplay replay){
         if (replay.getRunOptions().evalReportLevel.equals(RunOptions.EVAL_REPORT_LEVEL.NONE)){
@@ -325,17 +354,25 @@ public class RestReplayReport {
             if (evalResult.nestingLevel == 1){
                 nestClass = " evalReport-level1";
             }
+            Map<String,List<VarInfo>> vars = evalResult.vars;
             if (evalResult.isDummy) {
-                b.append("<div class='evalReportTestIDLabel'>"+evalResult.testIDLabel+"</div>");
+                b.append("<a name='"+evalResult.testIDLabel+"_EvalReport' ></a>");
+                b.append("<div><div class='evalReportTestIDLabel'>"+evalResult.testIDLabel+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a style='font-size:50%;' href='#"+evalResult.testIDLabel+"'>go to test</a></div></div>");
+                b.append("  ");
+                b.append("<div class='evalReportTestIDVars'>"+formatVarsReport(vars)+"</div>");
             } else {
+                String evalReportValueClass = "evalReportValue";
+                if (evalResult.isError){
+                    evalReportValueClass = "evalReportValueERROR";
+                }
                 b.append("<div class='evalReportRow "+nestClass+"'>")
                  .append("<span class='evalReportContext'>")
                  .append(evalResult.context)
                  .append("</span><span class='evalReportExpression'>")
                  .append(escape(trimmedExpression))
-                 .append("</span><span class='evalReportValue'>")
+                 .append("</span><span class='"+evalReportValueClass+"'>")
                  .append(trimmedResult)
-                 .append("</span></div>");
+                 .append("</span> </div>");
             }
         }
         b.append("</div>");
@@ -510,6 +547,7 @@ public class RestReplayReport {
     private static void appendTestAnchor(StringBuffer buffer, int tocID, ServiceResult serviceResult){
         buffer.append("<a name='TOC" + tocID + "'></a>");
         buffer.append("<a name='" + serviceResult.testID + "'></a>");
+        buffer.append("<a name='" + serviceResult.testIDLabel + "'></a>"); //belt and suspenders.  EvalReport knows context as IDLabel, (with group name).
     }
 
     private void appendServiceResult(ServiceResult serviceResult, StringBuffer buffer){
@@ -522,6 +560,7 @@ public class RestReplayReport {
         buffer.append("<div class='"+cssClass+"'>");
         buffer.append(formatSummary(serviceResult, tocID));
         buffer.append(formatPayloads(serviceResult, tocID));
+        buffer.append("<span class='payload-link'><a href='#"+serviceResult.testIDLabel+"_EvalReport'>EvalReport</a></span>");
         buffer.append("</div>");
         buffer.append(HTML_TEST_END);
     }

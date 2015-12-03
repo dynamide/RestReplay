@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplayMaster>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
+
+    <dump payloads="false" dumpServiceResult="minimal" /> <!-- TODO: set dumpServiceResult to auto to test behavior for releases. -->
+
+    <runOptions>
+        <connectionTimeout>3000</connectionTimeout>
+        <socketTimeout>5000</socketTimeout>
+        <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
+        <outputServiceResultDB>false</outputServiceResultDB>
+    </runOptions>
+
+    <vars>
+        <var ID="DUMMY1">dummy-1-value-m</var>
+        <var ID="DUMMY2">dummy-2-value-m</var>
+    </vars>
+
+    <run controlFile="run_scenarios/vars-used.xml" testGroup="varsUsed_Errors">
+        <vars>
+            <var ID="DUMMY1">dummy-1-value</var>
+            <var ID="DUMMY2">dummy-2-value</var>
+        </vars>
+    </run>
+
+    <run controlFile="run_scenarios/vars-used.xml" testGroup="varsUsed">
+        <vars>
+            <var ID="DUMMY1">dummy-1-value</var>
+            <var ID="DUMMY2">dummy-2-value</var>
+        </vars>
+    </run>
+
+
+
+
+
+</restReplayMaster>
+

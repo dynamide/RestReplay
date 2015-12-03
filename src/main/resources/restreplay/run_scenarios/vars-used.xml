@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restReplay>
+    <protoHostPort>http://localhost:${SELFTEST_PORT}</protoHostPort>
+    <testGroup ID="varsUsed" autoDeletePOSTS="false">
+        <comment>We want a report that shows all VARs that get accessed by a test/testgroup.</comment>
+        <test ID="useVars">
+            <method>GET</method>
+            <uri>/tagonomy?mock=true&amp;name=useToken</uri>
+            <exports>
+               <vars>
+                   <var ID="myExportDUMMY2">${DUMMY2}</var>
+                   <var ID="myExportDUMMY2Duplicate">${DUMMY2}</var>
+                   <var ID="myRef">${result.result}</var>
+               </vars>
+           </exports>
+        </test>
+    </testGroup>
+    <testGroup ID="varsUsed_Errors" autoDeletePOSTS="false">
+        <comment>Error handling of syntax</comment>
+        <test ID="useVarsBadBraces">
+            <method>GET</method>
+            <uri>/tagonomy?mock=true&amp;name=MissingCloseBrace&amp;dummy=${DUMMY1</uri>
+            <exports>
+               <vars>
+                   <var ID="myExportDUMMY2">${DUMMY2}</var>
+                   <var ID="myExportDUMMY2Duplicate">${DUMMY2}</var>
+                   <var ID="myMissingCloseBrace">${DUMMYM</var>
+               </vars>
+           </exports>
+        </test>
+    </testGroup>
+</restReplay>

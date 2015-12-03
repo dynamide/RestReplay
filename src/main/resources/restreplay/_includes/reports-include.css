@@ -593,6 +593,25 @@ DIV.mutation {
     font-weight: bold;
     margin-left: -5px;
 }
+.evalReportTestIDVars {
+    background-color: #EBFFD6;
+    font-size: 100%;
+    margin: 10px;
+    margin-left: 25px;
+    display: inline-block;
+    border: 1px dotted lightblue;
+    padding:10px;
+}
+.evalReportVarName {
+    padding:0.4em;
+    padding-left:2em;
+}
+.evalReportReference {
+    padding:0.2em;
+    padding-left:2em;
+    color: gray;
+}
+
 .evalReportRow {
     background-color: #bbddff;
     border: 1px solid black;
@@ -621,7 +640,17 @@ DIV.mutation {
     display: inline-block;
     margin: 2px;
     padding: 3px;
-     margin-left: 5px;
+    margin-left: 5px;
+}
+.evalReportValueERROR {
+    max-width:98%;
+    word-wrap:break-word;
+    background-color: #ffcccc;
+    border: 1px solid black;
+    display: inline-block;
+    margin: 2px;
+    padding: 3px;
+    margin-left: 5px;
 }
 .evalReport-level0 {
     padding-left: 2px;

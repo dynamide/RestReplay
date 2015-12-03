@@ -44,6 +44,7 @@ public class Eval {
     }
 
     public void addToEvalReport(EvalResult result){
+        //System.out.println("addToEvalReport.....> "+result.expression+" :: "+result.testIDLabel + " toString: "+result.toString());
         boolean doInsertion = false;
         if (lastLevel>0 && result.nestingLevel==0){
             doInsertion=true;
@@ -60,6 +61,7 @@ public class Eval {
     }
 
     //private String currentTestIDLabel = "";
+    EvalResult currentTestIDEvalResult = null;
 
     /** The current test label is the title of a block of evals in the Eval Report for this session.
      *  When checking variables such as <code>&lt;test loop="${expression}" ...</code>, RestReplay
@@ -78,6 +80,7 @@ public class Eval {
         label.isDummy = true;
         label.testIDLabel = val;
         addToEvalReport(label);
+        currentTestIDEvalResult = label;
         return label;
     }
 
@@ -177,6 +180,7 @@ public class Eval {
             EvalResult innerResult2 = parse(logname, inputJexlExpression);
             if (innerResult2.alerts.size()>0){
                 result.addAllAlerts(innerResult2.alerts);
+                //addToEvalReport(innerResult2);
             }
             result.result = innerResult2.result;
             addToEvalReport(result);
@@ -223,6 +227,7 @@ public class Eval {
                 } else {
                     evalResult.result = in;
                 }
+                evalResult.isError = true;
                 return evalResult;
             }
             front = in.substring(cursor, start);
@@ -238,6 +243,25 @@ public class Eval {
             //experimental:
             Script script = jexl.createScript(var);   //http://commons.apache.org/proper/commons-jexl/apidocs/org/apache/commons/jexl2/Script.html
 
+            VarInfo info = null;
+            //System.out.println("\r\n~~~~~~~~~~ var: "+var+"    context: "+context+"\r\n\r\n");
+            if (currentTestIDEvalResult!=null){
+                info = new VarInfo();
+                info.name = var;
+                info.context = context;
+                info.expression = var;
+                info.testIDLabel = currentTestIDEvalResult.testIDLabel;
+                List<VarInfo> infoList = currentTestIDEvalResult.vars.get(var);
+                if (infoList==null) {
+                    infoList = new ArrayList<VarInfo>();
+                    infoList.add(info);
+                    currentTestIDEvalResult.vars.put(var, infoList);
+                } else {
+                    infoList.add(info);
+                }
+            }
+
+
             Object resultObj = null;
             try {
                 //jc.set("out", System.out);
@@ -248,17 +272,32 @@ public class Eval {
                 evalResult.addAlert("Exception while evaluating variable: '"+var+"'. Exception: "+ex,
                         dumpContext(jc),
                         LEVEL.ERROR);
+                evalResult.isError = true;
                 resultObj = null;
+                if(info!=null){
+                    info.error = 1;
+                }
             }
             String resultStr;
             if (null == resultObj){
                 evalResult.addAlert("Variable not found: '"+var+"'",
                         dumpContext(jc),
                         LEVEL.WARN);
+                //evalResult.expression = var;
+                System.out.println("@@@@@ Variable not found::evalResult:"+evalResult+", evalResult.expression:"+evalResult.expression);
                 if (runOptions.errorsBecomeEmptyStrings){
                     resultStr = "";
                 } else {
                     resultStr = "${"+var+"}";
+                }
+                EvalResult evalResultNOTFOUND = new EvalResult();
+                evalResultNOTFOUND.expression = "${"+var+"}";
+                evalResultNOTFOUND.result = resultStr;
+                evalResultNOTFOUND.context = context;
+                evalResultNOTFOUND.isError = true;
+                addToEvalReport(evalResultNOTFOUND);
+                if(info!=null){
+                    info.notFound=1;
                 }
             } else {
                 resultStr = resultObj.toString();

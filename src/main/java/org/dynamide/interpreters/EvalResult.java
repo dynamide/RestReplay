@@ -1,15 +1,15 @@
 package org.dynamide.interpreters;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class EvalResult {
     public String context = "";     //informational
     public String expression = "";  //informational
     public String testIDLabel = ""; //informational
     public boolean isDummy = false;
+    public boolean isError = false;
     public int nestingLevel = 0;
+    public Map<String,List<VarInfo>> vars = new HashMap<String,List<VarInfo>>();
 
     public Object result = "";
     public boolean useResultAsObject = false;

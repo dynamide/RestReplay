@@ -41,6 +41,8 @@
     <div class="toc-error">This is an error</div>
     <br />
     <div class="toc-warn">This is a warning</div>
+    <br />
+    <div class="comment">This is a comment</div>
 
     <div class="payloads"><div class="DETAIL_TABLE autodelete">&#10034; &mdash; AutodeletedTestResult</div></div>
 
@@ -49,6 +51,15 @@
         <p>preflight is for expressions like loop="${['a','b']}" which get evaluated before the test gets created,
             so you'll see the same testID is shown with a new header in the eval report after the preflight section.</p>
         <div class="evalReportTestIDLabel">Eval Report for one testID</div>
+
+        <div class="evalReportTestIDVars">
+            <span class="SMALL">vars:</span>
+            <div style="padding:2px;">VARIABLES &nbsp;&nbsp;&nbsp;<i class="SMALL">[access-count]</i> </div>
+            <div class="SMALL">references:</div>
+            <div style="padding:2px; color: gray;">importedItem.field</div>
+            <div style="padding:2px; color: gray;">testID.field</div>
+        </div>
+
 
         <div class="evalReportRow  evalReport-level0">
             <span class="evalReportContext">title and id of level 0 items such as vars</span>
