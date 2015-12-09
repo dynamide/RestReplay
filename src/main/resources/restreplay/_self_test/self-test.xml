@@ -677,6 +677,21 @@
         </test>
     </testGroup>
 
+     <testGroup ID="Mastervars">
+        <test ID="showMastervars">
+            <method>GET</method>
+            <uri>/tagonomy?mock=token&amp;GLOBALMASTERVAR1=${GLOBALMASTERVAR1}&amp;MASTERVAR1=${MASTERVAR1}</uri>
+            <vars>
+                <var ID="MV1">${MASTERVAR1}</var>
+            </vars>
+            <exports>
+                <vars>
+                    <var ID="MV2">${MASTERVAR2}</var>
+                </vars>
+            </exports>
+        </test>
+    </testGroup>
+
     <testGroup ID="Loops" autoDeletePOSTS="true">
         <test ID="loopStringArraySimple" loop="${['10','18','21']}">
             <method>GET</method>

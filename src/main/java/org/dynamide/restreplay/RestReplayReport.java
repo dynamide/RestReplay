@@ -336,7 +336,7 @@ public class RestReplayReport {
         if (sbImports.length()>1){
             r = "<span style=''><span class='SMALL'>references:</span><br />"+sbImports.toString()+"</span>";
         }
-        return v + "<br />"+r;
+        return v + " "+r;
     }
 
 

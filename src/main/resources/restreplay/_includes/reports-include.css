@@ -604,18 +604,18 @@ DIV.mutation {
 .evalReportTestIDVars {
     background-color: #EBFFD6;
     font-size: 100%;
-    margin: 10px;
+    margin: 4px;
     margin-left: 25px;
     display: inline-block;
     border: 1px dotted lightblue;
-    padding:10px;
+    padding:4px;
 }
 .evalReportVarName {
-    padding:0.4em;
+    padding:0.2em;
     padding-left:2em;
 }
 .evalReportReference {
-    padding:0.2em;
+    padding:0.1em;
     padding-left:2em;
     color: gray;
 }

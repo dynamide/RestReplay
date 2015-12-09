@@ -90,6 +90,12 @@ public class Master extends ConfigFile {
 
         String desiredEnv = this.getEnvID();
         Node masterNode = document.selectSingleNode("/restReplayMaster");
+
+        //get restReplayMaster::vars
+        getVars().putAll(readVars(masterNode));//todo%% may have to do null-check
+
+
+        //get restReplayMaster::envs/env[desiredEnv]::vars
         EnvResult res = selectEnv(masterNode, desiredEnv);
         Node nodeWVars = res.nodeWEnvs;
         if (null!=nodeWVars){
@@ -98,6 +104,8 @@ public class Master extends ConfigFile {
             nodeWVars = masterNode;
         }
         getVars().putAll(readVars(nodeWVars));
+        //todo: get run/vars
+
         this.getRunOptions().addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
         readOnSummary(masterNode);
         readOnBeginMaster(masterNode);
@@ -221,7 +229,7 @@ public class Master extends ConfigFile {
         for (Node env: envNodes){
             String ID = env.valueOf("@ID");
             String isDefault = env.valueOf("@default");
-            if (Tools.notBlank(isDefault)){
+            if (Tools.isTrue(isDefault)){
                 defaultResult.nodeWEnvs = env;
                 defaultResult.envID = ID;
             }
@@ -346,6 +354,7 @@ public class Master extends ConfigFile {
         List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
         String runID = "";
         Integer runHashCount = 0;
+        //runVars is null, which is because we are running the test by control file name, NOT the <run> node in the master.
         serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, runID, runHashCount, testGroups));//TODO: remove dups.
         RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
         fireOnEndMaster();

@@ -25,6 +25,19 @@
        //kit.getOut().println("In onEndMaster event");
     ]]></event>
 
+    <vars>
+        <var ID="GLOBALMASTERVAR1">global_mastervar_value_1</var>
+        <var ID="GLOBALMASTERVAR2">global_mastervar_value_2</var>
+    </vars>
+
+    <envs>
+        <env ID="dev" default="true">
+            <vars>
+                <var ID="GLOBALMASTERVAR1">global_env_value_1</var>
+            </vars>
+        </env>
+    </envs>
+
     <!--
     <run controlFile="_self_test/self-test.xml" testGroup="debug" />
     -->
@@ -32,6 +45,12 @@
     <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
     <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
     <run controlFile="_self_test/self-test.xml" testGroup="VarsAndValidators" />
+    <run controlFile="_self_test/self-test.xml" testGroup="Mastervars">
+        <vars>
+            <var ID="MASTERVAR1">mastervar_value_1</var>
+            <var ID="MASTERVAR2">mastervar_value_2</var>
+        </vars>
+    </run>
     <run controlFile="_self_test/self-test.xml" testGroup="Loops" />
     <run controlFile="_self_test/self-test.xml" testGroup="login" />
     <run controlFile="_self_test/self-test.xml" testGroup="badResourcePaths" />

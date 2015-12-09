@@ -143,3 +143,8 @@
 
 ===========Tue Jul 21 11:32:40 PDT 2015======================
 - Made RESPONSE (html) not use PRE, so that source wraps in report.
+
+===========Tue Dec 8 16:21:01 PST 2015======================
+Added tracking of variables in Eval engine for knowing where vars and references come from withing a test. This enables printing out a block of vars and of references in the EvalReport, which can show what vars or named ServiceResults you expect to be in memory by the time this test runs.
+
+Normalized usage of vars and envs in mastervars, for various run scenarios.
