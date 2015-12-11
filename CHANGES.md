@@ -166,3 +166,6 @@ Normalized usage of vars and envs in mastervars, for various run scenarios.
 Updated doco for Tools: EvalReport, ResourceManager Summary, onSummary event.
 
 Create release: 1.19
+
+===========Fri Dec 11 13:20:09 PST 2015======================
+Updated doco
