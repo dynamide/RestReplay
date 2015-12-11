@@ -148,3 +148,21 @@
 Added tracking of variables in Eval engine for knowing where vars and references come from withing a test. This enables printing out a block of vars and of references in the EvalReport, which can show what vars or named ServiceResults you expect to be in memory by the time this test runs.
 
 Normalized usage of vars and envs in mastervars, for various run scenarios.
+
+===========Fri Dec 11 10:50:56 PST 2015======================
+Added tracking of variables in Eval engine for knowing where vars and references come from withing a test. This enables printing out a block of vars and of references in the EvalReport, which can show what vars or named ServiceResults you expect to be in memory by the time this test runs.
+
+Normalized usage of vars and envs in mastervars, for various run scenarios.
+
+Updated doco for Tools: EvalReport, ResourceManager Summary, onSummary event.
+
+Create release: 1.19
+
+===========Fri Dec 11 10:51:33 PST 2015======================
+Added tracking of variables in Eval engine for knowing where vars and references come from withing a test. This enables printing out a block of vars and of references in the EvalReport, which can show what vars or named ServiceResults you expect to be in memory by the time this test runs.
+
+Normalized usage of vars and envs in mastervars, for various run scenarios.
+
+Updated doco for Tools: EvalReport, ResourceManager Summary, onSummary event.
+
+Create release: 1.19

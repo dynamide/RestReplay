@@ -169,7 +169,7 @@
 
 <body>
   <div id="content" class="page view">
-    <div class="wiki-content">
+    <p class="wiki-content">
       
     <h1><a name="RestReplay-RestReplayDocumentation" id="RestReplay-RestReplayDocumentation"></a>RestReplay Documentation</h1>
       <div class="container" style="width: 90%; margin: 50px;">
@@ -183,18 +183,22 @@
     <h2><a href="#RestReplay-1.Introduction">1. Introduction</a></h2>
     <h3><a href="#RestReplay-1.a.Features">1.a. Features</a></h3>
     <h3><a href="#RestReplay-1.bOverview">1.b Overview</a></h3>
-<h3><a href="#RestReplay-1.c.Concepts">1.c Concepts</a></h3>
-<h4><a href="#1.c.1.Expressions">1.c.1 Expressions</a></h4>
-<h4><a href="#1.c.2.ValuesInContexts">1.c.2 Values in Contexts</a></h4>
-<h4><a href="#1.c.3.CommonUsefulMethodsInContexts">1.c.3 Common Useful Methods in Contexts</a></h4>
-<h4><a href="#1.c.4.Vars">1.c.4 Vars</a></h4>
-<h4><a href="#1.c.5.Headers">1.c.5 Headers</a></h4>
-<h4><a href="#1.c.6.Expected.Codes">1.c.6 Expected Codes</a></h4>
-<h4><a href="#1.c.7.Mutators">1.c.7 Mutators</a></h4>
-<h4><a href="#1.c.8-Looping">1.c.8 Looping</a></h4>
-<h4><a href="#1.c.9.AutoDelete">1.c.9 AutoDelete</a></h4>      
+    <h3><a href="#RestReplay-1.c.Concepts">1.c Concepts</a></h3>
+    <h4><a href="#1.c.1.Expressions">1.c.1 Expressions</a></h4>
+    <h4><a href="#1.c.2.ValuesInContexts">1.c.2 Values in Contexts</a></h4>
+    <h4><a href="#1.c.3.CommonUsefulMethodsInContexts">1.c.3 Common Useful Methods in Contexts</a></h4>
+    <h4><a href="#1.c.4.Vars">1.c.4 Vars</a></h4>
+    <h4><a href="#1.c.5.Headers">1.c.5 Headers</a></h4>
+    <h4><a href="#1.c.6.Expected.Codes">1.c.6 Expected Codes</a></h4>
+    <h4><a href="#1.c.7.Mutators">1.c.7 Mutators</a></h4>
+    <h4><a href="#1.c.8-Looping">1.c.8 Looping</a></h4>
+    <h4><a href="#1.c.9.AutoDelete">1.c.9 AutoDelete</a></h4>
       
-    <h4><a href="#RestReplay-1.d.1Runtime">1.d.1 Runtime</a></h4>
+    <h3><a href="#RestReplay-1.d.Runtime">1.d Runtime</a></h3>
+    <h3><a href="#RestReplay-1.e.Tools">1.e Tools</a></h3>
+    <h4><a href="#RestReplay-1.e.1.EvalReport">1.e.1 EvalReport</a></h4>
+    <h4><a href="#RestReplay-1.e.2.ResourceManagerSummary">1.e.2 ResourceManager Summary</a></h4>
+    <h4><a href="#RestReplay-1.e.2.onSummary.event">1.e.2 onSummary event</a></h4>
 
     <h2><a href="#RestReplay-2.ReferenceDocumentation">2. Reference Documentation</a></h2>
     <h3><a href="#RestReplay-2.a.Installation">2.a. Installation</a></h3>
@@ -268,7 +272,7 @@
 
       <h3><a name="RestReplay-1.bOverview" id="RestReplay-1.bOverview"></a>1.b Overview</h3>
 <p>RestReplay is run from the command line (or ant, maven, or Jenkins).&nbsp; It reads your configuration files, and along with startup parameters, determines which testGroups and which tests to run.&nbsp; Along the way, it initializes and evaluates any variables you have set up, such as hosts, ports, resource IDs, logins, and so on.&nbsp; </p>
-<p>It runs the tests in the order you define, synchronously.&nbsp; As each test is run, it exports variables which become available to subsequent tests.&nbsp; Also after each test, the response is evaluated for schema correctness, and any Validator you have defined can run using Jexl or Javascript code. Read more about the runtime workflow at <a href="#RestReplay-1.d.1Runtime">1.d.1 Runtime</a>.</p>
+<p>It runs the tests in the order you define, synchronously.&nbsp; As each test is run, it exports variables which become available to subsequent tests.&nbsp; Also after each test, the response is evaluated for schema correctness, and any Validator you have defined can run using Jexl or Javascript code. Read more about the runtime workflow at <a href="#RestReplay-1.d.Runtime">1.d.1 Runtime</a>.</p>
 <p>So you can think of it following stories, or use cases, or workflows, exercising your services layer.&nbsp; </p>
 <p>After the tests have run, RestReplay compiles a directory of stand-alone reports that drill down from your high level view (the Master) to the detail view (the individual testGroup/test reports).&nbsp; Tweaking the RunOptions gives you control over the output on the command line, and also in the HTML report.&nbsp; These reports do not depend on anything else, and can be archived, since they show stats, results, documentation of your APIs, and contain all the input and output payloads.&nbsp; <span class="Apple-style-span">See: <a href="http://dynamide.org/RestReplay/reports/index._self_test.master-self-test.html">self-test sample report</a> </span></p>
 <p>After the tests have run, you can check the code coverage of your services layer with external tools such as <a href="http://www.eclemma.org/">EclEmma / JaCoCo</a>, and also use other queries to check the state of your datastores.&nbsp; </p>
@@ -505,7 +509,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 <p>The vars/var tag appears in several places in the configuration file trees.<br>They use the same rules discussed under <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a>.</p>
 <p>Vars in different xml config elements have different scoping rules.</p>
 <p>Here are the places vars can exist:</p>
-<p>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a><br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a></p>
+<p>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a><br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.run.vars.var"> /restReplayMaster/run/vars/var</a></p>
 <p> See also: <a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a> for an example of using a more complicated Jexl expression as a var.</p>
 <p>Here is the list of vars shown above in the discussion on <a href="#1.c.1.Expressions">1.c.1 Expressions</a>
 <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
@@ -547,7 +551,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 
 
 
-    <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.d.1Runtime"></a>1.d.1 Runtime</h4>
+    <h4><a name="RestReplay-1.b.1Runtime" id="RestReplay-1.d.Runtime"></a>1.d.1 Runtime</h4>
 
       <p>At runtime, RestReplay consults parameters passed in on the command line, or from maven surefire,
           or from java:exec which uses parameters found in the pom.xml project file under options for the <span style="font-style: italic; font-weight: bold;">exec-maven-plugin</span> plugin.</p>
@@ -626,6 +630,67 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
       <div class="code">    Master Report Index: ./tests/reports/index.local.las-master.xml.html </div>
       
       <p>This reports directory starts with an index file named after any <b>master</b> file you have run, which links to individual <b>control</b> file results.</p>
+
+
+
+
+
+<h4><a name="RestReplay-1.e.Tools" id="RestReplay-1.e.Tools"></a>1.e Tools</h4>
+        <p>RestReplay reports include sections that help developers debug their test cases.  On the Master page,
+        you can optionally turn on the <a href="#RestReplay-1.e.2.ResourceManagerSummary">ResourceManager Summary</a>.
+        You can also optionally provide an <a href="#RestReplay-1.e.2.onSummary.event">onSummary event</a>,
+            which can be used to spit out all the APIs called, for example.
+        On the detail pages, the <a href="#RestReplay-1.e.1.EvalReport">EvalReport</a> is always included.</p>
+
+<h4><a name="RestReplay-1.e.1.EvalReport">1.e.1 EvalReport</a></h4>
+      <p>The EvalReport shows all evaluations of variables whilst running tests.  The output is
+      organized in the order that tests are run.  To see detail all the way into expressions containing expressions,
+      click the link at the top of the EvalReport called "Show EvalReport Detail".</p>
+
+      <p>For each <b>TestGroup.Test</b>, there is a link to the test output, the <i>vars</i> and <i>references</i> are shown, then
+          all evaluations are shown with expansions/substitutions.  Each expansion shows its context, then its raw value,
+          then its expanded value.  <i>Vars</i> are any legal variable names that are accessed, whilst <i>references</i> are
+          expressions that are evaluated that may point to imports or other tests.  (See the <b>Legend</b> at the bottom of the
+          report page for more info on how the EvalReport is presented.)</p>
+
+
+      <p>By tracing these vars and references,
+          you can refactor your tests so that each Test or TestGroup imports and exports variables, rather than expressions
+          that create messy dependencies.  (A clean dependency is when testA exports a variable, and testB imports that variable
+          but testB does not have a complicated expression that digs info out of testA.)
+      </p>
+
+
+<h4><a name="RestReplay-1.e.2.ResourceManagerSummary">1.e.2 ResourceManager Summary</a></h4>
+      <p>The ResourceManager Summary shows every resource that is pulled from the file system or the
+      class path (which can reference resources stored in the RestReplay jar file).  Relative resource names
+      are reported, plus attributes related to how that resource was found.
+      <ul>
+          <li>base - The path to the testdir or jar file</li>
+          <li>foundPath - The full, resolved path to the resource</li>
+          <li>source - [FILE,CLASSPATH,STREAM,URL,ZIP,NOTFOUND] What type of resource / where found</li>
+          <li>context - What phase of testing asked for this resource</li>
+          <li>doc - either the full path of the resource, or the name of the root element in an XML Document</li>
+          <li>cached - After two references, resources are cached in memory</li>
+      </ul>
+      Cached resources are highlighted with <font color="green"><b>green font</b></font>.
+      <br />Missing resources are highlighted with <font color="red"><b>red font</b></font>.
+      <i>This is the best way to find broken links to resources.</i>
+      </p>
+
+<h4><a name="RestReplay-1.e.2.onSummary.event">1.e.2 onSummary event</a></h4>
+        <p>There is an example of how to write this script in the source distribution under
+        <code>RestReplay/src/main/resources/restreplay/_self_test/s/master-self-test-onSummary.js</code>  By using this
+        onSummary script, you can spit out all the APIs called during a run.
+
+        <br />Documentation is here: <a href="#RestReplay-master.event">/restReplayMaster/event</a>
+        <event ID="onSummary" lang="javascript" filename="_self_test/s/master-self-test-onSummary.js"/></p>
+
+
+
+
+
+
 
       
 <h2><a name="RestReplay-2.ReferenceDocumentation" id="RestReplay-2.ReferenceDocumentation"></a>2. Reference Documentation</h2>
@@ -840,6 +905,10 @@ stand-alone within the control file.</td>
       &lt;/envs&gt;
       &lt;<a href="#RestReplay-master.event">event</a> /&gt;
       &lt;<a href="#RestReplay-master.run">run</a> /&gt;
+          &lt;<a href="#RestReplay-master.run.vars.var">vars</a>&gt;
+              &lt;<a href="#RestReplay-master.run.vars.var">var</a> /&gt;
+          &lt;/vars&gt;
+      &lt;/run&gt;
   &lt;/restReplayMaster&gt;</pre>
       </div>
 
@@ -1474,7 +1543,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-              <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.run"></a>/restReplayMaster/run</td>
+              <td colspan="3" class="element-hdr"><a name="RestReplay-master.run" id="RestReplay-master.run"><a name="RestReplay-master.run.vars.var" id="RestReplay-master.run.vars.var"></a>/restReplayMaster/run</td>
           </tr>
 
           <tr>
@@ -1487,6 +1556,11 @@ When overriding RunOptions in a master file, consider these two development scen
               <td>@testGroup</td>
 
               <td>ID of single testGroup within <b>control</b> file to run. To run multiple tests, use multiple /restReplayMaster/run elements.</td>
+          </tr>
+            <tr>
+              <td>child elements</td>
+
+              <td>vars</td>
           </tr>
 
           <tr>
@@ -1506,6 +1580,28 @@ When overriding RunOptions in a master file, consider these two development scen
                   </div>
               </td>
           </tr>
+
+        
+          <tr>
+              <td>Example:</td>
+
+              <td>
+                  In this example, mastervars are declared right in the <b>&lt;run></b> element, and will affect only this run.
+                  These are read in after mastervars declared in <b>/restReplayMaster/envs/env/vars</b> and <b>/restReplayMaster/vars</b>
+                  <div class="code">&lt;restReplayMaster&gt;
+    ....
+    &lt;run controlFile="_self_test/self-test.xml" testGroup="Mastervars">
+        &lt;vars>
+            &lt;var ID="MASTERVAR1">mastervar_value_1&lt;/var>
+            &lt;var ID="MASTERVAR2">mastervar_value_2&lt;/var>
+        &lt;/vars>
+    &lt;/run>
+
+                  </div>
+              </td>
+          </tr>
+        
+
 
         </tbody>
       </table>
