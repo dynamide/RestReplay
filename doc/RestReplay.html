@@ -818,7 +818,8 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 <td>control</td>
 <td>-control my-control.xml</td>
 <td>Run one control file, optionally without a master.  Requires at least <strong>testGroup</strong>, and also accepts <strong>test</strong>. If you
-run with a master, then masterVars and master headers are pulled in first.  Otherwise, all vars and headers must run
+run with a master, then masterVars and master headers are pulled in first (since we are specifying the
+    control file, no /restReplayMaster/run element or /restReplayMaster/run/vars children are consulted).  Otherwise, all vars and headers must run
 stand-alone within the control file.</td>
 </tr>
 
@@ -855,7 +856,8 @@ stand-alone within the control file.</td>
       <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br> -testdir ./tests \<br> -control pi/pitoken.xml \<br> -testGroup main \<br> -test pitoken
       </div>
       <p><br></p>
-<p>In this run, we are running with a -master and a -control, AND a -testGroup.&nbsp; This runs only that testGroup, but picks up vars and headers from the master.</p>
+<p>In this run, we are running with a -master and a -control, AND a -testGroup.&nbsp; This runs only that testGroup, but picks up vars and headers from the master. (Since no /restReplayMaster/run element is used,
+there are no vars from /restReplayMaster/run/vars.</p>
           <div class="code">java -jar lib/RestReplay-1.0.4-standalone.jar \<br>  -testdir ./tests \<br>  -master my-master.xml <br>  -control myservice/myservice.xml \<br>  -testGroup deleteAllWidgets
       </div>
       
