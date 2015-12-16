@@ -693,7 +693,8 @@ public class RestReplayReport {
                                           Map<String,Object> masterVars,
                                           List<Header> testGroups,
                                           Master master,
-                                          List<List<ServiceResult>> list) {
+                                          List<List<ServiceResult>> list,
+                                          List<String> masterAlertStrings) {
 
         MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
 
@@ -750,7 +751,13 @@ public class RestReplayReport {
             sb.append("<br />"+masterSummaryLineHTML);
             sb.append("</div>");
 
-
+            if (masterAlertStrings!=null&&masterAlertStrings.size()>0) {
+                sb.append("<br /><div class='toc-toc'><b>Alerts in master file</b><br />");
+                for (String oneAlertLine : masterAlertStrings) {
+                    sb.append(oneAlertLine).append("<br />");
+                }
+                sb.append("</div>");
+            }
 
             for (String oneToc : reportsList) {
                 sb.append(oneToc);

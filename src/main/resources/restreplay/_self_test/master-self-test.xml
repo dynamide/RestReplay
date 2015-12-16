@@ -45,10 +45,15 @@
     <run controlFile="_self_test/self-test.xml" testGroup="selftestGroup" />
     <run controlFile="_self_test/self-test.xml" testGroup="testMutatorExpectedCodes" />
     <run controlFile="_self_test/self-test.xml" testGroup="VarsAndValidators" />
-    <run controlFile="_self_test/self-test.xml" testGroup="Mastervars">
+    <run ID="MastervarsID" controlFile="_self_test/self-test.xml" testGroup="Mastervars">
         <vars>
             <var ID="MASTERVAR1">mastervar_value_1</var>
             <var ID="MASTERVAR2">mastervar_value_2</var>
+        </vars>
+    </run>
+    <run controlFile="_self_test/self-test.xml" testGroup="ImportedRunVars">
+        <vars>
+            <var ID="VAR_VALUE">${MastervarsID.showMastervars.MV2</var>
         </vars>
     </run>
     <run controlFile="_self_test/self-test.xml" testGroup="Loops" />

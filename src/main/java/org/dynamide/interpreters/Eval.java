@@ -18,6 +18,9 @@ import org.dynamide.util.Tools;
    in the input String.
  */
 public class Eval {
+    public Eval(){
+        resetContext();
+    }
     public Map<String, ServiceResult> serviceResultsMap;
     public Map<String, ServiceResult> importsNamespace;
     public JexlEngine jexl = new JexlEngine();   // Used for expression language expansion from uri field.

@@ -2,6 +2,7 @@ package org.dynamide.restreplay;
 
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
+import org.dynamide.interpreters.Alert;
 import org.dynamide.interpreters.Eval;
 import org.dynamide.interpreters.EvalResult;
 import org.dynamide.interpreters.RhinoInterpreter;
@@ -317,6 +318,9 @@ public class Master extends ConfigFile {
         String controlFile, testGroup, test;
         String runID;
         RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+        Map<String, Map> allRunIDs = new HashMap<String,Map>();
+        List<String> alertStrings = new ArrayList<String>();
+
         List<Node> runNodes = document.selectNodes("/restReplayMaster/run");
         for (Node runNode : runNodes) {
             controlFile = runNode.valueOf("@controlFile");
@@ -333,13 +337,65 @@ public class Master extends ConfigFile {
             }
             runSequenceMap.put(runHash, runHashCount);
 
-            Map<String, Object> runVars = readVars(runNode);
             //testGroups.add(testGroup);
-            serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, runID, runHashCount, testGroups));//TODO: remove dups.
+
+            Map<String, Object> runVars = readVars(runNode);
+            runVars = expandRunVars(runVars, allRunIDs, masterFilename, testGroup, alertStrings);
+
+            List<ServiceResult> listOTests
+               = runTest(masterFilename, controlFile, testGroup, test, runVars, tupple.relname, runID, runHashCount, testGroups);
+
+            if (Tools.notBlank(runID)){
+                Map<String, ? extends Object> serviceResultsByName = createMapByTestIDs(listOTests);
+                allRunIDs.put(runID, serviceResultsByName);
+            }
+
+            serviceResultsListList.add(listOTests);//TODO: remove dups.
         }
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList, alertStrings);
         fireOnEndMaster();
         return serviceResultsListList;
+    }
+
+    private Map<String, ServiceResult> createMapByTestIDs(List<ServiceResult> listOTests) {
+
+        Map<String, ServiceResult> result = new HashMap<String, ServiceResult>();
+        for (ServiceResult sr: listOTests){
+            result.put(sr.testID, sr); //could use testIDLabel, but I think testGroup is required in <run.../>
+        }
+        return result;
+    }
+
+    private Map<String, Object> expandRunVars(Map<String, Object> runVars,
+                                              Map<String, Map> srsByName,
+                                              String masterFilename,
+                                              String currentTestGroup,
+                                              List<String> alertStrings){
+        Eval evalStruct = new Eval();
+        for (Map.Entry<String,Map> entry: srsByName.entrySet()) {
+            evalStruct.jc.set(entry.getKey(), entry.getValue());
+        }
+        //evalStruct.setCurrentTestIDLabel(serviceResult.testIDLabel);
+        evalStruct.runOptions = this.getRunOptions();
+        Map<String, Object> result = new HashMap<String, Object>();
+        EvalResult evalResult;
+        for (Map.Entry<String,Object> entry: runVars.entrySet()){
+            String key = entry.getKey();
+            Object val = entry.getValue();
+            if (val!=null) {
+                evalResult = evalStruct.eval(currentTestGroup, val.toString(), getVars());
+                result.put(key, evalResult.getResultString());
+                if (evalResult.alerts.size()>0){
+                    for (Alert alert: evalResult.alerts){
+                        String oneAlert = "/run/vars/var under ("+currentTestGroup+") : "+alert.toString();
+                        System.out.println("ERROR expanding "+masterFilename+"  "+oneAlert+"\r\n\r\n");
+                        alertStrings.add(oneAlert);
+                    }
+                }
+                //todo: add alerts to master report somehow.  This is how it is done in RestReplay: serviceResult.alerts.addAll(evalResult.alerts);
+            }
+        }
+        return result;
     }
 
     public List<List<ServiceResult>> runMaster(String masterFilename,
@@ -356,7 +412,7 @@ public class Master extends ConfigFile {
         Integer runHashCount = 0;
         //runVars is null, which is because we are running the test by control file name, NOT the <run> node in the master.
         serviceResultsListList.add(runTest(masterFilename, controlFile, testGroup, test, null, tupple.relname, runID, runHashCount, testGroups));//TODO: remove dups.
-        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList);
+        RestReplayReport.saveIndexForMaster(getTestDir(), reportsDir, masterFilename, this.getReportsList(), this.getEnvID(), vars, testGroups, this, serviceResultsListList, null);
         fireOnEndMaster();
         return serviceResultsListList;
     }
