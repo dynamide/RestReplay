@@ -1,1 +1,1 @@
-Updated doco
+Fixed a bug where masterVars were cloned, but not passes to the eval in readHeaders().  Now mastervars will get passed all the way into headers with expressions.

@@ -1119,9 +1119,9 @@ public class RestReplay extends ConfigFile {
             String inheritHeaders = testNode.valueOf("@inheritHeaders");
             boolean skipInheritHeaders = Tools.notBlank(inheritHeaders) && inheritHeaders.equalsIgnoreCase("FALSE");
             if (!skipInheritHeaders) {
-                readHeaders(testGroupNode, evalStruct, serviceResult, serviceResult.requestHeaderMap);  //inserts into requestHeaderMap, condensing multiples.
+                readHeaders(testGroupNode, evalStruct, serviceResult, serviceResult.requestHeaderMap, clonedMasterVarsWTest);  //inserts into requestHeaderMap, condensing multiples.
             }
-            readHeaders(testNode, evalStruct, serviceResult, serviceResult.requestHeaderMap);  //inserts into requestHeaderMap, condensing multiples.
+            readHeaders(testNode, evalStruct, serviceResult, serviceResult.requestHeaderMap, clonedMasterVarsWTest);  //inserts into requestHeaderMap, condensing multiples.
             //========END Headers=====================
 
             String oneProtoHostPort = protoHostPort;

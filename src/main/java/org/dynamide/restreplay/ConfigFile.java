@@ -169,13 +169,14 @@ public class ConfigFile {
     public void readHeaders(Node testNode,
                             Eval evalStruct,
                             ServiceResult serviceResult,
-                            Map<String,String> headerMap){
+                            Map<String,String> headerMap,
+                            Map<String,Object> clonedMasterVars){
         List<Node> headerNodes = testNode.selectNodes("headers/header");
         for (Node headerNode: headerNodes){
             String headerValue = headerNode.getStringValue();
             String headerName = headerNode.valueOf("@name");
             if (headerValue.indexOf("$")>-1){
-                EvalResult evalResult = evalStruct.eval(headerName, headerValue, null);
+                EvalResult evalResult = evalStruct.eval(headerName, headerValue, clonedMasterVars);
                 headerValue = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
             }

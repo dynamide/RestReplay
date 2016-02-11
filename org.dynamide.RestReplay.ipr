@@ -998,17 +998,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/jdom/jdom/1.0/jdom-1.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: junit:junit:4.10">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.10/junit-4.10.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.10/junit-4.10-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.10/junit-4.10-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: log4j:log4j:1.2.17">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.17/log4j-1.2.17.jar!/" />
@@ -1042,28 +1031,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/net/minidev/json-smart/2.1.0/json-smart-2.1.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.ant:ant-launcher:1.7.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.7.0/ant-launcher-1.7.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.7.0/ant-launcher-1.7.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.7.0/ant-launcher-1.7.0-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.ant:ant:1.7.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.7.0/ant-1.7.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.7.0/ant-1.7.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.7.0/ant-1.7.0-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: org.apache.commons:commons-jexl:2.1.1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-jexl/2.1.1/commons-jexl-2.1.1.jar!/" />
@@ -1084,17 +1051,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/beanshell/bsh/2.0b4/bsh-2.0b4-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.hamcrest:hamcrest-core:1.1">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.json:json:20140107">
@@ -1130,26 +1086,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/RELEASE/slf4j-log4j12-RELEASE-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.testng:testng:6.9.9">
+    <library name="Maven: org.testng:testng:6.9.10">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.9/testng-6.9.9.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.10/testng-6.9.10.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.9/testng-6.9.9-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.10/testng-6.9.10-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.9/testng-6.9.9-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.yaml:snakeyaml:1.15">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.15/snakeyaml-1.15.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.15/snakeyaml-1.15-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.15/snakeyaml-1.15-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/6.9.10/testng-6.9.10-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: xml-apis:xml-apis:1.0.b2">
