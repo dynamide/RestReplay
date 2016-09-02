@@ -1,6 +1,5 @@
 package org.dynamide.restreplay;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.dynamide.interpreters.EvalResult;
 import org.dynamide.interpreters.VarInfo;
 import org.dynamide.util.XmlTools;
@@ -11,7 +10,6 @@ import org.dom4j.DocumentHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import org.dynamide.interpreters.Alert;
@@ -77,14 +75,23 @@ public class RestReplayReport {
 
     private static final String SP = "&nbsp;&nbsp;&nbsp;";
 
-    public RestReplayReport(String reportsDir) {
+    /** @param relativePathFromReportsDir is relative to the uri the master is served from, and in the current implementation, is the env so that each env can have equivalent output file directories.
+     *  @param reportsDir is the physical location of the reports output directory where master index files, and environments (as directories), and also the db output if turned on.
+     */
+    public RestReplayReport(String reportsDir, String relativePathFromReportsDir) {
         this.reportsDir = reportsDir;
+        this.relativePathFromReportsDir = relativePathFromReportsDir;
     }
 
     private String reportsDir = "";
 
     public String getReportsDir() {
         return reportsDir;
+    }
+
+    private String relativePathFromReportsDir = "";
+    public String getRelativePathFromReportsDir(){
+        return relativePathFromReportsDir;
     }
 
     protected static String formatCollapse(String myDivID, String linkText) {
@@ -633,6 +640,28 @@ public class RestReplayReport {
             FilePath filePath = extractRelPath(reportName);
             String relPath = filePath.relPath;
             String detailDirectory = FileTools.join(reportsDir, relPath);
+            File testfn = new File(detailDirectory);
+            String canonical = testfn.getCanonicalPath();  //try to get the full name to look like /Users/vcrocla or /home/jenkins/RestReplay/reports or somesuch.
+
+            ReportMasterLocations reportMaster = new ReportMasterLocations();
+            reportMaster.directory = detailDirectory;
+            reportMaster.relname = reportName;
+            reportMaster.fullname = canonical;
+            reportMaster.relPath = filePath.relPath;
+            reportMaster.filenameOnly = filePath.filenameOnly;
+
+            ReportDetailLocations reportDetail = new ReportDetailLocations();
+            reportDetail.relativeDirectory = detailDirectory;
+            reportDetail.filenameOnly = filePath.filenameOnly;
+            reportDetail.reportName = reportName;
+            reportDetail.uri = Tools.glue(this.relativePathFromReportsDir, reportName);
+
+            if (reportsList!=null){
+                for (ServiceResult sr: reportsList){
+                    sr.reportDetail = reportDetail;
+                    sr.reportMaster = reportMaster;
+                }
+            }
 
             File resultFile = FileTools.saveFile(detailDirectory, filePath.filenameOnly, this.getPage(testdir, restReplay, testGroupID), true);
             if (resultFile != null) {
@@ -652,13 +681,22 @@ public class RestReplayReport {
         return null;
     }
 
-    public static class MasterReportNameTupple {
+    public static class ReportDetailLocations {
+        public String relativeDirectory = "";
+        public String filenameOnly = "";
+        public String uri = "";
+        public String reportName = "";
+    }
+    public static class ReportMasterLocations {
         public String directory;
         public String relname;
+        public String fullname = "";
+        public String relPath = "";
+        public String filenameOnly = "";
     }
-    public static MasterReportNameTupple calculateMasterReportRelname( String reportsDir,
-                                                       String localMasterFilename,
-                                                       String envID){
+    public static ReportMasterLocations calculateMasterReportRelname(String reportsDir,
+                                                                     String localMasterFilename,
+                                                                     String envID){
         File f = new File(localMasterFilename);
         String relPath = FileTools.getFilenamePath(f.getPath());
         String relPathNameComponent = Tools.notBlank(relPath)
@@ -673,7 +711,7 @@ public class RestReplayReport {
         }
         String masterFilenameNameFull = masterFilenameNameOnly+".html";
         String masterFilenameDirectory =  reportsDir;// this doesn't get propogated to control file reports. :(   Tools.join(reportsDir, masterFilenameNameOnly);;
-        MasterReportNameTupple tupple = new MasterReportNameTupple();
+        ReportMasterLocations tupple = new ReportMasterLocations();
         tupple.directory = masterFilenameDirectory;
         tupple.relname = masterFilenameNameFull;
         return tupple;
@@ -696,7 +734,16 @@ public class RestReplayReport {
                                           List<List<ServiceResult>> list,
                                           List<String> masterAlertStrings) {
 
-        MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
+        ReportMasterLocations tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, envID);
+        String relname = Tools.glue(tupple.directory, tupple.relname);
+        String canonical = relname;  //default to the glued name, which will look like "./reports/...."
+        try {
+            File testfn = new File(relname);
+            canonical = testfn.getCanonicalPath();  //try to get the full name to look like /Users/vcrocla or /home/jenkins/RestReplay/reports or somesuch.
+            tupple.fullname = canonical;
+        } catch (IOException e){
+            System.out.println("ERROR: could not determine canonical path of report: "+e);
+        }
 
         //System.out.println("RestReplay summary report output ***********>>>(saveIndexForMaster):"
         //                +"\n testdir:"+testdir
@@ -725,6 +772,7 @@ public class RestReplayReport {
                     if (master.getRunOptions().dumpMasterSummary){
                         masterSummary.append(sr.tiny()).append('\n');
                     }
+                    sr.reportMaster = tupple;
                 }
             }
 
@@ -735,21 +783,37 @@ public class RestReplayReport {
             StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager(), pageTitle));
             String dateStr = Tools.nowLocale();
             sb.append("<div class='REPORTTIME'><b>RestReplay</b> " + lbl(" run on") + " " + dateStr + "<span class='header-label-master'>Master:</span>" + localMasterFilename + "</div>");
+
+            sb.append("<div class='toc-toc'><b>Totals</b>");
+            sb.append("<br />"+masterSummaryLineHTML);
+            sb.append("</div>");
+
+            sb.append("<br />");
+
             sb.append("<div class='masterVars'>")
               .append("<span class='LABEL'>environment:</span> <span class='env'>"+envID+"</span><br />")
               .append(formatMasterVars(masterVars)).append("</div>");
 
-            sb.append("<br />");
-            sb.append("<div class='toc-toc'>");
-            sb.append("<b>Test Groups Run</b><br /><table border='0'>");
-            for (Header testGroup: testGroups) {
-                sb.append("<tr><td><small>"+testGroup.controlFile+"</small></td><td><a href='#"+testGroup.anchor+"'>"+testGroup.groupID+"</a></td></tr>");
-            }
-            sb.append("</table></div>");
 
-            sb.append("<br /><div class='toc-toc'><b>Totals</b>");
-            sb.append("<br />"+masterSummaryLineHTML);
-            sb.append("</div>");
+            Master.ScriptEventResult onFailureSummary = master.fireOnFailureSummary();
+            String sresultFS = onFailureSummary.result;
+            if (Tools.notBlank(sresultFS)){
+                sb.append("<br /><div class='toc-toc'><b>FAILURE Report</b>");
+                sb.append(sresultFS);
+                sb.append("</div>");
+            }
+
+
+
+            Master.ScriptEventResult onMasterSummaryTable = master.fireOnMasterSummaryTable();
+            String sresultMT = onMasterSummaryTable.result;
+            if (Tools.notBlank(sresultMT)){
+                sb.append("<br /><div class='toc-toc'><b>Master Summary</b>");
+                sb.append(sresultMT);
+                sb.append("</div>");
+            }
+
+
 
             if (masterAlertStrings!=null&&masterAlertStrings.size()>0) {
                 sb.append("<br /><div class='toc-toc'><b>Alerts in master file</b><br />");
@@ -759,12 +823,30 @@ public class RestReplayReport {
                 sb.append("</div>");
             }
 
+
+            sb.append("<br /><br /><hr />");
+            sb.append("<h2>All Tests by TestGroup (execution order)</h2>");
+
             for (String oneToc : reportsList) {
                 sb.append(oneToc);
                 sb.append("<hr />");
             }
+
+
+            sb.append("<br /><br /><hr />");
+            sb.append("<h2>Test Groups Run</h2>");
+            sb.append("<div class='toc-toc'><table border='0'>");
+            for (Header testGroup: testGroups) {
+                sb.append("<tr><td><small>"+testGroup.controlFile+"</small></td><td><a href='#"+testGroup.anchor+"'>"+testGroup.groupID+"</a></td></tr>");
+            }
+            sb.append("</table></div>");
+
+
+            sb.append("<hr />");
             sb.append("<h2>Run Options</h2>");
             sb.append("<div class='run-options'>"+master.getRunOptions().toHTML()+"</div>");
+
+
             sb.append("<br /><br /><hr />");
             if (master.getRunOptions().reportResourceManagerSummary){
                 sb.append("<h2>ResourceManager Summary</h2>");
@@ -773,12 +855,14 @@ public class RestReplayReport {
                 sb.append("<p>ResourceManager Summary off. To see summary, set reportResourceManagerSummary=\"true\" in master::runOptions or runOptions.xml.</p>");
             }
 
-            String onSummaryScriptResult = master.fireOnSummary();
-            if (Tools.notBlank(onSummaryScriptResult)){
+            Master.ScriptEventResult onSummary = master.fireOnSummary();
+            String sresult = onSummary.result;
+            if (Tools.notBlank(sresult)){
+                sb.append("<hr />");
                 sb.append("<h2>Master onSummary event results</h2>");
                 sb.append("<div ID='onSummaryScriptResult' class='white-box'>");
-                sb.append("<div class='payload-subtitle' style='border: 1px solid black;'>"+master.onSummaryScriptName+"</div>");
-                sb.append(onSummaryScriptResult);
+                sb.append("<div class='payload-subtitle' style='border: 1px solid black;'>"+onSummary.event.name+"</div>");
+                sb.append(sresult);
                 sb.append("</div>");
             }
 
@@ -788,13 +872,8 @@ public class RestReplayReport {
                 System.out.println("\nMaster Summary:\n");
                 System.out.println(masterSummary+"\n");
             }
-            String relname = Tools.glue(tupple.directory, tupple.relname);
-            String fn = Tools.glue(reportsDir, relname);
-            File testfn = new File(relname);
-            if (!testfn.exists()){
-                testfn = new File(fn);
-            }
-            System.out.println("====|\r\n====|  Master Report Index:       "+testfn.getCanonicalPath()+"\r\n====|\n\n");
+
+            System.out.println("====|\r\n====|  Master Report Index:       "+canonical+"\r\n====|\n\n");
 
             System.out.println(masterSummaryLine);
 
@@ -818,7 +897,7 @@ public class RestReplayReport {
                                           String localMasterFilename,
                                           List<String> reportsList) {
 
-        MasterReportNameTupple tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, "");
+        ReportMasterLocations tupple = calculateMasterReportRelname(reportsDir, localMasterFilename, "");
         try {
             String dateStr = Tools.nowLocale();
             String pageTitle = "RestReplay "+localMasterFilename;

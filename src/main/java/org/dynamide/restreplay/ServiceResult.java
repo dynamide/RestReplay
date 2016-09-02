@@ -9,9 +9,7 @@ import org.dynamide.restreplay.mutators.IMutator;
 import org.dynamide.util.Tools;
 import org.dynamide.restreplay.TreeWalkResults.TreeWalkEntry.STATUS;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.json.XML;
 
 import java.net.MalformedURLException;
@@ -66,6 +64,8 @@ public class ServiceResult {
     protected void setParent(ServiceResult sr){
         parent = sr;
     }
+    public RestReplayReport.ReportMasterLocations reportMaster = new RestReplayReport.ReportMasterLocations();
+    public RestReplayReport.ReportDetailLocations reportDetail = new RestReplayReport.ReportDetailLocations();
     public String controlFileName = "";
     public String testID = "test-id-not-set";
     public String testGroupID = "";

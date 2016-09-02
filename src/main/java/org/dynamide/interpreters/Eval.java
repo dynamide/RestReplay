@@ -72,8 +72,8 @@ public class Eval {
      *  If no evals occur in the evaluation of the expression, then RestReplay can remove the header
      *  line by calling popLastEvalReportItemIfUnused(token) where token is the value returned by
      *  this call.
-     *
-     *    @returns a token which can be used to call popLastEvalReportItemIfUnused(token).
+     *    @param val becomes the testIDLabel.
+     *    @return a token which can be used to call popLastEvalReportItemIfUnused(token).
      *    Do not use the token for any calls or values.
      */
     public EvalResult setCurrentTestIDLabel(String val){

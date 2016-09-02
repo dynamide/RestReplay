@@ -17,14 +17,14 @@ import java.util.*;
 public class ResourceManager {
 
     public static class Resource{
-        public enum SOURCE {FILE,CLASSPATH,STREAM,URL,ZIP,NOTFOUND}
+        public enum SOURCE {FILE,CLASSPATH,STREAM,URL,ZIP,INLINE,NOTFOUND}
         public Document document;
         public String contents = "";
         public String name = "";
         public String relPath = "";
         public String base = "";
         public String foundPath = "";
-        public SOURCE provider;
+        public SOURCE provider = SOURCE.INLINE;
         public String context = "";
         public boolean cached = false;
         public boolean relative = true;
@@ -214,7 +214,7 @@ public class ResourceManager {
             resource.relative = true;  //relPath not found, so fullPath has the test dir already glued on ==> relative.
         }
 
-        if (theFile!=null && theFile.exists()){
+        if (theFile!=null && theFile.exists() && (!theFile.isDirectory()) ){
             byte[] b = FileUtils.readFileToByteArray(theFile);
             String res = new String(b);
             // posix or somesuch says all text files must end in \n.

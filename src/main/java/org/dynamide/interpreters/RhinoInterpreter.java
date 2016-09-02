@@ -63,7 +63,8 @@ public class RhinoInterpreter {
 
     private ScriptEngine getInterpreter() throws Exception {
         if (m_Interpreter == null){
-            m_Interpreter = scriptEngineManager.getEngineByName("javascript");
+            //m_Interpreter = scriptEngineManager.getEngineByName("javascript");
+            m_Interpreter = scriptEngineManager.getEngineByName("rhino");   // specifically look for "rhino" engine, not nashorn.
             Bindings bindings = m_Interpreter.getBindings(ScriptContext.ENGINE_SCOPE);
             bindings.put("stdout", System.out);
         }

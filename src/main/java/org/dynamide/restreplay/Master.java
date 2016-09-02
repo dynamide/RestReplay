@@ -32,9 +32,6 @@ public class Master extends ConfigFile {
         return masterNamespace;
     }
 
-    private String onSummaryScript = "";
-    public String onSummaryScriptName = "";
-
     List<List<ServiceResult>> serviceResultsListList = new ArrayList<List<ServiceResult>>();
 
     public Map<String,Object> vars = new LinkedHashMap<String,Object>();
@@ -108,42 +105,46 @@ public class Master extends ConfigFile {
         //todo: get run/vars
 
         this.getRunOptions().addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
-        readOnSummary(masterNode);
-        readOnBeginMaster(masterNode);
-        readOnEndMaster(masterNode);
+
+        readEvent(masterNode, "onSummary");
+        readEvent(masterNode, "onBeginMaster");
+        readEvent(masterNode, "onEndMaster");
+        readEvent(masterNode, "onMasterSummaryTable");
+        readEvent(masterNode, "onFailureSummary");
+
         return document;
     }
 
-    private void readOnSummary(Node masterNode)
-    throws  FileNotFoundException {
-        readEvent(masterNode, "onSummary");
-    }
 
-    private void readOnBeginMaster(Node masterNode)
-    throws  FileNotFoundException {
-        readEvent(masterNode, "onBeginMaster");
-    }
 
-    private void readOnEndMaster(Node masterNode)
-    throws  FileNotFoundException {
-        readEvent(masterNode, "onEndMaster");
-    }
 
-    String fireOnSummary(){
+    ScriptEventResult fireOnSummary(){
         return fireEvent("onSummary");
     }
 
-    private String fireOnBeginMaster(){
-        return fireEvent("onBeginMaster");
+    ScriptEventResult fireOnFailureSummary(){
+        return fireEvent("onFailureSummary");
     }
 
-    private String fireOnEndMaster(){
-        return fireEvent("onEndMaster");
+    ScriptEventResult fireOnMasterSummaryTable(){
+        return fireEvent("onMasterSummaryTable");
     }
+
+    private void fireOnBeginMaster(){
+        fireEvent("onBeginMaster");
+    }
+
+    private void fireOnEndMaster(){
+        fireEvent("onEndMaster");
+    }
+
+
 
     /* supports javascript only, not jexl.*/
     private void readEvent(Node masterNode, String eventID)
     throws  FileNotFoundException {
+        String onSummaryScript = "";
+        String onSummaryScriptName = "";
         Event event = new Event();
         Node eventNode = masterNode.selectSingleNode("event[@ID='"+eventID+"']");
         if (eventNode==null){
@@ -187,15 +188,20 @@ public class Master extends ConfigFile {
         public String eventID = "";
         public String name = "";
         public String script = "";
-        public String language = "";
+        public String language = "";  //search the code in this unit if you want languages other than javascript.  For now it must be javascript.
     }
 
     private Map<String,Event> events = new HashMap<String,Event>();
 
-    public String fireEvent(String eventID){
+    public class ScriptEventResult{
+        public String result="";
+        public Event event=new Event();
+    }
+
+    public ScriptEventResult fireEvent(String eventID){
         Event event = events.get(eventID);
         if (event == null || Tools.isBlank(event.script)) {
-            return "";
+            return new ScriptEventResult();
         }
         //System.out.println("Firing "+eventID+" event "+event.name);
         Map<String,Object> varsMap = new HashMap<String, Object>();
@@ -212,7 +218,10 @@ public class Master extends ConfigFile {
         interpreter.setVariable("tools", RestReplay.TOOLS);
         EvalResult evalResult = interpreter.eval(event.name, event.script);
         evalStruct.addToEvalReport(evalResult);
-        return evalResult.getResultString();
+        ScriptEventResult eventResult = new ScriptEventResult();
+        eventResult.event = event;
+        eventResult.result = evalResult.getResultString();
+        return eventResult;
     }
 
     private static class EnvResult {
@@ -317,7 +326,7 @@ public class Master extends ConfigFile {
         fireOnBeginMaster();
         String controlFile, testGroup, test;
         String runID;
-        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+        RestReplayReport.ReportMasterLocations tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
         Map<String, Map> allRunIDs = new HashMap<String,Map>();
         List<String> alertStrings = new ArrayList<String>();
 
@@ -406,7 +415,7 @@ public class Master extends ConfigFile {
         serviceResultsListList.clear();
         fireOnBeginMaster();
         //org.dom4j.Document document = loadDocument(masterFilename, readOptionsFromMaster);
-        RestReplayReport.MasterReportNameTupple tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
+        RestReplayReport.ReportMasterLocations tupple = RestReplayReport.calculateMasterReportRelname(reportsDir, masterFilename, this.getEnvID());
         List<RestReplayReport.Header> testGroups = new ArrayList<RestReplayReport.Header>();
         String runID = "";
         Integer runHashCount = 0;

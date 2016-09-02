@@ -14,7 +14,15 @@
     <!-- this fires just before the report is closed, and its output is included in the HTML report.
          It can also be done inline.
     -->
-    <event ID="onSummary" lang="javascript" filename="_self_test/s/master-self-test-onSummary.js"/>
+    <!--old version :
+     event ID="onSummary" lang="javascript" filename="_self_test/s/master-self-test-onSummary.js"/
+     -->
+    <event ID="onSummary" lang="javascript" filename="_includes/onSummary.js"/>
+
+    <event ID="onMasterSummaryTable" lang="javascript" filename="_includes/onMasterSummaryTable.js"/>
+
+    <event ID="onFailureSummary" lang="javascript" filename="_includes/onFailureSummary.js"/>
+
 
     <event ID="onBeginMaster" lang="javascript" ><![CDATA[
        kit.getOut().println("In onBeginMaster event");

@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dynamide</groupId>
     <artifactId>RestReplay</artifactId>
-    <version>1.0.21</version>
+    <version>1.0.22</version>
     <name>RestReplay</name>
     <packaging>jar</packaging>
     <description>RestReplay is a dynamide.org utility to send REST requests to the services layer 
@@ -209,6 +209,18 @@
             <artifactId>gson</artifactId>
             <version>2.3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>cat.inspiracio</groupId>
+            <artifactId>rhino-js-engine</artifactId>
+            <version>1.7.7.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mozilla/rhino -->
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+            <version>1.7R4</version>
+        </dependency>
     </dependencies>
     
     <distributionManagement>
@@ -363,7 +375,11 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                        </execution>
+                        <!-- turn this off to see all the javadoc lint errors again -->
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             

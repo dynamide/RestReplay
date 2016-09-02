@@ -866,7 +866,7 @@ public class RestReplay extends ConfigFile {
             if (commentNode!=null) {
                 comment = commentNode.asXML();
             }
-            RestReplayReport report = new RestReplayReport(reportsDir);
+            RestReplayReport report = new RestReplayReport(reportsDir, relativePathFromReportsDir);
 
             testGroupID = currentTestGroupID;
 
