@@ -599,7 +599,7 @@ public class RestReplay extends ConfigFile {
     }
 
     private EvalResult evalJavascript(Eval evalStruct, String resourceName, String source, ServiceResult serviceResult) {
-        RhinoInterpreter interpreter = new RhinoInterpreter();
+        RhinoInterpreter interpreter = new RhinoInterpreter(getRunOptions().dumpJavascriptEvals);
         interpreter.setVariable("result", serviceResult);
         interpreter.setVariable("serviceResult", serviceResult);
         interpreter.setVariable("serviceResultsMap", serviceResultsMap);
@@ -1347,6 +1347,7 @@ public class RestReplay extends ConfigFile {
             serviceResult.fromTestID = fromTestID;
             test.results.add(serviceResult);
             if (serviceResult.codeInSuccessRange(serviceResult.responseCode)) {  //gotExpectedResult depends on serviceResult.expectedCodes.
+                //TODO: not sure about this one
                 serviceResultsMap.remove(fromTestID);
             }
         } else {

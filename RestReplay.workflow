@@ -50,6 +50,58 @@ Inspect a repository.
     Alternatively, use
       mvn nexus-staging:release
     Sonatype says their job to push to Central runs every 10 minutes, and updates to search.maven.org take 2 hours.
+    
+    
+
+=============================================================
+Set up OSSRH / sonatype central maven server for deployments.
+=============================================================
+Followed the jira ticket thing: 
+https://issues.sonatype.org/browse/OSSRH-15028
+and got an account on: 
+    https://oss.sonatype.org/
+Credentials are the same for oss.sonatype.orgt as for the ticket. 
+
+First, your pom.xml must point to maven central.
+The file in src/RestReplay/pom.xml does this already:
+
+ ...
+      </dependency>
+    </dependencies>
+    
+    <distributionManagement>
+      <snapshotRepository>
+        <id>ossrh</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      </snapshotRepository>
+      <repository>
+        <id>ossrh</id>
+        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      </repository>
+    </distributionManagement>
+
+    <build>
+     ...
+     
+With that file in place, now log in to 
+    https://oss.sonatype.org/
+and click on user name, then "Profile" then drop down for "Summary" should be changed to "User Token"
+then copy the userToken to this block  (these have been faked, below--replace with the block you see on the web page), and put that block in your ~/.m2/settings.xml on your local machine, 
+add your userToken block for the user, for server id "ossrh"
+
+
+        ...
+        <server>
+          <id>ossrh</id>
+          <username>P39RBcb6</username>
+          <password>7u+rSLm7SQPir2wSvq5YmrxvUvGYCfZRxSmrmOS73QKP</password>
+        </server>
+    </servers>  
+    
+The server id is "ossrh" which is referenced from the pom.xml of the project.  
+Here we authorized that user on this local build machine.
+
+
 
 =============================================================
 Deploy to Revel/LAS:

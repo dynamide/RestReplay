@@ -211,7 +211,7 @@ public class Master extends ConfigFile {
         Eval evalStruct = new Eval();
         evalStruct.runOptions = this.getRunOptions();
 
-        RhinoInterpreter interpreter = new RhinoInterpreter();
+        RhinoInterpreter interpreter = new RhinoInterpreter(getRunOptions().dumpJavascriptEvals);
         interpreter.setVariable("master", this);
         interpreter.setVariable("serviceResultsListList", serviceResultsListList);
         interpreter.setVariable("kit", RestReplay.KIT);  //with kit they can spit to stdout if they want.

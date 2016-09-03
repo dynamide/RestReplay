@@ -6,6 +6,7 @@ var isSuccess = false;
 var arrFailures = [];
 var avgTime = 0;
 var totTime = 0;
+var tot = 0;
 
 arrSummary.push("<table border='1' class='TOC_TABLE'>");
 arrSummary.push(" <tr><th>Group"
@@ -21,6 +22,7 @@ for (var i=0; i<serviceResultsListList.size(); i++) {
     numSUCCESS = 0;
     numFAILURE = 0;
     totTime = 0;
+    tot = 0;
 
     var serviceResult = null;
     for (var j=0; j<serviceResultsList.size(); j++) {
@@ -31,6 +33,7 @@ for (var i=0; i<serviceResultsListList.size(); i++) {
         } else {
             numFAILURE++;
         }
+        tot++;
         totTime += serviceResult.time
     }
 
@@ -38,7 +41,7 @@ for (var i=0; i<serviceResultsListList.size(); i++) {
 
     if (serviceResult!=null){
         arrSummary.push(" <tr><td><a href='"+serviceResult.reportDetail.uri+"'>"+serviceResult.testGroupID+"</a>"
-                        +"</td><td>"+numSUCCESS+numFAILURE
+                        +"</td><td>"+(0+numSUCCESS+numFAILURE)
                         +"</td><td>"+numSUCCESS
                         +"</td><td>"+(numFAILURE==0?" ":"<span class='ERROR'>"+numFAILURE+"</span>")
                         +"</td><td>"+totTime

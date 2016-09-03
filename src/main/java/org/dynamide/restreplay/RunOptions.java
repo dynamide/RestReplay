@@ -36,6 +36,7 @@ public class RunOptions {
     public boolean dumpMasterSummary = false;
     public boolean dumpRunOptions = false;
     public boolean dumpResourceManagerSummary = true;
+    public boolean dumpJavascriptEvals = true;
     public boolean reportResourceManagerSummary = true;
     public boolean reportResponseRaw = false;
     public boolean reportPayloadsAsXML = false;
@@ -73,6 +74,7 @@ public class RunOptions {
                 "    dumpMasterSummary=" + dumpMasterSummary + CR+
                 "    dumpRunOptions=" + dumpRunOptions + CR+
                 "    dumpResourceManagerSummary=" + dumpResourceManagerSummary + CR+
+                "    dumpJavascriptEvals=" + dumpJavascriptEvals + CR+
                 "    reportResourceManagerSummary=" + reportResourceManagerSummary +CR+
                 "    reportResponseRaw=" + reportResponseRaw +CR+
                 "    reportPayloadsAsXML=" + reportPayloadsAsXML +CR+
@@ -97,6 +99,7 @@ public class RunOptions {
                 "dumpMasterSummary=" + dumpMasterSummary +BR+
                 "dumpRunOptions=" + dumpRunOptions +BR+
                 "dumpResourceManagerSummary=" + dumpResourceManagerSummary +BR+
+                "dumpJavascriptEvals=" + dumpJavascriptEvals +BR+
                 "reportResourceManagerSummary=" + reportResourceManagerSummary +BR+
                 "reportResponseRaw=" + reportResponseRaw +BR+
                 "reportPayloadsAsXML=" + reportPayloadsAsXML +BR+
@@ -136,6 +139,7 @@ public class RunOptions {
         String dumpMasterSummary = runOptionsNode.valueOf("dumpMasterSummary");
         String dumpRunOptions = runOptionsNode.valueOf("dumpRunOptions");
         String dumpResourceManagerSummary = runOptionsNode.valueOf("dumpResourceManagerSummary");
+        String dumpJavascriptEvals = runOptionsNode.valueOf("dumpJavascriptEvals");
         String reportResourceManagerSummary = runOptionsNode.valueOf("reportResourceManagerSummary");
         String reportResponseRaw = runOptionsNode.valueOf("reportResponseRaw");
         String reportPayloadsAsXML = runOptionsNode.valueOf("reportPayloadsAsXML");
@@ -172,6 +176,9 @@ public class RunOptions {
         }
         if (Tools.notBlank(dumpResourceManagerSummary)) {
             this.dumpResourceManagerSummary = Tools.isTrue(dumpResourceManagerSummary);
+        }
+        if (Tools.notBlank(dumpJavascriptEvals)) {
+            this.dumpJavascriptEvals = Tools.isTrue(dumpJavascriptEvals);
         }
         if (Tools.notBlank(reportResourceManagerSummary)) {
             this.reportResourceManagerSummary = Tools.isTrue(reportResourceManagerSummary);

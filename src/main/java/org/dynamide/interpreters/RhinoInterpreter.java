@@ -7,12 +7,20 @@ import javax.script.ScriptEngineManager;
 import java.util.*;
 
 import org.dynamide.util.Tools;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ScriptableObject;
 
 public class RhinoInterpreter {
+    public RhinoInterpreter(boolean dumpJavascriptEvals){
+        this.dumpJavascriptEvals = dumpJavascriptEvals;
+    }
+
+    private boolean dumpJavascriptEvals = false;
 
     private ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
 
-    private ScriptEngine m_Interpreter;
+    private Context m_Interpreter;
+    private ScriptableObject m_globalScope;
 
     private Map<String, Object> m_variables = new LinkedHashMap<String, Object>();
 
@@ -21,8 +29,7 @@ public class RhinoInterpreter {
     }
 
     public void unsetVariable(String name) {
-        Bindings bindings = m_Interpreter.getBindings(ScriptContext.ENGINE_SCOPE);
-        bindings.remove(name);
+        m_globalScope.delete(name);
         m_variables.remove(name);
     }
 
@@ -30,28 +37,36 @@ public class RhinoInterpreter {
         EvalResult result = new EvalResult();
         result.context = resourceName;
         result.expression = source;
-        //System.out.println("======================================^^^+++++++++++++ resourceName : "+resourceName+" source: "+source);
+        if (dumpJavascriptEvals){System.out.println("=======javascript eval======= \r\nresourceName : "+resourceName+" source: \r\n"+source+"\r\n==================");}
         try{
             getInterpreter();
+            Context.enter();
             synchronized (m_Interpreter){
-                Bindings bindings = m_Interpreter.getBindings(ScriptContext.ENGINE_SCOPE);
                 //Now add all the variables in m_variables (added by setVariable) into the bindings for the eval call.
                 Object obj;
                 Iterator<String> en = m_variables.keySet().iterator();
                 for (String key: m_variables.keySet()) {
                     obj = m_variables.get(key);
-                    bindings.put(key, obj);
+                    m_globalScope.put(key, m_globalScope, obj);
                 }
 
-                ScriptContext ctx = m_Interpreter.getContext();
-                ctx.setAttribute(ScriptEngine.FILENAME, resourceName, ScriptContext.ENGINE_SCOPE);
-                bindings.put("__FILE__", resourceName);
+                //special Rhino in Java7 trick: ctx.setAttribute(ScriptEngine.FILENAME, resourceName, ScriptContext.ENGINE_SCOPE);
+
+                m_globalScope.put("__FILE__", m_globalScope, resourceName);
                 try {
-                     result.result = m_Interpreter.eval(source);  //pull in functions, vars.
+                    Object evalResult = m_Interpreter.evaluateString(m_globalScope,
+                                                 source,
+                                                 resourceName,
+                                                 0, //startline
+                                                 null);
+                    if (evalResult != Context.getUndefinedValue()) {
+                        result.result = (Context.toString(evalResult));
+                    }
                 } finally {
                     for (String key: m_variables.keySet()) {
-                        bindings.remove(key);
+                        m_globalScope.delete(key);
                     }
+                    Context.exit();
                 }
             }
         } catch (Exception e2){
@@ -61,18 +76,36 @@ public class RhinoInterpreter {
         return result;
     }
 
-    private ScriptEngine getInterpreter() throws Exception {
+    private Context getInterpreter() throws Exception {
         if (m_Interpreter == null){
-            //m_Interpreter = scriptEngineManager.getEngineByName("javascript");
+            if (dumpJavascriptEvals){System.out.println("=== RestReplay using Rhino Javascript interpreter. ===");}
+            Context cx = Context.enter();  //binds Context object to this Thread.
+            m_globalScope = cx.initStandardObjects();
+            m_globalScope.put("stdout", m_globalScope, System.out);
+            m_Interpreter = cx;
+            Context.exit();
+        }
+        return m_Interpreter;
+    }
+
+    /* This was the hacked way to get Java 8 to accept Rhino as a ScriptEngine, but it's a bit flakey.
+    private ScriptEngine getInterpreterRhinoHack() throws Exception {
+
+        if (m_Interpreter == null){
             m_Interpreter = scriptEngineManager.getEngineByName("rhino");   // specifically look for "rhino" engine, not nashorn.
+            if (m_Interpreter==null) {
+                System.out.println("could not load rhino engine "+Tools.getStackTrace(new Exception("null m_Interpreter")));
+                return null;
+            }
             Bindings bindings = m_Interpreter.getBindings(ScriptContext.ENGINE_SCOPE);
             bindings.put("stdout", System.out);
         }
         return m_Interpreter;
     }
+    */
 
     public static void main(String[]args) throws Exception {
-        RhinoInterpreter interp = new RhinoInterpreter();
-        interp.eval("stdout.println('hello');", "main()");
+        RhinoInterpreter interp = new RhinoInterpreter(true);
+        interp.eval("main()", "stdout.println('hello');");
     }
 }
