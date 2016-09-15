@@ -106,6 +106,14 @@ public class RhinoInterpreter {
 
     public static void main(String[]args) throws Exception {
         RhinoInterpreter interp = new RhinoInterpreter(true);
-        interp.eval("main()", "stdout.println('hello');");
+        Object out;
+        if (args.length>0){
+            // for example, run with these as program args, with the quotes:
+            //     "var res={}; res.name='mojo'; JSON.stringify(res);"
+            out = interp.eval("args", args[0]);
+        } else {
+            out = interp.eval("main()", "stdout.println('hello');");
+        }
+        System.out.println("out: "+out);
     }
 }

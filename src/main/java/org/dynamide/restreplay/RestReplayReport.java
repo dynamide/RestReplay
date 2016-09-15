@@ -693,12 +693,21 @@ public class RestReplayReport {
         public String fullname = "";
         public String relPath = "";
         public String filenameOnly = "";
+        public String toString(){
+            return    "{directory:"+directory
+                    +", relname:"+relname
+                    +", fullname:"+fullname
+                    +", relPath:"+relPath
+                    +", filenameOnly:"+filenameOnly
+                    +"}";
+        }
     }
     public static ReportMasterLocations calculateMasterReportRelname(String reportsDir,
                                                                      String localMasterFilename,
                                                                      String envID){
         File f = new File(localMasterFilename);
         String relPath = FileTools.getFilenamePath(f.getPath());
+
         String relPathNameComponent = Tools.notBlank(relPath)
                 ? FileTools.safeFilename(relPath)+'.'
                 : "";
@@ -714,6 +723,7 @@ public class RestReplayReport {
         ReportMasterLocations tupple = new ReportMasterLocations();
         tupple.directory = masterFilenameDirectory;
         tupple.relname = masterFilenameNameFull;
+        tupple.filenameOnly = f.getName();
         return tupple;
     }
 
@@ -813,7 +823,21 @@ public class RestReplayReport {
                 sb.append("</div>");
             }
 
-
+            Master.ScriptEventResult onAnalysis = master.fireOnAnalysis();
+            String sresultAn = onAnalysis.result;
+            if (Tools.notBlank(sresultAn)){
+                sb.append("<br /><div class='toc-toc'><b>Master Analysis</b>");
+                sb.append(sresultAn);
+                sb.append("</div>");
+                String foo = tupple.toString();
+                String filenameOnly = tupple.filenameOnly;
+                if (filenameOnly.endsWith(".xml")){
+                    filenameOnly = filenameOnly.substring(0, filenameOnly.length()-4);
+                }
+                String jsonName = "stats."+master.getEnvID()+'.'+filenameOnly+".json";
+                File fSaved = FileTools.saveFile(tupple.directory, jsonName, sresultAn, true);
+                System.out.println("\r\nAnalysis file saved (tupple: "+foo+") for Master Run: "+fSaved.getCanonicalPath());
+            }
 
             if (masterAlertStrings!=null&&masterAlertStrings.size()>0) {
                 sb.append("<br /><div class='toc-toc'><b>Alerts in master file</b><br />");

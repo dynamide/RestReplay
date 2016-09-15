@@ -4,9 +4,11 @@ var arr = [];
 var arrSummary = [];
 var numSUCCESS = 0;
 var numFAILURE = 0;
-var isSuccess = false;
 var arrFailures = [];
 var totalFailures = 0;
+
+var analytics = {};
+
 
 arrSummary.push("<table border='1' class='TOC_TABLE'>");
 arrSummary.push(" <tr><th>testGroupID"
@@ -24,7 +26,7 @@ for (var i=0; i<serviceResultsListList.size(); i++) {
     var serviceResult = null;
     for (var j=0; j<serviceResultsList.size(); j++) {
         serviceResult = serviceResultsList.get(j);
-        isSUCCESS = serviceResult.isSUCCESS();
+        var isSUCCESS = serviceResult.isSUCCESS();
         if (isSUCCESS){
             numSUCCESS++;
         } else {
@@ -57,8 +59,8 @@ for (var i=0; i<serviceResultsListList.size(); i++) {
 }
 arrSummary.push("</table>");
 if (totalFailures>0){
-    outstring += ""+arrSummary.join(" ");
+    outstring += " VERSION 1 "+arrSummary.join(" ");
 } else {
-    outstring = "";
+    outstring = " VERSION 1 ";
 }
 outstring;

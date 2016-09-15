@@ -22,10 +22,15 @@ public class Master extends ConfigFile {
         setTestDir(testdir);
         setReportsList(new ArrayList<String>());
         this.reportsDir = reportsDir;
+        this.startTime = Tools.now();
+        this.endTime = Tools.now();
         setResourceManager(manager);
         readDefaultRunOptions();//prerequisites: ResourceManager has been set.
     }
     public static final String DEFAULT_MASTER_CONTROL = "master.xml";
+
+    public long startTime;
+    public long endTime;
 
     private Map<String, ServiceResult> masterNamespace = new LinkedHashMap<String, ServiceResult>();
     public Map<String, ServiceResult> getMasterNamespace(){
@@ -111,6 +116,7 @@ public class Master extends ConfigFile {
         readEvent(masterNode, "onEndMaster");
         readEvent(masterNode, "onMasterSummaryTable");
         readEvent(masterNode, "onFailureSummary");
+        readEvent(masterNode, "onAnalysis");
 
         return document;
     }
@@ -130,11 +136,17 @@ public class Master extends ConfigFile {
         return fireEvent("onMasterSummaryTable");
     }
 
+    ScriptEventResult fireOnAnalysis(){
+        return fireEvent("onAnalysis");
+    }
+
+
     private void fireOnBeginMaster(){
         fireEvent("onBeginMaster");
     }
 
     private void fireOnEndMaster(){
+        endTime = Tools.now();
         fireEvent("onEndMaster");
     }
 
