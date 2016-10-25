@@ -180,3 +180,6 @@ Fixed a bug where masterVars were cloned, but not passes to the eval in readHead
 Allowed administrators to call javascript report generators to publish master report parts: MasterSummary, FailureSummary, and OnSummary (for local report customization, currently just outputs apis called).
 
 Fixed a bug where masterVars were cloned, but not passes to the eval in readHeaders().  Now mastervars will get passed all the way into headers with expressions.
+
+===========Tue Oct 25 17:42:52 EDT 2016======================
+Version 26 adds pulling master envs and vars into a separate file, and now only dumps the analysis filename in the master, not the contents.

@@ -981,7 +981,7 @@ there are no vars from /restReplayMaster/run/vars.</p>
 
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 
               <td>
                   <br>
@@ -1044,7 +1044,7 @@ dynamide:
           </tr>
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 
               <td>
                   <p>Example:</p>
@@ -1165,7 +1165,7 @@ dynamide:
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
             <td>
 <div class="code"> &lt;runOptions&gt;
         &lt;connectionTimeout&gt;<strong>3000</strong>&lt;/connectionTimeout&gt;
@@ -1242,15 +1242,55 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
           <tr>
 <td><br></td>
-<td>See also <a href="#1.c.4.Vars">1.c.4 Vars</a></td></tr>
+<td>See also <a href="#1.c.4.Vars">1.c.4 Vars</a>
+<p>Note that you can also move master vars into a shared file containing the master envs. See <a href="#RestReplay-master.envs">envs</a></p></td></tr>
 <tr>
             <td>@id</td>
 
             <td>The name of the variable.  var elements declared here are available to all tests.  These are useful for
             defining host endpoints, or other values that will apply across all tests under a master.</td>
           </tr>
+          
           <tr>
-            <td><a name="protoHostPort_Example"></a>Master Example (with vars, uri, and protoHostPort):</td>
+            <td><a name="varsEnvFilename_Example"></a>Master Example (with vars pulled from an env file):</td>
+            <td>
+<div class="code">    &lt;restReplayMaster&gt;
+        &lt;protoHostPort&gt;<b>${SNOOPSERVER}</b>&lt;/protoHostPort&gt;
+        &lt;env filename="mytest/mySharedEnvs.xml" /&gt;
+        ...
+    &lt;/restReplayMaster&gt;
+</div>
+                <p>Contents of file <b>mytest/mySharedEnvs.xml</b></p>
+<div class="code">&lt;container&gt;
+    &lt;vars>
+        &lt;var ID="APIKEY">111122222333344444&lt;/var>
+        &lt;var ID="LOGIN_SERVER">https://base.example.com&lt;/var>
+    &lt;/vars>
+
+    &lt;envs>
+        &lt;env ID="stage">
+            &lt;vars>
+                &lt;var ID="LOGIN_SERVER">https://override.example.com&lt;/var>
+                &lt;var ID="TEST_PRODUCT_ID">666666677777AAAA&lt;/var>
+            &lt;/vars>
+        &lt;/env>
+
+        &lt;env ID="production">
+            &lt;vars>
+                &lt;var ID="LOGIN_SERVER">https://production.example.com&lt;/var>
+                &lt;var ID="TEST_PRODUCT_ID">88888999999000001111&lt;/var>
+            &lt;/vars>
+        &lt;/env>
+    &lt;/envs>
+&lt;/container&gt;
+</div>
+            
+            </td>
+</tr>
+          
+          
+          <tr>
+            <td><a name="protoHostPort_Example"></a>Master Example (with inline vars, uri, and protoHostPort):</td>
 
             <td>
 <div class="code">    &lt;restReplayMaster&gt;
@@ -1356,6 +1396,8 @@ When overriding RunOptions in a master file, consider these two development scen
               <td>Contains blocks of vars/var elements which define variables available to all tests run by this master.
                   <br>The calling program can supply the environment ID in the command-line parameter <b>-env</b>.
               <br>
+              <br>These <b>envs</b> elements can be inline in the master, or in a separate file.  See the two examples below.
+              <br>
               <br>
                   If calling restReplayInstance.readOptionsFromMasterConfigFile() programmatically, call restReplayInstance.setEnvID() first.
               </td>
@@ -1375,6 +1417,13 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
+              <td>@filename</td>
+
+              <td>All envs are read from the named file, as though they were inline in the master with the envs node</td>
+          </tr>
+
+
+          <tr>
               <td>default</td>
 
               <td>If true, this is the env which will be used if the user supplies none on the command line or programmatically.</td>
@@ -1382,9 +1431,79 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example (filename):</td>
 
               <td>
+    <p><br />This is useful if you will have several restReplayMaster files, and they would share the same envs.</p>
+                  <div class="code">&lt;restReplayMaster&gt;
+    &lt;envs filename="<b>mytest/environments.xml</b> /&gt;
+    ...
+    </div>
+
+<p>in <b>that</b> file, you would put this structure:</p>
+<div class="code">&lt;container&gt;
+    &lt;envs&gt;
+        &lt;env ID="local" default="true"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://localhost:8080&lt;/var&gt;
+                &lt;var ID="SELFTEST_SERVER"&gt;http://localhost:18080&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+        &lt;env ID="dev"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://be.example.com&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+        &lt;env ID="qa"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://be.example.com&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+    &lt;/envs&gt;
+&lt;/container>
+    </div>
+
+<p>Or, you can also move the master vars into this file:</p>
+<div class="code">&lt;container&gt;
+    &lt;vars>
+        &lt;var ID="APIKEY">111122222333344444&lt;/var>
+        &lt;var ID="LOGIN_SERVER">https://base.example.com&lt;/var>
+    &lt;/vars>
+
+    &lt;envs&gt;
+        &lt;env ID="local" default="true"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://localhost:8080&lt;/var&gt;
+                &lt;var ID="SELFTEST_SERVER"&gt;http://localhost:18080&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+        &lt;env ID="dev"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://be.example.com&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+        &lt;env ID="qa"&gt;
+            &lt;vars&gt;
+                &lt;var ID="LISERVER"&gt;http://li-api.example.com&lt;/var&gt;
+                &lt;var ID="BESERVER"&gt;http://be.example.com&lt;/var&gt;
+            &lt;/vars&gt;
+        &lt;/env&gt;
+    &lt;/envs&gt;
+&lt;/container>
+    </div>
+          </td></tr>
+
+
+          <tr>
+              <td  valign="top">Example (inline):</td>
+
+              <td>
+                  <p>In this example, we are putting the envs inline in the restReplayMaster.</p>
                   <div class="code">&lt;restReplayMaster&gt;
     &lt;protoHostPort&gt;${BESERVER}&lt;/protoHostPort&gt;
     &lt;envs&gt;
@@ -1411,7 +1530,9 @@ When overriding RunOptions in a master file, consider these two development scen
     ...
     </div>
 
-          </td></tr><tr>
+          </td></tr>
+
+          <tr>
               <td colspan="3" class="element-hdr"><a name="RestReplay-master.envs.vars" id="RestReplay-master.envs.vars"></a>/restReplayMaster/envs/vars</td>
           </tr>
 
@@ -1445,12 +1566,28 @@ When overriding RunOptions in a master file, consider these two development scen
               <td><br></td>
 
               <td>Names an event handler which gets fired at some phase.
-                  Below are the named events, specified by the attribute ID.  <i>NOTE: You only get these events if you
-                  run a Master.  Running a test or testGroup without a Master will skip these events and other Master control file features.</i>
+                  Below are the named events, specified by the attribute ID.
+                  <br />
+                  <br />
+                  <i>NOTE: You only get these events if you
+                      run a Master.  Running a test or testGroup without a Master will skip these events and other
+                      Master control file features.</i>
+                  <br />
+                  <br />
+
+                  These take a lang attribute, which is optional, or may contain the value: lang="javascript".
+                  They support inline javascript in the event, or you may specify a filename relative to the test directory:
+                  filename="onAnalysis.js" or filename="myTest/myOnAnalysis.js".   If the filename is absent, RestReplay looks for the
+                  file with the name of the event, plus ".js", first relative to your test directory, then relative to the included files in the RestReplay jar classpath.
+                  So you can use the default event handling code shipped with RestReplay, or you may replace it with your own of the same name and relative location,
+                  or with your own using some other relative path and filename.
                   <br />Currently supported event IDs:
                   <br /><code>onBeginMaster</code>
-                  <br /><code>onSummary</code>
                   <br /><code>onEndMaster</code>
+                  <br /><code>onSummary</code>
+                  <br /><code>onMasterSummaryTable</code>
+                  <br /><code>onFailureSummary</code>
+                  <br /><code>onAnalysis</code>
               </td>
           </tr>
           <tr>
@@ -1482,21 +1619,47 @@ When overriding RunOptions in a master file, consider these two development scen
 
           <tr>
               <td>ID="onBeginMaster"</td>
-
               <td>Fires after the Master has been configured, but just before it runs any tests.
               </td>
           </tr>
 
           <tr>
               <td>ID="onEndMaster"</td>
-
               <td>Fires after the report has been written.  The event handler is an appropriate place for programmatic cleanup of resources not cleaned up by autoDeletePOSTS.
               </td>
           </tr>
 
+          <tr>
+              <td>ID="onMasterSummaryTable"</td>
+              <td>Runs after all tests, produces a summary table showing success and failures with links to tests.
+              </td>
+          </tr>
 
           <tr>
-              <td>Example:<br />
+              <td>ID="onFailureSummary"</td>
+              <td>Runs after all tests, produces a summary just showing failures with links to tests.
+              </td>
+          </tr>
+
+          <tr>
+              <td>ID="onAnalysis"</td>
+              <td>Runs after all tests, produces an analysis file, named after the env and master, begining with "stats." and ending in ".json".
+                  This file is suitable for comparing against other runs using the same master with different envs, or with the same master and env over time.
+              </td>
+          </tr>
+
+          <tr>
+              <td valign="top">Example:<br />
+                  (using default, supplied event handlers)
+              </td>
+              <td><div class="code">
+  &lt;event ID="onSummary" />
+              </div>
+              </td>
+          </tr>
+
+          <tr>
+              <td valign="top">Example:<br />
                   (inline)
               </td>
               <td><div class="code">
@@ -1518,7 +1681,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-              <td>Example:<br />
+              <td valign="top">Example:<br />
                   (filename)
               </td>
               <td>
@@ -1566,13 +1729,13 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 <td>
                   <div class="code">&lt;run controlFile="objectexit/object-exit.xml" testGroup="CRUDL" /&gt;</div>
               </td>
           </tr>
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 
               <td>
                   <div class="code">&lt;restReplayMaster&gt;
@@ -1585,7 +1748,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
         
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 
               <td>
                   In this example, mastervars are declared right in the <b>&lt;run></b> element, and will affect only this run.
@@ -1750,7 +1913,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>
               <p>Example:</p>
@@ -1795,7 +1958,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>
               <p>Example:</p>
@@ -1830,7 +1993,7 @@ When overriding RunOptions in a master file, consider these two development scen
           </tr>
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
               <td>
                   <div class="code">
       &lt;testGroup ID="ImportsExample"&gt;
@@ -1857,7 +2020,7 @@ When overriding RunOptions in a master file, consider these two development scen
 <td>@ID</td>
 <td>The ID attribute of var makes that variable available in the test's namespace under that ID.&nbsp; So requests can use ${COURSE_ID} to get the value 540f4515e4b004e7d8f22fc8 because COURSE_ID was the ID attribute value, in this next example. In other words, the value of the ID becomes a variable in the target language.&nbsp; </td></tr>
 <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
             <td>
               <div class="code">
     &lt;restReplay&gt;
@@ -1885,7 +2048,7 @@ When overriding RunOptions in a master file, consider these two development scen
             set inheritHeaders="false" on that &lt;test&gt; node.</td>
           </tr>
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
             <td>
               <div class="code">
     &lt;restreplay&gt;
@@ -1918,7 +2081,7 @@ When overriding RunOptions in a master file, consider these two development scen
 
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
               <td>
                   <div class="code">
     &lt;restreplay&gt;
@@ -2243,7 +2406,7 @@ For convenience, you may place the <b>expected/code</b> node either at the top l
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>
               Examples:<br>
@@ -2352,7 +2515,7 @@ For convenience, you may place the <b>expected/code</b> node either at the top l
 <td>If the request is not multipart, you can simply place the &lt;filename&gt; element under the &lt;test&gt; element.&nbsp; If the request is mime-multipart, this element goes in a &lt;part&gt; element. Like all filenames in RestReplay, the value is relative to the <strong>-testdir</strong> directory.</td>
 <td><br></td></tr>
 <tr>
-<td>Example: </td>
+<td valign="top">Example: </td>
 <td>&lt;filename&gt;_self_test/content-mutator-test.json&lt;/filename&gt;</td>
 <td><br></td>
 </tr>
@@ -2654,7 +2817,7 @@ For convenience, you may place the <b>expected/code</b> node either at the top l
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>&amp;&lt;filename&gt;objectexit/object-exit.xml&lt;/filename&gt;</td>
           </tr>
@@ -2676,7 +2839,7 @@ For convenience, you may place the <b>expected/code</b> node either at the top l
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>
               var may be dereferenced in an expression in the request payload.like this:
@@ -2846,7 +3009,7 @@ stdout.println("LOG from javascript: "+result);
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>
               <div class="code">...
@@ -2863,7 +3026,7 @@ stdout.println("LOG from javascript: "+result);
           </tr>
 
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 
               <td>
                   <div class="code">...
@@ -2883,7 +3046,7 @@ stdout.println("LOG from javascript: "+result);
               </td>
               </tr>
           <tr>
-              <td>Example:</td>
+              <td valign="top">Example:</td>
 
               <td>
 
@@ -2972,7 +3135,7 @@ stdout.println("LOG from javascript: "+result);
           </tr>
 
           <tr>
-            <td>Example:</td>
+            <td valign="top">Example:</td>
 
             <td>
               <p>The file named in /restReplay/testGroup/test/response/part/filename is a template, which may contain variables.<br>

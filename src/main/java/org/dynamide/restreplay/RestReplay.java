@@ -54,6 +54,22 @@ public class RestReplay extends ConfigFile {
         this.masterFilename = val;
     }
 
+    private String masterEnvsFileLocation;
+    public String getMasterEnvsFileLocation() {
+        return masterEnvsFileLocation;
+    }
+    public void setMasterEnvsFileLocation(String masterEnvsFileLocation) {
+        this.masterEnvsFileLocation = masterEnvsFileLocation;
+    }
+
+    private String masterVarsFileLocation;
+    public String getMasterVarsFileLocation() {
+        return masterVarsFileLocation;
+    }
+    public void setMasterVarsFileLocation(String masterVarsFileLocation) {
+        this.masterVarsFileLocation = masterVarsFileLocation;
+    }
+
     private String relToMasterPath = "";
     private String relToMaster = "";
     public String getRelToMaster(){
@@ -831,6 +847,8 @@ public class RestReplay extends ConfigFile {
                 + "\r\n   controlFile: " + controlFileName
                 + "\r\n   Master: " + masterFilenameInfo
                 + "\r\n   env: " + relativePathFromReportsDir
+                + (Tools.notEmpty(masterEnvsFileLocation) ? "\r\n   masterEnvsFile: " + masterEnvsFileLocation : "")
+                + (Tools.notEmpty(masterVarsFileLocation) ? "\r\n   masterVarsFile: " + masterVarsFileLocation : "")
                 + "\r\n   reports directory: " + reportsDir
                 + "\r\n   protoHostPort: " + protoHostPort + "    " + protoHostPortFrom
                 + (Tools.notEmpty(oneTestID) ? "\r\n   oneTestID: " + oneTestID : "")

@@ -789,6 +789,19 @@ public class RestReplayReport {
             String masterSummaryLine = "TESTS: "+numTests+" SUCCESS: "+numSUCCESS + " FAILURE: "+numFAILURE;
             String masterSummaryLineHTML = smallblack("TESTS: ")+numTests+' '+ok("SUCCESS:")+numSUCCESS + ' '+(numFAILURE>0?red("FAILURE:"):noerror("FAILURE:")) +numFAILURE;
 
+            String envLocationsLineHTML = "";
+            if (   Tools.notBlank(master.masterEnvsFileLocation)
+                && Tools.notBlank(master.masterVarsFileLocation)
+                && master.masterEnvsFileLocation.equals(master.masterVarsFileLocation)) {
+                envLocationsLineHTML = "<div class='label'>vars and envs read from:<br />&nbsp;&nbsp;<span class='SMALLBLACK'>" + master.masterEnvsFileLocation + "</span></div>";
+            } else {
+                if(Tools.notBlank(master.masterVarsFileLocation)){
+                    envLocationsLineHTML  = "<div class='label'>vars read from:<br />&nbsp;&nbsp;<span class='SMALLBLACK'>" + master.masterVarsFileLocation + "</span></div>";
+                }
+                if (Tools.notBlank(master.masterEnvsFileLocation)) {
+                    envLocationsLineHTML += "<div class='label'>envs read from:<br />&nbsp;&nbsp;<span class='SMALLBLACK'>" + master.masterEnvsFileLocation + "</span></div>";
+                }
+            }
             String pageTitle = "RestReplay "+localMasterFilename+(Tools.notBlank(envID)?" ("+envID+")":"");
             StringBuffer sb = new StringBuffer(formatPageStart(testdir, master.getResourceManager(), pageTitle));
             String dateStr = Tools.nowLocale();
@@ -802,7 +815,9 @@ public class RestReplayReport {
 
             sb.append("<div class='masterVars'>")
               .append("<span class='LABEL'>environment:</span> <span class='env'>"+envID+"</span><br />")
-              .append(formatMasterVars(masterVars)).append("</div>");
+              .append(formatMasterVars(masterVars))
+              .append(envLocationsLineHTML)
+              .append("</div>");
 
 
             Master.ScriptEventResult onFailureSummary = master.fireOnFailureSummary();
@@ -826,9 +841,6 @@ public class RestReplayReport {
             Master.ScriptEventResult onAnalysis = master.fireOnAnalysis();
             String sresultAn = onAnalysis.result;
             if (Tools.notBlank(sresultAn)){
-                sb.append("<br /><div class='toc-toc'><b>Master Analysis</b>");
-                sb.append(sresultAn);
-                sb.append("</div>");
                 String foo = tupple.toString();
                 String filenameOnly = tupple.filenameOnly;
                 if (filenameOnly.endsWith(".xml")){
@@ -837,6 +849,10 @@ public class RestReplayReport {
                 String jsonName = "stats."+master.getEnvID()+'.'+filenameOnly+".json";
                 File fSaved = FileTools.saveFile(tupple.directory, jsonName, sresultAn, true);
                 System.out.println("\r\nAnalysis file saved (tupple: "+foo+") for Master Run: "+fSaved.getCanonicalPath());
+                sb.append("<br /><div class='toc-toc'><b>Master Analysis produced:</b> ");
+                //sb.append(sresultAn);
+                sb.append(fSaved.getPath());
+                sb.append("</div>");
             }
 
             if (masterAlertStrings!=null&&masterAlertStrings.size()>0) {

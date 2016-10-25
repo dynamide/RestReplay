@@ -59,8 +59,8 @@ for (var i=0; i<serviceResultsListList.size(); i++) {
 }
 arrSummary.push("</table>");
 if (totalFailures>0){
-    outstring += " VERSION 1 "+arrSummary.join(" ");
+    outstring += ""+arrSummary.join(" ");
 } else {
-    outstring = " VERSION 1 ";
+    outstring = "";
 }
 outstring;

@@ -32,6 +32,9 @@ public class Master extends ConfigFile {
     public long startTime;
     public long endTime;
 
+    public String masterEnvsFileLocation = "";
+    public String masterVarsFileLocation = "";
+
     private Map<String, ServiceResult> masterNamespace = new LinkedHashMap<String, ServiceResult>();
     public Map<String, ServiceResult> getMasterNamespace(){
         return masterNamespace;
@@ -94,18 +97,44 @@ public class Master extends ConfigFile {
         String desiredEnv = this.getEnvID();
         Node masterNode = document.selectSingleNode("/restReplayMaster");
 
+        Node masterProxyNode = masterNode;
+
+        Node envsNode = masterNode.selectSingleNode("envs");
+        String envsFilename = envsNode.valueOf("@filename");
+        if (Tools.notBlank(envsFilename)){
+            try {
+                org.dom4j.Document envsDoc = getResourceManager().getDocument("open envsDoc:" + envsFilename, getTestDir(), envsFilename);
+                if (envsDoc==null){
+                    throw new FileNotFoundException("envs filename was not found: "+envsFilename+" as specified in master: "+masterFilename);
+                }
+                masterProxyNode = envsDoc.getRootElement();
+                this.masterEnvsFileLocation = envsFilename;
+            } catch (DocumentException de) {
+                System.out.println("$$$$$$ ERROR reading env vars from single file: " + de);
+                masterProxyNode = masterNode;
+            }
+        }
+
         //get restReplayMaster::vars
-        getVars().putAll(readVars(masterNode));//todo%% may have to do null-check
+        Node theVarsMasterNode;
+        if (masterProxyNode.selectSingleNode("vars") == null) {
+            theVarsMasterNode = masterNode;
+        } else {
+            theVarsMasterNode = masterProxyNode;
+            this.masterVarsFileLocation = envsFilename;
+        }
+        getVars().putAll(readVars(theVarsMasterNode));//todo%% may have to do null-check
 
 
         //get restReplayMaster::envs/env[desiredEnv]::vars
-        EnvResult res = selectEnv(masterNode, desiredEnv);
+        EnvResult res = selectEnv(masterProxyNode, desiredEnv);
         Node nodeWVars = res.nodeWEnvs;
-        if (null!=nodeWVars){
+        if (null != nodeWVars) {
             this.setEnvID(res.envID);
         } else {
-            nodeWVars = masterNode;
+            nodeWVars = masterProxyNode;
         }
+
         getVars().putAll(readVars(nodeWVars));
         //todo: get run/vars
 
@@ -170,6 +199,9 @@ public class Master extends ConfigFile {
         }
         event.language = "javascript";
         String filenameRel = eventNode.valueOf("@filename");
+        if (Tools.isBlank(filenameRel) && Tools.isBlank(eventNode.valueOf("."))){
+            filenameRel = eventID + ".js";
+        }
         if (Tools.notBlank(filenameRel)){
             String filenameFull = getTestDir() + '/' + filenameRel;
             try {
@@ -307,6 +339,8 @@ public class Master extends ConfigFile {
         replay.setRunOptions(this.getRunOptions());
         replay.setMasterFilename(masterFilename);
         replay.setRelToMaster(relToMaster);
+        replay.setMasterEnvsFileLocation(masterEnvsFileLocation);
+        replay.setMasterVarsFileLocation(masterVarsFileLocation);
 
         Map<String, Object> masterVarsDup = new LinkedHashMap<String, Object>();
         masterVarsDup.putAll(getVars());
