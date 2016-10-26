@@ -183,3 +183,6 @@ Fixed a bug where masterVars were cloned, but not passes to the eval in readHead
 
 ===========Tue Oct 25 17:42:52 EDT 2016======================
 Version 26 adds pulling master envs and vars into a separate file, and now only dumps the analysis filename in the master, not the contents.
+
+===========Tue Oct 25 21:06:44 EDT 2016======================
+Version 26 moves all default event implementations to the root directory of RestReplay, same dir as runOptions.xml.

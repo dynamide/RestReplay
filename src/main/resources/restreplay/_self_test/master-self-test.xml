@@ -17,15 +17,17 @@
     <!--old version :
      event ID="onSummary" lang="javascript" filename="_self_test/s/master-self-test-onSummary.js"/
      -->
-    <event ID="onSummary" lang="javascript" filename="_includes/onSummary.js"/>
+    <event ID="onSummary"/>
 
-    <event ID="onMasterSummaryTable" lang="javascript" filename="_includes/onMasterSummaryTable.js"/>
+    <event ID="onMasterSummaryTable" filename="onMasterSummaryTable.js"/>
 
-    <event ID="onFailureSummary" lang="javascript" filename="_includes/onFailureSummary.js"/>
+    <event ID="onFailureSummary" filename="onFailureSummary.js"/>
 
+    <event ID="onAnalysis" />
 
     <event ID="onBeginMaster" lang="javascript" ><![CDATA[
-       kit.getOut().println("In onBeginMaster event");
+       //this works, but turn it off unless you need it.
+       //kit.getOut().println("In onBeginMaster event");
     ]]></event>
 
     <event ID="onEndMaster" lang="javascript"><![CDATA[
