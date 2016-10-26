@@ -22,10 +22,6 @@ Building:
     Remember that this creates the release jar, such as target/RestReplay-1.0.4-standalone.jar
       which should be copied to any deployed clients.
 
-    DEPLOY on Retina LAPPY WITH:
-         restreplay -u
-     (this is a script installed in ~/bin/restreplay )
-
 =============================================================
 Push to public server
 =============================================================
