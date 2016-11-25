@@ -21,6 +21,7 @@ public class RestReplayTest {
     public static RestReplay createRestReplayForMaven() throws Exception {
         String baseDir = getTestDirectory();
         ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
+        rootResourceManager.setTestDir(baseDir);
         RestReplay replay = new RestReplay(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
                                            baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
                                            rootResourceManager,
@@ -31,6 +32,7 @@ public class RestReplayTest {
     public static Master createRestReplayMasterForMaven() throws Exception {
         String baseDir = getTestDirectory();
         ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
+        rootResourceManager.setTestDir(baseDir);
         Master master = new Master(baseDir+RESTREPLAY_REL_DIR_TO_MODULE,
                 baseDir+RESTREPLAY_REL_DIR_REPORTS_TO_MODULE,
                 rootResourceManager);

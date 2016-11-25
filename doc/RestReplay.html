@@ -1193,6 +1193,11 @@ It contains a &lt;<strong>runOptions</strong>&gt; root element.
 All of these options can be controlled in a master file, too.
 In this case, your master file contains &lt;<strong>runOptions</strong>&gt; under the root element &lt;<strong>restReplayMaster</strong>&gt;
 
+The options are set in this order, and all three sources will be read if available:
+        1) the Class default values for RunOptions are loaded.
+        2) the runOptions.xml file in your test directory is loaded.
+        3) the &lt;runOptions&gt; element in your master file is loaded.
+
 When overriding RunOptions in a master file, consider these two development scenarios:
             1) you are developing locally, and are setting per-test cases while you run tests,
                and you may or may not check in your changes.

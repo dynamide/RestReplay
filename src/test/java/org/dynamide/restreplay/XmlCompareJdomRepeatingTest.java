@@ -43,6 +43,8 @@ public class XmlCompareJdomRepeatingTest {
 
         String dir = getDirectory();
         ResourceManager resourceManager = ResourceManager.createRootResourceManager();
+        resourceManager.setTestDir(dir);
+
         String relLeft  = "_self_test/XmlCompareJdom/1-left.xml";
         String relRight = "_self_test/XmlCompareJdom/1-right.xml";
         String expectedPartContent = resourceManager.readResource("testLeftAndRightSame", relLeft, dir+'/'+relLeft).contents;
@@ -68,6 +70,7 @@ public class XmlCompareJdomRepeatingTest {
 
         String dir = getDirectory();
         ResourceManager resourceManager = ResourceManager.createRootResourceManager();
+        resourceManager.setTestDir(dir);
 
         String relLeft  = "_self_test/XmlCompareJdom/2-left.xml";
         String relRight = "_self_test/XmlCompareJdom/2-right.xml";

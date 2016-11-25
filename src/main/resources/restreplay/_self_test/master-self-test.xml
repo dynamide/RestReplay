@@ -5,7 +5,6 @@
     <dump payloads="false" dumpServiceResult="minimal" /> <!-- TODO: set dumpServiceResult to auto to test behavior for releases. -->
 
     <runOptions>
-        <connectionTimeout>3000</connectionTimeout>
         <socketTimeout>5000</socketTimeout>
         <errorsBecomeEmptyStrings>true</errorsBecomeEmptyStrings>
         <outputServiceResultDB>false</outputServiceResultDB>

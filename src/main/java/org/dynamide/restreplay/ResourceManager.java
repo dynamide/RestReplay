@@ -57,6 +57,13 @@ public class ResourceManager {
         }
     }
 
+    private String testDir = "";
+    public String getTestDir(){
+        return testDir;
+    }
+    public void setTestDir(String v){
+        testDir = v;
+    }
     private static final class CachedDoc {
         public CachedDoc(Document document){
             this.document = document;

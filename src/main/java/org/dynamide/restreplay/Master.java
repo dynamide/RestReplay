@@ -123,7 +123,7 @@ public class Master extends ConfigFile {
             theVarsMasterNode = masterProxyNode;
             this.masterVarsFileLocation = envsFilename;
         }
-        getVars().putAll(readVars(theVarsMasterNode));//todo%% may have to do null-check
+        getVars().putAll(readVars(theVarsMasterNode, getResourceManager(), null, null, null));//todo%% may have to do null-check
 
 
         //get restReplayMaster::envs/env[desiredEnv]::vars
@@ -135,7 +135,7 @@ public class Master extends ConfigFile {
             nodeWVars = masterProxyNode;
         }
 
-        getVars().putAll(readVars(nodeWVars));
+        getVars().putAll(readVars(nodeWVars, getResourceManager(), null, null, null));
         //todo: get run/vars
 
         this.getRunOptions().addRunOptions(document.selectSingleNode("/restReplayMaster/runOptions"), "master");
@@ -394,7 +394,7 @@ public class Master extends ConfigFile {
 
             //testGroups.add(testGroup);
 
-            Map<String, Object> runVars = readVars(runNode);
+            Map<String, Object> runVars = readVars(runNode, getResourceManager(), null, null, null);
             runVars = expandRunVars(runVars, allRunIDs, masterFilename, testGroup, alertStrings);
 
             List<ServiceResult> listOTests

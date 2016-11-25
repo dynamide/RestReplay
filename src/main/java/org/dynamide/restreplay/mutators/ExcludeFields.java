@@ -51,7 +51,6 @@ public class ExcludeFields extends ContentMutator {
         return " ["+p+"] no-"+current;
     }
 
-    @Override
     public int getIndex(){
         return p;
     }
@@ -68,6 +67,7 @@ public class ExcludeFields extends ContentMutator {
         String relResourceName = "_self_test/content-mutator-test.json";
         String fn = "/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/content-mutator-test.json";
         ResourceManager standaloneResourceManager = ResourceManager.createRootResourceManager();
+        standaloneResourceManager.setTestDir("/Users/vcrocla/src/RestReplay/src/main/resources/restreplay");
         ServiceResult serviceResult = new ServiceResult(new RunOptions());
         Eval evalStruct = new Eval();
         IMutator mutator

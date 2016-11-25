@@ -186,3 +186,6 @@ Version 26 adds pulling master envs and vars into a separate file, and now only 
 
 ===========Tue Oct 25 21:06:44 EDT 2016======================
 Version 26 moves all default event implementations to the root directory of RestReplay, same dir as runOptions.xml.
+
+===========Fri Nov 25 13:10:10 PST 2016======================
+Version 27 allows var elements, in master, env files, testGroups, and tests, to have a filename attribute, which pulls in the contents of that file as the value of the var.

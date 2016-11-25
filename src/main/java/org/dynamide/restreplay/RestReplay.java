@@ -263,13 +263,22 @@ public class RestReplay extends ConfigFile {
         //This method is overloaded with the isResponse boolean.  If isResponse, we are reading test/response/filename,
         //  otherwise we are reading test/filename. These should be split into two functions, because the XML structs
         //  are different--they just have the /vars element in common.
-        public static PartsStruct readParts(Node testNode, final String testID, String testdir, boolean isResponse) {
+        public static PartsStruct readParts(Node testNode,
+                                            final String testID,
+                                            String testdir,
+                                            boolean isResponse,
+                                            ResourceManager rm,
+                                            ServiceResult serviceResult,
+                                            Eval evalStruct,
+                                            Map<String, Object> masterVars) {
             PartsStruct resultPartsStruct = new PartsStruct();
             resultPartsStruct.isResponse = isResponse;
             resultPartsStruct.startElement = testNode.valueOf("startElement");
             resultPartsStruct.label = testNode.valueOf("label");
             resultPartsStruct.testdir = testdir;
             String filename = testNode.valueOf("filename");
+
+            //TODO: pass in evalStruct so you can eval these filenames to allow for vars.
 
             if (isResponse) {
                 resultPartsStruct.validator = testNode.valueOf("validator");  //the actual script, hopefully in a CDATA.
@@ -295,7 +304,7 @@ public class RestReplay extends ConfigFile {
                     resultPartsStruct.requestPayloadFilename = testdir + '/' + filename;
                     resultPartsStruct.requestPayloadFilenameRel = filename;
                 }
-                resultPartsStruct.varsList.add(readVars(testNode));
+                resultPartsStruct.varsList.add(readVars(testNode, rm, serviceResult, evalStruct, masterVars));
             }
             return resultPartsStruct;
         }
@@ -903,7 +912,7 @@ public class RestReplay extends ConfigFile {
             testGroups.add(hdr);
 
             //vars var = get control file vars and merge masterVars into it, replacing
-            Map<String, Object> testGroupVars = readVars(testgroup);
+            Map<String, Object> testGroupVars = readVars(testgroup, getResourceManager(), null, evalStruct, masterVars);
             Map<String, Object> clonedMasterVars = new LinkedHashMap<String, Object>();
             if (null != masterVars) {
                 clonedMasterVars.putAll(masterVars);
@@ -1085,7 +1094,8 @@ public class RestReplay extends ConfigFile {
 
         try {
             clonedMasterVarsWTest.putAll(clonedMasterVars);
-            clonedMasterVarsWTest.putAll(readVars(testNode));
+            Map<String,Object>  temp = readVars(testNode, getResourceManager(), serviceResult, evalStruct, clonedMasterVars);
+            clonedMasterVarsWTest.putAll(temp);
             if (mutatorScopeVars!=null){
                 clonedMasterVarsWTest.putAll(mutatorScopeVars);
             }
@@ -1144,6 +1154,7 @@ public class RestReplay extends ConfigFile {
 
             String oneProtoHostPort = protoHostPort;
             if (oneProtoHostPort.indexOf("$") > -1) {
+                //TODO: strange, this first call seems to run all the evals.
                 EvalResult evalResult = evalStruct.eval("vars to protoHostPort", oneProtoHostPort, clonedMasterVarsWTest);
                 oneProtoHostPort = evalResult.getResultString();
                 serviceResult.alerts.addAll(evalResult.alerts);
@@ -1164,7 +1175,7 @@ public class RestReplay extends ConfigFile {
             Node responseNode = testNode.selectSingleNode("response");
             PartsStruct expectedResponseParts = null;
             if (responseNode != null) {
-                expectedResponseParts = PartsStruct.readParts(responseNode, testID, testdir, true);
+                expectedResponseParts = PartsStruct.readParts(responseNode, testID, testdir, true, getResourceManager(), serviceResult, evalStruct, clonedMasterVars);
                 Node failure = responseNode.selectSingleNode("expected/failure");
                 serviceResult.expectedFailure = (failure != null);
             }
@@ -1401,7 +1412,7 @@ public class RestReplay extends ConfigFile {
             throws IOException {
         ServiceResult serviceResult = test.serviceResult;
 
-        PartsStruct parts = PartsStruct.readParts(test.testNode, test.testID, testdir, false);
+        PartsStruct parts = PartsStruct.readParts(test.testNode, test.testID, testdir, false, getResourceManager(), test.serviceResult, test.evalStruct, clonedMasterVars);
         if (Tools.notEmpty(parts.overrideTestID)) {
             test.testID = parts.overrideTestID;
         }
@@ -1597,7 +1608,7 @@ public class RestReplay extends ConfigFile {
     private void handleExports(ServiceResult serviceResult, Node testNode, Eval evalStruct, Map<String, Object> clonedMasterVarsWTest) {
         Node exportsNode = testNode.selectSingleNode("exports");
         if (exportsNode != null) {
-            Map<String, Object> exports = readVars(exportsNode);
+            Map<String, Object> exports = readVars(exportsNode, getResourceManager(), serviceResult, evalStruct, clonedMasterVarsWTest);
             Map<String, Object> exportsEvald = new LinkedHashMap<String, Object>();
             for (Map.Entry<String, Object> entry : exports.entrySet()) {
                 String exportID = entry.getKey();

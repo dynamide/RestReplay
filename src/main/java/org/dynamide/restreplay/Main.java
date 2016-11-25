@@ -226,6 +226,7 @@ public class Main {
             );
 
             ResourceManager rootResourceManager = ResourceManager.createRootResourceManager();
+            rootResourceManager.setTestDir(testdirResolved);
 
             if (Tools.notEmpty(restReplayMaster)) {
                 //****************** RUNNING MASTER ******************************************

@@ -1073,6 +1073,17 @@
                 <filename>/Users/vcrocla/src/RestReplay/src/main/resources/restreplay/_self_test/upload/q/favicon.ico</filename>
             </upload>
         </test>
+
+        <test ID="varWithFilename">
+            <method>GET</method>
+            <uri>/tagonomy?mock=true</uri>
+            <vars>
+                <var ID="TITLE">My Title</var>
+                <var ID="INSTRUCTOR_NOTE">My long note.</var>
+                <var ID="DUE_DATE_MILLIS">${tools.now()}</var>
+                <var ID="VAR_IN_FILE" filename="_self_test/loop-dates.json"></var>
+            </vars>
+        </test>
     </testGroup>
 
     <testGroup ID="debugHAR" autoDeletePOSTS="true">

@@ -2,10 +2,13 @@ package org.dynamide.restreplay;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderGroup;
+import org.apache.commons.httpclient.util.ExceptionUtil;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
+import org.dynamide.interpreters.Alert;
 import org.dynamide.interpreters.Eval;
+import org.dynamide.util.FileTools;
 import org.dynamide.util.Tools;
 import org.dynamide.interpreters.EvalResult;
 
@@ -145,16 +148,50 @@ public class ConfigFile {
         return authsMap;
     }
 
-    public static Map<String,Object> readVars(Node nodeWVars){
+    public static Map<String,Object> readVars(Node nodeWVars,
+                                              ResourceManager rm,
+                                              ServiceResult serviceResult,
+                                              Eval evalStruct,
+                                              Map<String, Object> masterVars){
         Map<String,Object> vars = new LinkedHashMap<String,Object>();
         List<Node> varNodes = nodeWVars.selectNodes("vars/var");
-        return readVars(varNodes, vars);
+        return readVars(varNodes, vars, rm, serviceResult, evalStruct, masterVars);
     }
 
-    private static Map<String,Object> readVars(List<Node> varNodes, Map<String,Object> vars){
+    private static Map<String,Object> readVars(List<Node> varNodes,
+                                               Map<String,Object> vars,
+                                               ResourceManager rm,
+                                               ServiceResult serviceResult,
+                                               Eval evalStruct,
+                                               Map<String, Object> masterVars){
         for (Node var: varNodes){
             String ID = var.valueOf("@ID");
+            String filename = var.valueOf("@filename");
             String value = var.getText();
+            if (Tools.notEmpty(filename)){
+                if (Tools.notEmpty(value)) {
+                    System.out.println("WARNING: var "+ID+" specified a filename, but var node text was not empty: "+value);
+                }
+                try {
+                    if (evalStruct!=null) {
+                        EvalResult filanameRelEvalResult = evalStruct.eval("readVars filenameRel:" + filename,
+                                filename,
+                                masterVars);
+                        if (serviceResult==null) {
+                            serviceResult.alerts.addAll(filanameRelEvalResult.alerts);
+                        } else {
+                            for (Alert a: filanameRelEvalResult.alerts) {
+                                System.out.println("ERROR: "+a.toString());
+                            }
+                        }
+                        filename = filanameRelEvalResult.getResultString();
+                    }
+                    value = rm.readResource("read requested by var", filename, FileTools.join(rm.getTestDir(), filename)).contents;
+                } catch (Exception e){
+                    System.out.println("ERROR:"+e);
+                }
+
+            }
             vars.put(ID, value);
         }
         return vars;
