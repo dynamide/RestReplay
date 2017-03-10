@@ -511,6 +511,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
 <p>Here are the places vars can exist:</p>
 <p>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.vars.var">/restReplay/testGroup/vars/var</a><br>&nbsp;&nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.vars.var">/restReplay/testGroup/test/vars/var</a><br>&nbsp; &nbsp;<a href="#RestReplay-restReplay.testGroup.test.exports.vars.var"> /restReplay/testGroup/test/exports/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.vars.var"> /restReplayMaster/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.envs.vars.var"> /restReplayMaster/env/vars/var</a><br>&nbsp;&nbsp;&nbsp;<a href="#RestReplay-master.run.vars.var"> /restReplayMaster/run/vars/var</a></p>
 <p> See also: <a href="#RestReplay-3.a.4.JexlScript">3.a.4 Jexl Script</a> for an example of using a more complicated Jexl expression as a var.</p>
+<p>The <i>filename</i> attribute may be used to pull in a text file and assign that string to the var's value.</p>
 <p>Here is the list of vars shown above in the discussion on <a href="#1.c.1.Expressions">1.c.1 Expressions</a>
 <script type="syntaxhighlighter" class="brush: xml; "><![CDATA[
 <vars>
@@ -519,6 +520,7 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
   <var ID="DUE_DATE_MILLIS">${BASE_DATE +0 * DAYS}</var>
   <var ID="DueDate">Due ${kit.dates.getMonthName(BASE_DATE)} ${kit.dates.getDayOfMonth(BASE_DATE)}</var>
   <var ID="VarTestMessage">Base message set here as default.</var>
+  <var ID="VarTextFromFile" filename="folders/in/testdir/myvar.json" />
 </vars>
 ]]></script>
 </p>
@@ -673,8 +675,8 @@ color--see Legend at bottom of page).<br>See the discussion under <a href="#Rest
           <li>doc - either the full path of the resource, or the name of the root element in an XML Document</li>
           <li>cached - After two references, resources are cached in memory</li>
       </ul>
-      Cached resources are highlighted with <font color="green"><b>green font</b></font>.
-      <br />Missing resources are highlighted with <font color="red"><b>red font</b></font>.
+      Cached resources are highlighted with <font color="green"><b>green font</b></font> and have a <b>"cached: true"</b> attribute.
+      <br />Missing resources are highlighted with <font color="red"><b>red font</b></font> and have a <b>"source: NOTFOUND"</b> attribute.
       <i>This is the best way to find broken links to resources.</i>
       </p>
 
@@ -1239,26 +1241,34 @@ When overriding RunOptions in a master file, consider these two development scen
                             or for maven, surefire, etc:
                                 -Dmaster=relative-path-to-master-file
 </pre>
-    (see docs/RestReplay.html for examples).
-</td>
-<td><br></td></tr>
-<tr>
+            (see docs/RestReplay.html for examples).
+        </td>
+        <td><br></td>
+        </tr>
+        <tr>
             <td colspan="3" class="element-hdr"><a name="RestReplay-master.vars.var" id="RestReplay-master.vars.var"></a>/restReplayMaster/vars/var</td>
-          </tr>
-          <tr>
-<td><br></td>
-<td>See also <a href="#1.c.4.Vars">1.c.4 Vars</a>
-<p>Note that you can also move master vars into a shared file containing the master envs. See <a href="#RestReplay-master.envs">envs</a></p></td></tr>
-<tr>
-            <td>@id</td>
-
+        </tr>
+        <tr>
+            <td><br></td>
+            <td>See also <a href="#1.c.4.Vars">1.c.4 Vars</a>
+              <p>Note that you can also move master vars into a shared file containing the master envs. See <a href="#RestReplay-master.envs">envs</a></p>
+            </td>
+        </tr>
+        <tr>
+            <td>@ID</td>
             <td>The name of the variable.  var elements declared here are available to all tests.  These are useful for
             defining host endpoints, or other values that will apply across all tests under a master.</td>
-          </tr>
-          
-          <tr>
-            <td><a name="varsEnvFilename_Example"></a>Master Example (with vars pulled from an env file):</td>
-            <td>
+        </tr>
+        <tr>
+          <td>@filename</td>
+          <td>The <i>filename</i> attribute of var reads the referenced filename relative to the test directory,
+                and assigns the contents as a String to a var with the specified <i>ID</i> attribute.
+            </td>
+        </tr>
+
+      <tr>
+        <td><a name="varsEnvFilename_Example"></a>Master Example (with vars pulled from an env file):</td>
+        <td>
 <div class="code">    &lt;restReplayMaster&gt;
         &lt;protoHostPort&gt;<b>${SNOOPSERVER}</b>&lt;/protoHostPort&gt;
         &lt;env filename="mytest/mySharedEnvs.xml" /&gt;
@@ -2022,9 +2032,16 @@ When overriding RunOptions in a master file, consider these two development scen
             <td>A variable that will be expanded just before the test is run.  Available to use in uri element.<br>The body of the element is a&nbsp; <a href="http://commons.apache.org/proper/commons-jexl/reference/syntax.html">Jexl2 Expression</a>, discussed in this document under <a href="#1.c.1.Expressions">1.c.1 Expressions</a> and <a href="#1.c.2.ValuesInContexts">1.c.2 Values in Contexts</a>.<br><br>See also: <a href="#1.c.4.Vars">1.c.4 Vars</a><br><br>For more programmatic horsepower (such as javascript/rhino, and XPath expressions) see the discussion on response validators:<br>&nbsp; &nbsp;&nbsp; <a href="#RestReplay-restReplay.testGroup.test.response.validator">/restReplay/testGroup/test/response/validator</a>.</td>
           </tr>
           <tr>
-<td>@ID</td>
-<td>The ID attribute of var makes that variable available in the test's namespace under that ID.&nbsp; So requests can use ${COURSE_ID} to get the value 540f4515e4b004e7d8f22fc8 because COURSE_ID was the ID attribute value, in this next example. In other words, the value of the ID becomes a variable in the target language.&nbsp; </td></tr>
-<tr>
+            <td>@ID</td>
+            <td>The ID attribute of var makes that variable available in the test's namespace under that ID.&nbsp; So requests can use ${COURSE_ID} to get the value 540f4515e4b004e7d8f22fc8 because COURSE_ID was the ID attribute value, in this next example. In other words, the value of the ID becomes a variable in the target language.&nbsp; </td></tr>
+          </tr>
+          <tr>
+            <td>@filename</td>
+            <td>The <i>filename</i> attribute of var reads the referenced filename relative to the test directory,
+                and assigns the contents as a String to a var with the specified <i>ID</i> attribute.
+            </td>
+          </tr>
+          <tr>
             <td valign="top">Example:</td>
             <td>
               <div class="code">
